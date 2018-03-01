@@ -1,0 +1,38 @@
+RewriteEngine On
+
+##use https
+#RewriteCond %{SERVER_PORT}   !^443$
+#RewriteRule  (.*)  https://%{HTTP_HOST}/%{REQUEST_URI}  [L]
+#
+##used for api
+#RewriteCond %{REQUEST_FILENAME} !-d
+#RewriteCond %{REQUEST_FILENAME} !-s
+#RewriteRule ^(.*)$ index.php?rquest=$1 [QSA,NC,L]
+#
+#RewriteCond %{REQUEST_FILENAME} -d
+#RewriteRule ^(.*)$ index.php [QSA,NC,L]
+#
+#RewriteCond %{REQUEST_FILENAME} -s
+#RewriteRule ^(.*)$ index.php [QSA,NC,L]
+
+#RewriteCond %{HTTP:X-Forwarded-Proto} !https
+#RewriteCond %{HTTPS} off
+#RewriteRule .* https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+#RewriteCond %{REQUEST_FILENAME} !-d
+#RewriteCond %{REQUEST_FILENAME} !-f
+#RewriteRule . index.php [L]`
+
+#RewriteCond %{HTTPS} off
+## First rewrite to HTTPS:
+## Don't put www. here. If it is already there it will be included, if not
+## the subsequent rule will catch it.
+#RewriteRule .* https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+## Now, rewrite any request to the wrong domain to use www.
+## [NC] is a case-insensitive match
+#RewriteCond %{HTTP_HOST} !^www\. [NC]
+#RewriteRule .* https://www.%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^ index.php [QSA,L]

@@ -1,0 +1,13 @@
+{
+    "require": {
+        "slim/slim": "^3.0",
+        "illuminate/database": "^5.5",
+        "respect/validation": "^1.1",
+        "slim/csrf": "^0.8.2"
+    },
+	"autoload": {
+		"psr-4": {
+			"tgui\\": "app"
+		}
+	}
+}

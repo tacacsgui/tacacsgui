@@ -1,0 +1,42 @@
+.loading{
+	position: fixed;
+	top: 0px;
+	background-color: #d2d6de;
+	width: 100%;
+	height: 100%;
+	z-index: 9999;
+}
+.loading_text{
+	color:#444;
+	padding-top: 50px;
+    font-size: 24px;
+    font-family: fantasy;
+}
+
+pre.cli_style {background-color: #333;}
+cli_text_general {color: green;}
+cli_text_comment {color: orange;}
+cli_text_banner {color:#2aca2a;}
+
+.divideLine{
+	width: 100%;
+    height: 5px;
+    background-color: #999;
+}
+
+.disabledRow{
+	background-color:#ccc !important;
+	color:#888;
+}
+.disabledRow .bg-green{background-color: #56c793 !important;}
+.disabledRow .bg-yellow{background-color: #daa95c !important;}
+
+small.label[data-toggle=tooltip]{cursor:pointer;}
+
+div.dashboard_log {
+	position: absolute;
+}
+
+div.dashboard_log p {
+	margin: 0px;
+}

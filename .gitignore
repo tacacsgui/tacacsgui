@@ -1,0 +1,17 @@
+/web/api/vendor
+/web/api/config.php
+/tac_plus.cfg*
+/tacTestOutput.txt
+/backups/api/*
+/backups/database/*
+/backups/gui/*
+/log/apache2/*
+/log/tacacs/*
+/ssl/*
+
+!/backups/api/.gitkeep
+!/backups/database/.gitkeep
+!/backups/gui/.gitkeep
+!/log/apache2/.gitkeep
+!/log/tacacs/.gitkeep
+!/ssl/.gitkeep
