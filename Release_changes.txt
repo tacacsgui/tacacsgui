@@ -1,0 +1,6 @@
+##############################
+Version0.8.3 20180319
+	* Added README description
+	* Added some kind of debug output for dashboard
+	* Fixed bug: DES encryption work properly now
+	* Fixed bug: changed "failed auth" link on dashboard 
