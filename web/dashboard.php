@@ -103,7 +103,7 @@ require __DIR__ . '/templates/body_start.php';
 			<div class="icon">
 			<i class="fa fa-binoculars"></i>
 			</div>
-			<a href="/authentication.php" class="small-box-footer">
+			<a href="/tac_authentication.php" class="small-box-footer">
 			More info <i class="fa fa-arrow-circle-right"></i>
 			</a>
 		</div>

@@ -75,25 +75,27 @@ class TACUsersCtrl extends Controller
 		$data['login']=$req->getParam('login');
 		$data['group']=$req->getParam('group');
 
-		if (isset($data['login']) AND $req->getParam('login_encrypt'))
+		if (isset($data['login']) AND $req->getParam('login_encrypt') == 'true')
 		{
 			if ($req->getParam('login_flag') == 1)
 			{
 				$data['login']=trim(shell_exec('openssl passwd -1 '.$data['login']));
-			} elseif ($req->getParam('login_flag') == 2)
+			}
+			if ($req->getParam('login_flag') == 2)
 			{
-				$data['login']=trim(shell_exec('openssl passwd crypt '.$data['login']));
+				$data['login']=trim(shell_exec('openssl passwd -crypt '.$data['login']));
 			} 
 		} 
 		
-		if (isset($data['enable']) AND $req->getParam('enable_encrypt'))
+		if (isset($data['enable']) AND $req->getParam('enable_encrypt') == 'true')
 		{
 			if ($req->getParam('enable_flag') == 1)
 			{
 				$data['enable']=trim(shell_exec('openssl passwd -1 '.$data['enable']));
-			} elseif ($req->getParam('enable_flag') == 2)
+			} 
+			if ($req->getParam('enable_flag') == 2)
 			{
-				$data['enable']=trim(shell_exec('openssl passwd crypt '.$data['enable']));
+				$data['enable']=trim(shell_exec('openssl passwd -crypt '.$data['enable']));
 			} 
 		} 
 		
@@ -190,25 +192,25 @@ class TACUsersCtrl extends Controller
 		$data['login']=$req->getParam('login');
 		$data['group']=$req->getParam('group');
 
-		if (isset($data['login']) AND $req->getParam('login_encrypt'))
+		if (isset($data['login']) AND $req->getParam('login_encrypt') == 'true')
 		{
 			if ($req->getParam('login_flag') == 1)
 			{
 				$data['login']=trim(shell_exec('openssl passwd -1 '.$data['login']));
 			} elseif ($req->getParam('login_flag') == 2)
 			{
-				$data['login']=trim(shell_exec('openssl passwd crypt '.$data['login']));
+				$data['login']=trim(shell_exec('openssl passwd -crypt '.$data['login']));
 			} 
 		} 
 		
-		if (isset($data['enable']) AND $req->getParam('enable_encrypt'))
+		if (isset($data['enable']) AND $req->getParam('enable_encrypt') == 'true')
 		{
 			if ($req->getParam('enable_flag') == 1)
 			{
 				$data['enable']=trim(shell_exec('openssl passwd -1 '.$data['enable']));
 			} elseif ($req->getParam('enable_flag') == 2)
 			{
-				$data['enable']=trim(shell_exec('openssl passwd crypt '.$data['enable']));
+				$data['enable']=trim(shell_exec('openssl passwd -crypt '.$data['enable']));
 			} 
 		} 
 		
