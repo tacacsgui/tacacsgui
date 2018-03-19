@@ -1,5 +1,6 @@
 /web/api/vendor
 /web/api/config.php
+/web/api/composer.lock
 /tac_plus.cfg*
 /tacTestOutput.txt
 /backups/api/*
