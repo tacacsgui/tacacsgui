@@ -12,7 +12,8 @@
         
 		<p>I'll add something here later, maybe</p>
         <!-- /.control-sidebar-menu -->
-
+		<textarea class="form-control debug-output">
+		</textarea>
       </div>
       <!-- /.tab-pane -->
       <!-- Stats tab content -->

@@ -107,7 +107,7 @@
         },
         {
             "name": "illuminate/container",
-            "version": "v5.5.35",
+            "version": "v5.5.39",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/container.git",
@@ -151,7 +151,7 @@
         },
         {
             "name": "illuminate/contracts",
-            "version": "v5.5.35",
+            "version": "v5.5.39",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/contracts.git",
@@ -195,16 +195,16 @@
         },
         {
             "name": "illuminate/database",
-            "version": "v5.5.35",
+            "version": "v5.5.39",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/database.git",
-                "reference": "9a814d9e336b9ff934e5f937794f641c19bc1fb2"
+                "reference": "cfba60398815ff93bef31ade7c1d5dbbabdcaafc"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/illuminate/database/zipball/9a814d9e336b9ff934e5f937794f641c19bc1fb2",
-                "reference": "9a814d9e336b9ff934e5f937794f641c19bc1fb2",
+                "url": "https://api.github.com/repos/illuminate/database/zipball/cfba60398815ff93bef31ade7c1d5dbbabdcaafc",
+                "reference": "cfba60398815ff93bef31ade7c1d5dbbabdcaafc",
                 "shasum": ""
             },
             "require": {
@@ -250,20 +250,20 @@
                 "orm",
                 "sql"
             ],
-            "time": "2018-02-22 19:23:35"
+            "time": "2018-03-06 18:27:38"
         },
         {
             "name": "illuminate/support",
-            "version": "v5.5.35",
+            "version": "v5.5.39",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/support.git",
-                "reference": "c10c2fcabe8cb907ebb2dcae4f50e7c83a872055"
+                "reference": "7540abdf66efe232bb657b9a5982fbb0d4de428f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/illuminate/support/zipball/c10c2fcabe8cb907ebb2dcae4f50e7c83a872055",
-                "reference": "c10c2fcabe8cb907ebb2dcae4f50e7c83a872055",
+                "url": "https://api.github.com/repos/illuminate/support/zipball/7540abdf66efe232bb657b9a5982fbb0d4de428f",
+                "reference": "7540abdf66efe232bb657b9a5982fbb0d4de428f",
                 "shasum": ""
             },
             "require": {
@@ -307,29 +307,29 @@
             ],
             "description": "The Illuminate Support package.",
             "homepage": "https://laravel.com",
-            "time": "2018-02-14 15:12:47"
+            "time": "2018-03-09 16:54:15"
         },
         {
             "name": "nesbot/carbon",
-            "version": "1.22.1",
+            "version": "1.24.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/briannesbitt/Carbon.git",
-                "reference": "7cdf42c0b1cc763ab7e4c33c47a24e27c66bfccc"
+                "reference": "bba6c6e410c6b4317e37a9474aeaa753808c3875"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/briannesbitt/Carbon/zipball/7cdf42c0b1cc763ab7e4c33c47a24e27c66bfccc",
-                "reference": "7cdf42c0b1cc763ab7e4c33c47a24e27c66bfccc",
+                "url": "https://api.github.com/repos/briannesbitt/Carbon/zipball/bba6c6e410c6b4317e37a9474aeaa753808c3875",
+                "reference": "bba6c6e410c6b4317e37a9474aeaa753808c3875",
                 "shasum": ""
             },
             "require": {
-                "php": ">=5.3.0",
-                "symfony/translation": "~2.6 || ~3.0"
+                "php": ">=5.3.9",
+                "symfony/translation": "~2.6 || ~3.0 || ~4.0"
             },
             "require-dev": {
                 "friendsofphp/php-cs-fixer": "~2",
-                "phpunit/phpunit": "~4.0 || ~5.0"
+                "phpunit/phpunit": "^4.8.35 || ^5.7"
             },
             "type": "library",
             "extra": {
@@ -360,7 +360,7 @@
                 "datetime",
                 "time"
             ],
-            "time": "2017-01-16 07:55:07"
+            "time": "2018-03-10 10:10:14"
         },
         {
             "name": "nikic/fast-route",
@@ -607,16 +607,16 @@
         },
         {
             "name": "psr/simple-cache",
-            "version": "1.0.0",
+            "version": "1.0.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/php-fig/simple-cache.git",
-                "reference": "753fa598e8f3b9966c886fe13f370baa45ef0e24"
+                "reference": "408d5eafb83c57f6365a3ca330ff23aa4a5fa39b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/php-fig/simple-cache/zipball/753fa598e8f3b9966c886fe13f370baa45ef0e24",
-                "reference": "753fa598e8f3b9966c886fe13f370baa45ef0e24",
+                "url": "https://api.github.com/repos/php-fig/simple-cache/zipball/408d5eafb83c57f6365a3ca330ff23aa4a5fa39b",
+                "reference": "408d5eafb83c57f6365a3ca330ff23aa4a5fa39b",
                 "shasum": ""
             },
             "require": {
@@ -651,7 +651,7 @@
                 "psr-16",
                 "simple-cache"
             ],
-            "time": "2017-01-02 13:31:39"
+            "time": "2017-10-23 01:57:42"
         },
         {
             "name": "respect/validation",
@@ -898,16 +898,16 @@
         },
         {
             "name": "symfony/translation",
-            "version": "v3.4.4",
+            "version": "v3.4.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/translation.git",
-                "reference": "10b32cf0eae28b9b39fe26c456c42b19854c4b84"
+                "reference": "80e19eaf12cbb546ac40384e5c55c36306823e57"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/translation/zipball/10b32cf0eae28b9b39fe26c456c42b19854c4b84",
-                "reference": "10b32cf0eae28b9b39fe26c456c42b19854c4b84",
+                "url": "https://api.github.com/repos/symfony/translation/zipball/80e19eaf12cbb546ac40384e5c55c36306823e57",
+                "reference": "80e19eaf12cbb546ac40384e5c55c36306823e57",
                 "shasum": ""
             },
             "require": {
@@ -962,7 +962,7 @@
             ],
             "description": "Symfony Translation Component",
             "homepage": "https://symfony.com",
-            "time": "2018-01-18 22:16:57"
+            "time": "2018-02-22 06:28:18"
         }
     ],
     "packages-dev": [],

@@ -43,6 +43,9 @@ class TACReportsCtrl extends Controller
 		/////////////NAMBER OF FAILED AUTH/////START//
 		$data['numberOfAuthFails']=Authentication::select()->whereBetween('date', $weekTimeRange)->where([['action','LIKE','%fail%']])->get()->count();
 		
+		$data['tacacsStatusCommand'] = 'sudo '.TAC_DEAMON.' status';
+		$data['tacacsStatusUser'] = trim(shell_exec('id -u -n'));
+		$data['tacacsStatusEmptyCommand'] = trim(shell_exec('sudo '.TAC_DEAMON));
 		$data['tacacsStatusMessage'] = trim(shell_exec('sudo '.TAC_DEAMON.' status'));
 		$data['tacacsStatus']=0;
 		if ($data['tacacsStatusMessage'] == null)

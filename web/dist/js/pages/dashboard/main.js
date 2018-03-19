@@ -74,7 +74,7 @@ function widgetsData()
 				topUsers = data['topUsers']
 				//topDevices[0] = data['topDevices']
 				topDevices = data['topDevicesNamed']
-				
+				$('textarea.debug-output').val((print_r(data)));
 				configForUsers.data.datasets[0].data=Object.values(topUsers);
 				configForUsers.data.labels=Object.keys(topUsers)
 				window.usersPie.update();
