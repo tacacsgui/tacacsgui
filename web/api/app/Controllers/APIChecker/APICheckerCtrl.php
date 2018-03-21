@@ -72,8 +72,10 @@ protected $tablesArr = array(
 		'group' => ['integer', 0],
 		'disabled' => ['integer', 0],
 		'message' => ['text', '_'],
+		'manual_beginning' => ['text', '_'],
 		'manual' => ['text', '_'],
 		'acl' => ['integer', 0],
+		'priv-lvl' => ['integer', -1],
 		'valid_from' => ['string', '_'],
 		'valid_until' => ['string', '_'],
 		'default_service' => ['integer', 0],
@@ -102,6 +104,9 @@ protected $tablesArr = array(
 		'default_flag' => ['integer', 0],
 		'valid_from' => ['string', '_'],
 		'valid_until' => ['string', '_'],
+		'acl' => ['integer', 0],
+		'priv-lvl' => ['integer', -1],
+		'manual_beginning' => ['text', '_'],
 		'manual' => ['text', '_'],
 	],
 	'tac_device_groups' =>
@@ -200,7 +205,7 @@ protected $tablesArr = array(
 				}
 				if(isset($columnAttr[1]) 
 					AND 
-					($columnAttr[0]=='integer' AND $columnAttr[1]!=-1)
+					($columnAttr[0]=='integer' AND $columnAttr[1] != '_')
 					OR
 					($columnAttr[1]!='_' AND $columnAttr[0]=='string')
 					OR
@@ -364,7 +369,7 @@ protected $tablesArr = array(
 							$columnObj -> after($preColumnName);
 							if(isset($tableColumns[$columnName][1]) 
 								AND 
-								($tableColumns[$columnName][0]=='integer' AND $tableColumns[$columnName][1]!=-1)
+								($tableColumns[$columnName][0]=='integer' AND $tableColumns[$columnName][1]!= '_' )
 								OR
 								($tableColumns[$columnName][1]!='_' AND $tableColumns[$columnName][0]=='string')
 								OR

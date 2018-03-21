@@ -348,5 +348,54 @@ class TACACLCtrl extends Controller
 	
 ########	ACL Datatables	###############END###########
 ################################################
+################################################
+########	List ACL	###############START###########
+	#########	GET List ACL#########
+	public function getAclList($req,$res)
+	{
+		//INITIAL CODE////START//
+		$data=array();
+		$data=$this->initialData([
+			'type' => 'get',
+			'object' => 'acl',
+			'action' => 'list',
+		]);
+		#check error#
+		if ($_SESSION['error']['status']){
+			$data['error']=$_SESSION['error'];
+			return $res -> withStatus(401) -> write(json_encode($data));
+		}
+		//INITIAL CODE////END//
+		$noneItem = array('id' => 0, 'text' => 'None');
+		///IF GROUPID SET///
+		if ($req->getParam('aclId') != null){
+			if ($req->getParam('aclId') == 0)
+			{
+				$data['item']=$noneItem;
+				return $res -> withStatus(200) -> write(json_encode($data));
+			}
+			$data['item'] = TACACL::select(['id','name'])->
+			where([['id', '=', $req->getParam('aclId')],['line_number','=',0]])->
+			first();
+			
+			$data['item']['text'] = $data['item']['name'];
+			return $res -> withStatus(200) -> write(json_encode($data));
+		}
+		//////////////////////
+		////LIST OF GROUPS////
+		$data['incomplete_results'] = false;
+		$data['totalCount'] = TACACL::select(['id','name'])->count();
+		$tempData = TACACL::select(['id','name'])->where([['line_number','=',0]])->get()->toArray();
+		$data['items']=array( 0 => $noneItem);
+		foreach($tempData as $group)
+		{
+			$group['text'] = $group['name'];
+			array_push($data['items'],$group);
+		}
+		
+		return $res -> withStatus(200) -> write(json_encode($data));
+	}
+########	List ACL	###############END###########
+################################################
 
 }//END OF CLASS//

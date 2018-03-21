@@ -27,96 +27,24 @@ function disabledSwitcher(form,action)
 }
 /////DISABLED, ENABLED SWITCHER///END//
 ///////////////////////////////////////
-///////////////////////////////////////
-//////ACTIVATE SELECT2/////
-//////TEMPLATE FUNCTIONS/////
-function selectionTemplate(data){
-	var default_flag_class = (data.default_flag) ? 'option_default_flag': ''
-	var output='<div class="selectGroupOption '+ default_flag_class +'">';
-		output += '<text>'+data.text+'</text>';
-		output += '<specialFlags>';
-		output += (data.key) ? '<small class="label pull-right bg-green" style="margin:3px">k</small>' : '';
-		output += (data.enable) ? ' <small class="label pull-right bg-yellow" style="margin:3px">e</small>' : '';
-		output += (data.default_flag) ? ' <small class="label pull-right bg-gray" style="margin:3px">d</small>' : '';
-		output += '</specialFlags>'
-	output += '</div>'
-	return output;
-}
-function resultTemplate(data){
-	console.log(data)
-	return 222;
-}
-////////////////////////////
-var select_group_add = $('#addUserForm .select_group')
-var select_group_edit = $('#editUserForm .select_group')
-var generalSelect2Data = {
-	ajax:{
-		url: API_LINK+"tacacs/user/group/list/",
-		dataType: 'json',
-		processResults: function (data) {
-			// Tranforms the top-level key of the response object from 'items' to 'results'
-			console.log(data)
-			return {
-				results: data.items
-			};
-		},
-		result: function(data){
-		console.log(data)
-		}
-	},
-	escapeMarkup: function(markup){ return markup;},
-	templateResult: selectionTemplate,
-	templateSelection: selectionTemplate,
-	minimumResultsForSearch: Infinity,
-}
-select_group_add.select2(generalSelect2Data)
-select_group_edit.select2(generalSelect2Data)
-function preSelection(groupId, selector)
-{
-	if (groupId == 0)
-	{
-		var output='<div class="selectGroupOption">';
-				output += '<text>None</text>';
-				output += '</div>'
-			var option = new Option(output, 0, true, true)
-			if (selector == 'addModal') select_group_add.append(option).trigger('change');
-			if (selector == 'editModal') select_group_edit.append(option).trigger('change');
-		return;
+//////CHANGE PRIVILEGE LEVEL//////START///
+function setPrivLvl(action){
+	var privLvl = parseInt($('input[name="priv-lvl"]').val());
+	switch(action) {
+    case 'add':
+        if (privLvl >= 15) return;
+		$('input[name="priv-lvl"]').val(privLvl + 1 );
+        break;
+    case 'subtract':
+        if (privLvl <= -1) return;
+		$('input[name="priv-lvl"]').val(privLvl - 1);
+        break;
+	case 'unset':
+        $('input[name="priv-lvl"]').val(-1);
+        break;
 	}
-	var data = {
-		"action": "GET",
-		"groupId": groupId,
-		"test" : "none"
-		};	
-	$.ajax({
-		type: "GET",
-		dataType: "json",
-		url: API_LINK+"tacacs/user/group/list/",
-		cache: false,
-		data: data,
-		success: function(data) {
-			console.log(data);
-			var output='<div class="selectGroupOption">';
-				output += '<text>'+data.item.text+'</text>';
-				output += '<specialFlags>';
-				output += (data.item.key) ? '<small class="label pull-right bg-green" style="margin:3px">k</small>' : '';
-				output += (data.item.enable) ? ' <small class="label pull-right bg-yellow" style="margin:3px">e</small>' : '';
-				output += '</specialFlags>'
-				output += '</div>'
-			var option = new Option(output, data.item.id, true, true)
-			if (selector == 'addModal') select_group_add.append(option).trigger('change');
-			if (selector == 'editModal') select_group_edit.append(option).trigger('change');
-			
-		},
-		error: function(data) {
-			//console.log(data);
-			errorHere(data);
-		}
-	});
 }
-$('#addUser').on('show.bs.modal', function(){
-	preSelection(0, 'addModal');
-})
+//////CHANGE PRIVILEGE LEVEL//////END///
 ///////////////////////////////////////
 /////CHECKBOX ENABLING///
 var generalCheckboxParameters={
@@ -180,6 +108,8 @@ function addUser(){
 		"enable_flag": $('form#addUserForm select[name="enable_flag"]').val(),
 		"enable_encrypt": $('form#addUserForm input[name="enable_encrypt"]').prop('checked'),
 		"group": select_group_add.select2('data')[0].id,
+		"acl": select_acl_add.select2('data')[0].id,
+		"priv-lvl": $('form#addUserForm input[name="priv-lvl"]').val(),
 		"default_service": $('form#addUserForm input[name="default_service"]').prop('checked'),
 		"message": $('form#addUserForm textarea[name="message"]').val(),
 		"manual": $('form#addUserForm textarea[name="manual"]').val(),
@@ -245,11 +175,14 @@ function clearAddUserModal(){
 	
 	disabledSwitcher('add','0')
 	
-	$('a.manualConfTrigger').show()
-	$('div.manualConfiguration').hide()
+	// Select first tab
+	$('form#addUserForm .nav-tabs-custom a:first').tab('show') 
 	
 	$('p.text-red').remove();
 	$('p.help-block').show();
+	
+	//Unset Priv-Lvl//
+	$('input[name="priv-lvl"]').val(-1);
 }
 ////ADD USER FUNCTION///END//
 /////////////////////////////////////////////
@@ -275,7 +208,9 @@ function editUser(id,username){ //GET INFO ABOUT USER//
 			$('form#editUserForm input[name="login"]').val(data['user']['login'])
 			$('form#editUserForm input[name="enable"]').val(data['user']['enable'])
 			$('form#editUserForm input[name="id"]').val(data['user']['id'])
-			$('form#editUserForm input[name="group"]').val(data['user']['group'])
+			//$('form#editUserForm input[name="group"]').val(data['user']['group'])
+			
+			$('form#editUserForm input[name="priv-lvl"]').val(data['user']['priv-lvl'])
 			
 			var enable_encryption = (data['user']['enable_flag'] == 1 || data['user']['enable_flag'] == 2) ? 'uncheck' : 'check';
 			$('form#editUserForm input[name="enable_encrypt"]').iCheck(enable_encryption)
@@ -294,6 +229,7 @@ function editUser(id,username){ //GET INFO ABOUT USER//
 			disabledSwitcher('edit',data['user']['disabled'])
 			
 			preSelection(data['user']['group'], 'editModal');
+			preSelection_acl(data['user']['acl'], 'editModal');
 			
 			var default_service = (data['user']['default_service'] == 1) ? 'check' : 'uncheck';
 			$('form#editUserForm input[name="default_service"]').iCheck(default_service)
@@ -326,6 +262,8 @@ function submitUserChanges(){
 		"enable_flag": $('form#editUserForm select[name="enable_flag"]').val(),
 		"enable_encrypt": $('form#editUserForm input[name="enable_encrypt"]').prop('checked'),
 		"group": select_group_edit.select2('data')[0].id,
+		"acl": select_acl_edit.select2('data')[0].id,
+		"priv-lvl": $('form#editUserForm input[name="priv-lvl"]').val(),
 		"id": $('form#editUserForm input[name="id"]').val(),
 		"default_service": $('form#editUserForm input[name="default_service"]').prop('checked'),
 		"message": $('form#editUserForm textarea[name="message"]').val(),
@@ -385,11 +323,14 @@ function clearEditUserModal(){
 	$('form#editUserForm textarea[name="manual"]').val('')
 	$('.form-group.has-error').removeClass('has-error');
 	
-	$('a.manualConfTrigger').show()
-	$('div.manualConfiguration').hide()	
+	// Select first tab
+	$('form#editUserForm .nav-tabs-custom a:first').tab('show') 	
 	
 	$('p.text-red').remove();
 	$('p.help-block').show();
+	
+	//Unset Priv-Lvl//
+	$('input[name="priv-lvl"]').val(-1);
 }
 ////EDIT USER FUNCTION///END//
 //////////////////////////////
@@ -437,11 +378,5 @@ $('#editUser').on('hidden.bs.modal', function(){
 	clearEditUserModal()
 })
 ////////////////////////////////
-////////////////////////////////
-////MANUAL CONFIGURATION TRIGGER//START//
-$('a.manualConfTrigger').click(function(){
-	$('a.manualConfTrigger').hide()
-	$('div.manualConfiguration').show()
-})
-////MANUAL CONFIGURATION TRIGGER//END//
+
 ////////////////////////////////////////

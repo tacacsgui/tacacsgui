@@ -403,12 +403,27 @@ class TACConfigCtrl extends Controller
 		
 		$allUsers = TACUsers::select()->get()->toArray();
 		
+		$allACL_array = TACACL::select('id','name')->where([['line_number','=',0]])->get()->toArray();
+		$allUserGroups_array = TACUserGrps::select('id','name')->get()->toArray();
+		$allACL = array();
+		$allUserGroups = array();
+		foreach($allACL_array as $acl)
+		{
+			$allACL[$acl['id']]=$acl['name'];
+		}
+		
+		foreach($allUserGroups_array as $ugrp)
+		{
+			$allUserGroups[$ugrp['id']]=$ugrp['name'];
+		}
+		
 		$outputUsers[0][0]=array('title_flag' => 1, 'name' =>
 		($html) ? $this->html_tags['comment'][0] . "####LIST OF USERS####" . $this->html_tags['comment'][1] 
 		:
 		"####LIST OF USERS####");
 		foreach($allUsers as $user)
 		{
+			if ($user['priv-lvl'] < 0) $user['priv-lvl'] = 15;
 			///EMPTY ARRAY///
 			$outputUsers[$user['id']] = array();
 			///USER TITLE///
@@ -420,25 +435,52 @@ class TACConfigCtrl extends Controller
 			'user = '.$user['username'].' {');
 			///USER KEY///
 			array_push($outputUsers[$user['id']], 
-			($html) ? $this->html_tags['param'][0] . "login" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] . $this->crypto_flag[$user['login_flag']].' '.$user['login']. $this->html_tags['val'][1]
+			($html) ? '	'.$this->html_tags['param'][0] . "login" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] . $this->crypto_flag[$user['login_flag']].' '.$user['login']. $this->html_tags['val'][1]
 			:
-			'login = '.$this->crypto_flag[$user['login_flag']].' '.$user['login']);
+			'	login = '.$this->crypto_flag[$user['login_flag']].' '.$user['login']);
 			///USER ENABLE///
 			if ($user['enable']!='')array_push($outputUsers[$user['id']], 
-			($html) ? $this->html_tags['param'][0] . "enable" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] . $this->crypto_flag[$user['enable_flag']].' '.$user['enable']. $this->html_tags['val'][1]
+			($html) ? '	'.$this->html_tags['param'][0] . "enable" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] . $this->crypto_flag[$user['enable_flag']].' '.$user['enable']. $this->html_tags['val'][1]
 			:
-			'enable = '.$this->crypto_flag[$user['enable_flag']].' '.$user['enable']);
+			'	enable = '.$this->crypto_flag[$user['enable_flag']].' '.$user['enable']);
+			///USER MEMBER///
+			if ($user['group'] > 0)array_push($outputUsers[$user['id']], 
+			($html) ? '	'.$this->html_tags['param'][0] . "member" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] . $allUserGroups[$user['group']] . $this->html_tags['val'][1]
+			:
+			'	member = '.$allUserGroups[$user['group']]);
+			///USER ACL///
+			if ($user['acl'] > 0)array_push($outputUsers[$user['id']], 
+			($html) ? '	'.$this->html_tags['param'][0] . "acl" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] . $allACL[$user['acl']] . $this->html_tags['val'][1]
+			:
+			'	acl = '. $allACL[$user['acl']]);
 			///USER MESSAGE///
 			if ($user['message']!='')array_push($outputUsers[$user['id']], 
-			($html) ? $this->html_tags['param'][0] . "message" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] .'"'.$user['message'].'"'. $this->html_tags['val'][1]
+			($html) ? '	'.$this->html_tags['param'][0] . "message" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] .'"'.$user['message'].'"'. $this->html_tags['val'][1]
 			:
-			'message = "'.$user['message'].'"');
+			'	message = "'.$user['message'].'"');
 			///USER DEFAULT SERVICE///
 			$default_service = ($user['default_service']) ? 'permit' : 'deny';
 			array_push($outputUsers[$user['id']], 
-			($html) ? $this->html_tags['param'][0] . "default service" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] .$default_service. $this->html_tags['val'][1] 
+			($html) ? '	' . $this->html_tags['param'][0] . "default service" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] .$default_service. $this->html_tags['val'][1] 
 			:
-			'default service = '. $default_service);
+			'	default service = '. $default_service);
+			///USER SERVICE SHELL///
+			array_push($outputUsers[$user['id']], 
+			($html) ? '	' . $this->html_tags['param'][0] . "service" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['attr'][0] .'shell {'. $this->html_tags['attr'][1] 
+			:
+			'	service = shell {');
+			array_push($outputUsers[$user['id']], 
+			($html) ? '		' . $this->html_tags['param'][0] . "default cmd" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] .'permit'. $this->html_tags['val'][1] 
+			:
+			'		default cmd = permit');
+			array_push($outputUsers[$user['id']], 
+			($html) ? '		' . $this->html_tags['param'][0] . "set priv-lvl" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] .$user['priv-lvl']. $this->html_tags['val'][1] 
+			:
+			'		set priv-lvl = '.$user['priv-lvl']);
+			array_push($outputUsers[$user['id']], 
+			($html) ? '	' . $this->html_tags['attr'][0] .'}'. $this->html_tags['attr'][1] 
+			:
+			'	}');
 			///USER MANUAL CONFIGURATION/// 
 			if ($user['manual']!="") 
 			{

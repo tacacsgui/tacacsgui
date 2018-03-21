@@ -78,6 +78,7 @@ $app->get('/tacacs/acl/edit/', 'TACACLCtrl:getACLEdit');
 $app->post('/tacacs/acl/edit/', 'TACACLCtrl:postACLEdit');
 $app->get('/tacacs/acl/delete/', 'TACACLCtrl:getACLDelete');
 $app->post('/tacacs/acl/delete/', 'TACACLCtrl:postACLDelete');
+$app->get('/tacacs/acl/list/', 'TACACLCtrl:getAclList');
 #####################################################
 ###Tacacs Configuration Generator Routes#######################################
 $app->get('/tacacs/config/generate/file/', 'TACConfigCtrl:getConfigGenFile');

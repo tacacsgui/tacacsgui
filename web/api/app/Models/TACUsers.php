@@ -17,6 +17,8 @@ class TACUsers extends Model
 		'group',
 		'disabled',
 		'message',
+		'priv-lvl',
+		'acl',
 		'default_service',
 		'manual',
 	];

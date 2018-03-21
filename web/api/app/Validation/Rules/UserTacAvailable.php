@@ -16,7 +16,7 @@ class UserTacAvailable extends AbstractRule
 	
 	public function validate($input)
 	{
-		if (isset($this->userID)){
+		if (!empty($this->userID)){
 			
 			return TACUsers::where([['username', '=' ,$input],['id', '<>', $this->userID]])->count() === 0;
 		}

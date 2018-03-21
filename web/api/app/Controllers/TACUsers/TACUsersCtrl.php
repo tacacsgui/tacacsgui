@@ -107,6 +107,8 @@ class TACUsersCtrl extends Controller
 			'enable_flag' => $req->getParam('enable_flag'),
 			'group' => $req->getParam('group'),
 			'default_service' => $data['default_service'],
+			'priv-lvl' => intval($req->getParam('priv-lvl')),
+			'acl' => intval($req->getParam('acl')),
 			'message' => $req->getParam('message'),
 			'manual' => $req->getParam('manual'),
 		]);
@@ -141,7 +143,7 @@ class TACUsersCtrl extends Controller
 		}
 		//INITIAL CODE////END//
 		
-		$data['user']=TACUsers::select('id','username','login','login_flag','enable','enable_flag','group','message','default_service','manual','created_at', 'updated_at')->
+		$data['user']=TACUsers::select()->
 			where([['id','=',$req->getParam('id')],['username','=',$req->getParam('username')]])->
 			first();
 		
@@ -225,6 +227,8 @@ class TACUsersCtrl extends Controller
 				'enable_flag' => $req->getParam('enable_flag'),
 				'group' => $req->getParam('group'),
 				'default_service' => $data['default_service'],
+				'priv-lvl' => intval($req->getParam('priv-lvl')),
+				'acl' => intval($req->getParam('acl')),
 				'message' => $req->getParam('message'),
 				'manual' => $req->getParam('manual'),
 			]);
@@ -318,7 +322,7 @@ class TACUsersCtrl extends Controller
 		
 		unset($data['error']);//BEACAUSE DATATABLES USES THAT VARIABLE//
 		
-		$params=$req->getParams(); //Get ALL parameters form Datatables
+		$params = $req->getParams(); //Get ALL parameters form Datatables
 		
 		$columns = array( 
 		// datatable column index  => database column name
@@ -365,10 +369,10 @@ class TACUsersCtrl extends Controller
 		
 		foreach($tempData as $user){
 			$buttons='<button class="btn btn-warning btn-xs btn-flat" onclick="editUser(\''.$user['id'].'\',\''.$user['username'].'\')">Edit</button> <button class="btn btn-danger btn-xs btn-flat" onclick="deleteUser(\''.$user['id'].'\',\''.$user['username'].'\')">Del</button>';
-			$grpID=$user['group'];
-			$user['group']=$tempGroupsNew[$grpID]['name'];
-			$user['groupMessage']=$tempGroupsNew[$grpID]['message'];
-			$user['groupEnable']=$tempGroupsNew[$grpID]['enable'];
+			$grpID = $user['group'];
+			$user['group'] = (empty($tempGroupsNew[$grpID]['name'])) ? null : $tempGroupsNew[$grpID]['name'];
+			$user['groupMessage'] = (empty($tempGroupsNew[$grpID]['message'])) ? null : $tempGroupsNew[$grpID]['message'];
+			$user['groupEnable']=(empty($tempGroupsNew[$grpID]['enable'])) ? null : $tempGroupsNew[$grpID]['enable'];
 			$user['enable']=($user['enable']!== '' AND $user['enable']!== NULL) ? true : false;
 			$user['message']=($user['message']!== '' AND $user['message']!== NULL) ? true : false;
 			$user['buttons']=$buttons;
