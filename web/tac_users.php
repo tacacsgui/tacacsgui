@@ -109,7 +109,9 @@ require __DIR__ . '/templates/footer_end.php';
 
 	
 	<!-- main js User MAIN Functions -->
+	<script src="dist/js/pages/tac_users/select.js"></script>
     <script src="dist/js/pages/tac_users/main.js"></script>
+    
 	<!-- DATATABLES MAIN -->
     <script src="dist/js/pages/tac_users/datatables.js"></script>
 <!-- ADDITIONAL JS FILES END-->

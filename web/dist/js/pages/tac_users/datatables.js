@@ -9,8 +9,7 @@ $("#filterButton").click(function() {
 });
 			
 var dataTable =  $('#usersDataTable').DataTable( {
-				
-	//scrollX: true,	
+					
 	processing: true,
 	serverSide: true,
 	autoWidth: false,
@@ -40,6 +39,7 @@ var dataTable =  $('#usersDataTable').DataTable( {
 		"targets": [ 2 ],
 		"createdCell": function (td, cellData, rowData, row, col) {
 			//console.log(rowData.group)
+			if (rowData.group == null) {$(td).append("-Not set-"); return;}
 			if (rowData.groupMessage) $(td).append(' <small class="label bg-gray" data-toggle="tooltip" data-placement="top" title="Message configured" style="margin:3px">m</small>')
 			if (rowData.groupEnable) $(td).append(' <small class="label bg-yellow" data-toggle="tooltip" data-placement="top" title="Enable password configured" style="margin:3px">e</small>')
 		},
@@ -66,7 +66,7 @@ var dataTable =  $('#usersDataTable').DataTable( {
 			if (settings.aoColumns[i].bSearchable) 
 			{
 				var filter = $("<td></td>");
-				var inputElement=$('<input searchCol_id="'+i+'" class="search-input form-control">')
+				var inputElement=$('<input searchCol_id="' + i + '" class="search-input form-control">')
 				filterRowElement.append(filter.append(inputElement))
 			}
 			filterRow+=filter;

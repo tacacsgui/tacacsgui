@@ -1,5 +1,10 @@
 ##############################
-Version_0.8.3 20180319
+Version_0.8.6 20180321
+	* If tac_user group doesn't set in a table it is as -Not set-
+	* Added Privilege Level for tac_user
+	* Added ACL selection for tac_user
+##############################
+Version_0.8.4 20180319
 	* Added README description
 	* Added some kind of debug output for dashboard
 	* Fixed bug: DES encryption work properly now
