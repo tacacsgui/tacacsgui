@@ -1,4 +1,10 @@
 ##############################
+Version_0.8.7 20180322
+	GUI changes:
+	* added meta no cache
+	* fixed entrance of lockscreen
+##############################
+##############################
 Version_0.8.6 20180321
 	* If tac_user group doesn't set in a table it is as -Not set-
 	* Added Privilege Level for tac_user

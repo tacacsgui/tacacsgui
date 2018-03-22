@@ -84,7 +84,7 @@
         <input type="hidden" id="username" value="">
 
         <div class="input-group-btn">
-          <button type="button" class="btn" id="submit_btn"><i class="fa fa-arrow-right text-muted"></i></button>
+          <button type="submit" class="btn" id="submit_btn"><i class="fa fa-arrow-right text-muted"></i></button>
         </div>
       </div>
     </form>
