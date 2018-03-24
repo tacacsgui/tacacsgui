@@ -1,4 +1,7 @@
 ##############################
+Version_0.8.10 20180322
+	*Added LDAP support
+##############################
 Version_0.8.7 20180322
 	GUI changes:
 	* added meta no cache

@@ -320,6 +320,7 @@ class APIUserGrpsCtrl extends Controller
 		[ 'name' => 'Add/Edit/Delete API User Groups', 'value' => '8'],
 		[ 'name' => 'Delete/Restore Backups', 'value' => '9'],
 		[ 'name' => 'Upgrade API', 'value' => '10'],
+		[ 'name' => 'MAVIS LDAP', 'value' => '11'],
 		[ 'name' => 'DEMO (just view all)', 'value' => '0'],
 	);
 	#########	POST User Group 	#########

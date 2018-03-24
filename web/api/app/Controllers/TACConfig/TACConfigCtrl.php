@@ -8,6 +8,7 @@ use tgui\Models\TACDevices;
 use tgui\Models\TACDeviceGrps;
 use tgui\Models\TACGlobalConf;
 use tgui\Models\TACACL;
+use tgui\Models\MAVISLDAP;
 use tgui\Controllers\Controller;
 
 use Respect\Validation\Validator as v;
@@ -507,6 +508,153 @@ class TACConfigCtrl extends Controller
 		return $outputUsers;
 	}
 	
+	private function tacMavisLdapGen($html)
+	{
+		$html = (empty($html)) ? false : true;
+		
+		$mavis_ldap_settings = MAVISLDAP::select()->first();
+		
+		if ($mavis_ldap_settings->enabled == 0) return array('title_flag' => 0, 'name' =>"");
+		
+		$id = $mavis_ldap_settings->id;
+		
+		$outputMavisLdap[0][0]=array('title_flag' => 1, 'name' =>
+		($html) ? $this->html_tags['comment'][0] . "####MAVIS LDAP MODULE####" . $this->html_tags['comment'][1] 
+		:
+		"####MAVIS LDAP MODULE####");
+		///EMPTY ARRAY///
+		$outputMavisLdap[$id] = array();
+		///MAVIS LDAP TITLE///
+		$outputMavisLdap[$id][0] = array('title_flag' => 0, 'name' =>"");
+		///MAVIS LDAP SETTINGS START///
+		array_push($outputMavisLdap[$id], 
+		($html) ? $this->html_tags['attr'][0] . "mavis module" . $this->html_tags['attr'][1] . ' = ' . $this->html_tags['object'][0] . 'external' . $this->html_tags['object'][1] . ' {'
+		:
+		'mavis module = external {');
+		///LDAP SERVER TYPE///
+		array_push($outputMavisLdap[$id], 
+		($html) ? $this->html_tags['param'][0] . "	setenv LDAP_SERVER_TYPE" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] .'"'. $mavis_ldap_settings['type'] .'"'. $this->html_tags['val'][1]
+		:
+		'	setenv LDAP_SERVER_TYPE = "'. $mavis_ldap_settings['type'].'"');
+		///LDAP HOSTS///
+		array_push($outputMavisLdap[$id], 
+		($html) ? $this->html_tags['param'][0] . "	setenv LDAP_HOSTS" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] .'"'. $mavis_ldap_settings['hosts'] .'"'. $this->html_tags['val'][1]
+		:
+		'	setenv LDAP_HOSTS = "'. $mavis_ldap_settings['hosts'].'"');
+		///LDAP SCOPE///
+		array_push($outputMavisLdap[$id], 
+		($html) ? $this->html_tags['param'][0] . "	setenv LDAP_SCOPE" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] . $mavis_ldap_settings['scope'] . $this->html_tags['val'][1]
+		:
+		'	setenv LDAP_SCOPE = '. $mavis_ldap_settings['scope']);
+		///LDAP BASE///
+		array_push($outputMavisLdap[$id], 
+		($html) ? $this->html_tags['param'][0] . "	setenv LDAP_BASE" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] .'"'. $mavis_ldap_settings['base'] .'"'. $this->html_tags['val'][1]
+		:
+		'	setenv LDAP_BASE = "'. $mavis_ldap_settings['base'].'"');
+		///LDAP FILTER///
+		array_push($outputMavisLdap[$id], 
+		($html) ? $this->html_tags['param'][0] . "	setenv LDAP_FILTER" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] .'"'. $mavis_ldap_settings['filter'] .'"'. $this->html_tags['val'][1]
+		:
+		'	setenv LDAP_FILTER = "'. $mavis_ldap_settings['filter'].'"');
+		///LDAP USER///
+		array_push($outputMavisLdap[$id], 
+		($html) ? $this->html_tags['param'][0] . "	setenv LDAP_USER" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] .'"'. $mavis_ldap_settings['user'] .'"'. $this->html_tags['val'][1]
+		:
+		'	setenv LDAP_USER = "'. $mavis_ldap_settings['user'].'"');
+		///LDAP PASSWD///
+		array_push($outputMavisLdap[$id], 
+		($html) ? $this->html_tags['param'][0] . "	setenv LDAP_PASSWD" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] .'"'. $mavis_ldap_settings['password'] .'"'. $this->html_tags['val'][1]
+		:
+		'	setenv LDAP_PASSWD = "'. $mavis_ldap_settings['password'].'"');
+		///LDAP AD GROUP PREFIX///
+		$commentChar = ($mavis_ldap_settings['group_prefix'] == '') ? '#' : '';
+		array_push($outputMavisLdap[$id], 
+		($html) ?  $commentChar . $this->html_tags['param'][0] . "	setenv AD_GROUP_PREFIX" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] . $mavis_ldap_settings['group_prefix'] . $this->html_tags['val'][1] . '# default prefix is <i>tacacs</i>'
+		:
+		$commentChar .'	setenv AD_GROUP_PREFIX = '. $mavis_ldap_settings['group_prefix']);
+		///LDAP PRIFIX REQUIRED///
+		array_push($outputMavisLdap[$id], 
+		($html) ? $this->html_tags['param'][0] . "	setenv REQUIRE_AD_GROUP_PREFIX" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] . $mavis_ldap_settings['group_prefix_flag'] . $this->html_tags['val'][1]
+		:
+		'	setenv REQUIRE_AD_GROUP_PREFIX = '. $mavis_ldap_settings['group_prefix_flag']);
+		///LDAP TLS///
+		array_push($outputMavisLdap[$id], 
+		($html) ? $this->html_tags['param'][0] . "	setenv USE_TLS" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] . $mavis_ldap_settings['tls'] . $this->html_tags['val'][1]
+		:
+		'	setenv USE_TLS = '. $mavis_ldap_settings['tls']);
+		///LDAP CACHE CONN///
+		array_push($outputMavisLdap[$id], 
+		($html) ? $this->html_tags['param'][0] . "	setenv FLAG_CACHE_CONNECTION" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] . $mavis_ldap_settings['cache_conn'] . $this->html_tags['val'][1]
+		:
+		'	setenv FLAG_CACHE_CONNECTION  = '. $mavis_ldap_settings['cache_conn']);
+		///LDAP MEMBEROF///
+		array_push($outputMavisLdap[$id], 
+		($html) ? $this->html_tags['param'][0] . "	setenv FLAG_USE_MEMBEROF" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] . $mavis_ldap_settings['memberOf'] . $this->html_tags['val'][1]
+		:
+		'	setenv FLAG_USE_MEMBEROF  = '. $mavis_ldap_settings['memberOf']);
+		///LDAP FALLTHROUGH///
+		array_push($outputMavisLdap[$id], 
+		($html) ? $this->html_tags['param'][0] . "	setenv FLAG_FALLTHROUGH" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] . $mavis_ldap_settings['fallthrough'] . $this->html_tags['val'][1]
+		:
+		'	setenv FLAG_FALLTHROUGH  = '. $mavis_ldap_settings['fallthrough']);
+		///LDAP PATH///
+		array_push($outputMavisLdap[$id], 
+		($html) ? $this->html_tags['param'][0] . "	exec" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] . $mavis_ldap_settings['path'] . $this->html_tags['val'][1]
+		:
+		'	exec  = '. $mavis_ldap_settings['path']);
+		///USER MANUAL CONFIGURATION/// 
+		/*if ($group['manual']!="") 
+		{
+			array_push($outputUserGroup[$group['id']], ($html) ? $this->html_tags['comment'][0] . '###MANUAL CONFIGURATION START###' . $this->html_tags['comment'][1] 
+			:
+			'###MANUAL CONFIGURATION START###');
+			$arrayManual=explode(PHP_EOL, $group['manual']);
+			foreach($arrayManual as $item)
+			{
+				array_push($outputUserGroup[$group['id']], $item);
+			}
+			array_push($outputUserGroup[$group['id']], ($html) ? $this->html_tags['comment'][0] . '###MANUAL CONFIGURATION END###' . $this->html_tags['comment'][1] 
+			:
+			'###MANUAL CONFIGURATION END###');
+		}*/
+		
+		array_push($outputMavisLdap[$id], 
+		($html) ? '} ' . $this->html_tags['comment'][0] . '#END OF MAVIS LDAP SETTINGS' . $this->html_tags['comment'][1] 
+		:
+		'} #END OF MAVIS LDAP SETTINGS');
+		
+		return $outputMavisLdap;
+	}
+	
+	private function tacMavisGeneralGen($html)
+	{
+		$html = (empty($html)) ? false : true;
+		
+		$mavis_ldap_settings = MAVISLDAP::select()->first();
+		
+		if ($mavis_ldap_settings->enabled == 0) return array('title_flag' => 0, 'name' =>"");
+		
+		$outputMavisGeneral[0][0]=array('title_flag' => 1, 'name' =>
+		($html) ? $this->html_tags['comment'][0] . "####MAVIS GENERAL SETTINGS####" . $this->html_tags['comment'][1] 
+		:
+		"####MAVIS GENERAL SETTINGS####");
+		///EMPTY ARRAY///
+		$outputMavisGeneral[1] = array();
+		///MAVIS LDAP TITLE///
+		$outputMavisGeneral[1][0] = array('title_flag' => 0, 'name' =>"");
+		///MAVIS LDAP SETTINGS START///
+		array_push($outputMavisGeneral[1], 
+		($html) ? $this->html_tags['attr'][0] . "user backend" . $this->html_tags['attr'][1] . ' = ' . $this->html_tags['object'][0] . 'mavis' . $this->html_tags['object'][1]
+		:
+		'user backend = mavis');
+		array_push($outputMavisGeneral[1],
+		($html) ? $this->html_tags['attr'][0] . "login backend" . $this->html_tags['attr'][1] . ' = ' . $this->html_tags['object'][0] . 'mavis' . $this->html_tags['object'][1]
+		:
+		'login backend = mavis');
+		
+	return $outputMavisGeneral;
+	}	
+	
 	public function getConfigGen($req,$res)
 	{
 		//INITIAL CODE////START//
@@ -525,6 +673,8 @@ class TACConfigCtrl extends Controller
 		
 		$html = (empty($req->getParam('html'))) ? false : true;
 		
+		$data['mavisGeneralConfig']=array_values($this->tacMavisGeneralGen($html));
+		$data['mavisLdapConfig']=array_values($this->tacMavisLdapGen($html));
 		$data['devicesConfig']=array_values($this->tacDevicesPartGen($html));
 		$data['deviceGroupsConfig']=array_values($this->tacDeviceGroupsPartGen($html));
 		$data['userGroupsConfig']=array_values($this->tacUserGroupsPartGen($html));
@@ -567,7 +717,7 @@ class TACConfigCtrl extends Controller
 	//////////////OUTPUT PARSER///////////////////END//
 	////////////////////////////////////////////////
 	////////////TEST CONFIGURATION////START//
-	private function testConfiguration($confText)
+	public function testConfiguration($confText)
 	{
 		$errorFlag=false;
 		$confTestFile = fopen(TAC_PLUS_CFG_TEST, 'w') or $errorFlag=true;
@@ -643,28 +793,10 @@ class TACConfigCtrl extends Controller
 	////////////APPLY CONFIGURATION////END//
 	////////////////////////////////////////////////
 	//////////////CREATE CONFIGURATION////START//
-	public function getConfigGenFile($req,$res)
+	public function createConfiguration($lineSeparator)
 	{
-		//INITIAL CODE////START//
-		$data=array();
-		$data=$this->initialData([
-			'type' => 'get',
-			'object' => 'config',
-			'action' => 'generate to file',
-		]);
-		#check error#
-		if ($_SESSION['error']['status']){
-			$data['error']=$_SESSION['error'];
-			return $res -> withStatus(401) -> write(json_encode($data));
-		}
-		//INITIAL CODE////END//
-		//CHECK ACCESS TO THAT FUNCTION//START//
-		if(!$this->checkAccess(6))
-		{
-			return $res -> withStatus(403) -> write(json_encode($data));
-		}
-		//CHECK ACCESS TO THAT FUNCTION//END//
-		
+		$tempMavisGeneralArray=$this->tacMavisGeneralGen();
+		$tempMavisLdapArray=$this->tacMavisLdapGen();
 		$tempDeviceArray=$this->tacDevicesPartGen();
 		$tempDeviceGroupArray=$this->tacDeviceGroupsPartGen();
 		$tempUserGroupArray=$this->tacUserGroupsPartGen();
@@ -673,8 +805,6 @@ class TACConfigCtrl extends Controller
 		$tempGlobalConfArray=$this->tacGeneralPartGen();
 		$tempACL=$this->tacACLPartGen();
 		
-		$lineSeparator = ($req->getParam('contentType') == 'html' ) ? '</p>' : "\n ";
-		$contentTypeOutput = ($req->getParam('contentType') == 'html' ) ? 'text/html' : 'application/json';
 		$output="";
 		
 		////////////////////////////////////
@@ -688,6 +818,14 @@ class TACConfigCtrl extends Controller
 		$output.="id = tac_plus { ##START GLOBAL CONFIGURATION".$lineSeparator;
 		$output.=$this->arrayParserToText($tempGlobalConfArray,$lineSeparator);
 		//GLOBAL CONFIGURATION//END//
+		////////////////////////////////////
+		//MAVIS GENERAL CONFIGURATION//START//
+		$output.=$this->arrayParserToText($tempMavisGeneralArray,$lineSeparator);
+		//MAVIS GENERAL CONFIGURATION//END//
+		////////////////////////////////////
+		//MAVIS LDAP CONFIGURATION//START//
+		$output.=$this->arrayParserToText($tempMavisLdapArray,$lineSeparator);
+		//MAVIS LDAP CONFIGURATION//END//
 		////////////////////////////////////
 		//DEVICE GROUP LIST CONFIGURATION//START//
 		$output.=$this->arrayParserToText($tempDeviceGroupArray,$lineSeparator);
@@ -711,6 +849,37 @@ class TACConfigCtrl extends Controller
 		//////////////////////////////////
 		$output.="}##END GLOBAL CONFIGURATION".$lineSeparator;
 		//////////////////////////////////
+		
+		return $output;
+	}
+	
+	public function getConfigGenFile($req,$res)
+	{
+		//INITIAL CODE////START//
+		$data=array();
+		$data=$this->initialData([
+			'type' => 'get',
+			'object' => 'config',
+			'action' => 'generate to file',
+		]);
+		#check error#
+		if ($_SESSION['error']['status']){
+			$data['error']=$_SESSION['error'];
+			return $res -> withStatus(401) -> write(json_encode($data));
+		}
+		//INITIAL CODE////END//
+		//CHECK ACCESS TO THAT FUNCTION//START//
+		if(!$this->checkAccess(6))
+		{
+			return $res -> withStatus(403) -> write(json_encode($data));
+		}
+		//CHECK ACCESS TO THAT FUNCTION//END//
+		
+		$lineSeparator = ($req->getParam('contentType') == 'html' ) ? '</p>' : "\n ";
+		$contentTypeOutput = ($req->getParam('contentType') == 'html' ) ? 'text/html' : 'application/json';
+		$output="";
+		
+		$output = $this->createConfiguration($lineSeparator);
 		
 		if ($req->getParam('confSave')=='yes'){
 			

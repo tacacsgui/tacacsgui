@@ -115,6 +115,12 @@ $app->post('/update/', 'APIUpdateCtrl:postCheck');
 $app->post('/update/upgrade/', 'APIUpdateCtrl:postUpgrade');
 #####################################################
 
+###MAVIS Routes#######################################
+$app->get('/mavis/ldap/', 'MAVISLDAP:getLDAPParams');
+$app->post('/mavis/ldap/', 'MAVISLDAP:postLDAPParams');
+$app->post('/mavis/ldap/check/', 'MAVISLDAP:postLDAPCheck');
+#####################################################
+
 ###APIChecker Routes#######################################
 $app->post('/logging/datatables/', 'APILoggingCtrl:postLoggingDatatables');
 #####################################################

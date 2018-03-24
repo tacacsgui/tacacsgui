@@ -217,6 +217,14 @@ $.ajax({
 			outputConfigurationParser(data['tacGeneralConfig'])
 			//TACACS GENERAL CONF //END//
 			/////////////////////
+			//MAVIS GENERAL SETTINGS //START//
+			outputConfigurationParser(data['mavisGeneralConfig'])
+			//MAVIS GENERAL SETTINGS //END//
+			/////////////////////
+			//MAVIS LDAP SETTINGS //START//
+			outputConfigurationParser(data['mavisLdapConfig'])
+			//MAVIS LDAP SETTINGS //END//
+			/////////////////////
 			//DEVICE GROUP LIST //START//
 			outputConfigurationParser(data['deviceGroupsConfig'])
 			//DEVICE GROUP LIST //END//

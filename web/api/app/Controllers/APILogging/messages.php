@@ -54,3 +54,7 @@ $MESSAGES[505]="Tacacs global settings was saved";
 $MESSAGES[601]="Backup was added successfully";
 $MESSAGES[602]="Backup was deleted successfully";
 $MESSAGES[603]="Backup was restored successfully";
+###################################
+##	MAVIS Events	###############
+###################################
+$MESSAGES[701]="MAVIS LDAP module was changed";

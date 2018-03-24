@@ -20,21 +20,21 @@ protected $tablesArr = array(
 		'password' => ['string'],
 		'firstname' => ['string', ''],
 		'surname' => ['string', ''],
-		'group' => ['integer', 0],
+		'group' => ['integer', '0'],
 		'position' => ['string', ''],
 	],
 	'api_user_groups' =>
 	[
 		'name' => ['string',''],
-		'rights' => ['integer', 0],
-		'default_flag' => ['integer', 0],
+		'rights' => ['integer', '0'],
+		'default_flag' => ['integer', '0'],
 	],
 	'api_settings' =>
 	[
 		'timezone' => ['string', ''],
 		'update_url' => ['string', 'https://tacacsgui.com/api/tacacsgui/update/'],
-		'update_activated' => ['integer', 0],
-		'update_signin' => ['integer', 0],
+		'update_activated' => ['integer', '0'],
+		'update_signin' => ['integer', '0'],
 		'api_logging_max_entries' => ['integer', 500],
 		'update_key' => ['string', ''],
 	],
@@ -60,36 +60,36 @@ protected $tablesArr = array(
 		'max_attempts' => ['integer', 1],
 		'backoff' => ['integer', 1],
 		'manual' => ['text', '_'],
-		'changeFlag' => ['integer', 0],
+		'changeFlag' => ['integer', '0'],
 	],
 	'tac_users' =>
 	[
 		'username' => ['string'],
 		'login' => ['string'],
-		'login_flag' => ['integer', 0],
+		'login_flag' => ['integer', '0'],
 		'enable' => ['string'],
-		'enable_flag' => ['integer', 0],
-		'group' => ['integer', 0],
-		'disabled' => ['integer', 0],
+		'enable_flag' => ['integer', '0'],
+		'group' => ['integer', '0'],
+		'disabled' => ['integer', '0'],
 		'message' => ['text', '_'],
 		'manual_beginning' => ['text', '_'],
 		'manual' => ['text', '_'],
-		'acl' => ['integer', 0],
+		'acl' => ['integer', '0'],
 		'priv-lvl' => ['integer', -1],
 		'valid_from' => ['string', '_'],
 		'valid_until' => ['string', '_'],
-		'default_service' => ['integer', 0],
+		'default_service' => ['integer', '0'],
 	],
 	'tac_devices' =>
 	[
 		'name' => ['string'],
 		'ipaddr' => ['string'],
-		'prefix' => ['integer', 32],
+		'prefix' => ['integer', '32'],
 		'enable' => ['string'],
 		'key' => ['string'],
-		'enable_flag' => ['integer', 0],
-		'group' => ['integer', 0],
-		'disabled' => ['integer', 0],
+		'enable_flag' => ['integer', '0'],
+		'group' => ['integer', '0'],
+		'disabled' => ['integer', '0'],
 		'banner_welcome' => ['text', '_'],
 		'banner_failed' => ['text', '_'],
 		'banner_motd' => ['text', '_'],
@@ -99,9 +99,9 @@ protected $tablesArr = array(
 	[
 		'name' => ['string'],
 		'enable' => ['string', ''],
-		'enable_flag' => ['integer', 0],
+		'enable_flag' => ['integer', '0'],
 		'message' => ['text', '_'],
-		'default_flag' => ['integer', 0],
+		'default_flag' => ['integer', '0'],
 		'valid_from' => ['string', '_'],
 		'valid_until' => ['string', '_'],
 		'acl' => ['integer', 0],
@@ -114,17 +114,17 @@ protected $tablesArr = array(
 		'name' => ['string'],
 		'enable' => ['string', ''],
 		'key' => ['string', ''],
-		'enable_flag' => ['integer', 0],
+		'enable_flag' => ['integer', '0'],
 		'banner_welcome' => ['text', '_'],
 		'banner_failed' => ['text', '_'],
 		'banner_motd' => ['text', '_'],
 		'manual' => ['text', '_'],
-		'default_flag' => ['integer', 0]
+		'default_flag' => ['integer', '0']
 	],
 	'tac_acl' =>
 	[
 		'name' => ['string'],
-		'line_number' => ['integer', 0],
+		'line_number' => ['integer', '0'],
 		'action' => ['string', ''],
 		'nac' => ['string', ''],
 		'nas' => ['string', ''],
@@ -172,6 +172,24 @@ protected $tablesArr = array(
 		'action' => ['string', '_'],
 		'cmd' => ['string', '_'],
 	],
+	'mavis_ldap' =>
+	[
+		'enabled' => ['integer', '0'],
+		'type' => ['string', 'microsoft'],
+		'scope' => ['string', 'sub'],
+		'hosts' => ['string', ''],
+		'base' => ['string', ''],
+		'filter' => ['string', ''],
+		'user' => ['string', ''],
+		'password' => ['string', ''],
+		'group_prefix' => ['string', ''],
+		'group_prefix_flag' => ['integer', '0'],
+		'memberOf' => ['integer', '0'],
+		'fallthrough' => ['integer', '0'],
+		'cache_conn' => ['integer', '0'],
+		'tls' => ['integer', '0'],
+		'path' => ['string', '/usr/local/lib/mavis/mavis_tacplus_ldap.pl'],
+	],
 );	
 
 	public function myFirstTable()
@@ -203,7 +221,7 @@ protected $tablesArr = array(
 						$columnObj = $table->timestamp($columnName);
 						break;
 				}
-				if(isset($columnAttr[1]) 
+				if( (isset($columnAttr[1]) OR $columnAttr[1] == 0)
 					AND 
 					($columnAttr[0]=='integer' AND $columnAttr[1] != '_')
 					OR
@@ -303,6 +321,12 @@ protected $tablesArr = array(
 					'banner_failed' => 'Go away! Unauthorized access is prohibited!',
 					'banner_motd' => 'Today is a perfect day! Have a nice day!',
 					'default_flag' => 1,
+					'created_at' => date('Y-m-d H:i:s', time()),
+					'updated_at' => date('Y-m-d H:i:s', time())
+				]);
+				break;
+			case 'mavis_ldap':
+				$this->db::table($tableName)->insert([
 					'created_at' => date('Y-m-d H:i:s', time()),
 					'updated_at' => date('Y-m-d H:i:s', time())
 				]);
