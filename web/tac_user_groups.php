@@ -39,6 +39,8 @@ require __DIR__ . '/templates/header.php';
 	<link rel="stylesheet" href="bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css">
 	<!-- iCheck -->
 	<link rel="stylesheet" href="/plugins/iCheck/square/blue.css">
+	<!-- Select2 -->
+	<link rel="stylesheet" href="bower_components/select2/dist/css/select2.min.css">
 
 </head>
 <!--ADDITIONAL CSS FILES END-->
@@ -101,9 +103,12 @@ require __DIR__ . '/templates/footer_end.php';
 	<script src="bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
 	<!-- iCheck -->
 	<script src="/plugins/iCheck/icheck.min.js"></script>
+	<!-- Select2 -->
+	<script src="bower_components/select2/dist/js/select2.full.min.js"></script>
 
 	
 	<!-- main js User Groups MAIN Functions -->
+    <script src="dist/js/pages/tac_user_groups/select.js"></script>
     <script src="dist/js/pages/tac_user_groups/main.js"></script>
 	<!-- DATATABLES MAIN -->
     <script src="dist/js/pages/tac_user_groups/datatables.js"></script>

@@ -346,6 +346,13 @@ class TACConfigCtrl extends Controller
 		$html = (empty($html)) ? false : true;
 		
 		$allUserGroups = TACUserGrps::select()->get()->toArray();
+		$allACL_array = TACACL::select('id','name')->where([['line_number','=',0]])->get()->toArray();
+		
+		$allACL = array();
+		foreach($allACL_array as $acl)
+		{
+			$allACL[$acl['id']]=$acl['name'];
+		}
 		
 		$outputUserGroup[0][0]=array('title_flag' => 1, 'name' =>
 		($html) ? $this->html_tags['comment'][0] . "####LIST OF USER GROUPS####" . $this->html_tags['comment'][1] 
@@ -353,6 +360,7 @@ class TACConfigCtrl extends Controller
 		"####LIST OF USER GROUPS####");
 		foreach($allUserGroups as $group)
 		{
+			if ($group['priv-lvl'] < 0) $group['priv-lvl'] = 15;
 			///EMPTY ARRAY///
 			$outputUserGroup[$group['id']] = array();
 			///USER GROUP TITLE///
@@ -372,7 +380,35 @@ class TACConfigCtrl extends Controller
 			($html) ? $this->html_tags['param'][0] . "message" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] .'"'.$group['message'].'"'. $this->html_tags['val'][1]
 			:
 			'message = "'.$group['message'].'"');
-			///USER MANUAL CONFIGURATION/// 
+			///USER GROUP ACL///
+			if ($group['acl'] > 0)array_push($outputUserGroup[$group['id']], 
+			($html) ? $this->html_tags['param'][0] . "acl" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] . $allACL[$group['acl']] . $this->html_tags['val'][1]
+			:
+			'acl = '. $allACL[$group['acl']]);
+			///USER GROUP DEFAULT SERVICE///
+			$default_service = ($group['default_service']) ? 'permit' : 'deny';
+			array_push($outputUserGroup[$group['id']], 
+			($html) ? '	' . $this->html_tags['param'][0] . "default service" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] .$default_service. $this->html_tags['val'][1] 
+			:
+			'	default service = '. $default_service);
+			///USER GROUP SERVICE SHELL///
+			array_push($outputUserGroup[$group['id']], 
+			($html) ? '	' . $this->html_tags['param'][0] . "service" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['attr'][0] .'shell {'. $this->html_tags['attr'][1] 
+			:
+			'	service = shell {');
+			array_push($outputUserGroup[$group['id']], 
+			($html) ? '		' . $this->html_tags['param'][0] . "default cmd" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] .'permit'. $this->html_tags['val'][1] 
+			:
+			'		default cmd = permit');
+			array_push($outputUserGroup[$group['id']], 
+			($html) ? '		' . $this->html_tags['param'][0] . "set priv-lvl" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] .$group['priv-lvl']. $this->html_tags['val'][1] 
+			:
+			'		set priv-lvl = '.$group['priv-lvl']);
+			array_push($outputUserGroup[$group['id']], 
+			($html) ? '	' . $this->html_tags['attr'][0] .'}'. $this->html_tags['attr'][1] 
+			:
+			'	}');
+			///USER GROUP MANUAL CONFIGURATION/// 
 			if ($group['manual']!="") 
 			{
 				array_push($outputUserGroup[$group['id']], ($html) ? $this->html_tags['comment'][0] . '###MANUAL CONFIGURATION START###' . $this->html_tags['comment'][1] 
@@ -532,6 +568,7 @@ class TACConfigCtrl extends Controller
 		:
 		'mavis module = external {');
 		///LDAP SERVER TYPE///
+
 		array_push($outputMavisLdap[$id], 
 		($html) ? $this->html_tags['param'][0] . "	setenv LDAP_SERVER_TYPE" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] .'"'. $mavis_ldap_settings['type'] .'"'. $this->html_tags['val'][1]
 		:

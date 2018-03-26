@@ -71,7 +71,7 @@ function addACE(addTo,form)
 	}
 	dt.row.add({
 		"line_number" : line_number,
-		"action" : '<div class="form-group"><select class="form-control action"><option value="permit">permit</option><option value="deny">deny</option></select></div>',
+		"action" : '<div class="form-group"><select class="form-control action"><option value="permit" selected>permit</option><option value="deny">deny</option></select></div>',
 		"nac" : '<div class="form-group"><input class="form-control nac" placeholder="0.0.0.0/0"></div>',
 		"nas" : '<div class="form-group"><input class="form-control nas" placeholder="0.0.0.0/0"></div>',
 		"timerange" : '<input class="form-control timerange" placeholder="timeRange" disabled>',
@@ -154,7 +154,7 @@ function editRow(event,form)
 	var rowData = dt.row(row).data()
 	newRowData = {
 		"line_number" : rowData.line_number,
-		"action" : '<div class="form-group"><select class="form-control action"><option value="permit">permit</option><option value="deny" '+ ((rowData.action == 'deny') ? 'selected' : '') +'>deny</option></select></div>',
+		"action" : '<div class="form-group"><select class="form-control action"><option value="permit" '+ ((rowData.action == 'permit') ? 'selected' : '') +'>permit</option><option value="deny" '+ ((rowData.action == 'deny') ? 'selected' : '') +'>deny</option></select></div>',
 		"nac" : '<input class="form-control nac" placeholder="0.0.0.0/0" value="'+rowData.nac+'">',
 		"nas" : '<input class="form-control nas" placeholder="0.0.0.0/0" value="'+rowData.nas+'">',
 		"timerange" : '<input class="form-control timerange" placeholder="timeRange" disabled>',

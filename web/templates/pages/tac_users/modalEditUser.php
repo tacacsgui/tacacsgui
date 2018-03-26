@@ -32,7 +32,7 @@
 				</div>
 				<!-- /.tab-pane -->
 				<div class="tab-pane" id="manual_edit">
-					<?php include __DIR__ . '/tabManual.php';?>
+					<?php include __DIR__ . '/tabManualSettings.php';?>
 				</div>
 				<!-- /.tab-pane -->
             </div>

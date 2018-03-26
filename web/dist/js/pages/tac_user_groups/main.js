@@ -2,6 +2,26 @@ checkConfiguration()
 getUserInfo()
 var editForm='form#editGroupForm';
 var addForm='form#addGroupForm';
+///////////////////////////////////////
+//////CHANGE PRIVILEGE LEVEL//////START///
+function setPrivLvl(action){
+	var privLvl = parseInt($('input[name="priv-lvl"]').val());
+	switch(action) {
+    case 'add':
+        if (privLvl >= 15) return;
+		$('input[name="priv-lvl"]').val(privLvl + 1 );
+        break;
+    case 'subtract':
+        if (privLvl <= -1) return;
+		$('input[name="priv-lvl"]').val(privLvl - 1);
+        break;
+	case 'unset':
+        $('input[name="priv-lvl"]').val(-1);
+        break;
+	}
+}
+//////CHANGE PRIVILEGE LEVEL//////END///
+///////////////////////////////////////
 /////CHECKBOX ENABLING///
 var generalCheckboxParameters={
 	checkboxClass: 'icheckbox_square-blue',
@@ -42,10 +62,14 @@ function addGroup(){
 		"enable": $('form#addGroupForm input[name="enable"]').val(),
 		"enable_flag": $('form#addGroupForm select[name="enable_flag"]').val(),
 		"enable_encrypt": $('form#addGroupForm input[name="enable_encrypt"]').prop('checked'),
+		"acl": select_acl_add.select2('data')[0].id,
+		"priv-lvl": $('form#addGroupForm input[name="priv-lvl"]').val(),
 		"message": $('form#addGroupForm textarea[name="message"]').val(),
 		"manual": $('form#addGroupForm textarea[name="manual"]').val(),
+		"default_service": $('form#addGroupForm input[name="default_service"]').prop('checked'),
 		"test" : "none"
 		};	
+		console.log($('form#addGroupForm input.select_acl').val())
 	$.ajax({
 		type: "POST",
 		dataType: "json",
@@ -78,8 +102,8 @@ function addGroup(){
 			setTimeout( function () {dataTable.ajax.reload()}, 2000 );
 		},
 		error: function(data) {
-			//console.log(data);
-			errorHere(data);
+			console.log(data);
+			//errorHere(data);
 		}
 	});
 	
@@ -95,11 +119,16 @@ function clearAddGroupModal(){
 	$('form#addGroupForm textarea[name="manual"]').val('')
 	$('.form-group.has-error').removeClass('has-error');
 	
-	$('a.manualConfTrigger').show()
-	$('div.manualConfiguration').hide()
+	$('form#addGroupForm input[name="default_service"]').iCheck('check')
+	
+	// Select first tab
+	$('form#addGroupForm .nav-tabs-custom a:first').tab('show') 
 	
 	$('p.text-red').remove();
 	$('p.help-block').show();
+	
+	//Unset Priv-Lvl//
+	$('input[name="priv-lvl"]').val(-1);
 }
 ////ADD USER FUNCTION///END//
 /////////////////////////////////////////////
@@ -124,6 +153,10 @@ function editGroup(id,name){ //GET INFO ABOUT USER//
 			$(editForm + ' input[name="name_old"]').val(data['group']['name'])
 			$(editForm + ' input[name="enable"]').val(data['group']['enable'])
 			$(editForm + ' input[name="id"]').val(data['group']['id'])
+			
+			$(editForm + ' input[name="priv-lvl"]').val(data['group']['priv-lvl'])
+			
+			preSelection_acl(data['group']['acl'], 'editModal');
 			
 			var enable_encryption = ( (data['group']['enable_flag'] == 1 || data['group']['enable_flag'] == 2) && data['group']['enable'] != '') ? 'uncheck' : 'check';
 			$(editForm + ' input[name="enable_encrypt"]').iCheck(enable_encryption)
@@ -159,6 +192,9 @@ function submitGroupChanges(){
 		"enable": $(editForm + ' input[name="enable"]').val(),
 		"enable_flag": $(editForm + ' select[name="enable_flag"]').val(),
 		"enable_encrypt": $(editForm + ' input[name="enable_encrypt"]').prop('checked'),
+		"acl": select_acl_edit.select2('data')[0].id,
+		"priv-lvl": $(editForm + ' input[name="priv-lvl"]').val(),
+		"default_service": $(editForm + ' input[name="default_service"]').prop('checked'),
 		"id": $(editForm + ' input[name="id"]').val(),
 		"message": $(editForm + ' textarea[name="message"]').val(),
 		"manual": $(editForm + ' textarea[name="manual"]').val(),
@@ -203,19 +239,24 @@ function submitGroupChanges(){
 }
 ///////////////////////////
 function clearEditGroupModal(){
-	$(editForm + 'input[name="name"]').val('')
-	$(editForm + 'input[name="enable"]').val('')
-	$(editForm + 'div.enable_encrypt_section').show()
-	$(editForm + 'input[name="enable_encrypt"]').iCheck('check')
-	$(editForm + 'textarea[name="message"]').val('')
-	$(editForm + 'textarea[name="manual"]').val('')
+	$(editForm + ' input[name="name"]').val('')
+	$(editForm + ' input[name="enable"]').val('')
+	$(editForm + ' div.enable_encrypt_section').show()
+	$(editForm + ' input[name="enable_encrypt"]').iCheck('check')
+	$(editForm + ' textarea[name="message"]').val('')
+	$(editForm + ' textarea[name="manual"]').val('')
 	$('.form-group.has-error').removeClass('has-error');
 	
-	$('a.manualConfTrigger').show()
-	$('div.manualConfiguration').hide()	
+	$(editForm + ' input[name="default_service"]').iCheck('check')
+
+	// Select first tab
+	$(editForm + ' .nav-tabs-custom a:first').tab('show') 
 	
 	$('p.text-red').remove();
 	$('p.help-block').show();
+	
+	//Unset Priv-Lvl//
+	$('input[name="priv-lvl"]').val(-1);
 }
 ////EDIT USER FUNCTION///END//
 //////////////////////////////
@@ -264,11 +305,3 @@ $('#editGroup').on('hidden.bs.modal', function(){
 	clearEditGroupModal()
 })
 ////////////////////////////////
-////////////////////////////////
-////MANUAL CONFIGURATION TRIGGER//START//
-$('a.manualConfTrigger').click(function(){
-	$('a.manualConfTrigger').hide()
-	$('div.manualConfiguration').show()
-})
-////MANUAL CONFIGURATION TRIGGER//END//
-////////////////////////////////////////

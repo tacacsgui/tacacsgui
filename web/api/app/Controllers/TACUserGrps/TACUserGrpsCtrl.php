@@ -68,14 +68,17 @@ class TACUserGrpsCtrl extends Controller
 		
 		$data['enable']=$req->getParam('enable');
 		
-		if (isset($data['enable']) AND $req->getParam('enable_encrypt'))
+		$data['default_service'] = ($req->getParam('default_service') === 'true') ? 1 : 0;
+		
+		if (isset($data['enable']) AND $req->getParam('enable_encrypt') == 'true')
 		{
 			if ($req->getParam('enable_flag') == 1)
 			{
 				$data['enable']=trim(shell_exec('openssl passwd -1 '.$data['enable']));
-			} elseif ($req->getParam('enable_flag') == 2)
+			} 
+			if ($req->getParam('enable_flag') == 2)
 			{
-				$data['enable']=trim(shell_exec('openssl passwd crypt '.$data['enable']));
+				$data['enable']=trim(shell_exec('openssl passwd -crypt '.$data['enable']));
 			} 
 		} 
 		
@@ -83,7 +86,10 @@ class TACUserGrpsCtrl extends Controller
 			'name' => $req->getParam('name'),
 			'enable' => $data['enable'],
 			'enable_flag' => $req->getParam('enable_flag'),
+			'acl' => $req->getParam('acl'),
+			'priv-lvl' => $req->getParam('priv-lvl'),
 			'message' => $req->getParam('message'),
+			'default_service' => $data['default_service'],
 			'manual' => $req->getParam('manual'),
 		]);
 		
@@ -160,14 +166,17 @@ class TACUserGrpsCtrl extends Controller
 		
 		$data['enable']=$req->getParam('enable');
 		
-		if (isset($data['enable']) AND $req->getParam('enable_encrypt'))
+		$data['default_service'] = ($req->getParam('default_service') === 'true') ? 1 : 0;
+		
+		if (isset($data['enable']) AND $req->getParam('enable_encrypt') == 'true')
 		{
 			if ($req->getParam('enable_flag') == 1)
 			{
 				$data['enable']=trim(shell_exec('openssl passwd -1 '.$data['enable']));
-			} elseif ($req->getParam('enable_flag') == 2)
+			} 
+			if ($req->getParam('enable_flag') == 2)
 			{
-				$data['enable']=trim(shell_exec('openssl passwd crypt '.$data['enable']));
+				$data['enable']=trim(shell_exec('openssl passwd -crypt '.$data['enable']));
 			} 
 		} 
 		
@@ -176,6 +185,9 @@ class TACUserGrpsCtrl extends Controller
 			'name' => $req->getParam('name'),
 			'enable' => $data['enable'],
 			'enable_flag' => $req->getParam('enable_flag'),
+			'acl' => $req->getParam('acl'),
+			'priv-lvl' => $req->getParam('priv-lvl'),
+			'default_service' => $data['default_service'],
 			'message' => $req->getParam('message'),
 			'manual' => $req->getParam('manual'),
 		]);

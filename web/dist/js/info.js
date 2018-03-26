@@ -1,1 +1,1 @@
-var GUIVER='0.9.2';
+var GUIVER='0.9.6';

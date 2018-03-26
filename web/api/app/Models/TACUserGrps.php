@@ -16,6 +16,7 @@ class TACUserGrps extends Model
 		'default_flag',
 		'priv-lvl',
 		'acl',
+		'default_service',
 		'valid_from',
 		'valid_until',
 		'manual',

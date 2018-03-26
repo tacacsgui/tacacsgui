@@ -106,6 +106,7 @@ protected $tablesArr = array(
 		'valid_until' => ['string', '_'],
 		'acl' => ['integer', 0],
 		'priv-lvl' => ['integer', -1],
+		'default_service' => ['integer', '0'],
 		'manual_beginning' => ['text', '_'],
 		'manual' => ['text', '_'],
 	],

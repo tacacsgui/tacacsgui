@@ -1,4 +1,11 @@
 ##############################
+Version_0.8.12 20180326
+	*Changed User Group MOdal
+	*Added User Group Priv-Lvl
+	*Added User Group ACL
+	*Added User Group Default Service Attr
+	*Fixed bug with ACL: when you add ACE, action didn't applied
+##############################
 Version_0.8.10 20180322
 	*Added LDAP support
 ##############################

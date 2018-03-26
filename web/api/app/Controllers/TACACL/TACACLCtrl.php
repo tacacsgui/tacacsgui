@@ -189,6 +189,8 @@ class TACACLCtrl extends Controller
 			if (!empty($ACE['id'])) { array_push($data['ace'],$ACE); $aceId=$ACE['id']; unset($ACE['id']); TACACL::where([['id','=',$aceId]])->
 			update($ACE);}
 			else {
+				$ACE['action']=$ACE['action'];
+				$data['test1']=$ACE;
 				array_push($data['ace'],TACACL::create($ACE));
 			}
 			

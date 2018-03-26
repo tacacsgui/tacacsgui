@@ -10,6 +10,7 @@ class TACACL extends Model
 	
 	protected $fillable = [
 		'name',
+		'action',
 		'nac',
 		'nas',
 		'line_number',
