@@ -104,7 +104,7 @@ protected $tablesArr = array(
 		'default_flag' => ['integer', '0'],
 		'valid_from' => ['string', '_'],
 		'valid_until' => ['string', '_'],
-		'acl' => ['integer', 0],
+		'acl' => ['integer', '0'],
 		'priv-lvl' => ['integer', -1],
 		'default_service' => ['integer', '0'],
 		'manual_beginning' => ['text', '_'],
@@ -130,6 +130,14 @@ protected $tablesArr = array(
 		'nac' => ['string', ''],
 		'nas' => ['string', ''],
 		'timerange' => ['string', '']
+	],
+	'tac_services' =>
+	[
+		'name' => ['string'],
+		'priv-lvl' => ['integer', -1],
+		'default_cmd' => ['integer', '0'],
+		'manual' => ['text', '_'],
+		'manual_conf_only' => ['integer', '0'],
 	],
 	'tac_log_accounting' =>
 	[

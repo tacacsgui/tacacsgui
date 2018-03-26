@@ -1,6 +1,9 @@
 ##############################
+Version_0.8.14 20180326
+	*Added Services section
+##############################
 Version_0.8.12 20180326
-	*Changed User Group MOdal
+	*Changed User Group Modal
 	*Added User Group Priv-Lvl
 	*Added User Group ACL
 	*Added User Group Default Service Attr

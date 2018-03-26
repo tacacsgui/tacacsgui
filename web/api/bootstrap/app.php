@@ -2,7 +2,7 @@
 
 #########################################
 ########TACACS GUI API###################
-		define('APIVER', '0.8.12');
+		define('APIVER', '0.8.14');
 		define('TACVER', '201710201114');
 #########################################
 #########################################
@@ -87,6 +87,10 @@ $container['TACUserGrpsCtrl'] = function($container) {
 
 $container['TACACLCtrl'] = function($container) {
 	return new \tgui\Controllers\TACACL\TACACLCtrl($container);
+};
+
+$container['TACServicesCtrl'] = function($container) {
+	return new \tgui\Controllers\TACServices\TACServicesCtrl($container);
 };
 
 $container['TACConfigCtrl'] = function($container) {

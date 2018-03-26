@@ -20,6 +20,7 @@ $MESSAGES[204]="Tacacs user group was added";
 $MESSAGES[205]="API user was added";
 $MESSAGES[206]="API user group was added";
 $MESSAGES[207]="ACL was added";
+$MESSAGES[208]="Services was added";
 ###################################
 ##	Edit Events	###################
 ###################################
@@ -30,6 +31,7 @@ $MESSAGES[304]="Tacacs user group was edited";
 $MESSAGES[305]="API user was edited";
 $MESSAGES[306]="API user group was edited";
 $MESSAGES[307]="ACL was edited";
+$MESSAGES[308]="Services was edited";
 ###################################
 ##	Delete Events	###############
 ###################################
@@ -40,6 +42,7 @@ $MESSAGES[404]="Tacacs user group was deleted";
 $MESSAGES[405]="API user was deleted";
 $MESSAGES[406]="API user group was deleted";
 $MESSAGES[407]="ACL was deleted";
+$MESSAGES[408]="Services was deleted";
 ###################################
 ##	Tacacs Events	###############
 ###################################

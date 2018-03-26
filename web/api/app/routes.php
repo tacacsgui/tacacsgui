@@ -71,7 +71,6 @@ $app->get('/tacacs/user/group/list/', 'TACUserGrpsCtrl:getUserGroupList');
 #####################################################
 ###Tacacs ACL Routes#######################################
 $app->post('/tacacs/acl/datatables/', 'TACACLCtrl:postACLDatatables');
-$app->get('/tacacs/acl/ping/', 'TACACLCtrl:getACLPing');
 $app->get('/tacacs/acl/add/', 'TACACLCtrl:getACLAdd');
 $app->post('/tacacs/acl/add/', 'TACACLCtrl:postACLAdd');
 $app->get('/tacacs/acl/edit/', 'TACACLCtrl:getACLEdit');
@@ -79,6 +78,16 @@ $app->post('/tacacs/acl/edit/', 'TACACLCtrl:postACLEdit');
 $app->get('/tacacs/acl/delete/', 'TACACLCtrl:getACLDelete');
 $app->post('/tacacs/acl/delete/', 'TACACLCtrl:postACLDelete');
 $app->get('/tacacs/acl/list/', 'TACACLCtrl:getAclList');
+#####################################################
+###Tacacs ACL Routes#######################################
+$app->post('/tacacs/services/datatables/', 'TACServicesCtrl:postServiceDatatables');
+$app->get('/tacacs/services/add/', 'TACServicesCtrl:getServiceAdd');
+$app->post('/tacacs/services/add/', 'TACServicesCtrl:postServiceAdd');
+$app->get('/tacacs/services/edit/', 'TACServicesCtrl:getServiceEdit');
+$app->post('/tacacs/services/edit/', 'TACServicesCtrl:postServiceEdit');
+$app->get('/tacacs/services/delete/', 'TACServicesCtrl:getServiceDelete');
+$app->post('/tacacs/services/delete/', 'TACServicesCtrl:postServiceDelete');
+$app->get('/tacacs/services/list/', 'TACServicesCtrl:getServiceList');
 #####################################################
 ###Tacacs Configuration Generator Routes#######################################
 $app->get('/tacacs/config/generate/file/', 'TACConfigCtrl:getConfigGenFile');

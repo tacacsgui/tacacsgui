@@ -15,16 +15,22 @@ $BREADCRUMB = array(
 		'icon' => 'fa fa-cogs', 
 		'class' => ''  //last item should have active class!!
 	], 
+	'access_rules' => [
+		'name' => 'Access Rules', 
+		'href' => '', 
+		'icon' => 'fa fa-exchange', //leave empty if you won't put icon
+		'class' => '' //last item should have active class!!
+	],
 	'ACLs' => [
 		'name' => 'ACLs', 
 		'href' => '', 
-		'icon' => 'fa fa-exchange', //leave empty if you won't put icon
+		'icon' => '', //leave empty if you won't put icon
 		'class' => 'active' //last item should have active class!!
 	]
 );
 ///!!!!!////
 $ACTIVE_MENU_ID=50;
-$ACTIVE_SUBMENU_ID=0;
+$ACTIVE_SUBMENU_ID=510;
 ///!!!!!////
 ///PAGE VARIABLES///END
 ?>

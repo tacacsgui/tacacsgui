@@ -216,8 +216,6 @@ class TACUsersCtrl extends Controller
 			} 
 		} 
 		
-		$data['json']=$req->getParams();
-		
 		$data['user_update']=TACUsers::where([['id','=',$req->getParam('id')],['username','=',$req->getParam('username_old')]])->
 			update([
 				'username' => $req->getParam('username'),

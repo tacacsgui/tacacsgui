@@ -132,14 +132,37 @@ $TAC_CONFIGURATION = array(
 
 $TAC_ACL = array(
 	'id' => 50,
-	'name' => 'ACLs',
-	'href' => 'tac_acl.php',
+	'name' => 'Access Rules',
+	'href' => '',
 	'li-class' => '',
 	'icon' => 'fa fa-exchange',
 	'icon-class' => 'text-red',
 	'type' => 0, //type 0 used for linked menu item, type 1 user for header in menu
-	'submenuFlag' => 0,
-	'submenu' => [],//.submenu
+	'submenuFlag' => 1,
+	'submenu' => [
+			'acls' => [
+			'id' => 510,
+			'name' => 'ACLs',
+			'href' => 'tac_acl.php',
+			'li-class' => '',
+			'icon' => 'fa fa-circle-o',
+			'icon-class' => 'text-red',
+			'type' => 0, //type 0 used for linked menu item, type 1 user for header in menu
+			'submenuFlag' => 0,
+			'submenu' => [],//.submenu
+			],
+			'services' => [
+			'id' => 520,
+			'name' => 'Services',
+			'href' => 'tac_services.php',
+			'li-class' => '',
+			'icon' => 'fa fa-circle-o',
+			'icon-class' => 'text-red',
+			'type' => 0, //type 0 used for linked menu item, type 1 user for header in menu
+			'submenuFlag' => 0,
+			'submenu' => [],//.submenu
+			],
+	],//.submenu
 );
 
 $TAC_REPORTS = array(

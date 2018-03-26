@@ -315,6 +315,7 @@ class APIUserGrpsCtrl extends Controller
 		[ 'name' => 'Add/Edit/Delete Tac Users', 'value' => '4'],
 		[ 'name' => 'Add/Edit/Delete Tac User Groups', 'value' => '5'],
 		[ 'name' => 'Add/Edit/Delete Tac ACL', 'value' => '10'],
+		[ 'name' => 'Add/Edit/Delete Tac Services', 'value' => '12'],
 		[ 'name' => 'Edit/Apply/Test Tac Configuration', 'value' => '6'],
 		[ 'name' => 'Add/Edit/Delete API Users', 'value' => '7'],
 		[ 'name' => 'Add/Edit/Delete API User Groups', 'value' => '8'],
