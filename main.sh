@@ -16,7 +16,7 @@ fi
 case $1 in
 	check)
 		case $2 in
-		tacacs-ldap)			
+		mavis)			
 			/usr/local/bin/mavistest $ROOT_PATH/tac_plus.cfg_test tac_plus TACPLUS $3 $4
 		;;
 		

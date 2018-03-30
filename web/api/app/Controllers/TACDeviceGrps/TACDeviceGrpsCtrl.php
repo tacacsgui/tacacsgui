@@ -55,7 +55,7 @@ class TACDeviceGrpsCtrl extends Controller
 		//CHECK ACCESS TO THAT FUNCTION//END//
 		
 		$validation = $this->validator->validate($req, [
-			'name' => v::noWhitespace()->notEmpty()->deviceGroupAvailable(),
+			'name' => v::noWhitespace()->notEmpty()->deviceGroupAvailable(0),
 			'enable' => v::noWhitespace(),
 			'enable_flag' => v::noWhitespace()->numeric(),
 			'key' => v::noWhitespace(),

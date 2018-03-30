@@ -14,6 +14,7 @@
               <li class="active"><a href="#general_info" data-toggle="tab" aria-expanded="true">General</a></li>
               <li class=""><a href="#message" data-toggle="tab" aria-expanded="false">Message</a></li>
               <li class=""><a href="#access" data-toggle="tab" aria-expanded="false">Access Rules</a></li>
+              <li class=""><a href="#otp" data-toggle="tab" aria-expanded="false">OTP Auth</a></li>
 			  <li class="pull-right"><a href="#manual" data-toggle="tab" aria-expanded="false" class="text-muted"><i class="fa fa-gear"></i></a></li>
             </ul>
             <div class="tab-content">
@@ -27,6 +28,10 @@
 				<!-- /.tab-pane -->
 				<div class="tab-pane" id="access">
 					<?php include __DIR__ . '/tabAccessRules.php';?>
+				</div>
+				<!-- /.tab-pane -->
+				<div class="tab-pane" id="otp">
+					<div class="text-center"><p style="padding-top:40px;padding-bottom:20px;">You can use that function in edit mode. Firstly add user.</p></div>
 				</div>
 				<!-- /.tab-pane -->
 				<div class="tab-pane" id="manual">

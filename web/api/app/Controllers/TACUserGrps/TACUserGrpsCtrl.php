@@ -55,7 +55,7 @@ class TACUserGrpsCtrl extends Controller
 		//CHECK ACCESS TO THAT FUNCTION//END//
 		
 		$validation = $this->validator->validate($req, [
-			'name' => v::noWhitespace()->notEmpty()->userGroupTacAvailable(),
+			'name' => v::noWhitespace()->notEmpty()->userGroupTacAvailable(0),
 			'enable' => v::noWhitespace(),
 			'enable_flag' => v::noWhitespace()->numeric(),
 		]);

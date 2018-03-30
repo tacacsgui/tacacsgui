@@ -48,7 +48,7 @@ class MAVISLDAPCtrl extends Controller
 			return $res -> withStatus(401) -> write(json_encode($data));
 		}
 		//INITIAL CODE////END//
-				//CHECK ACCESS TO THAT FUNCTION//START//
+		//CHECK ACCESS TO THAT FUNCTION//START//
 		if(!$this->checkAccess(11))
 		{
 			return $res -> withStatus(403) -> write(json_encode($data));
@@ -102,7 +102,7 @@ class MAVISLDAPCtrl extends Controller
 		
 		$data['test_configuration'] = $this->TACConfigCtrl->testConfiguration($this->TACConfigCtrl->createConfiguration("\n "));
 		
-		$data['ldap_check']=shell_exec(TAC_ROOT_PATH . '/main.sh check tacacs-ldap '.$req->getParam('username').' '.$req->getParam('password').' 2>&1');
+		$data['ldap_check']=shell_exec(TAC_ROOT_PATH . '/main.sh check mavis '.$req->getParam('username').' '.$req->getParam('password').' 2>&1');
 		
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}

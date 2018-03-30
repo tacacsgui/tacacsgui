@@ -16,7 +16,7 @@ class DeviceNameAvailable extends AbstractRule
 	
 	public function validate($input)
 	{	
-		if ($this->deviceID){
+		if ($this->deviceID !== 0){
 			
 			return TACDevices::where([['name', '=' ,$input],['id', '<>', $this->deviceID]])->count() === 0;
 		}

@@ -24,14 +24,9 @@ function checkDatabase()
 			success: function(data) {
 				console.log(data);
 				if (data.message != undefined) { 
-					if ( $('div.dashboard_log').is(':empty') ) $('div.dashboard_log').append('<p>API ubdate database</p>');
-					$('div.dashboard_log').append('<p>'+data.message+'</p>');
-					checkDatabase(); return; 
+					window.location.replace('/update.php');
+					return d.reject();
 				}
-				
-				//widgetsData()
-				//checkConfiguration()
-				//getUserInfo()
 			},
 			error: function(data) {
 				console.log(data['responseJSON']);
@@ -40,11 +35,6 @@ function checkDatabase()
 	});
 	return d.resolve();
 }
-/*$.when(checkDatabase()).then(
-	checkConfiguration(),
-	getUserInfo(),
-	widgetsData(),
-)*/
 /////////CHECK DATABESE///END////
 ///////////////////////////////////
 /////////Widgets///////Start///

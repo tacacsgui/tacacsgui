@@ -112,6 +112,9 @@ $container['APIBackupCtrl'] = function($container) {
 $container['MAVISLDAP'] = function($container) {
 	return new \tgui\Controllers\MAVISLDAP\MAVISLDAPCtrl($container);
 };
+$container['MAVISOTP'] = function($container) {
+	return new \tgui\Controllers\MAVISOTP\MAVISOTPCtrl($container);
+};
 
 /*$container['csrf'] = function($container) {
 	return new \Slim\Csrf\Guard;

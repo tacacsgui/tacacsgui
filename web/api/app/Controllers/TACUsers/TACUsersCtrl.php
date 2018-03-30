@@ -4,6 +4,7 @@ namespace tgui\Controllers\TACUsers;
 
 use tgui\Models\TACUsers;
 use tgui\Models\TACUserGrps;
+use tgui\Models\MAVISOTP;
 use tgui\Controllers\Controller;
 use Respect\Validation\Validator as v;
 
@@ -55,7 +56,7 @@ class TACUsersCtrl extends Controller
 		//CHECK ACCESS TO THAT FUNCTION//END//
 		
 		$validation = $this->validator->validate($req, [
-			'username' => v::noWhitespace()->notEmpty()->userTacAvailable(),
+			'username' => v::noWhitespace()->notEmpty()->userTacAvailable(0),
 			'group' => v::noWhitespace(),
 			'enable' => v::noWhitespace(),
 			'enable_flag' => v::noWhitespace()->numeric(),
@@ -98,6 +99,8 @@ class TACUsersCtrl extends Controller
 				$data['enable']=trim(shell_exec('openssl passwd -crypt '.$data['enable']));
 			} 
 		} 
+
+		$otp_default = MAVISOTP::select()->first();
 		
 		$user = TACUsers::create([
 			'username' => $req->getParam('username'),
@@ -109,6 +112,10 @@ class TACUsersCtrl extends Controller
 			'default_service' => $data['default_service'],
 			'priv-lvl' => intval($req->getParam('priv-lvl')),
 			'acl' => intval($req->getParam('acl')),
+			'mavis_otp_secret' => $this->MAVISOTP->secret(),
+			'mavis_otp_period' => $otp_default->period,
+			'mavis_otp_digits' => $otp_default->digits,
+			'mavis_otp_digest' => $otp_default->digest,
 			'message' => $req->getParam('message'),
 			'manual' => $req->getParam('manual'),
 		]);
@@ -189,6 +196,7 @@ class TACUsersCtrl extends Controller
 		}
 		
 		$data['default_service'] = ($req->getParam('default_service') === true OR $req->getParam('default_service') === 'true') ? 1 : 0;
+		$data['mavis_otp_enabled'] = ($req->getParam('mavis_otp_enabled') == 'true') ? 1 : 0;
 		
 		$data['enable']=$req->getParam('enable');
 		$data['login']=$req->getParam('login');
@@ -227,6 +235,11 @@ class TACUsersCtrl extends Controller
 				'default_service' => $data['default_service'],
 				'priv-lvl' => intval($req->getParam('priv-lvl')),
 				'acl' => intval($req->getParam('acl')),
+				'mavis_otp_enabled' => $data['mavis_otp_enabled'],
+				'mavis_otp_secret' => $req->getParam('mavis_otp_secret'),
+				'mavis_otp_digits' => $req->getParam('mavis_otp_digits'),
+				'mavis_otp_digest' => $req->getParam('mavis_otp_digest'),
+				'mavis_otp_period' => $req->getParam('mavis_otp_period'),
 				'message' => $req->getParam('message'),
 				'manual' => $req->getParam('manual'),
 			]);

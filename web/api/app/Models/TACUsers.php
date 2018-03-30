@@ -19,6 +19,13 @@ class TACUsers extends Model
 		'message',
 		'priv-lvl',
 		'acl',
+		'mavis_otp_ebabled',
+		'mavis_otp_secret',
+		'mavis_otp_period',
+		'mavis_otp_digits',
+		'mavis_otp_digest',
+		'mavis_sms_enabled',
+		'mavis_sms_number',
 		'default_service',
 		'manual',
 	];

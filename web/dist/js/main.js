@@ -62,6 +62,7 @@ function checkConfiguration()
 			url: API_LINK+"apicheck/status/",
 			cache: false,
 			data: data,
+			async: false,
 			success: function(data) {
 				console.log(data);
 				$('tacversion').text(data['info']['version']['TACVER']);
@@ -91,6 +92,7 @@ function getUserInfo()
 			url: API_LINK+"/user/info/",
 			cache: false,
 			data: data,
+			async: false,
 			success: function(data) {
 				console.log(data);
 				$('firstname_info').text(data['user']['firstname'] + ' ')
@@ -118,6 +120,7 @@ function signout(){
 		url: API_LINK+"/auth/singout/",
 		cache: false,
 		data: data,
+		async: false,
 		success: function(data) {
 			console.log(data);
 			if (!data['authorised']) window.location.replace('/');

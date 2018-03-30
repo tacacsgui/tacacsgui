@@ -8,6 +8,7 @@ use tgui\Models\TACDevices;
 use tgui\Models\TACDeviceGrps;
 use tgui\Models\TACGlobalConf;
 use tgui\Models\TACACL;
+use tgui\Models\MAVISOTP;
 use tgui\Models\MAVISLDAP;
 use tgui\Controllers\Controller;
 
@@ -471,10 +472,12 @@ class TACConfigCtrl extends Controller
 			:
 			'user = '.$user['username'].' {');
 			///USER KEY///
+			$login = $this->crypto_flag[$user['login_flag']].' '.$user['login'];
+			if ($user['mavis_otp_enabled'] == 1) $login = 'mavis';
 			array_push($outputUsers[$user['id']], 
-			($html) ? '	'.$this->html_tags['param'][0] . "login" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] . $this->crypto_flag[$user['login_flag']].' '.$user['login']. $this->html_tags['val'][1]
+			($html) ? '	'.$this->html_tags['param'][0] . "login" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] . $login . $this->html_tags['val'][1]
 			:
-			'	login = '.$this->crypto_flag[$user['login_flag']].' '.$user['login']);
+			'	login = '. $login);
 			///USER ENABLE///
 			if ($user['enable']!='')array_push($outputUsers[$user['id']], 
 			($html) ? '	'.$this->html_tags['param'][0] . "enable" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] . $this->crypto_flag[$user['enable_flag']].' '.$user['enable']. $this->html_tags['val'][1]
@@ -668,8 +671,9 @@ class TACConfigCtrl extends Controller
 		$html = (empty($html)) ? false : true;
 		
 		$mavis_ldap_settings = MAVISLDAP::select()->first();
+		$mavis_otp_settings = MAVISOTP::select()->first();
 		
-		if ($mavis_ldap_settings->enabled == 0) return array('title_flag' => 0, 'name' =>"");
+		if ($mavis_ldap_settings->enabled == 0 AND $mavis_otp_settings->enabled == 0) return array('title_flag' => 0, 'name' =>"");
 		
 		$outputMavisGeneral[0][0]=array('title_flag' => 1, 'name' =>
 		($html) ? $this->html_tags['comment'][0] . "####MAVIS GENERAL SETTINGS####" . $this->html_tags['comment'][1] 
@@ -677,19 +681,57 @@ class TACConfigCtrl extends Controller
 		"####MAVIS GENERAL SETTINGS####");
 		///EMPTY ARRAY///
 		$outputMavisGeneral[1] = array();
-		///MAVIS LDAP TITLE///
+		///MAVIS GENERAL TITLE///
 		$outputMavisGeneral[1][0] = array('title_flag' => 0, 'name' =>"");
-		///MAVIS LDAP SETTINGS START///
+		///MAVIS GENERAL SETTINGS START///
 		array_push($outputMavisGeneral[1], 
 		($html) ? $this->html_tags['attr'][0] . "user backend" . $this->html_tags['attr'][1] . ' = ' . $this->html_tags['object'][0] . 'mavis' . $this->html_tags['object'][1]
 		:
 		'user backend = mavis');
 		array_push($outputMavisGeneral[1],
-		($html) ? $this->html_tags['attr'][0] . "login backend" . $this->html_tags['attr'][1] . ' = ' . $this->html_tags['object'][0] . 'mavis' . $this->html_tags['object'][1]
+		($html) ? $this->html_tags['attr'][0] . "login backend" . $this->html_tags['attr'][1] . ' = ' . $this->html_tags['object'][0] . 'mavis chalresp' . $this->html_tags['object'][1]
 		:
-		'login backend = mavis');
+		'login backend = mavis chalresp');
 		
 	return $outputMavisGeneral;
+	}	
+	
+	private function tacMavisOTPGen($html)
+	{
+		$html = (empty($html)) ? false : true;
+		
+		$mavis_otp_settings = MAVISOTP::select('enabled')->first();
+		
+		if ($mavis_otp_settings->enabled == 0) return array('title_flag' => 0, 'name' =>"");
+		
+		$outputMavisOTP[0][0]=array('title_flag' => 1, 'name' =>
+		($html) ? $this->html_tags['comment'][0] . "####MAVIS OTP SETTINGS####" . $this->html_tags['comment'][1] 
+		:
+		"####MAVIS OTP SETTINGS####");
+		///EMPTY ARRAY///
+		$outputMavisOTP[1] = array();
+		///MAVIS OTP TITLE///
+		$outputMavisOTP[1][0] = array('title_flag' => 0, 'name' =>"");
+		///MAVIS OTP SETTINGS START///
+		array_push($outputMavisOTP[1], 
+		($html) ? $this->html_tags['attr'][0] . "mavis module" . $this->html_tags['attr'][1] . ' = ' . $this->html_tags['object'][0] . 'external' . $this->html_tags['object'][1] . ' {'
+		:
+		'mavis module = external {');
+		
+		///OTP PATH///
+		array_push($outputMavisOTP[1], 
+		($html) ? $this->html_tags['param'][0] . "	exec" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] . TAC_ROOT_PATH . '/mavis-modules/otp/module.php' . $this->html_tags['val'][1]
+		:
+		'	exec  = ' . TAC_ROOT_PATH . '/mavis-modules/otp/module.php');
+		
+		array_push($outputMavisOTP[1], 
+		($html) ? '} ' . $this->html_tags['comment'][0] . '#END OF MAVIS OTP SETTINGS' . $this->html_tags['comment'][1] 
+		:
+		'} #END OF MAVIS OTP SETTINGS');
+		
+		
+		
+	return $outputMavisOTP;
 	}	
 	
 	public function getConfigGen($req,$res)
@@ -711,6 +753,7 @@ class TACConfigCtrl extends Controller
 		$html = (empty($req->getParam('html'))) ? false : true;
 		
 		$data['mavisGeneralConfig']=array_values($this->tacMavisGeneralGen($html));
+		$data['mavisOTPConfig']=array_values($this->tacMavisOTPGen($html));
 		$data['mavisLdapConfig']=array_values($this->tacMavisLdapGen($html));
 		$data['devicesConfig']=array_values($this->tacDevicesPartGen($html));
 		$data['deviceGroupsConfig']=array_values($this->tacDeviceGroupsPartGen($html));
@@ -832,15 +875,16 @@ class TACConfigCtrl extends Controller
 	//////////////CREATE CONFIGURATION////START//
 	public function createConfiguration($lineSeparator)
 	{
-		$tempMavisGeneralArray=$this->tacMavisGeneralGen();
-		$tempMavisLdapArray=$this->tacMavisLdapGen();
-		$tempDeviceArray=$this->tacDevicesPartGen();
-		$tempDeviceGroupArray=$this->tacDeviceGroupsPartGen();
-		$tempUserGroupArray=$this->tacUserGroupsPartGen();
-		$tempUserArray=$this->tacUsersPartGen();
-		$tempSpawndConfArray=$this->tacSpawndPartGen();
-		$tempGlobalConfArray=$this->tacGeneralPartGen();
-		$tempACL=$this->tacACLPartGen();
+		$tempMavisGeneralArray=$this->tacMavisGeneralGen(false);
+		$tempMavisOTPArray=$this->tacMavisOTPGen(false);
+		$tempMavisLdapArray=$this->tacMavisLdapGen(false);
+		$tempDeviceArray=$this->tacDevicesPartGen(false);
+		$tempDeviceGroupArray=$this->tacDeviceGroupsPartGen(false);
+		$tempUserGroupArray=$this->tacUserGroupsPartGen(false);
+		$tempUserArray=$this->tacUsersPartGen(false);
+		$tempSpawndConfArray=$this->tacSpawndPartGen(false);
+		$tempGlobalConfArray=$this->tacGeneralPartGen(false);
+		$tempACL=$this->tacACLPartGen(false);
 		
 		$output="";
 		
@@ -859,6 +903,10 @@ class TACConfigCtrl extends Controller
 		//MAVIS GENERAL CONFIGURATION//START//
 		$output.=$this->arrayParserToText($tempMavisGeneralArray,$lineSeparator);
 		//MAVIS GENERAL CONFIGURATION//END//
+		////////////////////////////////////
+		//MAVIS OTP CONFIGURATION//START//
+		$output.=$this->arrayParserToText($tempMavisOTPArray,$lineSeparator);
+		//MAVIS OTP CONFIGURATION//END//
 		////////////////////////////////////
 		//MAVIS LDAP CONFIGURATION//START//
 		$output.=$this->arrayParserToText($tempMavisLdapArray,$lineSeparator);

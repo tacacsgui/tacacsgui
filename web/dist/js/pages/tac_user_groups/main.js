@@ -91,6 +91,7 @@ function addGroup(){
 							error_message='<p class="text-red">'+data['error']['validation'][v][num]+'</p>';
 						}
 						$('div.form-group.'+v).append(error_message)
+						toastr["error"](data['error']['validation'][v][num])
 					}
 				}
 				return;
@@ -221,6 +222,7 @@ function submitGroupChanges(){
 							error_message='<p class="text-red">'+data['error']['validation'][v][num]+'</p>';
 						}
 						$('div.form-group.'+v).append(error_message)
+						toastr["error"](data['error']['validation'][v][num])
 					}
 				}
 				return;

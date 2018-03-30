@@ -44,6 +44,33 @@ require __DIR__ . '/templates/body_start.php';
 ?>
 <!--MAIN CONTENT START-->
 
+<div class="box box-solid">
+	<div class="box-body">
+		<div class="nav-tabs-custom">
+            <ul class="nav nav-tabs">
+              <li class="active"><a href="#general" data-toggle="tab">General</a></li>
+              <li><a href="#time_settings" data-toggle="tab">Time settings</a></li>
+              <li><a href="#logging" data-toggle="tab">Logging</a></li>
+            </ul>
+            <div class="tab-content">
+              <div class="tab-pane active" id="general">
+                It will be added soon
+              </div>
+              <!-- /.tab-pane -->
+              <div class="tab-pane" id="time_settings">
+                It will be added soon
+              </div>
+              <!-- /.tab-pane -->
+              <div class="tab-pane" id="logging">
+                It will be added soon
+              </div>
+              <!-- /.tab-pane -->
+            </div>
+            <!-- /.tab-content -->
+          </div>
+	</div>
+	<!-- /.box-body -->
+</div>
 
 <!--MAIN CONTENT END-->
 

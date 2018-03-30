@@ -221,6 +221,10 @@ $.ajax({
 			outputConfigurationParser(data['mavisGeneralConfig'])
 			//MAVIS GENERAL SETTINGS //END//
 			/////////////////////
+			//MAVIS OTP SETTINGS //START//
+			outputConfigurationParser(data['mavisOTPConfig'])
+			//MAVIS OTP SETTINGS //END//
+			/////////////////////
 			//MAVIS LDAP SETTINGS //START//
 			outputConfigurationParser(data['mavisLdapConfig'])
 			//MAVIS LDAP SETTINGS //END//

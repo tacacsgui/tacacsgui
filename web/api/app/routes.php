@@ -108,6 +108,7 @@ $app->get('/tacacs/reports/general/', 'TACReportsCtrl:getGeneralReport');
 ###APIChecker Routes#######################################
 $app->get('/apicheck/database/', 'APICheckerCtrl:getCheckDatabase');
 $app->get('/apicheck/status/', 'APICheckerCtrl:getApiStatus');
+$app->get('/apicheck/time/', 'APICheckerCtrl:getApiTime');
 #####################################################
 
 ###Backup Routes#######################################
@@ -128,6 +129,11 @@ $app->post('/update/upgrade/', 'APIUpdateCtrl:postUpgrade');
 $app->get('/mavis/ldap/', 'MAVISLDAP:getLDAPParams');
 $app->post('/mavis/ldap/', 'MAVISLDAP:postLDAPParams');
 $app->post('/mavis/ldap/check/', 'MAVISLDAP:postLDAPCheck');
+$app->post('/mavis/otp/generate/secret/', 'MAVISOTP:postOTPSecret');
+$app->post('/mavis/otp/generate/url', 'MAVISOTP:postOTPurl');
+$app->get('/mavis/otp/', 'MAVISOTP:getOTPParams');
+$app->post('/mavis/otp/', 'MAVISOTP:postOTPParams');
+$app->post('/mavis/otp/check/', 'MAVISOTP:postOTPCheck');
 #####################################################
 
 ###APIChecker Routes#######################################

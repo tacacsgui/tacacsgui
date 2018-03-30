@@ -104,6 +104,8 @@ require __DIR__ . '/templates/footer_end.php';
 	<script src="/plugins/iCheck/icheck.min.js"></script>
 	<!-- Select2 -->
 	<script src="bower_components/select2/dist/js/select2.full.min.js"></script>
+	
+	<script type="text/javascript" src="/plugins/qrcode/jquery.qrcode.min.js"></script>
 
 
 

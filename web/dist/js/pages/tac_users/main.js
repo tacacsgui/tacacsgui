@@ -1,5 +1,67 @@
 checkConfiguration()
 getUserInfo()
+/////GENERATE OTP PASSWORD///START///
+function generateOTPSecret(secret){
+
+		if (secret == '') secret = $('form#editUserForm input[name="otp_secret"]').val();
+		
+		var data = {
+		"action": "POST",
+		"id": $('form#editUserForm input[name="id"]').val(),
+		"secret": secret,
+		"digits": $('form#editUserForm input.digits').val(),
+		"digest": $('form#editUserForm select.digest').val(),
+		"period": $('form#editUserForm input.period').val(),
+		"test" : "none"
+		};	
+	$.ajax({
+		type: "POST",
+		dataType: "json",
+		url: API_LINK+"mavis/otp/generate/secret/",
+		cache: false,
+		data: data,
+		success: function(data) {
+			console.log(data);
+			$('form#editUserForm #qrcode').empty();
+			$('form#editUserForm input.otp_secret').val(data.secret);
+			$('form#editUserForm #qrcode').qrcode(data.url);
+		},
+		error: function(data) {
+			//console.log(data);
+			errorHere(data);
+		}
+	});
+}
+/////GENERATE OTP PASSWORD///START///
+////////////////////////////////////
+$('input[name="otp_enabled"]').on('ifChecked', function(event){
+	//if ($('input.otp_secret').val() == '') generateOTPSecret('');
+})
+////////////////////////////////////////
+////////CHECK SERVER TIME////START///
+function getCurrentTime(){
+		var data = {
+		"action": "GET",
+		"test" : "none"
+		};	
+	$.ajax({
+		type: "GET",
+		dataType: "json",
+		url: API_LINK+"apicheck/time/",
+		cache: false,
+		data: data,
+		success: function(data) {
+			console.log(data);
+			$('form#editUserForm time.current-time').text(data.time);
+		},
+		error: function(data) {
+			//console.log(data);
+			errorHere(data);
+		}
+	});
+}
+////////CHECK SERVER TIME////END///
+///////////////////////////////////////
 /////DISABLED, ENABLED SWITCHER///START//
 function disabledSwitcher(form,action)
 {
@@ -136,6 +198,7 @@ function addUser(){
 							error_message='<p class="text-red">'+data['error']['validation'][v][num]+'</p>';
 						}
 						$('div.form-group.'+v).append(error_message)
+						toastr["error"](data['error']['validation'][v][num])
 					}
 				}
 				return;
@@ -221,6 +284,19 @@ function editUser(id,username){ //GET INFO ABOUT USER//
 			$('form#editUserForm input[name="login_encrypt"]').iCheck(login_encryption)
 			if (login_encryption == 'check') {$('form#editUserForm div.login_encrypt_section').hide()}
 			else ($('form#editUserForm div.login_encrypt_section').show())
+
+			var otp_enabled = (data.user.mavis_otp_enabled == 0) ? 'uncheck' : 'check';
+			$('input[name="otp_enabled"]').iCheck(otp_enabled)
+
+			$('form#editUserForm input.period').val(data.user.mavis_otp_period)
+			$('form#editUserForm input.digits').val(data.user.mavis_otp_digits)
+			$('form#editUserForm select.digest').val(data.user.mavis_otp_digest)
+			
+			if (data.user.mavis_otp_secret==null || data.user.mavis_otp_secret == undefined || data.user.mavis_otp_secret == '') { generateOTPSecret(''); } 
+			else{
+				$('form#editUserForm input.otp_secret').val(data.user.mavis_otp_secret);
+				generateOTPSecret(data.user.mavis_otp_secret);
+			};
 			
 			$('form#editUserForm select[name="login_flag"] option[value="'+data['user']['login_flag']+'"]').prop('selected', true)
 			
@@ -239,6 +315,7 @@ function editUser(id,username){ //GET INFO ABOUT USER//
 			
 			$('text.created_at').text('Created at '+data['user']['created_at']);
 			$('text.updated_at').text('Last update was at '+data['user']['updated_at']);
+			getCurrentTime();
 			$('#editUser').modal('show')
 		},
 		error: function(data) {
@@ -263,6 +340,11 @@ function submitUserChanges(){
 		"enable_encrypt": $('form#editUserForm input[name="enable_encrypt"]').prop('checked'),
 		"group": select_group_edit.select2('data')[0].id,
 		"acl": select_acl_edit.select2('data')[0].id,
+		"mavis_otp_enabled": $('form#editUserForm input[name="otp_enabled"]').prop('checked'),
+		"mavis_otp_secret": $('form#editUserForm input[name="otp_secret"]').val(),
+		"mavis_otp_period": $('form#editUserForm input.period').val(),
+		"mavis_otp_digits": $('form#editUserForm input.digits').val(),
+		"mavis_otp_digest": $('form#editUserForm select.digest').val(),
 		"priv-lvl": $('form#editUserForm input[name="priv-lvl"]').val(),
 		"id": $('form#editUserForm input[name="id"]').val(),
 		"default_service": $('form#editUserForm input[name="default_service"]').prop('checked'),
@@ -291,6 +373,7 @@ function submitUserChanges(){
 							error_message='<p class="text-red">'+data['error']['validation'][v][num]+'</p>';
 						}
 						$('div.form-group.'+v).append(error_message)
+						toastr["error"](data['error']['validation'][v][num])
 					}
 				}
 				return;
@@ -303,7 +386,7 @@ function submitUserChanges(){
 		},
 		error: function(data) {
 			//console.log(data);
-			errorHere(data);
+			//errorHere(data);
 		}
 	});
 }
@@ -331,6 +414,8 @@ function clearEditUserModal(){
 	
 	//Unset Priv-Lvl//
 	$('input[name="priv-lvl"]').val(-1);
+
+	$('#qrcode').empty();
 }
 ////EDIT USER FUNCTION///END//
 //////////////////////////////

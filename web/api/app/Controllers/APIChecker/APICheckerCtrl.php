@@ -17,7 +17,7 @@ protected $tablesArr = array(
 	[
 		'username' => ['string',''],
 		'email' => ['string', ''],
-		'password' => ['string'],
+		'password' => ['string',''],
 		'firstname' => ['string', ''],
 		'surname' => ['string', ''],
 		'group' => ['integer', '0'],
@@ -34,15 +34,15 @@ protected $tablesArr = array(
 		'timezone' => ['string', ''],
 		'update_url' => ['string', 'https://tacacsgui.com/api/tacacsgui/update/'],
 		'update_activated' => ['integer', '0'],
-		'update_signin' => ['integer', '0'],
+		'update_signin' => ['integer', '1'],
 		'api_logging_max_entries' => ['integer', 500],
 		'update_key' => ['string', ''],
 	],
 	'api_logging' =>
 	[
-		'userName' => ['string'],
-		'userId' => ['string',],
-		'userIp' => ['string'],
+		'userName' => ['string',''],
+		'userId' => ['string',''],
+		'userIp' => ['string',''],
 		'objectName' => ['string', ''],
 		'objectId' => ['string', ''],
 		'action' => ['string', ''],
@@ -64,10 +64,10 @@ protected $tablesArr = array(
 	],
 	'tac_users' =>
 	[
-		'username' => ['string'],
-		'login' => ['string'],
+		'username' => ['string', ''],
+		'login' => ['string', ''],
 		'login_flag' => ['integer', '0'],
-		'enable' => ['string'],
+		'enable' => ['string', ''],
 		'enable_flag' => ['integer', '0'],
 		'group' => ['integer', '0'],
 		'disabled' => ['integer', '0'],
@@ -76,17 +76,24 @@ protected $tablesArr = array(
 		'manual' => ['text', '_'],
 		'acl' => ['integer', '0'],
 		'priv-lvl' => ['integer', -1],
+		'mavis_otp_enabled' => ['integer', '0'],
+		'mavis_otp_secret' => ['text', '_'],
+		'mavis_otp_period' => ['integer', '30'],
+		'mavis_otp_digits' => ['integer', '6'],
+		'mavis_otp_digest' => ['string', 'sha1'],
+		'mavis_sms_enabled' => ['integer', '0'],
+		'mavis_sms_number' => ['string', ''],
 		'valid_from' => ['string', '_'],
 		'valid_until' => ['string', '_'],
 		'default_service' => ['integer', '0'],
 	],
 	'tac_devices' =>
 	[
-		'name' => ['string'],
-		'ipaddr' => ['string'],
+		'name' => ['string', ''],
+		'ipaddr' => ['string', ''],
 		'prefix' => ['integer', '32'],
-		'enable' => ['string'],
-		'key' => ['string'],
+		'enable' => ['string', ''],
+		'key' => ['string', ''],
 		'enable_flag' => ['integer', '0'],
 		'group' => ['integer', '0'],
 		'disabled' => ['integer', '0'],
@@ -97,7 +104,7 @@ protected $tablesArr = array(
 	],
 	'tac_user_groups' =>
 	[
-		'name' => ['string'],
+		'name' => ['string',''],
 		'enable' => ['string', ''],
 		'enable_flag' => ['integer', '0'],
 		'message' => ['text', '_'],
@@ -112,7 +119,7 @@ protected $tablesArr = array(
 	],
 	'tac_device_groups' =>
 	[
-		'name' => ['string'],
+		'name' => ['string',''],
 		'enable' => ['string', ''],
 		'key' => ['string', ''],
 		'enable_flag' => ['integer', '0'],
@@ -124,7 +131,7 @@ protected $tablesArr = array(
 	],
 	'tac_acl' =>
 	[
-		'name' => ['string'],
+		'name' => ['string',''],
 		'line_number' => ['integer', '0'],
 		'action' => ['string', ''],
 		'nac' => ['string', ''],
@@ -133,7 +140,7 @@ protected $tablesArr = array(
 	],
 	'tac_services' =>
 	[
-		'name' => ['string'],
+		'name' => ['string',''],
 		'priv-lvl' => ['integer', -1],
 		'default_cmd' => ['integer', '0'],
 		'manual' => ['text', '_'],
@@ -198,6 +205,13 @@ protected $tablesArr = array(
 		'cache_conn' => ['integer', '0'],
 		'tls' => ['integer', '0'],
 		'path' => ['string', '/usr/local/lib/mavis/mavis_tacplus_ldap.pl'],
+	],
+	'mavis_otp' =>
+	[
+		'enabled' => ['integer', '0'],
+		'period' => ['integer', '30'],
+		'digits' => ['integer', '6'],
+		'digest' => ['string', 'sha1'],
 	],
 );	
 
@@ -340,6 +354,12 @@ protected $tablesArr = array(
 					'updated_at' => date('Y-m-d H:i:s', time())
 				]);
 				break;
+			case 'mavis_otp':
+				$this->db::table($tableName)->insert([
+					'created_at' => date('Y-m-d H:i:s', time()),
+					'updated_at' => date('Y-m-d H:i:s', time())
+				]);
+				break;
 		}
 	}
 	
@@ -445,6 +465,28 @@ protected $tablesArr = array(
 		//INITIAL CODE////END//
 		
 		$data['configuration']=TACGlobalConf::select('changeFlag')->first();
+		
+		return $res -> withStatus(200) -> write(json_encode($data));
+	}
+	################################################
+	###################API TIME MAIN##############
+	public function getApiTime($req,$res)
+	{
+		//INITIAL CODE////START//
+		$data=array();
+		$data=$this->initialData([
+			'type' => 'get',
+			'object' => 'apichecker',
+			'action' => 'api time',
+		]);
+		#check error#
+		if ($_SESSION['error']['status']){
+			$data['error']=$_SESSION['error'];
+			return $res -> withStatus(401) -> write(json_encode($data));
+		}
+		//INITIAL CODE////END//
+		
+		$data['time']=trim(shell_exec('date +"%T %D"'));
 		
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}

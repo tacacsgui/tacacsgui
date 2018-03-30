@@ -16,7 +16,7 @@ class UserGroupTacAvailable extends AbstractRule
 	
 	public function validate($input)
 	{
-		if (isset($this->groupID)){
+		if ($this->groupID !== 0){
 			
 			return TACUserGrps::where([['name', '=' ,$input],['id', '<>', $this->groupID]])->count() === 0;
 		}

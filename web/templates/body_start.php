@@ -18,7 +18,6 @@
 <!-- !!!!BODY START HERE!!!! -->
 <body class="hold-transition <?php echo GUI_SKIN;?> sidebar-mini">
 <div class="loading">
-	<div class="dashboard_log"></div>
 	<div class="text-center"><p class="loading_text">Loading...</p>
 	</div>
 </div>
