@@ -7,12 +7,19 @@ use tgui\Models\MAVISOTP;
 use OTPHP\TOTP;
 use ParagonIE\ConstantTime\Base32;
 use tgui\Controllers\Controller;
+use Respect\Validation\Validator as v;
 
 class MAVISOTPCtrl extends Controller
 {
 	public function secret()
 	{
 		return trim(Base32::encodeUpper(random_bytes(128)), '=');
+	}
+	
+	public function globalStatus()
+	
+	{
+		return MAVISOTP::select('enabled')->first()->enabled;
 	}
 ################################################
 ########	MAVIS OTP Secret	###############START###########	
@@ -120,6 +127,17 @@ class MAVISOTPCtrl extends Controller
 			return $res -> withStatus(403) -> write(json_encode($data));
 		}
 		//CHECK ACCESS TO THAT FUNCTION//END//
+		
+		$validation = $this->validator->validate($req, [
+			'period' => v::noWhitespace()->intVal()->between(30, 120),
+			'digits' => v::noWhitespace()->intVal()->between(5, 8),
+		]);
+		
+		if ($validation->failed()){
+			$data['error']['status']=true;
+			$data['error']['validation']=$validation->error_messages;
+			return $res -> withStatus(200) -> write(json_encode($data));
+		}
 		
 		$data['mavis_otp_update'] = MAVISOTP::where([['id','=',1]])->
 			update([

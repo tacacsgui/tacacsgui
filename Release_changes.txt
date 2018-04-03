@@ -1,4 +1,7 @@
 ##############################
+Version_0.9.1 20180330
+	*Added OTP Authorization limits for period and digits
+##############################
 Version_0.9.0 20180330
 	*Added OTP Authorization (Experimental)
 	*FULL OF CHANGES CONTACT ME BEFORE UPDATE - developer@tacasgui.com (also available in Skype)

@@ -315,7 +315,11 @@ function editUser(id,username){ //GET INFO ABOUT USER//
 			
 			$('text.created_at').text('Created at '+data['user']['created_at']);
 			$('text.updated_at').text('Last update was at '+data['user']['updated_at']);
+			
+			$('div.global_status p b').text( (data.otp_status == 1)? 'Enabled' : 'Disabled' )
+			
 			getCurrentTime();
+			
 			$('#editUser').modal('show')
 		},
 		error: function(data) {

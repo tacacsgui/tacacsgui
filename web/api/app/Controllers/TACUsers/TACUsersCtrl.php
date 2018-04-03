@@ -153,6 +153,7 @@ class TACUsersCtrl extends Controller
 		$data['user']=TACUsers::select()->
 			where([['id','=',$req->getParam('id')],['username','=',$req->getParam('username')]])->
 			first();
+		$data['otp_status']=$this->MAVISOTP->globalStatus();
 		
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
@@ -187,6 +188,8 @@ class TACUsersCtrl extends Controller
 			'enable_flag' => v::noWhitespace()->numeric(),
 			'login' => v::noWhitespace()->notEmpty(),
 			'login_flag' => v::noWhitespace()->numeric(),
+			'mavis_otp_period' => v::noWhitespace()->intVal()->between(30, 120),
+			'mavis_otp_digits' => v::noWhitespace()->intVal()->between(5, 8),
 		]);
 		
 		if ($validation->failed()){

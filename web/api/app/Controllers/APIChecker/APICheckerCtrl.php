@@ -323,6 +323,7 @@ protected $tablesArr = array(
 			case 'tac_devices':
 				$this->db::table($tableName)->insert([
 					'name' => 'deviceExample',
+					'ipaddr' => '10.1.1.1',
 					'created_at' => date('Y-m-d H:i:s', time()),
 					'updated_at' => date('Y-m-d H:i:s', time())
 				]);

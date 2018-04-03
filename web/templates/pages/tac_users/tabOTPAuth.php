@@ -1,12 +1,19 @@
-<div class="row otp_enabled">
-<div class="col-lg-12">
-<div class="form-group">
+<div class="row ">
+<div class="col-md-6">
+<div class="form-group otp_enabled">
 	<div class="checkbox icheck">
 		<label>
 			<input type="checkbox" name="otp_enabled" checked> Enable OTP Auth
 		</label>
 		<p class="help-block">if you check it, it will mean that that user can be authenticated only with this way</p>
 	</div>
+</div>
+</div>
+<div class="col-md-6">
+<div class="form-group global_status">
+		<label>Global Settings</label>
+		<p>Status: <b></b></p>
+		<p class="help=block">you can change that status <a href="/mavis_otp.php">here</a></p>
 </div>
 </div>
 </div>
@@ -36,21 +43,21 @@
 
 <div class="row">
 	<div class="col-md-4">
-		<div class="form-group period">
+		<div class="form-group mavis_otp_period">
 			<label>Period</label>
 			<input type="number" class="form-control period" onchange="generateOTPSecret('')" placeholder="Period"/>
 			<p class="help-block">period of generating OTP. By default, the period for a TOTP is 30 seconds</p>
         </div>
 	</div>
 	<div class="col-md-4">
-		<div class="form-group digits">
+		<div class="form-group mavis_otp_digits">
 			<label>Digits</label>
 			<input type="number" class="form-control digits" onchange="generateOTPSecret('')" placeholder="Digits"/>
 			<p class="help-block">by default the number of digits is 6, more than 10 may be difficult to use by the owner</p>
         </div>
 	</div>
 	<div class="col-md-4">
-		<div class="form-group digest">
+		<div class="form-group mavis_otp_digest">
 			<label>Digest</label>
 			<select class="form-control digest" onchange="generateOTPSecret('')">
 				<option value="sha1" selected>sha1</option>
