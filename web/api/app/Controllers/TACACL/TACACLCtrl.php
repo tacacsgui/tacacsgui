@@ -3,6 +3,8 @@
 namespace tgui\Controllers\TACACL;
 
 use tgui\Models\TACACL;
+use tgui\Models\TACUsers;
+use tgui\Models\TACUserGrps;
 use tgui\Controllers\Controller;
 use Respect\Validation\Validator as v;
 
@@ -54,7 +56,7 @@ class TACACLCtrl extends Controller
 		//CHECK ACCESS TO THAT FUNCTION//END//
 		
 		$validation = $this->validator->validate($req, [
-			'name' => v::noWhitespace()->notEmpty()->aclNameAvailable(),
+			'name' => v::noWhitespace()->notEmpty()->aclNameAvailable(0),
 		]);
 		
 		$ACEs=$req->getParam('ACEs');
@@ -263,6 +265,9 @@ class TACACLCtrl extends Controller
 		
 		$logEntry=array('action' => 'delete', 'objectName' => $req->getParam('name'), 'objectId' => $req->getParam('id'), 'section' => 'tacacs acl', 'message' => 407);
 		$data['logging']=$this->APILoggingCtrl->makeLogEntry($logEntry);
+		
+		$data['footprints_users']=TACUsers::where([['acl','=',$req->getParam('id')]])->update(['acl' => '0']);
+		$data['footprints_groups']=TACUserGrps::where([['acl','=',$req->getParam('id')]])->update(['acl' => '0']);
 		
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}

@@ -7,6 +7,7 @@ use tgui\Models\TACUserGrps;
 use tgui\Models\TACDevices;
 use tgui\Models\TACDeviceGrps;
 use tgui\Models\TACGlobalConf;
+use tgui\Models\TACServices;
 use tgui\Models\TACACL;
 use tgui\Models\MAVISOTP;
 use tgui\Models\MAVISLDAP;
@@ -334,7 +335,7 @@ class TACConfigCtrl extends Controller
 				///ACL NAS///
 				array_push($outputACL[$acl['id']], '}');
 			}
-			array_push($outputACL[$acl['id']], ($html) ? $this->html_tags['comment'][0] . '###ACL '.$acl['name'].' START###' . $this->html_tags['comment'][1] 
+			array_push($outputACL[$acl['id']], ($html) ? $this->html_tags['comment'][0] . '###ACL '.$acl['name'].' END###' . $this->html_tags['comment'][1] 
 			:
 			'###ACL '.$acl['name'].' END###');
 		}
@@ -382,10 +383,12 @@ class TACConfigCtrl extends Controller
 			:
 			'message = "'.$group['message'].'"');
 			///USER GROUP ACL///
-			if ($group['acl'] > 0)array_push($outputUserGroup[$group['id']], 
-			($html) ? $this->html_tags['param'][0] . "acl" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] . $allACL[$group['acl']] . $this->html_tags['val'][1]
-			:
-			'acl = '. $allACL[$group['acl']]);
+			if ($group['acl'] > 0) {
+				array_push($outputUserGroup[$group['id']], 
+				($html) ? '	' .$this->html_tags['param'][0] . "acl" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] . $allACL[$group['acl']] . $this->html_tags['val'][1]
+				:
+				'	acl = '. $allACL[$group['acl']]);
+			}
 			///USER GROUP DEFAULT SERVICE///
 			$default_service = ($group['default_service']) ? 'permit' : 'deny';
 			array_push($outputUserGroup[$group['id']], 
@@ -393,22 +396,62 @@ class TACConfigCtrl extends Controller
 			:
 			'	default service = '. $default_service);
 			///USER GROUP SERVICE SHELL///
-			array_push($outputUserGroup[$group['id']], 
-			($html) ? '	' . $this->html_tags['param'][0] . "service" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['attr'][0] .'shell {'. $this->html_tags['attr'][1] 
-			:
-			'	service = shell {');
-			array_push($outputUserGroup[$group['id']], 
-			($html) ? '		' . $this->html_tags['param'][0] . "default cmd" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] .'permit'. $this->html_tags['val'][1] 
-			:
-			'		default cmd = permit');
-			array_push($outputUserGroup[$group['id']], 
-			($html) ? '		' . $this->html_tags['param'][0] . "set priv-lvl" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] .$group['priv-lvl']. $this->html_tags['val'][1] 
-			:
-			'		set priv-lvl = '.$group['priv-lvl']);
-			array_push($outputUserGroup[$group['id']], 
-			($html) ? '	' . $this->html_tags['attr'][0] .'}'. $this->html_tags['attr'][1] 
-			:
-			'	}');
+			if ($group['service'] != 0) {
+				$service = TACServices::select()->where([['id','=',$group['service']]])->first() ;
+				array_push($outputUserGroup[$group['id']], 
+				($html) ? '	' . $this->html_tags['comment'][0] . "### PREDEFINED SERVICE - " .$service->name. $this->html_tags['comment'][1] 
+				:
+				'	### PREDEFINED SERVICE - '.$service->name );
+				
+				if ($service->manual_conf_only == 0){
+					array_push($outputUserGroup[$group['id']], 
+					($html) ? '	' . $this->html_tags['param'][0] . "service" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['attr'][0] .'shell {'. $this->html_tags['attr'][1] 
+					:
+					'	service = shell {');
+					array_push($outputUserGroup[$group['id']], 
+					($html) ? '		' . $this->html_tags['param'][0] . "default cmd" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] .'permit'. $this->html_tags['val'][1] 
+					:
+					'		default cmd = permit');
+					
+					$service_privilege = ($service['priv-lvl'] < 0) ? 15 : $service['priv-lvl'];
+					//$service_privilege = 123;
+					array_push($outputUserGroup[$group['id']], 
+					($html) ? '		' . $this->html_tags['param'][0] . "set priv-lvl" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] .$service_privilege. $this->html_tags['val'][1] 
+					:
+					'		set priv-lvl = '.$service_privilege);
+				}
+				
+				$arrayService=explode(PHP_EOL, $service->manual);
+				foreach($arrayService as $item)
+				{
+					array_push($outputUserGroup[$group['id']], '		'.$item);
+				}
+				
+				if ($service->manual_conf_only == 0){
+					array_push($outputUserGroup[$group['id']], 
+					($html) ? '	' . $this->html_tags['attr'][0] .'}'. $this->html_tags['attr'][1] 
+					:
+					'	}');
+				}
+				
+			} else {
+				array_push($outputUserGroup[$group['id']], 
+				($html) ? '	' . $this->html_tags['param'][0] . "service" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['attr'][0] .'shell {'. $this->html_tags['attr'][1] 
+				:
+				'	service = shell {');
+				array_push($outputUserGroup[$group['id']], 
+				($html) ? '		' . $this->html_tags['param'][0] . "default cmd" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] .'permit'. $this->html_tags['val'][1] 
+				:
+				'		default cmd = permit');
+				array_push($outputUserGroup[$group['id']], 
+				($html) ? '		' . $this->html_tags['param'][0] . "set priv-lvl" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] .$group['priv-lvl']. $this->html_tags['val'][1] 
+				:
+				'		set priv-lvl = '.$group['priv-lvl']);
+				array_push($outputUserGroup[$group['id']], 
+				($html) ? '	' . $this->html_tags['attr'][0] .'}'. $this->html_tags['attr'][1] 
+				:
+				'	}');
+			}
 			///USER GROUP MANUAL CONFIGURATION/// 
 			if ($group['manual']!="") 
 			{
@@ -461,7 +504,6 @@ class TACConfigCtrl extends Controller
 		"####LIST OF USERS####");
 		foreach($allUsers as $user)
 		{
-			if ($user['priv-lvl'] < 0) $user['priv-lvl'] = 15;
 			///EMPTY ARRAY///
 			$outputUsers[$user['id']] = array();
 			///USER TITLE///
@@ -505,22 +547,70 @@ class TACConfigCtrl extends Controller
 			:
 			'	default service = '. $default_service);
 			///USER SERVICE SHELL///
-			array_push($outputUsers[$user['id']], 
-			($html) ? '	' . $this->html_tags['param'][0] . "service" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['attr'][0] .'shell {'. $this->html_tags['attr'][1] 
-			:
-			'	service = shell {');
-			array_push($outputUsers[$user['id']], 
-			($html) ? '		' . $this->html_tags['param'][0] . "default cmd" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] .'permit'. $this->html_tags['val'][1] 
-			:
-			'		default cmd = permit');
-			array_push($outputUsers[$user['id']], 
-			($html) ? '		' . $this->html_tags['param'][0] . "set priv-lvl" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] .$user['priv-lvl']. $this->html_tags['val'][1] 
-			:
-			'		set priv-lvl = '.$user['priv-lvl']);
-			array_push($outputUsers[$user['id']], 
-			($html) ? '	' . $this->html_tags['attr'][0] .'}'. $this->html_tags['attr'][1] 
-			:
-			'	}');
+			if ($user['service'] == 0 AND  $user['group'] == 0) {
+				if ($user['priv-lvl'] < 0) $user['priv-lvl'] = 15;
+				array_push($outputUsers[$user['id']], 
+				($html) ? '	' . $this->html_tags['param'][0] . "service" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['attr'][0] .'shell {'. $this->html_tags['attr'][1] 
+				:
+				'	service = shell {');
+				array_push($outputUsers[$user['id']], 
+				($html) ? '		' . $this->html_tags['param'][0] . "default cmd" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] .'permit'. $this->html_tags['val'][1] 
+				:
+				'		default cmd = permit');
+				array_push($outputUsers[$user['id']], 
+				($html) ? '		' . $this->html_tags['param'][0] . "set priv-lvl" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] .$user['priv-lvl']. $this->html_tags['val'][1] 
+				:
+				'		set priv-lvl = '.$user['priv-lvl']);
+				array_push($outputUsers[$user['id']], 
+				($html) ? '	' . $this->html_tags['attr'][0] .'}'. $this->html_tags['attr'][1] 
+				:
+				'	}');
+			}
+			if ($user['service'] != 0) {
+				$service = TACServices::select()->where([['id','=',$user['service']]])->first() ;
+				array_push($outputUsers[$user['id']], 
+				($html) ? '	' . $this->html_tags['comment'][0] . "### PREDEFINED SERVICE - " .$service->name. $this->html_tags['comment'][1] 
+				:
+				'	### PREDEFINED SERVICE - '.$service->name );
+				
+				if ($service->manual_conf_only == 0){
+					array_push($outputUsers[$user['id']], 
+					($html) ? '	' . $this->html_tags['param'][0] . "service" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['attr'][0] .'shell {'. $this->html_tags['attr'][1] 
+					:
+					'	service = shell {');
+					array_push($outputUsers[$user['id']], 
+					($html) ? '		' . $this->html_tags['param'][0] . "default cmd" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] .'permit'. $this->html_tags['val'][1] 
+					:
+					'		default cmd = permit');
+					
+					$service_privilege = ($service['priv-lvl'] < 0) ? 15 : $service['priv-lvl'];
+					//$service_privilege = 123;
+					array_push($outputUsers[$user['id']], 
+					($html) ? '		' . $this->html_tags['param'][0] . "set priv-lvl" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] .$service_privilege. $this->html_tags['val'][1] 
+					:
+					'		set priv-lvl = '.$service_privilege);
+				}
+				
+				$arrayService=explode(PHP_EOL, $service->manual);
+				foreach($arrayService as $item)
+				{
+					array_push($outputUsers[$user['id']], '		'.$item);
+				}
+				
+				if ($service->manual_conf_only == 0){
+					array_push($outputUsers[$user['id']], 
+					($html) ? '	' . $this->html_tags['attr'][0] .'}'. $this->html_tags['attr'][1] 
+					:
+					'	}');
+				}
+				
+			}
+			elseif($user['group'] != 0){
+				array_push($outputUsers[$user['id']], 
+				($html) ? '	' . $this->html_tags['comment'][0] . "### GET SERVICES FROM GROUP" . $this->html_tags['comment'][1] 
+				:
+				'	### GET SERVICES FROM GROUP');
+			}
 			///USER MANUAL CONFIGURATION/// 
 			if ($user['manual']!="") 
 			{

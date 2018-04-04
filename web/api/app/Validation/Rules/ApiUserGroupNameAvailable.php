@@ -16,7 +16,7 @@ class ApiUserGroupNameAvailable extends AbstractRule
 	
 	public function validate($input)
 	{	
-		if (!empty($this->groupID)){
+		if ($this->groupID != 0){
 			
 			return APIUserGrps::where([['name', '=' ,$input],['id', '<>', $this->groupID]])->count() === 0;
 		}

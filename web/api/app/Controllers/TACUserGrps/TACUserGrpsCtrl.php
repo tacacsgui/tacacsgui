@@ -87,6 +87,7 @@ class TACUserGrpsCtrl extends Controller
 			'enable' => $data['enable'],
 			'enable_flag' => $req->getParam('enable_flag'),
 			'acl' => $req->getParam('acl'),
+			'service' => $req->getParam('service'),
 			'priv-lvl' => $req->getParam('priv-lvl'),
 			'message' => $req->getParam('message'),
 			'default_service' => $data['default_service'],
@@ -186,6 +187,7 @@ class TACUserGrpsCtrl extends Controller
 			'enable' => $data['enable'],
 			'enable_flag' => $req->getParam('enable_flag'),
 			'acl' => $req->getParam('acl'),
+			'service' => $req->getParam('service'),
 			'priv-lvl' => $req->getParam('priv-lvl'),
 			'default_service' => $data['default_service'],
 			'message' => $req->getParam('message'),
@@ -245,13 +247,6 @@ class TACUserGrpsCtrl extends Controller
 		}
 		//CHECK ACCESS TO THAT FUNCTION//END//
 		
-		if (TACUsers::where([['group','=',$req->getParam('id')]])->count())
-		{
-			TACUsers::where([['group','=',$req->getParam('id')]])->update([
-				'group' => '0',
-			]);
-		}
-		
 		$data['deleteGroup']=TACUserGrps::where([
 			['id','=',$req->getParam('id')],
 			['name','=',$req->getParam('name')],
@@ -263,6 +258,8 @@ class TACUserGrpsCtrl extends Controller
 		
 		$logEntry=array('action' => 'delete', 'objectName' => $req->getParam('name'), 'objectId' => $req->getParam('id'), 'section' => 'tacacs user groups', 'message' => 404);
 		$data['logging']=$this->APILoggingCtrl->makeLogEntry($logEntry);
+		
+		$data['footprints']=TACUsers::where([['group','=',$req->getParam('id')]])->update(['group' => '0']);
 		
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}

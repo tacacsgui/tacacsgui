@@ -171,6 +171,7 @@ function addUser(){
 		"enable_encrypt": $('form#addUserForm input[name="enable_encrypt"]').prop('checked'),
 		"group": select_group_add.select2('data')[0].id,
 		"acl": select_acl_add.select2('data')[0].id,
+		"service": select_service_add.select2('data')[0].id,
 		"priv-lvl": $('form#addUserForm input[name="priv-lvl"]').val(),
 		"default_service": $('form#addUserForm input[name="default_service"]').prop('checked'),
 		"message": $('form#addUserForm textarea[name="message"]').val(),
@@ -306,6 +307,7 @@ function editUser(id,username){ //GET INFO ABOUT USER//
 			
 			preSelection(data['user']['group'], 'editModal');
 			preSelection_acl(data['user']['acl'], 'editModal');
+			preSelection_service(data['user']['service'], 'editModal');
 			
 			var default_service = (data['user']['default_service'] == 1) ? 'check' : 'uncheck';
 			$('form#editUserForm input[name="default_service"]').iCheck(default_service)
@@ -344,6 +346,7 @@ function submitUserChanges(){
 		"enable_encrypt": $('form#editUserForm input[name="enable_encrypt"]').prop('checked'),
 		"group": select_group_edit.select2('data')[0].id,
 		"acl": select_acl_edit.select2('data')[0].id,
+		"service": select_service_edit.select2('data')[0].id,
 		"mavis_otp_enabled": $('form#editUserForm input[name="otp_enabled"]').prop('checked'),
 		"mavis_otp_secret": $('form#editUserForm input[name="otp_secret"]').val(),
 		"mavis_otp_period": $('form#editUserForm input.period').val(),

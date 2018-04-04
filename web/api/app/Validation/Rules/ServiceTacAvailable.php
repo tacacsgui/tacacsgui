@@ -16,7 +16,7 @@ class ServiceTacAvailable extends AbstractRule
 	
 	public function validate($input)
 	{
-		if (!empty($this->serviceID)){
+		if ($this->serviceID != 0){
 			
 			return TACServices::where([['name', '=' ,$input],['id', '<>', $this->serviceID]])->count() === 0;
 		}

@@ -63,7 +63,7 @@ class APIUserGrpsCtrl extends Controller
 		//CHECK ACCESS TO THAT FUNCTION//END//
 		
 		$validation = $this->validator->validate($req, [
-			'name' => v::noWhitespace()->notEmpty()->apiUserGroupNameAvailable(),
+			'name' => v::noWhitespace()->notEmpty()->apiUserGroupNameAvailable(0),
 			'rights' => v::not(v::nullType())->notEmpty()->arrayType(),
 		]);
 		

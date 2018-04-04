@@ -213,6 +213,11 @@ class APIUsersCtrl extends Controller
 		}
 		//CHECK ACCESS TO THAT FUNCTION//END//
 		
+		if ($_SESSION['uid'] == $req->getParam('id'))
+		{
+			return $res -> withStatus(403) -> write(json_encode($data));
+		}
+		
 		$data['deleteUser']=APIUsers::where([
 			['id','=',$req->getParam('id')],
 			['username','=',$req->getParam('username')],

@@ -3,6 +3,8 @@
 namespace tgui\Controllers\TACServices;
 
 use tgui\Models\TACServices;
+use tgui\Models\TACUsers;
+use tgui\Models\TACUserGrps;
 use tgui\Controllers\Controller;
 use Respect\Validation\Validator as v;
 
@@ -54,7 +56,7 @@ class TACServicesCtrl extends Controller
 		//CHECK ACCESS TO THAT FUNCTION//END//
 		
 		$validation = $this->validator->validate($req, [
-			'name' => v::noWhitespace()->notEmpty()->serviceTacAvailable(),
+			'name' => v::noWhitespace()->notEmpty()->serviceTacAvailable(0),
 			'priv-lvl' => v::noWhitespace()->numeric()->between(-1, 15),
 			'default_cmd' => v::noWhitespace()->boolVal(),
 			'manual_conf_only' => v::noWhitespace()->boolVal(),
@@ -225,6 +227,9 @@ class TACServicesCtrl extends Controller
 		
 		$logEntry=array('action' => 'delete', 'objectName' => $req->getParam('name'), 'objectId' => $req->getParam('id'), 'section' => 'tacacs services', 'message' => 408);
 		$data['logging']=$this->APILoggingCtrl->makeLogEntry($logEntry);
+		
+		$data['footprints_users']=TACUsers::where([['service','=',$req->getParam('id')]])->update(['service' => '0']);
+		$data['footprints_groups']=TACUserGrps::where([['service','=',$req->getParam('id')]])->update(['service' => '0']);
 		
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}

@@ -63,6 +63,7 @@ function addGroup(){
 		"enable_flag": $('form#addGroupForm select[name="enable_flag"]').val(),
 		"enable_encrypt": $('form#addGroupForm input[name="enable_encrypt"]').prop('checked'),
 		"acl": select_acl_add.select2('data')[0].id,
+		"service": select_service_add.select2('data')[0].id,
 		"priv-lvl": $('form#addGroupForm input[name="priv-lvl"]').val(),
 		"message": $('form#addGroupForm textarea[name="message"]').val(),
 		"manual": $('form#addGroupForm textarea[name="manual"]').val(),
@@ -158,6 +159,7 @@ function editGroup(id,name){ //GET INFO ABOUT USER//
 			$(editForm + ' input[name="priv-lvl"]').val(data['group']['priv-lvl'])
 			
 			preSelection_acl(data['group']['acl'], 'editModal');
+			preSelection_service(data['group']['service'], 'editModal');
 			
 			var enable_encryption = ( (data['group']['enable_flag'] == 1 || data['group']['enable_flag'] == 2) && data['group']['enable'] != '') ? 'uncheck' : 'check';
 			$(editForm + ' input[name="enable_encrypt"]').iCheck(enable_encryption)
@@ -194,6 +196,7 @@ function submitGroupChanges(){
 		"enable_flag": $(editForm + ' select[name="enable_flag"]').val(),
 		"enable_encrypt": $(editForm + ' input[name="enable_encrypt"]').prop('checked'),
 		"acl": select_acl_edit.select2('data')[0].id,
+		"service": select_service_edit.select2('data')[0].id,
 		"priv-lvl": $(editForm + ' input[name="priv-lvl"]').val(),
 		"default_service": $(editForm + ' input[name="default_service"]').prop('checked'),
 		"id": $(editForm + ' input[name="id"]').val(),

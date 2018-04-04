@@ -23,6 +23,15 @@
     </div>
 </div>
 </div>
+<div class="row">
+<div class="col-lg-6 col-md-6">
+	<div class="form-group service">
+		<label>Access Service</label>
+		<select class="select_service form-control select2" style="width:100%"></select>
+		<p class="help-block">select service</p>
+    </div>
+</div>
+</div>
 <div class="row default_service">
 	<div class="col-lg-12">
 		<div class="checkbox icheck">
