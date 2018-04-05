@@ -67,7 +67,8 @@
 	<div class="form_block text-center"> <h3>Loading...</h3> </div>
     <p class="login-box-msg">Sign in to get control</p>
 	<div class="alert alert-danger hidden"></div>
-    <form method="post">
+	<div class="alert alert-warning changePasswd" style="display:none">Hello <username><i></i></username>. Please change your password</div>
+    <form method="post" class="signin">
       <div class="form-group has-feedback input-group">
         <input type="text" class="form-control" placeholder="Login" id="username" required="true" value=''>
         <span class="input-group-addon"><i class="glyphicon glyphicon-user"></i></span>
@@ -90,6 +91,24 @@
         </div>
         <!-- /.col -->
       </div>
+    </form>
+	<!-- CHANGE PASSWORD FORM-->
+	<form method="post" class="changePasswd" style="display:none">
+		<div class="form-group has-feedback input-group">
+			<input type="password" class="form-control" placeholder="Password" id="change_password" required="true" value=''>
+			<span class="input-group-addon"><i class="glyphicon glyphicon-lock"></i></span>
+		</div>
+		<div class="form-group has-feedback input-group">
+			<input type="password" class="form-control" placeholder="Repeat Password" id="change_reppassword" required="true" value=''>
+			<span class="input-group-addon"><i class="glyphicon glyphicon-lock"></i></span>
+		</div>
+		<div class="row">
+			<!-- /.col -->
+			<div class="col-xs-12 text-center">
+				<button type="submit" class="btn btn-primary btn-flat" id="change_submit_btn">Change Password</button>
+			</div>
+			<!-- /.col -->
+		</div>
     </form>
   </div>
   <!-- /.login-box-body -->

@@ -17,6 +17,7 @@ class APIUsers extends Model
 		'firstname',
 		'surname',
 		'position',
-		'group'
+		'group',
+		'changePasswd',
 	];
 }

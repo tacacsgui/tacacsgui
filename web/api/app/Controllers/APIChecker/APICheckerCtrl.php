@@ -22,6 +22,7 @@ protected $tablesArr = array(
 		'surname' => ['string', ''],
 		'group' => ['integer', '0'],
 		'position' => ['string', ''],
+		'changePasswd' => ['integer', '1'],
 	],
 	'api_user_groups' =>
 	[

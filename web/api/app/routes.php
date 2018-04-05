@@ -6,6 +6,7 @@ $app->post('/', 'HomeController:postHome'); //->add($container->get('csrf'));
 ###Authentication Routes#############################
 $app->get('/auth/singin/', 'AuthController:getSingIn');
 $app->post('/auth/singin/', 'AuthController:postSingIn');
+$app->post('/auth/singin/changePassword/', 'AuthController:postChangePassword');
 $app->get('/auth/singout/', 'AuthController:getSingOut');
 #####################################################
 ###User Routes#######################################

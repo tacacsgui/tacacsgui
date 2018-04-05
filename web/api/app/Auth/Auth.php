@@ -49,6 +49,7 @@ class Auth
 		if (password_verify($password, $user->password)){
 			$_SESSION['uid'] = $user->id;
 			$_SESSION['uname'] = $user->username;
+			$_SESSION['changePasswd'] = $user->changePasswd;
 			$_SESSION['groupId'] = $user->group;
 			if ($_SESSION['groupId'] != 0 )
 			{	

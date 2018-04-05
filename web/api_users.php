@@ -38,6 +38,8 @@ require __DIR__ . '/templates/header.php';
 	<link rel="stylesheet" href="bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css">
 	<!-- Select2 -->
 	<link rel="stylesheet" href="bower_components/select2/dist/css/select2.min.css">
+	<!-- iCheck -->
+	<link rel="stylesheet" href="/plugins/iCheck/square/blue.css">
 </head>
 <!--ADDITIONAL CSS FILES END-->
 
@@ -100,7 +102,8 @@ require __DIR__ . '/templates/footer_end.php';
 	<script src="bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
 	<!-- Select2 -->
 	<script src="bower_components/select2/dist/js/select2.full.min.js"></script>
-	
+	<!-- iCheck -->
+	<script src="/plugins/iCheck/icheck.min.js"></script>
 	
 	<!-- main js User MAIN Functions -->
     <script src="dist/js/pages/api_users/main.js"></script>

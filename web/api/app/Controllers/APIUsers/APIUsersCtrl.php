@@ -56,7 +56,7 @@ class APIUsersCtrl extends Controller
 		$validation = $this->validator->validate($req, [
 			'email' => v::noWhitespace(),//->email(),//->notEmpty()->emailAvailable(),
 			'username' => v::noWhitespace()->notEmpty()->usernameAvailable(),
-			'password' => v::noWhitespace()->notContainChars()->notEmpty()->checkPassword($req->getParam('repPassword')),
+			'password' => v::noWhitespace()->notContainChars()->length(5, 24)->notEmpty()->checkPassword($req->getParam('repPassword')),
 			'repPassword' => v::noWhitespace()->notEmpty()->checkPassword($req->getParam('password')),
 		]);
 		
@@ -66,6 +66,8 @@ class APIUsersCtrl extends Controller
 			return $res -> withStatus(200) -> write(json_encode($data));
 		}
 		
+		$data['changePasswd'] = ($req->getParam('changePasswd') == 'true') ? 1 : 0;
+		
 		$user = APIUsers::create([
 			'username' => strtolower($req->getParam('username')),
 			'password' => password_hash($req->getParam('password'), PASSWORD_DEFAULT),
@@ -74,6 +76,7 @@ class APIUsersCtrl extends Controller
 			'surname' => $req->getParam('surname'),
 			'position' => $req->getParam('position'),
 			'group' => $req->getParam('group') ,
+			'changePasswd' => $data['changePasswd'] ,
 		]);
 		
 		$logEntry=array('action' => 'add', 'objectName' => $user->username, 'objectId' => $user->id, 'section' => 'api users', 'message' => 205);
@@ -146,13 +149,16 @@ class APIUsersCtrl extends Controller
 			return $res -> withStatus(200) -> write(json_encode($data));
 		}
 		
+		$data['changePasswd'] = ($req->getParam('changePasswd') == 'true') ? 1 : 0;
+		
 		$data['user_woPasswd']=APIUsers::where([['id','=',$req->getParam('id')],['username','=',$req->getParam('username')]])->
 			update([
 				'email' => $req->getParam('email'), 
 				'firstname' => $req->getParam('firstname'),
 				'surname' => $req->getParam('surname'),
 				'position' => $req->getParam('position'),
-				'group' => $req->getParam('group')
+				'group' => $req->getParam('group'),
+				'changePasswd' => $data['changePasswd'] ,
 			]);
 		$data['user_wPasswd']=0;
 		if ($req->getParam('password') !== ''){

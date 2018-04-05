@@ -40,6 +40,7 @@ class Controller
 				'username' => (isset($_SESSION['uname'])) ? $_SESSION['uname'] : 'empty',
 				'groupId' => (isset($_SESSION['groupId'])) ? $_SESSION['groupId'] : 'empty',
 				'groupRights' => (isset($_SESSION['groupRights'])) ? $_SESSION['groupRights'] : 'empty',
+				'changePasswd' => (isset($_SESSION['changePasswd'])) ? $_SESSION['changePasswd'] : 'empty',
 			],
 		);
 		$data['error'] = array(

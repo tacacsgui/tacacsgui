@@ -2,7 +2,7 @@
 
 namespace tgui\Controllers\Auth;
 
-//use tgui\Models\APIUsers;
+use tgui\Models\APIUsers;
 use tgui\Controllers\Controller;
 use Respect\Validation\Validator as v;
 
@@ -108,10 +108,59 @@ class AuthController extends Controller
 		///LOGGING//end//
 		
 		$data['authorised']=$this->auth->check();
+		$data['info']['user']['changePasswd'] = (isset($_SESSION['changePasswd'])) ? $_SESSION['changePasswd'] : 'empty';
 		//$data['error']='authorised'; //$this->message->getError(false, 6, 0);
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
 ########	SING IN	###############END###########
+################################################
+	#########	POST CHANGE PASSWORD	#########
+	public function postChangePassword($req,$res)
+	{	
+		//INITIAL CODE////START//
+		$data=array();
+		$data=$this->initialData([
+			'type' => 'post',
+			'object' => 'auth',
+			'action' => 'change password',
+		]);
+		#check error#
+		if ($_SESSION['error']['status']){
+			$data['error']=$_SESSION['error'];
+			return $res -> withStatus(401) -> write(json_encode($data));
+		}
+		//INITIAL CODE////END//
+		
+		$validation = $this->validator->validate($req, [
+			'password' => v::noWhitespace()->notContainChars()->length(5, 24)->notEmpty()->checkPassword($req->getParam('reppassword')),
+			//'reppassword' => v::noWhitespace()->notEmpty()->checkPassword($req->getParam('password')),
+		]);
+		
+		if ($validation->failed()){
+			$data['error']['status']=true;
+			$data['error']['validation']=$validation->error_messages;
+			return $res -> withStatus(200) -> write(json_encode($data));
+		}
+		
+		$user = APIUsers::select()->where([['id','=',$_SESSION['uid']]])->first();
+		
+		if ($user->changePasswd == 0){
+			$data['error']['status']=true;
+			$data['error']['message']='Operation not permitted!';
+			return $res -> withStatus(401) -> write(json_encode($data));
+		}
+		
+		$data['status']=APIUsers::where([['id','=',$_SESSION['uid']]])->
+			update([
+				'password' => password_hash($req->getParam('password'), PASSWORD_DEFAULT),
+				'changePasswd' => 0
+			]);
+		$_SESSION['changePasswd'] = 0;
+		$data['info']['user']['changePasswd'] = (isset($_SESSION['changePasswd'])) ? $_SESSION['changePasswd'] : 'empty';
+		
+		return $res -> withStatus(200) -> write(json_encode($data));
+	}
+########	CHANGE PASSWORD	###############END###########
 ################################################
 ########	SING OUT	###############START###########
 	#########	GET SING OUT	#########

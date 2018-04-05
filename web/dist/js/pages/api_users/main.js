@@ -2,6 +2,15 @@ checkConfiguration()
 getUserInfo()
 var addForm = 'form#addUserForm';
 var editForm = 'form#editUserForm';
+///////////////////////////////////////
+/////CHECKBOX ENABLING///
+var generalCheckboxParameters={
+	checkboxClass: 'icheckbox_square-blue',
+	radioClass: 'iradio_square-blue',
+	increaseArea: '20%' // optional
+}
+$('.checkbox.icheck').iCheck(generalCheckboxParameters);
+////////////////////////////////
 //////ACTIVATE SELECT2/////
 //////TEMPLATE FUNCTIONS/////
 function selectionTemplate(data){
@@ -125,14 +134,15 @@ function addUser(){
 	/////////ADD NEW USER///START//
 	var data = {
 		"action": "POST",
-		"username": $('form#addUserForm input[name="Username"]').val(),
-		"password": $('form#addUserForm input[name="Password"]').val(),
-		"repPassword": $('form#addUserForm input[name="RepPassword"]').val(),
-		"email": $('form#addUserForm input[name="Email"]').val(),
-		"firstname": $('form#addUserForm input[name="Firstname"]').val(),
-		"surname": $('form#addUserForm input[name="Surname"]').val(),
-		"position": $('form#addUserForm input[name="Position"]').val(),
+		"username": $(addForm + ' input[name="Username"]').val(),
+		"password": $(addForm + ' input[name="Password"]').val(),
+		"repPassword": $(addForm + ' input[name="RepPassword"]').val(),
+		"email": $(addForm + ' input[name="Email"]').val(),
+		"firstname": $(addForm + ' input[name="Firstname"]').val(),
+		"surname": $(addForm + ' input[name="Surname"]').val(),
+		"position": $(addForm + ' input[name="Position"]').val(),
 		"group": select_group_addDev.select2('data')[0].id,
+		"changePasswd": $(addForm + ' input[name="changePasswd"]').prop('checked'),
 		"test" : "none"
 		};	
 	$.ajax({
@@ -149,18 +159,19 @@ function addUser(){
 					//console.log(v)
 					if (!(data['error']['validation'][v] == null)){
 						//console.log($('form#addUserForm div.'+v))
-						$('form#addUserForm div.'+v).addClass('has-error')
+						$(addForm + ' div.'+v).addClass('has-error')
 						$('div.form-group.'+v+' p.help-block').hide()
 						var error_message='';
 						for (num in data['error']['validation'][v]){
 							error_message='<p class="text-red">'+data['error']['validation'][v][num]+'</p>';
 						}
 						$('div.form-group.'+v).append(error_message)
+						toastr["error"](data['error']['validation'][v][num])
 					}
 				}
 				return;
 			}
-			toastr["success"]("User "+ $('form#addUserForm input[name="Username"]').val() +" was added")
+			toastr["success"]("User "+ $(addForm + ' input[name="Username"]').val() +" was added")
 			$("#addUser").modal("hide");
 			clearAddUserModal();
 			setTimeout( function () {dataTable.ajax.reload()}, 2000 );
@@ -184,6 +195,8 @@ function clearAddUserModal(){
 	$('.form-group.has-error').removeClass('has-error');
 	$('p.text-red').remove();
 	$('p.help-block').show();
+	
+	$(addForm + ' input[name="changePasswd"]').iCheck('check')
 }
 ////ADD USER FUNCTION///END//
 ////////////////////////////////
@@ -213,6 +226,9 @@ function editUser(id,username){ //GET INFO ABOUT USER//
 			$('form#editUserForm input[name="Position"]').val(data['user']['position'])
 			$('form#editUserForm input[name="id"]').val(data['user']['id'])
 			
+			var changePasswd = (data.user.changePasswd == 0) ? 'uncheck' : 'check';
+			$(editForm + ' input[name="changePasswd"]').iCheck(changePasswd)
+			
 			preSelection(data['user']['group'], 'editModal');
 			
 			$('text.created_at').text('Created at '+data['user']['created_at']);
@@ -240,6 +256,7 @@ function submitUserChanges(){
 		"position": $('form#editUserForm input[name="Position"]').val(),
 		"id": $('form#editUserForm input[name="id"]').val(),
 		"group": select_group_editDev.select2('data')[0].id,
+		"changePasswd": $(editForm + ' input[name="changePasswd"]').prop('checked'),
 		"test" : "none"
 	};
 	$.ajax({

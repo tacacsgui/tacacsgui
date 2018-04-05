@@ -52,6 +52,18 @@
 			</div>
 			</div>
 			<div class="row">
+				<div class="col-lg-12">
+					<div class="cform-group changePasswd">
+					<div class="checkbox icheck">
+						<label>
+							<input type="checkbox" name="changePasswd" checked> Change password in next login
+						</label>
+						<p class="help-block">user must change password in next login</p>
+					</div>
+					</div>
+				</div>
+			</div>
+			<div class="row">
 			<div class="col-lg-6 col-md-6">
 				<div class="form-group firstname">
 					<label for="Firstname">Firstname</label>
