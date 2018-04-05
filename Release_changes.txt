@@ -1,4 +1,7 @@
 ##############################
+Version_0.9.4 20180405
+	*Some bugs fixed
+##############################
 Version_0.9.3 20180405
 	*Added function change password before loging for API users
 ##############################

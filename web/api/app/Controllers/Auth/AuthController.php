@@ -125,7 +125,7 @@ class AuthController extends Controller
 			'action' => 'change password',
 		]);
 		#check error#
-		if ($_SESSION['error']['status']){
+		if ($_SESSION['error']['status'] AND $data['info']['user']['changePasswd'] != 1){
 			$data['error']=$_SESSION['error'];
 			return $res -> withStatus(401) -> write(json_encode($data));
 		}

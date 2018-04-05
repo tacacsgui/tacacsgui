@@ -49,6 +49,10 @@ class Controller
 		#check user auth#
 		$data['authorised']=$this->auth->check();
 		
+		if ($data['info']['user']['changePasswd'] == 1){
+			$_SESSION['error']['status']=true;
+		}
+		
 		return $data;
 	}
 	////INITIAL DATA FUNCTION////END//

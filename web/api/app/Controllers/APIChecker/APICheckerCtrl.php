@@ -324,12 +324,12 @@ protected $tablesArr = array(
 				]);
 				break;
 			case 'tac_devices':
-				$this->db::table($tableName)->insert([
+				/*$this->db::table($tableName)->insert([
 					'name' => 'deviceExample',
 					'ipaddr' => '10.1.1.1',
 					'created_at' => date('Y-m-d H:i:s', time()),
 					'updated_at' => date('Y-m-d H:i:s', time())
-				]);
+				]); */
 				break;
 			case 'tac_user_groups':
 				$this->db::table($tableName)->insert([
@@ -339,7 +339,7 @@ protected $tablesArr = array(
 				]);
 				break;
 			case 'tac_device_groups':
-				$this->db::table($tableName)->insert([
+				/*$this->db::table($tableName)->insert([
 					'name' => 'defaultGroup',
 					'enable' => 'cisco123',
 					'key' => 'tguiKey',
@@ -350,7 +350,7 @@ protected $tablesArr = array(
 					'default_flag' => 1,
 					'created_at' => date('Y-m-d H:i:s', time()),
 					'updated_at' => date('Y-m-d H:i:s', time())
-				]);
+				]);*/
 				break;
 			case 'mavis_ldap':
 				$this->db::table($tableName)->insert([
