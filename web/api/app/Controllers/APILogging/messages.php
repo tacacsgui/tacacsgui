@@ -62,3 +62,4 @@ $MESSAGES[603]="Backup was restored successfully";
 ###################################
 $MESSAGES[701]="MAVIS LDAP module was changed";
 $MESSAGES[702]="MAVIS OTP module was changed";
+$MESSAGES[703]="MAVIS SMS module was changed";

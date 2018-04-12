@@ -23,6 +23,12 @@ case $1 in
 		ldapsearch)
 			#ldapsearch -x -LLL -h WIN-I8GVEDVHNBK.WIN2008.G33 -D "CN=Alexey AM,CN=Users,DC=win2008,DC=g33" -w cisco123 -b 'CN=Users,DC=win2008,DC=g33' -s sub '(&(objectclass=user)(sAMAccountName=user2))'
 		;;
+		
+		smpp-client)			
+			#php $ROOT_PATH/mavis-modules/sms/smpptest.php <type> <ipddr> <port> <debug> <login> <pass> <srcname> <number> <username>
+			php $ROOT_PATH/mavis-modules/sms/smpptest.php $3 $4 $5 $6 $7 $8 $9 ${10} ${11}
+		;;
+		
 		*)
 			echo 'Unexpected argument for check. Exit.'
 			exit 0

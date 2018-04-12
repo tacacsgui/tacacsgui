@@ -2,7 +2,7 @@
 
 #########################################
 ########TACACS GUI API###################
-		define('APIVER', '0.9.4');
+		define('APIVER', '0.9.6');
 		define('TACVER', '201710201114');
 #########################################
 #########################################
@@ -114,6 +114,9 @@ $container['MAVISLDAP'] = function($container) {
 };
 $container['MAVISOTP'] = function($container) {
 	return new \tgui\Controllers\MAVISOTP\MAVISOTPCtrl($container);
+};
+$container['MAVISSMS'] = function($container) {
+	return new \tgui\Controllers\MAVISSMS\MAVISSMSCtrl($container);
 };
 
 /*$container['csrf'] = function($container) {

@@ -10,6 +10,7 @@ use tgui\Models\TACGlobalConf;
 use tgui\Models\TACServices;
 use tgui\Models\TACACL;
 use tgui\Models\MAVISOTP;
+use tgui\Models\MAVISSMS;
 use tgui\Models\MAVISLDAP;
 use tgui\Controllers\Controller;
 
@@ -515,7 +516,7 @@ class TACConfigCtrl extends Controller
 			'user = '.$user['username'].' {');
 			///USER KEY///
 			$login = $this->crypto_flag[$user['login_flag']].' '.$user['login'];
-			if ($user['mavis_otp_enabled'] == 1) $login = 'mavis';
+			if ($user['mavis_otp_enabled'] == 1 OR $user['mavis_sms_enabled'] == 1) $login = 'mavis';
 			array_push($outputUsers[$user['id']], 
 			($html) ? '	'.$this->html_tags['param'][0] . "login" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] . $login . $this->html_tags['val'][1]
 			:
@@ -525,11 +526,6 @@ class TACConfigCtrl extends Controller
 			($html) ? '	'.$this->html_tags['param'][0] . "enable" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] . $this->crypto_flag[$user['enable_flag']].' '.$user['enable']. $this->html_tags['val'][1]
 			:
 			'	enable = '.$this->crypto_flag[$user['enable_flag']].' '.$user['enable']);
-			///USER MEMBER///
-			if ($user['group'] > 0)array_push($outputUsers[$user['id']], 
-			($html) ? '	'.$this->html_tags['param'][0] . "member" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] . $allUserGroups[$user['group']] . $this->html_tags['val'][1]
-			:
-			'	member = '.$allUserGroups[$user['group']]);
 			///USER ACL///
 			if ($user['acl'] > 0)array_push($outputUsers[$user['id']], 
 			($html) ? '	'.$this->html_tags['param'][0] . "acl" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] . $allACL[$user['acl']] . $this->html_tags['val'][1]
@@ -540,14 +536,20 @@ class TACConfigCtrl extends Controller
 			($html) ? '	'.$this->html_tags['param'][0] . "message" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] .'"'.$user['message'].'"'. $this->html_tags['val'][1]
 			:
 			'	message = "'.$user['message'].'"');
-			///USER DEFAULT SERVICE///
-			$default_service = ($user['default_service']) ? 'permit' : 'deny';
-			array_push($outputUsers[$user['id']], 
-			($html) ? '	' . $this->html_tags['param'][0] . "default service" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] .$default_service. $this->html_tags['val'][1] 
+			///USER MEMBER///
+			if ($user['group'] > 0)array_push($outputUsers[$user['id']], 
+			($html) ? '	'.$this->html_tags['param'][0] . "member" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] . $allUserGroups[$user['group']] . $this->html_tags['val'][1]
 			:
-			'	default service = '. $default_service);
+			'	member = '.$allUserGroups[$user['group']]);
 			///USER SERVICE SHELL///
 			if ($user['service'] == 0 AND  $user['group'] == 0) {
+				///USER DEFAULT SERVICE///
+				$default_service = ($user['default_service']) ? 'permit' : 'deny';
+				array_push($outputUsers[$user['id']], 
+				($html) ? '	' . $this->html_tags['param'][0] . "default service" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] .$default_service. $this->html_tags['val'][1] 
+				:
+				'	default service = '. $default_service);
+				///////////////////////////////////////////
 				if ($user['priv-lvl'] < 0) $user['priv-lvl'] = 15;
 				array_push($outputUsers[$user['id']], 
 				($html) ? '	' . $this->html_tags['param'][0] . "service" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['attr'][0] .'shell {'. $this->html_tags['attr'][1] 
@@ -567,6 +569,13 @@ class TACConfigCtrl extends Controller
 				'	}');
 			}
 			if ($user['service'] != 0) {
+				///USER DEFAULT SERVICE///
+				$default_service = ($user['default_service']) ? 'permit' : 'deny';
+				array_push($outputUsers[$user['id']], 
+				($html) ? '	' . $this->html_tags['param'][0] . "default service" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] .$default_service. $this->html_tags['val'][1] 
+				:
+				'	default service = '. $default_service);
+				///////////////////////////////////////////
 				$service = TACServices::select()->where([['id','=',$user['service']]])->first() ;
 				array_push($outputUsers[$user['id']], 
 				($html) ? '	' . $this->html_tags['comment'][0] . "### PREDEFINED SERVICE - " .$service->name. $this->html_tags['comment'][1] 
@@ -824,6 +833,45 @@ class TACConfigCtrl extends Controller
 	return $outputMavisOTP;
 	}	
 	
+	////MAVIS SMS////
+	private function tacMavisSMSGen($html)
+	{
+		$html = (empty($html)) ? false : true;
+		
+		$mavis_sms_settings = MAVISSMS::select('enabled')->first();
+		
+		if ($mavis_sms_settings->enabled == 0) return array('title_flag' => 0, 'name' =>"");
+		
+		$outputMavisSMS[0][0]=array('title_flag' => 1, 'name' =>
+		($html) ? $this->html_tags['comment'][0] . "####MAVIS SMS SETTINGS####" . $this->html_tags['comment'][1] 
+		:
+		"####MAVIS SMS SETTINGS####");
+		///EMPTY ARRAY///
+		$outputMavisSMS[1] = array();
+		///MAVIS SMS TITLE///
+		$outputMavisSMS[1][0] = array('title_flag' => 0, 'name' =>"");
+		///MAVIS SMS SETTINGS START///
+		array_push($outputMavisSMS[1], 
+		($html) ? $this->html_tags['attr'][0] . "mavis module" . $this->html_tags['attr'][1] . ' = ' . $this->html_tags['object'][0] . 'external' . $this->html_tags['object'][1] . ' {'
+		:
+		'mavis module = external {');
+		
+		///SMS PATH///
+		array_push($outputMavisSMS[1], 
+		($html) ? $this->html_tags['param'][0] . "	exec" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] . TAC_ROOT_PATH . '/mavis-modules/sms/module.php' . $this->html_tags['val'][1]
+		:
+		'	exec  = ' . TAC_ROOT_PATH . '/mavis-modules/sms/module.php');
+		
+		array_push($outputMavisSMS[1], 
+		($html) ? '} ' . $this->html_tags['comment'][0] . '#END OF MAVIS SMS SETTINGS' . $this->html_tags['comment'][1] 
+		:
+		'} #END OF MAVIS SMS SETTINGS');
+		
+		
+		
+	return $outputMavisSMS;
+	}	
+	
 	public function getConfigGen($req,$res)
 	{
 		//INITIAL CODE////START//
@@ -844,6 +892,7 @@ class TACConfigCtrl extends Controller
 		
 		$data['mavisGeneralConfig']=array_values($this->tacMavisGeneralGen($html));
 		$data['mavisOTPConfig']=array_values($this->tacMavisOTPGen($html));
+		$data['mavisSMSConfig']=array_values($this->tacMavisSMSGen($html));
 		$data['mavisLdapConfig']=array_values($this->tacMavisLdapGen($html));
 		$data['devicesConfig']=array_values($this->tacDevicesPartGen($html));
 		$data['deviceGroupsConfig']=array_values($this->tacDeviceGroupsPartGen($html));
@@ -967,6 +1016,7 @@ class TACConfigCtrl extends Controller
 	{
 		$tempMavisGeneralArray=$this->tacMavisGeneralGen(false);
 		$tempMavisOTPArray=$this->tacMavisOTPGen(false);
+		$tempMavisSMSArray=$this->tacMavisSMSGen(false);
 		$tempMavisLdapArray=$this->tacMavisLdapGen(false);
 		$tempDeviceArray=$this->tacDevicesPartGen(false);
 		$tempDeviceGroupArray=$this->tacDeviceGroupsPartGen(false);
@@ -997,6 +1047,10 @@ class TACConfigCtrl extends Controller
 		//MAVIS OTP CONFIGURATION//START//
 		$output.=$this->arrayParserToText($tempMavisOTPArray,$lineSeparator);
 		//MAVIS OTP CONFIGURATION//END//
+		////////////////////////////////////
+		//MAVIS SMS CONFIGURATION//START//
+		$output.=$this->arrayParserToText($tempMavisSMSArray,$lineSeparator);
+		//MAVIS SMS CONFIGURATION//END//
 		////////////////////////////////////
 		//MAVIS LDAP CONFIGURATION//START//
 		$output.=$this->arrayParserToText($tempMavisLdapArray,$lineSeparator);

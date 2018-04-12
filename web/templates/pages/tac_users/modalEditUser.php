@@ -15,6 +15,7 @@
               <li class=""><a href="#message_edit" data-toggle="tab" aria-expanded="false">Message</a></li>
               <li class=""><a href="#access_edit" data-toggle="tab" aria-expanded="false">Access Rules</a></li>
 			  <li class=""><a href="#otp_edit" data-toggle="tab" aria-expanded="false">OTP Auth</a></li>
+			  <li class=""><a href="#sms_edit" data-toggle="tab" aria-expanded="false">SMS Auth</a></li>
 			  <li class="pull-right"><a href="#manual_edit" data-toggle="tab" aria-expanded="false" class="text-muted"><i class="fa fa-gear"></i></a></li>
             </ul>
             <div class="tab-content">
@@ -34,6 +35,10 @@
 				<!-- /.tab-pane -->
 				<div class="tab-pane" id="otp_edit">
 					<?php include __DIR__ . '/tabOTPAuth.php';?> 
+				</div>
+				<!-- /.tab-pane -->
+				<div class="tab-pane" id="sms_edit">
+					<?php include __DIR__ . '/tabSMSAuth.php';?> 
 				</div>
 				<!-- /.tab-pane -->
 				<div class="tab-pane" id="manual_edit">

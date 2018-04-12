@@ -1,4 +1,8 @@
 ##############################
+Version_0.9.6 20180412
+	*Added SMS Authentification (SMPP client v.3.4)
+	*Some bugs fixed
+##############################
 Version_0.9.4 20180405
 	*Some bugs fixed
 ##############################

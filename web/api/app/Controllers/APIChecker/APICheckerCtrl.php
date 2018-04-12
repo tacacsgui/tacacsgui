@@ -216,6 +216,24 @@ protected $tablesArr = array(
 		'digits' => ['integer', '6'],
 		'digest' => ['string', 'sha1'],
 	],
+	'mavis_sms' =>
+	[
+		'enabled' => ['integer', '0'],
+		'ipaddr' => ['string', ''],
+		'port' => ['integer', '2775'],
+		'login' => ['string', ''],
+		'pass' => ['string', ''],
+		'srcname' => ['string', ''],
+	],
+	'mavis_otp_base' =>
+	[
+		'otp' => ['string', ''],
+		'username' => ['string', ''],
+		'type' => ['string', ''],
+		'destination' => ['string', ''],
+		'status' => ['string', ''],
+	],
+	
 );	
 
 	public function myFirstTable()
@@ -359,6 +377,12 @@ protected $tablesArr = array(
 				]);
 				break;
 			case 'mavis_otp':
+				$this->db::table($tableName)->insert([
+					'created_at' => date('Y-m-d H:i:s', time()),
+					'updated_at' => date('Y-m-d H:i:s', time())
+				]);
+				break;
+			case 'mavis_sms':
 				$this->db::table($tableName)->insert([
 					'created_at' => date('Y-m-d H:i:s', time()),
 					'updated_at' => date('Y-m-d H:i:s', time())

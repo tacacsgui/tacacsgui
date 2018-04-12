@@ -155,6 +155,7 @@ class TACUsersCtrl extends Controller
 			where([['id','=',$req->getParam('id')],['username','=',$req->getParam('username')]])->
 			first();
 		$data['otp_status']=$this->MAVISOTP->globalStatus();
+		$data['sms_status']=$this->MAVISSMS->globalStatus();
 		
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
@@ -201,6 +202,7 @@ class TACUsersCtrl extends Controller
 		
 		$data['default_service'] = ($req->getParam('default_service') === true OR $req->getParam('default_service') === 'true') ? 1 : 0;
 		$data['mavis_otp_enabled'] = ($req->getParam('mavis_otp_enabled') == 'true') ? 1 : 0;
+		$data['mavis_sms_enabled'] = ($req->getParam('mavis_sms_enabled') == 'true') ? 1 : 0;
 		
 		$data['enable']=$req->getParam('enable');
 		$data['login']=$req->getParam('login');
@@ -241,10 +243,12 @@ class TACUsersCtrl extends Controller
 				'acl' => intval($req->getParam('acl')),
 				'service' => $req->getParam('service'),
 				'mavis_otp_enabled' => $data['mavis_otp_enabled'],
+				'mavis_sms_enabled' => $data['mavis_sms_enabled'],
 				'mavis_otp_secret' => $req->getParam('mavis_otp_secret'),
 				'mavis_otp_digits' => $req->getParam('mavis_otp_digits'),
 				'mavis_otp_digest' => $req->getParam('mavis_otp_digest'),
 				'mavis_otp_period' => $req->getParam('mavis_otp_period'),
+				'mavis_sms_number' => $req->getParam('mavis_sms_number'),
 				'message' => $req->getParam('message'),
 				'manual' => $req->getParam('manual'),
 			]);

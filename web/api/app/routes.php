@@ -135,6 +135,10 @@ $app->post('/mavis/otp/generate/url', 'MAVISOTP:postOTPurl');
 $app->get('/mavis/otp/', 'MAVISOTP:getOTPParams');
 $app->post('/mavis/otp/', 'MAVISOTP:postOTPParams');
 $app->post('/mavis/otp/check/', 'MAVISOTP:postOTPCheck');
+$app->get('/mavis/sms/', 'MAVISSMS:getSMSParams');
+$app->post('/mavis/sms/', 'MAVISSMS:postSMSParams');
+$app->post('/mavis/sms/send/', 'MAVISSMS:postSMSSend');
+$app->post('/mavis/sms/check/', 'MAVISSMS:postSMSCheck');
 #####################################################
 
 ###APIChecker Routes#######################################

@@ -70,7 +70,7 @@ function getOTPParams()
 	});
 }
 getOTPParams()
-////GET LDAP PARAMETERS////END//
+////GET OTP PARAMETERS////END//
 /////////////////////
 /////////////////////
 $('button.submit').click(function(){

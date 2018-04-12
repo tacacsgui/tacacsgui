@@ -163,7 +163,7 @@ class MAVISOTPCtrl extends Controller
 		$data=array();
 		$data=$this->initialData([
 			'type' => 'post',
-			'object' => 'mavis ldap',
+			'object' => 'mavis otp',
 			'action' => 'check',
 		]);
 		#check error#

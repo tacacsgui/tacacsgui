@@ -288,7 +288,12 @@ function editUser(id,username){ //GET INFO ABOUT USER//
 
 			var otp_enabled = (data.user.mavis_otp_enabled == 0) ? 'uncheck' : 'check';
 			$('input[name="otp_enabled"]').iCheck(otp_enabled)
+			
+			var sms_enabled = (data.user.mavis_sms_enabled == 0) ? 'uncheck' : 'check';
+			$('input[name="sms_enabled"]').iCheck(sms_enabled)
 
+			$('form#editUserForm input.mavis_sms_number').val(data.user.mavis_sms_number)
+			
 			$('form#editUserForm input.period').val(data.user.mavis_otp_period)
 			$('form#editUserForm input.digits').val(data.user.mavis_otp_digits)
 			$('form#editUserForm select.digest').val(data.user.mavis_otp_digest)
@@ -319,6 +324,7 @@ function editUser(id,username){ //GET INFO ABOUT USER//
 			$('text.updated_at').text('Last update was at '+data['user']['updated_at']);
 			
 			$('div.global_status p b').text( (data.otp_status == 1)? 'Enabled' : 'Disabled' )
+			$('div.global_status_sms p b').text( (data.sms_status == 1)? 'Enabled' : 'Disabled' )
 			
 			getCurrentTime();
 			
@@ -352,6 +358,8 @@ function submitUserChanges(){
 		"mavis_otp_period": $('form#editUserForm input.period').val(),
 		"mavis_otp_digits": $('form#editUserForm input.digits').val(),
 		"mavis_otp_digest": $('form#editUserForm select.digest').val(),
+		"mavis_sms_enabled": $('form#editUserForm input[name="sms_enabled"]').prop('checked'),
+		"mavis_sms_number": $('form#editUserForm input.mavis_sms_number').val(),
 		"priv-lvl": $('form#editUserForm input[name="priv-lvl"]').val(),
 		"id": $('form#editUserForm input[name="id"]').val(),
 		"default_service": $('form#editUserForm input[name="default_service"]').prop('checked'),
