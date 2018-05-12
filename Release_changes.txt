@@ -1,4 +1,7 @@
 ##############################
+Version_0.9.7 20180513
+	*Fix bug accounting log for Accedian devices
+##############################
 Version_0.9.6 20180412
 	*Added SMS Authentification (SMPP client v.3.4)
 	*Some bugs fixed

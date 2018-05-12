@@ -64,6 +64,11 @@ class AccountingController extends Controller
 					$returnData['cmd']=$matches[1];
 					unset($logLineArray[$x]);
 					break;
+				case (preg_match('/(cmd-arg=)/', $logLineArray[$x])):
+					preg_match('/cmd-arg=(.*)/', $logLineArray[$x], $matches);
+					$returnData['cmd'].=' ' . $matches[1];
+					unset($logLineArray[$x]);
+					break;
 				case (preg_match('/(priv-lvl=\d+)/', $logLineArray[$x])):
 					preg_match('/priv-lvl=(\d+)/', $logLineArray[$x], $matches);
 					$returnData['priv-lvl']=$matches[1];
