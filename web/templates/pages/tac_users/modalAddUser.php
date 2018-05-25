@@ -1,3 +1,4 @@
+<?php $modalFormName_TacUser = 'add'; ?>
 <!-- Modal Add User -->
 <div id="addUser" class="modal fade" role="dialog">
 	<div class="modal-dialog modal-lg">
@@ -45,13 +46,13 @@
 				<!-- /.tab-pane -->
             </div>
             <!-- /.tab-content -->
-		</div>	
+		</div>
 		</form>
 		</div>
 		<div class="modal-footer">
 			<button type="button" class="btn btn-flat pull-left" data-dismiss="modal">Close</button>
 			<button type="button" class="btn btn-flat btn-success" onclick="addUser()">Add User</button>
-		</div>			
+		</div>
 	</div>
 	</div>
 </div>

@@ -4,7 +4,7 @@ getUserInfo()
 function generateOTPSecret(secret){
 
 		if (secret == '') secret = $('form#editUserForm input[name="otp_secret"]').val();
-		
+
 		var data = {
 		"action": "POST",
 		"id": $('form#editUserForm input[name="id"]').val(),
@@ -13,7 +13,7 @@ function generateOTPSecret(secret){
 		"digest": $('form#editUserForm select.digest').val(),
 		"period": $('form#editUserForm input.period').val(),
 		"test" : "none"
-		};	
+		};
 	$.ajax({
 		type: "POST",
 		dataType: "json",
@@ -43,7 +43,7 @@ function getCurrentTime(){
 		var data = {
 		"action": "GET",
 		"test" : "none"
-		};	
+		};
 	$.ajax({
 		type: "GET",
 		dataType: "json",
@@ -67,10 +67,10 @@ function disabledSwitcher(form,action)
 {
 	var button = $('form#'+form+'UserForm div.disabled button')
 	var input = $('form#'+form+'UserForm input[name="disabled"]')
-	
+	console.log(form);
 	if (action == undefined)
 	{
-		
+
 		if (input.val() == '0'){
 			button.removeClass('btn-success').addClass('btn-warning').text('Disabled');
 			input.val('1')
@@ -81,11 +81,11 @@ function disabledSwitcher(form,action)
 		}
 		return;
 	}
-	
+
 	if (action == 1){button.removeClass('btn-success').addClass('btn-warning').text('Disabled')}
 	if (action == 0){button.removeClass('btn-warning').addClass('btn-success').text('Enabled')}
 	input.val(action)
-	
+
 }
 /////DISABLED, ENABLED SWITCHER///END//
 ///////////////////////////////////////
@@ -162,6 +162,7 @@ function addUser(){
 	/////////ADD NEW DEVICE///START//
 	var data = {
 		"action": "POST",
+		"disabled": $('form#addUserForm input[name="disabled"]').val(),
 		"username": $('form#addUserForm input[name="username"]').val(),
 		"login": $('form#addUserForm input[name="login"]').val(),
 		"login_flag": $('form#addUserForm select[name="login_flag"]').val(),
@@ -177,7 +178,7 @@ function addUser(){
 		"message": $('form#addUserForm textarea[name="message"]').val(),
 		"manual": $('form#addUserForm textarea[name="manual"]').val(),
 		"test" : "none"
-		};	
+		};
 	$.ajax({
 		type: "POST",
 		dataType: "json",
@@ -215,7 +216,7 @@ function addUser(){
 			errorHere(data);
 		}
 	});
-	
+
 }
 ///////////////////////////
 function clearAddUserModal(){
@@ -226,25 +227,25 @@ function clearAddUserModal(){
 	$('form#addUserForm div.enable_encrypt_section').show()
 	$('form#addUserForm div.login_encrypt_section').show()
 	$('form#addUserForm input[name="login_encrypt"]').iCheck('check')
-	
+
 	$('form#addUserForm select[name="login_flag"] option[value="1').prop('selected', true)
-			
+
 	$('form#addUserForm select[name="enable_flag"] option[value="1"]').prop('selected', true)
-	
+
 	$('form#addUserForm input[name="enable_encrypt"]').iCheck('check')
 	$('form#addUserForm input[name="default_service"]').iCheck('check')
 	$('form#addUserForm textarea[name="message"]').val('')
 	$('form#addUserForm textarea[name="manual"]').val('')
 	$('.form-group.has-error').removeClass('has-error');
-	
+
 	disabledSwitcher('add','0')
-	
+
 	// Select first tab
-	$('form#addUserForm .nav-tabs-custom a:first').tab('show') 
-	
+	$('form#addUserForm .nav-tabs-custom a:first').tab('show')
+
 	$('p.text-red').remove();
 	$('p.help-block').show();
-	
+
 	//Unset Priv-Lvl//
 	$('input[name="priv-lvl"]').val(-1);
 }
@@ -273,61 +274,64 @@ function editUser(id,username){ //GET INFO ABOUT USER//
 			$('form#editUserForm input[name="enable"]').val(data['user']['enable'])
 			$('form#editUserForm input[name="id"]').val(data['user']['id'])
 			//$('form#editUserForm input[name="group"]').val(data['user']['group'])
-			
+
 			$('form#editUserForm input[name="priv-lvl"]').val(data['user']['priv-lvl'])
-			
+
 			var enable_encryption = (data['user']['enable_flag'] == 1 || data['user']['enable_flag'] == 2) ? 'uncheck' : 'check';
 			$('form#editUserForm input[name="enable_encrypt"]').iCheck(enable_encryption)
 			if (enable_encryption == 'check') {$('form#editUserForm div.enable_encrypt_section').hide()}
 			else ($('form#editUserForm div.enable_encrypt_section').show())
-			
+
 			var login_encryption = (data['user']['login_flag'] == 1 || data['user']['login_flag'] == 2) ? 'uncheck' : 'check';
 			$('form#editUserForm input[name="login_encrypt"]').iCheck(login_encryption)
 			if (login_encryption == 'check') {$('form#editUserForm div.login_encrypt_section').hide()}
 			else ($('form#editUserForm div.login_encrypt_section').show())
 
+			var nxos_support_enabled = (data.user.nxos_support == 0) ? 'uncheck' : 'check';
+			$('input[name="nxos_support"]').iCheck(nxos_support_enabled)
+
 			var otp_enabled = (data.user.mavis_otp_enabled == 0) ? 'uncheck' : 'check';
 			$('input[name="otp_enabled"]').iCheck(otp_enabled)
-			
+
 			var sms_enabled = (data.user.mavis_sms_enabled == 0) ? 'uncheck' : 'check';
 			$('input[name="sms_enabled"]').iCheck(sms_enabled)
 
 			$('form#editUserForm input.mavis_sms_number').val(data.user.mavis_sms_number)
-			
+
 			$('form#editUserForm input.period').val(data.user.mavis_otp_period)
 			$('form#editUserForm input.digits').val(data.user.mavis_otp_digits)
 			$('form#editUserForm select.digest').val(data.user.mavis_otp_digest)
-			
-			if (data.user.mavis_otp_secret==null || data.user.mavis_otp_secret == undefined || data.user.mavis_otp_secret == '') { generateOTPSecret(''); } 
+
+			if (data.user.mavis_otp_secret==null || data.user.mavis_otp_secret == undefined || data.user.mavis_otp_secret == '') { generateOTPSecret(''); }
 			else{
 				$('form#editUserForm input.otp_secret').val(data.user.mavis_otp_secret);
 				generateOTPSecret(data.user.mavis_otp_secret);
 			};
-			
+
 			$('form#editUserForm select[name="login_flag"] option[value="'+data['user']['login_flag']+'"]').prop('selected', true)
-			
+
 			$('form#editUserForm select[name="enable_flag"] option[value="'+data['user']['enable_flag']+'"]').prop('selected', true)
-			
+
 			disabledSwitcher('edit',data['user']['disabled'])
-			
+
 			preSelection(data['user']['group'], 'editModal');
 			preSelection_acl(data['user']['acl'], 'editModal');
 			preSelection_service(data['user']['service'], 'editModal');
-			
+
 			var default_service = (data['user']['default_service'] == 1) ? 'check' : 'uncheck';
 			$('form#editUserForm input[name="default_service"]').iCheck(default_service)
-			
+
 			$('form#editUserForm textarea[name="message"]').val(data['user']['message'])
 			$('form#editUserForm textarea[name="manual"]').val(data['user']['manual'])
-			
+
 			$('text.created_at').text('Created at '+data['user']['created_at']);
 			$('text.updated_at').text('Last update was at '+data['user']['updated_at']);
-			
+
 			$('div.global_status p b').text( (data.otp_status == 1)? 'Enabled' : 'Disabled' )
 			$('div.global_status_sms p b').text( (data.sms_status == 1)? 'Enabled' : 'Disabled' )
-			
+
 			getCurrentTime();
-			
+
 			$('#editUser').modal('show')
 		},
 		error: function(data) {
@@ -342,6 +346,7 @@ function submitUserChanges(){
 	$('p.help-block').show();
 		var data = {
 		"action": "POST",
+		"disabled": $('form#editUserForm input[name="disabled"]').val(),
 		"username": $('form#editUserForm input[name="username"]').val(),
 		"username_old": $('form#editUserForm input[name="username_old"]').val(),
 		"login": $('form#editUserForm input[name="login"]').val(),
@@ -350,6 +355,7 @@ function submitUserChanges(){
 		"enable": $('form#editUserForm input[name="enable"]').val(),
 		"enable_flag": $('form#editUserForm select[name="enable_flag"]').val(),
 		"enable_encrypt": $('form#editUserForm input[name="enable_encrypt"]').prop('checked'),
+		"nxos_support": ($('form#editUserForm input[name="nxos_support"]').prop('checked')) ? 1 : 0,
 		"group": select_group_edit.select2('data')[0].id,
 		"acl": select_acl_edit.select2('data')[0].id,
 		"service": select_service_edit.select2('data')[0].id,
@@ -420,13 +426,13 @@ function clearEditUserModal(){
 	$('form#editUserForm input[name="Surname"]').val('')
 	$('form#editUserForm textarea[name="manual"]').val('')
 	$('.form-group.has-error').removeClass('has-error');
-	
+
 	// Select first tab
-	$('form#editUserForm .nav-tabs-custom a:first').tab('show') 	
-	
+	$('form#editUserForm .nav-tabs-custom a:first').tab('show')
+
 	$('p.text-red').remove();
 	$('p.help-block').show();
-	
+
 	//Unset Priv-Lvl//
 	$('input[name="priv-lvl"]').val(-1);
 
@@ -444,7 +450,7 @@ function deleteUser(id,username){
 			"username": username,
 			"id": id,
 			"test" : "none"
-			};	
+			};
 		$.ajax({
 			type: "POST",
 			dataType: "json",
@@ -455,7 +461,7 @@ function deleteUser(id,username){
 				console.log(data);
 				if(data['deleteUser']!=1){toastr["error"]("Oops! Unknown error appeared :(");return;}
 				toastr["success"]("User "+ username +" was deleted")
-				changeApplyStatus(data['changeConfiguration'])				
+				changeApplyStatus(data['changeConfiguration'])
 				setTimeout( function () {dataTable.ajax.reload()}, 2000 );
 			},
 			error: function(data) {

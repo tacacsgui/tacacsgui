@@ -22,7 +22,7 @@ function getSMSParams()
 	var data = {
 		"action": "GET",
 		"test" : "none"
-		};	
+		};
 	$.ajax({
 		type: "GET",
 		dataType: "json",
@@ -60,7 +60,7 @@ $('button.submit').click(function(){
 		"pass" : $('input.pass').val() ,
 		"srcname" : $('input.srcname').val() ,
 		"test" : "none",
-		};	
+		};
 	$.ajax({
 		type: "POST",
 		dataType: "json",
@@ -86,25 +86,25 @@ $('button.submit').click(function(){
 })
 /////////////////////
 $('button.send_sms').click(function(){
-	
+
 	$('pre.sms-check-output').empty().append('Loading...'+"\n");
 	$('div.sms-check-alert').empty().hide();
-	
+
 	username = $('input.sms-send-username').val()
 	number = $('input.sms-send-number').val()
-	
+
 	errormessage = '';
-	
+
 	if (username == '' && number == ''){
 		errormessage += '<p>Please insert usename or phone number</p>';
 	}
-	
+
 	if (errormessage !== ''){
 		$('div.sms-check-alert').append(errormessage).show();
 		$('pre.sms-check-output').empty().append(errormessage);
 		return;
 	}
-	
+
 	var data = {
 		"action": "POST",
 		"ipaddr" : $('input.ipaddr').val() ,
@@ -115,7 +115,7 @@ $('button.send_sms').click(function(){
 		"username" : $('input.sms-send-username').val() ,
 		"number" : $('input.sms-send-number').val() ,
 		"test" : "none",
-		};	
+		};
 	$.ajax({
 		type: "POST",
 		dataType: "json",
@@ -131,6 +131,54 @@ $('button.send_sms').click(function(){
 		error: function(data) {
 			//console.log(data);
 			//errorHere(data);
+		}
+	});
+})
+
+$('button.sms-check').click(function(){
+	$('pre.sms-check-output').empty().append('Loading...'+"\n");
+	$('div.sms-check-alert').empty().hide();
+
+	username = $('input.otp-check-username').val()
+	password = $('input.otp-check-password').val()
+
+	errormessage = '';
+
+	if (username == ''){
+		errormessage += '<p>Where is username?!</p>';
+	}
+
+	if (password == ''){
+		errormessage += '<p>Where is password?!</p>';
+	}
+
+	if (errormessage !== ''){
+		$('div.sms-check-alert').append(errormessage).show();
+		$('pre.sms-check-output').empty().append(errormessage);
+		return;
+	}
+
+	var data = {
+		"action": "POST",
+		"username" : username,
+		"password" : password,
+		"test" : "none",
+		};
+	$.ajax({
+		type: "POST",
+		dataType: "json",
+		url: API_LINK+"mavis/otp/check/",
+		cache: false,
+		async: false,
+		data: data,
+		success: function(data) {
+			console.log(data);
+			$('pre.sms-check-output').empty();
+			$('pre.sms-check-output').append(data.ldap_check);
+		},
+		error: function(data) {
+			//console.log(data);
+			errorHere(data);
 		}
 	});
 })

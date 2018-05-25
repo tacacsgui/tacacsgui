@@ -7,11 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 class TACUsers extends Model
 {
 	protected $table = 'tac_users';
-	
+
 	protected $fillable = [
 		'username',
 		'login',
 		'login_flag',
+		'nxos_support',
 		'enable',
 		'enable_flag',
 		'group',

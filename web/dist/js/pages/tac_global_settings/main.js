@@ -1,5 +1,14 @@
 checkConfiguration()
 getUserInfo()
+///////////////////////////////////////
+/////CHECKBOX ENABLING///
+var generalCheckboxParameters={
+	checkboxClass: 'icheckbox_square-blue',
+	radioClass: 'iradio_square-blue',
+	increaseArea: '20%' // optional
+}
+$('.checkbox.icheck').iCheck(generalCheckboxParameters);
+////////////////////////////////
 /////////START STOP RELOAD STATUS DEAMON FUNCTION///////
 function deamonConfig(action)
 {
@@ -9,7 +18,7 @@ function deamonConfig(action)
 		"action": "POST",
 		"action": action,
 		"test" : "none"
-	};	
+	};
 	$.ajax({
 		type: "POST",
 		dataType: "json",
@@ -34,7 +43,7 @@ function getGlobalVariables()
 	var data = {
 		"action": "GET",
 		"test" : "none"
-	};	
+	};
 	$.ajax({
 		type: "GET",
 		dataType: "json",
@@ -45,17 +54,19 @@ function getGlobalVariables()
 			console.log(data);
 			$('lastupdate').text(data.global_variables.updated_at);
 			$('input[name="port"]').val(data.global_variables.port);
-			
+
 			$('input[name="max_attempts"]').val(data.global_variables.max_attempts);
 			$('input[name="backoff"]').val(data.global_variables.backoff);
-			
+
 			$('input[name="connection_timeout"]').val(data.global_variables.connection_timeout);
 			$('input[name="context_timeout"]').val(data.global_variables.context_timeout);
-			
+
 			$('input[name="authentication"]').val(data.global_variables.authentication);
 			$('input[name="authorization"]').val(data.global_variables.authorization);
 			$('input[name="accounting"]').val(data.global_variables.accounting);
-			
+
+			if (data.global_variables.nxos_support == 1) $('input[name="nxos_support"]').iCheck('check');
+
 			$('textarea[name="manual"]').val(data.global_variables.manual);
 		},
 		error: function(data) {
@@ -71,8 +82,8 @@ $('button.applySettings').click(function(){
 	$('.form-group.has-error').removeClass('has-error');
 	$('p.text-red').remove();
 	$('p.help-block').show();
-	
-	var port = $('input[name="port"]').val();	
+
+	var port = $('input[name="port"]').val();
 	var max_attempts = $('input[name="max_attempts"]').val();
 	var backoff = $('input[name="backoff"]').val();
 	var connection_timeout = $('input[name="connection_timeout"]').val();
@@ -80,8 +91,9 @@ $('button.applySettings').click(function(){
 	var authentication = $('input[name="authentication"]').val();
 	var authorization = $('input[name="authorization"]').val();
 	var accounting = $('input[name="accounting"]').val();
+	var nxos_support = ($('input[name="nxos_support"]').prop('checked')) ? 1 : 0;
 	var manual = $('textarea[name="manual"]').val();
-	
+
 	var data = {
 		"action": "POST",
 		"port": port,
@@ -92,9 +104,10 @@ $('button.applySettings').click(function(){
 		"authentication": authentication,
 		"authorization": authorization,
 		"accounting": accounting,
+		"nxos_support": nxos_support,
 		"manual": manual,
 		"test" : "none"
-	};	
+	};
 	$.ajax({
 		type: "POST",
 		dataType: "json",

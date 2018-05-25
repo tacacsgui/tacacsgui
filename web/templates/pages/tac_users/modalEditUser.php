@@ -1,3 +1,4 @@
+<?php $modalFormName_TacUser = 'edit'; ?>
 <!-- Modal Edit User -->
 <div id="editUser" class="modal fade" role="dialog">
 	<div class="modal-dialog modal-lg">
@@ -21,6 +22,20 @@
             <div class="tab-content">
 				<div class="tab-pane active" id="general_info_edit">
 					<?php include __DIR__ . '/tabGeneralInfo.php';?>
+					<hr>
+					<div class="row">
+					<div class="col-md-4 col-lg-4">
+						<div class="form-group">
+							<label>NX-OS Support</label>
+							<div class="checkbox icheck">
+								<label>
+									<input type="checkbox" name="nxos_support"> NX-OS Support
+								</label>
+							</div>
+							<p class="help-block">will be added additional parameter <i>pap</i></p>
+						</div>
+					</div>
+					</div>
 					<input type="hidden" value="" name="id"/>
 					<input type="hidden" value="" name="username_old"/>
 				</div>
@@ -34,11 +49,11 @@
 				</div>
 				<!-- /.tab-pane -->
 				<div class="tab-pane" id="otp_edit">
-					<?php include __DIR__ . '/tabOTPAuth.php';?> 
+					<?php include __DIR__ . '/tabOTPAuth.php';?>
 				</div>
 				<!-- /.tab-pane -->
 				<div class="tab-pane" id="sms_edit">
-					<?php include __DIR__ . '/tabSMSAuth.php';?> 
+					<?php include __DIR__ . '/tabSMSAuth.php';?>
 				</div>
 				<!-- /.tab-pane -->
 				<div class="tab-pane" id="manual_edit">
@@ -54,7 +69,7 @@
 		<div class="modal-footer">
 			<button type="button" class="btn btn-flat pull-left" data-dismiss="modal">Close</button>
 			<button type="button" class="btn btn-flat btn-success" onclick="submitUserChanges()">Edit User</button>
-		</div>			
+		</div>
 	</div>
 	</div>
 </div>

@@ -6,13 +6,13 @@ use tgui\Models\TACGlobalConf;
 
 class Controller
 {
-	protected $container; 
-	
+	protected $container;
+
 	public function __construct($container)
 	{
 		$this->container = $container;
 	}
-	
+
 	public function __get($property)
 	{
 		if($this->container->{$property})
@@ -45,14 +45,14 @@ class Controller
 		);
 		$data['error'] = array(
 				'status' => false,
-		); 
+		);
 		#check user auth#
 		$data['authorised']=$this->auth->check();
-		
+
 		if ($data['info']['user']['changePasswd'] == 1){
 			$_SESSION['error']['status']=true;
 		}
-		
+
 		return $data;
 	}
 	////INITIAL DATA FUNCTION////END//
@@ -69,6 +69,8 @@ class Controller
 	protected function checkAccess($value)
 	{
 		$rightsArray = array_reverse ( str_split( decbin($_SESSION['groupRights']) ) );
+		//Clear DEMO//
+		if ($value == 0 AND $rightsArray[0] == 1) return true;
 		//DEMO//
 		if ($rightsArray[0] == 1 AND count($rightsArray) == 1) return false;
 		//Administrator//

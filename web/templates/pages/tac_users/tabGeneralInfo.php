@@ -5,7 +5,7 @@
 					<div class="input-group">
 						<input type="text" class="form-control" name="username" placeholder="Enter User Name" autocomplete="off">
 						<div class="input-group-btn disabled">
-							<button type="button" class="btn btn-flat btn-success" onclick="disabledSwitcher('add')">Enabled</button>
+							<button type="button" class="btn btn-flat btn-success" onclick="disabledSwitcher('<?php echo $modalFormName_TacUser; ?>')">Enabled</button>
 							<input type="number" name="disabled" value="0" style="display:none;">
 						</div>
 					</div>
@@ -27,7 +27,7 @@
 						<input type="text" class="form-control" name="login" placeholder="Write Login Password" value="" autocomplete="off">
 					</div>
 				</div>
-				<div class="col-lg-6 col-md-6">	
+				<div class="col-lg-6 col-md-6">
 					<div class="form-group login_flag">
 						<label for="login_flag">Enable Encryption</label>
 						<select class="form-control" name="login_flag">
@@ -56,7 +56,7 @@
 						<input type="text" class="form-control" name="enable" placeholder="Write Enable Password" value="" autocomplete="off">
 					</div>
 				</div>
-				<div class="col-lg-6 col-md-6">	
+				<div class="col-lg-6 col-md-6">
 					<div class="form-group enable_flag">
 						<label for="enable_flag">Enable Encryption</label>
 						<select class="form-control" name="enable_flag">

@@ -10,14 +10,14 @@ $PAGE_TITLE = 'TacacsGUI';
 $PAGE_SUBTITLE = 'Tacacs Global Settings';
 $BREADCRUMB = array(
 	'Tacacs' => [
-		'name' => 'Tacacs', 
-		'href' => '', 
-		'icon' => 'fa fa-cogs', 
+		'name' => 'Tacacs',
+		'href' => '',
+		'icon' => 'fa fa-cogs',
 		'class' => ''  //last item should have active class!!
-	], 
+	],
 	'Global_Settings' => [
-		'name' => 'Global Settings', 
-		'href' => '', 
+		'name' => 'Global Settings',
+		'href' => '',
 		'icon' => 'fa fa-server', //leave empty if you won't put icon
 		'class' => 'active' //last item should have active class!!
 	]
@@ -34,12 +34,13 @@ $ACTIVE_SUBMENU_ID=410;
 require __DIR__ . '/templates/header.php';
 ?>
 <!--ADDITIONAL CSS FILES START-->
-
+<!-- iCheck -->
+<link rel="stylesheet" href="/plugins/iCheck/square/blue.css">
 <!--ADDITIONAL CSS FILES END-->
 
-<?php 
+<?php
 
-require __DIR__ . '/templates/body_start.php'; 
+require __DIR__ . '/templates/body_start.php';
 
 ?>
 <!--MAIN CONTENT START-->
@@ -171,6 +172,19 @@ require __DIR__ . '/templates/body_start.php';
 					</div>
 				</div>
 				</div>-->
+				<div class="row">
+				<div class="col-md-4 col-lg-4">
+					<div class="form-group">
+						<label>NX-OS Support by default</label>
+						<div class="checkbox icheck">
+							<label>
+							<input type="checkbox" name="nxos_support"> NX-OS Support by default
+							</label>
+						</div>
+						<p class="help-block">if checked every new user will have NX-OS support by default</p>
+					</div>
+				</div>
+				</div>
 				<hr>
 				<h3>Manual Configuration</h3>
 				<small class="text-red">be careful with those settings! by default it influences on log parser script!</small>
@@ -199,9 +213,9 @@ require __DIR__ . '/templates/body_start.php';
 
 <!--MAIN CONTENT END-->
 
-<?php 
+<?php
 
-require __DIR__ . '/templates/body_end.php'; 
+require __DIR__ . '/templates/body_end.php';
 
 ?>
 
@@ -212,7 +226,8 @@ require __DIR__ . '/templates/footer_end.php';
 
 ?>
 <!-- ADDITIONAL JS FILES START-->
-
+<!-- iCheck -->
+<script src="/plugins/iCheck/icheck.min.js"></script>
 	<!-- main js Device MAIN Functions -->
     <script src="dist/js/pages/tac_global_settings/main.js"></script>
 <!-- ADDITIONAL JS FILES END-->

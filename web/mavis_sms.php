@@ -10,17 +10,17 @@ $PAGE_TITLE = 'TacacsGUI';
 $PAGE_SUBTITLE = 'MAVIS SMS Auth';
 $BREADCRUMB = array(
 	'Home' => [
-		'name' => 'MAVIS', 
-		'href' => '', 
-		'icon' => 'fa fa-cog', 
+		'name' => 'MAVIS',
+		'href' => '',
+		'icon' => 'fa fa-cog',
 		'class' => ''  //last item should have active class!!
-	], 
+	],
 	'Tacacs' => [
-		'name' => 'SMS Auth', 
-		'href' => '', 
-		'icon' => 'fa fa-cog', 
+		'name' => 'SMS Auth',
+		'href' => '',
+		'icon' => 'fa fa-cog',
 		'class' => 'active'  //last item should have active class!!
-	], 
+	],
 );
 ///!!!!!////
 $ACTIVE_MENU_ID=900;
@@ -38,9 +38,9 @@ require __DIR__ . '/templates/header.php';
 	<link rel="stylesheet" href="/plugins/iCheck/square/blue.css">
 <!--ADDITIONAL CSS FILES END-->
 
-<?php 
+<?php
 
-require __DIR__ . '/templates/body_start.php'; 
+require __DIR__ . '/templates/body_start.php';
 
 ?>
 <!--MAIN CONTENT START-->
@@ -122,7 +122,7 @@ require __DIR__ . '/templates/body_start.php';
                 </div>
 			</div>
 		</div>
-		
+
 		</div>
 	</div>
 	<!-- /.box-body -->
@@ -169,7 +169,7 @@ require __DIR__ . '/templates/body_start.php';
 					<div class="action text-center"><button class="btn btn-flat btn-success send_sms">Send SMS</button></div>
 				</div>
 			</div>
-			
+
 			<div class="col-md-6">
 				<div class="box-body">
 					<div class="title text-center"><h4>Check OTP from SMS</h4></div>
@@ -183,32 +183,29 @@ require __DIR__ . '/templates/body_start.php';
 					<div class="col-md-12">
 						<div class="form-group">
 							<label>OTP Password</label>
-							<input type="text" class="form-control otp-check-password" placeholder="One Time Password"/>
+							<input type="text" class="form-control otp-check-password" placeholder="One-Time Password"/>
 							<p class="help-block">OTP from sms for that user</p>
 						</div>
 					</div>
-					<div class="action text-center"><button class="btn btn-flat btn-warning">Check Auth</button></div>
+					<div class="action text-center"><button class="btn btn-flat btn-warning sms-check">Check Auth</button></div>
 				</div>
 			</div>
 		</div>
 		<div class="row">
-			
+
 		</div>
 <pre class="sms-check-output">
 Info will appeared here
 </pre>
 	</div>
 	<!-- /.box-body -->
-	<div class="box-footer">
-		<button class="btn btn-warning btn-flat otp-check">Check connection</button>
-	</div>
 </div>
 
 <!--MAIN CONTENT END-->
 
-<?php 
+<?php
 
-require __DIR__ . '/templates/body_end.php'; 
+require __DIR__ . '/templates/body_end.php';
 
 ?>
 
@@ -221,7 +218,7 @@ require __DIR__ . '/templates/footer_end.php';
 <!-- ADDITIONAL JS FILES START-->
 	<!-- iCheck -->
 	<script src="/plugins/iCheck/icheck.min.js"></script>
-	
+
 	<!-- main js MAIN Functions -->
     <script src="dist/js/pages/mavis_sms/main.js"></script>
 

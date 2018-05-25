@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class TACGlobalConf extends Model
 {
 	protected $table = 'tac_global_settings';
-	
+
 	protected $fillable = [
 		'port',
 		'accounting',
@@ -18,6 +18,7 @@ class TACGlobalConf extends Model
 		'max_attempts',
 		'backoff',
 		'manual',
+		'nxos_support',
 		'changeFlag',
 	];
 }

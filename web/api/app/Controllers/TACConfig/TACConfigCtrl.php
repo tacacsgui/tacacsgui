@@ -41,16 +41,16 @@ class TACConfigCtrl extends Controller
 			1 => '</tac_object>'
 		],
 	);
-	
+
 	private function tacSpawndPartGen($html)
 	{
 		$html = (empty($html)) ? false : true;
-		
+
 		$globalVariables=TACGlobalConf::select('port')->first();
 		$outputSpawnd = array();
 		$outputSpawnd[0][0]=array('title_flag' => 1, 'name' => (
-		($html) ? $this->html_tags['comment'][0] . "####SPAWND####" . $this->html_tags['comment'][1] 
-		: 
+		($html) ? $this->html_tags['comment'][0] . "####SPAWND####" . $this->html_tags['comment'][1]
+		:
 		"####SPAWND####" ));
 			///EMPTY ARRAY///
 			$outputSpawnd[1] = array();
@@ -60,22 +60,22 @@ class TACConfigCtrl extends Controller
 			array_push($outputSpawnd[1], (
 				($html) ? $this->html_tags['attr'][0] . 'listen' . $this->html_tags['attr'][1] .
 				' = { '.$this->html_tags['param'][0].'port'.$this->html_tags['param'][1].
-				' = '.$this->html_tags['val'][0].$globalVariables['port'].$this->html_tags['val'][1].' }' 
-				: 
+				' = '.$this->html_tags['val'][0].$globalVariables['port'].$this->html_tags['val'][1].' }'
+				:
 				'listen = { port = '.$globalVariables['port'].' }'));
 
-		
+
 		return $outputSpawnd;
 	}
-	
+
 	private function tacGeneralPartGen($html)
 	{
 		$html = (empty($html)) ? false : true;
-		
+
 		$globalVariables=TACGlobalConf::select()->first();
 		$outputGeneralConf = array();
 		$outputGeneralConf[0][0]=array('title_flag' => 1, 'name' => (
-			($html) ? $this->html_tags['comment'][0] . "####GENERAL CONFIGURATION####" . $this->html_tags['comment'][1] 
+			($html) ? $this->html_tags['comment'][0] . "####GENERAL CONFIGURATION####" . $this->html_tags['comment'][1]
 			:
 			"####GENERAL CONFIGURATION####"));
 			///EMPTY ARRAY///
@@ -83,9 +83,9 @@ class TACConfigCtrl extends Controller
 			///GENERAL CONF TITLE///
 			$outputGeneralConf[1][0] = array('title_flag' => 0, 'name' =>"");
 			///////////MANUAL CONFIGURATION/////////////
-			if ($globalVariables['manual']!="") 
+			if ($globalVariables['manual']!="")
 			{
-				array_push($outputGeneralConf[1], ($html) ? $this->html_tags['comment'][0] . '###MANUAL CONFIGURATION START###' . $this->html_tags['comment'][1] 
+				array_push($outputGeneralConf[1], ($html) ? $this->html_tags['comment'][0] . '###MANUAL CONFIGURATION START###' . $this->html_tags['comment'][1]
 				:
 				'###MANUAL CONFIGURATION START###');
 				$arrayManual=explode(PHP_EOL, $globalVariables['manual']);
@@ -93,56 +93,56 @@ class TACConfigCtrl extends Controller
 				{
 					array_push($outputGeneralConf[1], $item);
 				}
-				array_push($outputGeneralConf[1], ($html) ? $this->html_tags['comment'][0] . '###MANUAL CONFIGURATION END###' . $this->html_tags['comment'][1] 
+				array_push($outputGeneralConf[1], ($html) ? $this->html_tags['comment'][0] . '###MANUAL CONFIGURATION END###' . $this->html_tags['comment'][1]
 				:
 				'###MANUAL CONFIGURATION END###');
 			}
 			///ACCOUNTING LOG///
-			array_push($outputGeneralConf[1], 
+			array_push($outputGeneralConf[1],
 			($html) ? $this->html_tags['attr'][0] . 'accounting log' . $this->html_tags['attr'][1] . ' = ' .$this->html_tags['val'][0] . $globalVariables['accounting'] . $this->html_tags['val'][1]
 			:
 			'accounting log = '.$globalVariables['accounting']);
 			///AUTHENTICATION LOG///
-			array_push($outputGeneralConf[1], 
+			array_push($outputGeneralConf[1],
 			($html) ? $this->html_tags['attr'][0] . 'authentication log' . $this->html_tags['attr'][1] . ' = ' .$this->html_tags['val'][0] . $globalVariables['authentication'] . $this->html_tags['val'][1]
 			:
 			'authentication log = '.$globalVariables['authentication']);
 			///AUTHORIZATION LOG///
-			array_push($outputGeneralConf[1], 
+			array_push($outputGeneralConf[1],
 			($html) ? $this->html_tags['attr'][0] . 'authorization log' . $this->html_tags['attr'][1] . ' = ' .$this->html_tags['val'][0] . $globalVariables['authorization'] . $this->html_tags['val'][1]
 			:
 			'authorization log = '.$globalVariables['authorization']);
 			///CONNECTION TIMEOUT TO NAS///
-			array_push($outputGeneralConf[1], 
+			array_push($outputGeneralConf[1],
 			($html) ? $this->html_tags['attr'][0] . 'connection timeout' . $this->html_tags['attr'][1] . ' = ' .$this->html_tags['val'][0] . $globalVariables['connection_timeout'] . $this->html_tags['val'][1]
 			:
 			'connection timeout = '.$globalVariables['connection_timeout']);
 			///Context TIMEOUT///
-			array_push($outputGeneralConf[1], 
+			array_push($outputGeneralConf[1],
 			($html) ? $this->html_tags['attr'][0] . 'context timeout' . $this->html_tags['attr'][1] . ' = ' .$this->html_tags['val'][0] . $globalVariables['context_timeout'] . $this->html_tags['val'][1]
 			:
 			'context timeout = '.$globalVariables['context_timeout']);
 			///Max attempt///
-			array_push($outputGeneralConf[1], 
+			array_push($outputGeneralConf[1],
 			($html) ? $this->html_tags['attr'][0] . 'password max-attempts' . $this->html_tags['attr'][1] . ' = ' .$this->html_tags['val'][0] . $globalVariables['max_attempts'] . $this->html_tags['val'][1]
 			:
 			'password max-attempts = '.$globalVariables['max_attempts']);
 			///Backoff settings///
-			array_push($outputGeneralConf[1], 
+			array_push($outputGeneralConf[1],
 			($html) ? $this->html_tags['attr'][0] . 'password backoff' . $this->html_tags['attr'][1] . ' = ' .$this->html_tags['val'][0] . $globalVariables['backoff'] . $this->html_tags['val'][1]
 			:
 			'password backoff = '.$globalVariables['backoff']);
-		
+
 		return $outputGeneralConf;
 	}
-	
+
 	private function tacDevicesPartGen($html)
 	{
 		$html = (empty($html)) ? false : true;
-		
+
 		$allDevices = TACDevices::select()->get()->toArray();
 		$outputDevices[0][0]=array('title_flag' => 1, 'name' =>
-		($html) ? $this->html_tags['comment'][0] . "####LIST OF HOSTS####" . $this->html_tags['comment'][1] 
+		($html) ? $this->html_tags['comment'][0] . "####LIST OF HOSTS####" . $this->html_tags['comment'][1]
 		:
 		"####LIST OF HOSTS####");
 		$allGroupsArrTemp=TACDeviceGrps::select('id','name')->get()->toArray();
@@ -159,49 +159,49 @@ class TACConfigCtrl extends Controller
 			///DEVICE TITLE///
 			$outputDevices[$host['id']][0] = array('title_flag' => 0, 'name' =>"");
 			///DEVICE NAME///
-			array_push($outputDevices[$host['id']], 
+			array_push($outputDevices[$host['id']],
 			($html) ? $this->html_tags['attr'][0] . "host" . $this->html_tags['attr'][1] . ' = ' . $this->html_tags['object'][0] .$host['name']. $this->html_tags['object'][1] . ' {'
 			:
 			'host = '.$host['name'].' {');
 			///DEVICE IP ADDRESS///
-			array_push($outputDevices[$host['id']], 
+			array_push($outputDevices[$host['id']],
 			($html) ? $this->html_tags['param'][0] . "address" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] .$host['ipaddr'].'/'.$host['prefix']. $this->html_tags['val'][1]
 			:
 			'address = "'.$host['ipaddr'].'/'.$host['prefix'].'"');
 			///DEVICE KEY///
-			if ($host['key']!='')array_push($outputDevices[$host['id']], 
+			if ($host['key']!='')array_push($outputDevices[$host['id']],
 			($html) ? $this->html_tags['param'][0] . "key" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] .$host['key']. $this->html_tags['val'][1]
 			:
 			'key = '.$host['key']);
 			///DEVICE ENABLE///
-			if ($host['enable']!='')array_push($outputDevices[$host['id']], 
+			if ($host['enable']!='')array_push($outputDevices[$host['id']],
 			($html) ? $this->html_tags['param'][0] . "enable" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] .$this->crypto_flag[$host['enable_flag']].' '.$host['enable']. $this->html_tags['val'][1]
 			:
 			'enable = '.$this->crypto_flag[$host['enable_flag']].' '.$host['enable']);
 			///DEVICE BANNER WELCOME///
-			if ($host['banner_welcome']!='')array_push($outputDevices[$host['id']],  
+			if ($host['banner_welcome']!='')array_push($outputDevices[$host['id']],
 			($html) ? $this->html_tags['param'][0] . "welcome banner" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] .'"'.$host['banner_welcome'].'"'. $this->html_tags['val'][1]
 			:
 			'welcome banner = "'.$host['banner_welcome'].'"');
 			///DEVICE BANNER MOTD///
-			if ($host['banner_motd']!='')array_push($outputDevices[$host['id']], 
+			if ($host['banner_motd']!='')array_push($outputDevices[$host['id']],
 			($html) ? $this->html_tags['param'][0] . "motd banner" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] .'"'.$host['banner_motd'].'"'. $this->html_tags['val'][1]
 			:
 			'motd banner = "'.$host['banner_motd'].'"');
 			///DEVICE BANNER FAILED AUTH///
-			if ($host['banner_failed']!='')array_push($outputDevices[$host['id']], 
+			if ($host['banner_failed']!='')array_push($outputDevices[$host['id']],
 			($html) ? $this->html_tags['param'][0] . "failed authentication banner" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] .'"'.$host['banner_failed'].'"'. $this->html_tags['val'][1]
 			:
 			'failed authentication banner = "'.$host['banner_failed'].'"');
 			///DEVICE GROUP///
-			array_push($outputDevices[$host['id']], 
+			array_push($outputDevices[$host['id']],
 			($html) ? $this->html_tags['param'][0] . "template" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] .$allGroupsArr[$host['group']]. $this->html_tags['val'][1]
 			:
 			'template = '.$allGroupsArr[$host['group']].'');
-			///DEVICE MANUAL CONFIGURATION/// 
-			if ($host['manual']!="") 
+			///DEVICE MANUAL CONFIGURATION///
+			if ($host['manual']!="")
 			{
-				array_push($outputDevices[$host['id']], ($html) ? $this->html_tags['comment'][0] . '###MANUAL CONFIGURATION START###' . $this->html_tags['comment'][1] 
+				array_push($outputDevices[$host['id']], ($html) ? $this->html_tags['comment'][0] . '###MANUAL CONFIGURATION START###' . $this->html_tags['comment'][1]
 				:
 				'###MANUAL CONFIGURATION START###');
 				$arrayManual=explode(PHP_EOL, $host['manual']);
@@ -209,28 +209,28 @@ class TACConfigCtrl extends Controller
 				{
 					array_push($outputDevices[$host['id']], $item);
 				}
-				array_push($outputDevices[$host['id']], ($html) ? $this->html_tags['comment'][0] . '###MANUAL CONFIGURATION END###' . $this->html_tags['comment'][1] 
+				array_push($outputDevices[$host['id']], ($html) ? $this->html_tags['comment'][0] . '###MANUAL CONFIGURATION END###' . $this->html_tags['comment'][1]
 				:
 				'###MANUAL CONFIGURATION END###');
 			}
-			
-			array_push($outputDevices[$host['id']], 
-			($html) ? '} ' . $this->html_tags['comment'][0] . '#END OF '.$host['name'] . $this->html_tags['comment'][1] 
+
+			array_push($outputDevices[$host['id']],
+			($html) ? '} ' . $this->html_tags['comment'][0] . '#END OF '.$host['name'] . $this->html_tags['comment'][1]
 			:
 			'} #END OF '.$host['name']);
-			
+
 		}
-		
+
 		return $outputDevices;
 	}
-	
+
 	private function tacDeviceGroupsPartGen($html)
 	{
 		$html = (empty($html)) ? false : true;
-		
+
 		$allDeviceGroups = TACDeviceGrps::select()->get()->toArray();
 		$outputDeviceGroups[0][0]=array('title_flag' => 1, 'name' =>
-		($html) ? $this->html_tags['comment'][0] . "####LIST OF DEVICE GROUPS####" . $this->html_tags['comment'][1] 
+		($html) ? $this->html_tags['comment'][0] . "####LIST OF DEVICE GROUPS####" . $this->html_tags['comment'][1]
 		:
 		"####LIST OF DEVICE GROUPS####");
 		foreach($allDeviceGroups as $group)
@@ -240,39 +240,39 @@ class TACConfigCtrl extends Controller
 			///GROUP TITLE///
 			$outputDeviceGroups[$group['id']][0] = array('title_flag' => 0, 'name' =>"");
 			///GROUP NAME///
-			array_push($outputDeviceGroups[$group['id']], 
+			array_push($outputDeviceGroups[$group['id']],
 			($html) ? $this->html_tags['attr'][0] . "host" . $this->html_tags['attr'][1] . ' = ' . $this->html_tags['object'][0] .$group['name']. $this->html_tags['object'][1] . ' {'
 			:
 			'host = '.$group['name'].' {');
 			///GROUP KEY///
-			if ($group['key']!='')array_push($outputDeviceGroups[$group['id']], 
+			if ($group['key']!='')array_push($outputDeviceGroups[$group['id']],
 			($html) ? $this->html_tags['param'][0] . "key" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] .$group['key']. $this->html_tags['val'][1]
 			:
 			'key = '.$group['key']);
 			///GROUP ENABLE///
-			if ($group['enable']!='')array_push($outputDeviceGroups[$group['id']], 
+			if ($group['enable']!='')array_push($outputDeviceGroups[$group['id']],
 			($html) ? $this->html_tags['param'][0] . "enable" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] . $this->crypto_flag[$group['enable_flag']] . ' ' . $group['enable']. $this->html_tags['val'][1]
 			:
 			'enable = '.$this->crypto_flag[$group['enable_flag']].' '.$group['enable']);
 			///GROUP BANNER WELCOME///
-			if ($group['banner_welcome']!='')array_push($outputDeviceGroups[$group['id']], 
+			if ($group['banner_welcome']!='')array_push($outputDeviceGroups[$group['id']],
 			($html) ? $this->html_tags['param'][0] . "welcome banner" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] .'"'.$group['banner_welcome'].'"'. $this->html_tags['val'][1]
 			:
 			'welcome banner = "'.$group['banner_welcome'].'"');
 			///GROUP BANNER MOTD///
-			if ($group['banner_motd']!='')array_push($outputDeviceGroups[$group['id']], 
+			if ($group['banner_motd']!='')array_push($outputDeviceGroups[$group['id']],
 			($html) ? $this->html_tags['param'][0] . "motd banner" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] .'"'.$group['banner_motd'].'"'. $this->html_tags['val'][1]
 			:
 			'motd banner = "'.$group['banner_motd'].'"');
 			///GROUP BANNER FAILED AUTH///
-			if ($group['banner_failed']!='')array_push($outputDeviceGroups[$group['id']], 
+			if ($group['banner_failed']!='')array_push($outputDeviceGroups[$group['id']],
 			($html) ? $this->html_tags['param'][0] . "failed authentication banner" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] .'"'.$group['banner_failed'].'"'. $this->html_tags['val'][1]
 			:
 			'failed authentication banner = "'.$group['banner_failed'].'"');
-			///GROUP MANUAL CONFIGURATION/// 
-			if ($group['manual']!="") 
+			///GROUP MANUAL CONFIGURATION///
+			if ($group['manual']!="")
 			{
-				array_push($outputDeviceGroups[$group['id']], ($html) ? $this->html_tags['comment'][0] . '###MANUAL CONFIGURATION START###' . $this->html_tags['comment'][1] 
+				array_push($outputDeviceGroups[$group['id']], ($html) ? $this->html_tags['comment'][0] . '###MANUAL CONFIGURATION START###' . $this->html_tags['comment'][1]
 				:
 				'###MANUAL CONFIGURATION START###');
 				$arrayManual=explode(PHP_EOL, $group['manual']);
@@ -280,28 +280,28 @@ class TACConfigCtrl extends Controller
 				{
 					array_push($outputDeviceGroups[$group['id']], $item);
 				}
-				array_push($outputDeviceGroups[$group['id']], ($html) ? $this->html_tags['comment'][0] . '###MANUAL CONFIGURATION END###' . $this->html_tags['comment'][1] 
+				array_push($outputDeviceGroups[$group['id']], ($html) ? $this->html_tags['comment'][0] . '###MANUAL CONFIGURATION END###' . $this->html_tags['comment'][1]
 				:
 				'###MANUAL CONFIGURATION END###');
 			}
-			array_push($outputDeviceGroups[$group['id']], 
-			($html) ? '} ' . $this->html_tags['comment'][0] . '#END OF '.$group['name'] . $this->html_tags['comment'][1] 
+			array_push($outputDeviceGroups[$group['id']],
+			($html) ? '} ' . $this->html_tags['comment'][0] . '#END OF '.$group['name'] . $this->html_tags['comment'][1]
 			:
 			'} #END OF '.$group['name']);
-			
+
 		}
-		
+
 		return $outputDeviceGroups;
 	}
-	
+
 	private function tacACLPartGen($html)
 	{
 		$html = (empty($html)) ? false : true;
-		
+
 		$allACL = TACACL::select()->where([['line_number','=',0]])->get()->toArray();
-		
+
 		$outputACL[0][0]=array('title_flag' => 1, 'name' =>
-		($html) ? $this->html_tags['comment'][0] . "####LIST OF ACL####" . $this->html_tags['comment'][1] 
+		($html) ? $this->html_tags['comment'][0] . "####LIST OF ACL####" . $this->html_tags['comment'][1]
 		:
 		"####LIST OF ACL####");
 		foreach($allACL as $acl)
@@ -310,55 +310,55 @@ class TACConfigCtrl extends Controller
 			$outputACL[$acl['id']] = array();
 			///ACL TITLE///
 			$outputACL[$acl['id']][0] = array('title_flag' => 0, 'name' =>"");
-			array_push($outputACL[$acl['id']], ($html) ? $this->html_tags['comment'][0] . '###ACL '.$acl['name'].' START###' . $this->html_tags['comment'][1] 
+			array_push($outputACL[$acl['id']], ($html) ? $this->html_tags['comment'][0] . '###ACL '.$acl['name'].' START###' . $this->html_tags['comment'][1]
 			:
 			'###ACL '.$acl['name'].' START###');
 			$allAces = TACACL::select()->where([['line_number','<>',0],['name','=',$acl['name']]])->get()->toArray();
 			foreach($allAces as $ace)
 			{
 				///ACL NAME///
-				array_push($outputACL[$acl['id']], 
+				array_push($outputACL[$acl['id']],
 				($html) ? $this->html_tags['attr'][0] . "acl" . $this->html_tags['attr'][1] . ' = ' . $this->html_tags['object'][0] .$acl['name']. $this->html_tags['object'][1] . ' '.$ace['action'].' {'
 				:
 				'acl = '.$acl['name'].' '.$ace['action'].' {');
-				
+
 				///ACL NAC///
-				array_push($outputACL[$acl['id']], 
+				array_push($outputACL[$acl['id']],
 				($html) ? $this->html_tags['param'][0] . "	nac" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] .$ace['nac']. $this->html_tags['val'][1]
 				:
 				'nac = '.$ace['nac']);
-				
+
 				///ACL NAS///
-				array_push($outputACL[$acl['id']], 
+				array_push($outputACL[$acl['id']],
 				($html) ? $this->html_tags['param'][0] . "	nas" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] .$ace['nas']. $this->html_tags['val'][1]
 				:
 				'nas = '.$ace['nas']);
 				///ACL NAS///
 				array_push($outputACL[$acl['id']], '}');
 			}
-			array_push($outputACL[$acl['id']], ($html) ? $this->html_tags['comment'][0] . '###ACL '.$acl['name'].' END###' . $this->html_tags['comment'][1] 
+			array_push($outputACL[$acl['id']], ($html) ? $this->html_tags['comment'][0] . '###ACL '.$acl['name'].' END###' . $this->html_tags['comment'][1]
 			:
 			'###ACL '.$acl['name'].' END###');
 		}
-		
+
 		return $outputACL;
 	}
-	
+
 	private function tacUserGroupsPartGen($html)
 	{
 		$html = (empty($html)) ? false : true;
-		
+
 		$allUserGroups = TACUserGrps::select()->get()->toArray();
 		$allACL_array = TACACL::select('id','name')->where([['line_number','=',0]])->get()->toArray();
-		
+
 		$allACL = array();
 		foreach($allACL_array as $acl)
 		{
 			$allACL[$acl['id']]=$acl['name'];
 		}
-		
+
 		$outputUserGroup[0][0]=array('title_flag' => 1, 'name' =>
-		($html) ? $this->html_tags['comment'][0] . "####LIST OF USER GROUPS####" . $this->html_tags['comment'][1] 
+		($html) ? $this->html_tags['comment'][0] . "####LIST OF USER GROUPS####" . $this->html_tags['comment'][1]
 		:
 		"####LIST OF USER GROUPS####");
 		foreach($allUserGroups as $group)
@@ -369,94 +369,94 @@ class TACConfigCtrl extends Controller
 			///USER GROUP TITLE///
 			$outputUserGroup[$group['id']][0] = array('title_flag' => 0, 'name' =>"");
 			///USER GROUP NAME///
-			array_push($outputUserGroup[$group['id']], 
+			array_push($outputUserGroup[$group['id']],
 			($html) ? $this->html_tags['attr'][0] . "group" . $this->html_tags['attr'][1] . ' = ' . $this->html_tags['object'][0] .$group['name']. $this->html_tags['object'][1] . ' {'
 			:
 			'group = '.$group['name'].' {');
 			///USER GROUP ENABLE///
-			if ($group['enable'] != '')array_push($outputUserGroup[$group['id']], 
+			if ($group['enable'] != '')array_push($outputUserGroup[$group['id']],
 			($html) ? $this->html_tags['param'][0] . "enable" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] . $this->crypto_flag[$group['enable_flag']] .' '. $group['enable']. $this->html_tags['val'][1]
 			:
 			'enable = '.$this->crypto_flag[$group['enable_flag']].' '.$group['enable']);
 			///USER GROUP MESSAGE///
-			if ($group['message']!='')array_push($outputUserGroup[$group['id']], 
+			if ($group['message']!='')array_push($outputUserGroup[$group['id']],
 			($html) ? $this->html_tags['param'][0] . "message" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] .'"'.$group['message'].'"'. $this->html_tags['val'][1]
 			:
 			'message = "'.$group['message'].'"');
 			///USER GROUP ACL///
 			if ($group['acl'] > 0) {
-				array_push($outputUserGroup[$group['id']], 
+				array_push($outputUserGroup[$group['id']],
 				($html) ? '	' .$this->html_tags['param'][0] . "acl" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] . $allACL[$group['acl']] . $this->html_tags['val'][1]
 				:
 				'	acl = '. $allACL[$group['acl']]);
 			}
 			///USER GROUP DEFAULT SERVICE///
 			$default_service = ($group['default_service']) ? 'permit' : 'deny';
-			array_push($outputUserGroup[$group['id']], 
-			($html) ? '	' . $this->html_tags['param'][0] . "default service" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] .$default_service. $this->html_tags['val'][1] 
+			array_push($outputUserGroup[$group['id']],
+			($html) ? '	' . $this->html_tags['param'][0] . "default service" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] .$default_service. $this->html_tags['val'][1]
 			:
 			'	default service = '. $default_service);
 			///USER GROUP SERVICE SHELL///
 			if ($group['service'] != 0) {
 				$service = TACServices::select()->where([['id','=',$group['service']]])->first() ;
-				array_push($outputUserGroup[$group['id']], 
-				($html) ? '	' . $this->html_tags['comment'][0] . "### PREDEFINED SERVICE - " .$service->name. $this->html_tags['comment'][1] 
+				array_push($outputUserGroup[$group['id']],
+				($html) ? '	' . $this->html_tags['comment'][0] . "### PREDEFINED SERVICE - " .$service->name. $this->html_tags['comment'][1]
 				:
 				'	### PREDEFINED SERVICE - '.$service->name );
-				
+
 				if ($service->manual_conf_only == 0){
-					array_push($outputUserGroup[$group['id']], 
-					($html) ? '	' . $this->html_tags['param'][0] . "service" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['attr'][0] .'shell {'. $this->html_tags['attr'][1] 
+					array_push($outputUserGroup[$group['id']],
+					($html) ? '	' . $this->html_tags['param'][0] . "service" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['attr'][0] .'shell {'. $this->html_tags['attr'][1]
 					:
 					'	service = shell {');
-					array_push($outputUserGroup[$group['id']], 
-					($html) ? '		' . $this->html_tags['param'][0] . "default cmd" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] .'permit'. $this->html_tags['val'][1] 
+					array_push($outputUserGroup[$group['id']],
+					($html) ? '		' . $this->html_tags['param'][0] . "default cmd" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] .'permit'. $this->html_tags['val'][1]
 					:
 					'		default cmd = permit');
-					
+
 					$service_privilege = ($service['priv-lvl'] < 0) ? 15 : $service['priv-lvl'];
 					//$service_privilege = 123;
-					array_push($outputUserGroup[$group['id']], 
-					($html) ? '		' . $this->html_tags['param'][0] . "set priv-lvl" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] .$service_privilege. $this->html_tags['val'][1] 
+					array_push($outputUserGroup[$group['id']],
+					($html) ? '		' . $this->html_tags['param'][0] . "set priv-lvl" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] .$service_privilege. $this->html_tags['val'][1]
 					:
 					'		set priv-lvl = '.$service_privilege);
 				}
-				
+
 				$arrayService=explode(PHP_EOL, $service->manual);
 				foreach($arrayService as $item)
 				{
 					array_push($outputUserGroup[$group['id']], '		'.$item);
 				}
-				
+
 				if ($service->manual_conf_only == 0){
-					array_push($outputUserGroup[$group['id']], 
-					($html) ? '	' . $this->html_tags['attr'][0] .'}'. $this->html_tags['attr'][1] 
+					array_push($outputUserGroup[$group['id']],
+					($html) ? '	' . $this->html_tags['attr'][0] .'}'. $this->html_tags['attr'][1]
 					:
 					'	}');
 				}
-				
+
 			} else {
-				array_push($outputUserGroup[$group['id']], 
-				($html) ? '	' . $this->html_tags['param'][0] . "service" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['attr'][0] .'shell {'. $this->html_tags['attr'][1] 
+				array_push($outputUserGroup[$group['id']],
+				($html) ? '	' . $this->html_tags['param'][0] . "service" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['attr'][0] .'shell {'. $this->html_tags['attr'][1]
 				:
 				'	service = shell {');
-				array_push($outputUserGroup[$group['id']], 
-				($html) ? '		' . $this->html_tags['param'][0] . "default cmd" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] .'permit'. $this->html_tags['val'][1] 
+				array_push($outputUserGroup[$group['id']],
+				($html) ? '		' . $this->html_tags['param'][0] . "default cmd" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] .'permit'. $this->html_tags['val'][1]
 				:
 				'		default cmd = permit');
-				array_push($outputUserGroup[$group['id']], 
-				($html) ? '		' . $this->html_tags['param'][0] . "set priv-lvl" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] .$group['priv-lvl']. $this->html_tags['val'][1] 
+				array_push($outputUserGroup[$group['id']],
+				($html) ? '		' . $this->html_tags['param'][0] . "set priv-lvl" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] .$group['priv-lvl']. $this->html_tags['val'][1]
 				:
 				'		set priv-lvl = '.$group['priv-lvl']);
-				array_push($outputUserGroup[$group['id']], 
-				($html) ? '	' . $this->html_tags['attr'][0] .'}'. $this->html_tags['attr'][1] 
+				array_push($outputUserGroup[$group['id']],
+				($html) ? '	' . $this->html_tags['attr'][0] .'}'. $this->html_tags['attr'][1]
 				:
 				'	}');
 			}
-			///USER GROUP MANUAL CONFIGURATION/// 
-			if ($group['manual']!="") 
+			///USER GROUP MANUAL CONFIGURATION///
+			if ($group['manual']!="")
 			{
-				array_push($outputUserGroup[$group['id']], ($html) ? $this->html_tags['comment'][0] . '###MANUAL CONFIGURATION START###' . $this->html_tags['comment'][1] 
+				array_push($outputUserGroup[$group['id']], ($html) ? $this->html_tags['comment'][0] . '###MANUAL CONFIGURATION START###' . $this->html_tags['comment'][1]
 				:
 				'###MANUAL CONFIGURATION START###');
 				$arrayManual=explode(PHP_EOL, $group['manual']);
@@ -464,27 +464,27 @@ class TACConfigCtrl extends Controller
 				{
 					array_push($outputUserGroup[$group['id']], $item);
 				}
-				array_push($outputUserGroup[$group['id']], ($html) ? $this->html_tags['comment'][0] . '###MANUAL CONFIGURATION END###' . $this->html_tags['comment'][1] 
+				array_push($outputUserGroup[$group['id']], ($html) ? $this->html_tags['comment'][0] . '###MANUAL CONFIGURATION END###' . $this->html_tags['comment'][1]
 				:
 				'###MANUAL CONFIGURATION END###');
 			}
-			
-			array_push($outputUserGroup[$group['id']], 
-			($html) ? '} ' . $this->html_tags['comment'][0] . '#END OF '.$group['name'] . $this->html_tags['comment'][1] 
+
+			array_push($outputUserGroup[$group['id']],
+			($html) ? '} ' . $this->html_tags['comment'][0] . '#END OF '.$group['name'] . $this->html_tags['comment'][1]
 			:
 			'} #END OF '.$group['name']);
-			
+
 		}
-		
+
 		return $outputUserGroup;
 	}
-	
+
 	private function tacUsersPartGen($html)
 	{
 		$html = (empty($html)) ? false : true;
-		
+
 		$allUsers = TACUsers::select()->get()->toArray();
-		
+
 		$allACL_array = TACACL::select('id','name')->where([['line_number','=',0]])->get()->toArray();
 		$allUserGroups_array = TACUserGrps::select('id','name')->get()->toArray();
 		$allACL = array();
@@ -493,51 +493,57 @@ class TACConfigCtrl extends Controller
 		{
 			$allACL[$acl['id']]=$acl['name'];
 		}
-		
+
 		foreach($allUserGroups_array as $ugrp)
 		{
 			$allUserGroups[$ugrp['id']]=$ugrp['name'];
 		}
-		
+
 		$outputUsers[0][0]=array('title_flag' => 1, 'name' =>
-		($html) ? $this->html_tags['comment'][0] . "####LIST OF USERS####" . $this->html_tags['comment'][1] 
+		($html) ? $this->html_tags['comment'][0] . "####LIST OF USERS####" . $this->html_tags['comment'][1]
 		:
 		"####LIST OF USERS####");
 		foreach($allUsers as $user)
 		{
+			if ($user['disabled'] == 1) continue;
 			///EMPTY ARRAY///
 			$outputUsers[$user['id']] = array();
 			///USER TITLE///
 			$outputUsers[$user['id']][0] = array('title_flag' => 0, 'name' =>"");
 			///USER NAME///
-			array_push($outputUsers[$user['id']], 
+			array_push($outputUsers[$user['id']],
 			($html) ? $this->html_tags['attr'][0] . "user" . $this->html_tags['attr'][1] . ' = ' . $this->html_tags['object'][0] .$user['username']. $this->html_tags['object'][1] . ' {'
 			:
 			'user = '.$user['username'].' {');
 			///USER KEY///
 			$login = $this->crypto_flag[$user['login_flag']].' '.$user['login'];
 			if ($user['mavis_otp_enabled'] == 1 OR $user['mavis_sms_enabled'] == 1) $login = 'mavis';
-			array_push($outputUsers[$user['id']], 
+			array_push($outputUsers[$user['id']],
 			($html) ? '	'.$this->html_tags['param'][0] . "login" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] . $login . $this->html_tags['val'][1]
 			:
 			'	login = '. $login);
+			///USER PAP///
+			if ($user['nxos_support'] == 1) array_push($outputUsers[$user['id']],
+			($html) ? '	'.$this->html_tags['param'][0] . "pap" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] . $login . $this->html_tags['val'][1]
+			:
+			'	pap = '. $login);
 			///USER ENABLE///
-			if ($user['enable']!='')array_push($outputUsers[$user['id']], 
+			if ($user['enable']!='')array_push($outputUsers[$user['id']],
 			($html) ? '	'.$this->html_tags['param'][0] . "enable" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] . $this->crypto_flag[$user['enable_flag']].' '.$user['enable']. $this->html_tags['val'][1]
 			:
 			'	enable = '.$this->crypto_flag[$user['enable_flag']].' '.$user['enable']);
 			///USER ACL///
-			if ($user['acl'] > 0)array_push($outputUsers[$user['id']], 
+			if ($user['acl'] > 0)array_push($outputUsers[$user['id']],
 			($html) ? '	'.$this->html_tags['param'][0] . "acl" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] . $allACL[$user['acl']] . $this->html_tags['val'][1]
 			:
 			'	acl = '. $allACL[$user['acl']]);
 			///USER MESSAGE///
-			if ($user['message']!='')array_push($outputUsers[$user['id']], 
+			if ($user['message']!='')array_push($outputUsers[$user['id']],
 			($html) ? '	'.$this->html_tags['param'][0] . "message" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] .'"'.$user['message'].'"'. $this->html_tags['val'][1]
 			:
 			'	message = "'.$user['message'].'"');
 			///USER MEMBER///
-			if ($user['group'] > 0)array_push($outputUsers[$user['id']], 
+			if ($user['group'] > 0)array_push($outputUsers[$user['id']],
 			($html) ? '	'.$this->html_tags['param'][0] . "member" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] . $allUserGroups[$user['group']] . $this->html_tags['val'][1]
 			:
 			'	member = '.$allUserGroups[$user['group']]);
@@ -545,85 +551,85 @@ class TACConfigCtrl extends Controller
 			if ($user['service'] == 0 AND  $user['group'] == 0) {
 				///USER DEFAULT SERVICE///
 				$default_service = ($user['default_service']) ? 'permit' : 'deny';
-				array_push($outputUsers[$user['id']], 
-				($html) ? '	' . $this->html_tags['param'][0] . "default service" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] .$default_service. $this->html_tags['val'][1] 
+				array_push($outputUsers[$user['id']],
+				($html) ? '	' . $this->html_tags['param'][0] . "default service" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] .$default_service. $this->html_tags['val'][1]
 				:
 				'	default service = '. $default_service);
 				///////////////////////////////////////////
 				if ($user['priv-lvl'] < 0) $user['priv-lvl'] = 15;
-				array_push($outputUsers[$user['id']], 
-				($html) ? '	' . $this->html_tags['param'][0] . "service" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['attr'][0] .'shell {'. $this->html_tags['attr'][1] 
+				array_push($outputUsers[$user['id']],
+				($html) ? '	' . $this->html_tags['param'][0] . "service" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['attr'][0] .'shell {'. $this->html_tags['attr'][1]
 				:
 				'	service = shell {');
-				array_push($outputUsers[$user['id']], 
-				($html) ? '		' . $this->html_tags['param'][0] . "default cmd" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] .'permit'. $this->html_tags['val'][1] 
+				array_push($outputUsers[$user['id']],
+				($html) ? '		' . $this->html_tags['param'][0] . "default cmd" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] .'permit'. $this->html_tags['val'][1]
 				:
 				'		default cmd = permit');
-				array_push($outputUsers[$user['id']], 
-				($html) ? '		' . $this->html_tags['param'][0] . "set priv-lvl" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] .$user['priv-lvl']. $this->html_tags['val'][1] 
+				array_push($outputUsers[$user['id']],
+				($html) ? '		' . $this->html_tags['param'][0] . "set priv-lvl" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] .$user['priv-lvl']. $this->html_tags['val'][1]
 				:
 				'		set priv-lvl = '.$user['priv-lvl']);
-				array_push($outputUsers[$user['id']], 
-				($html) ? '	' . $this->html_tags['attr'][0] .'}'. $this->html_tags['attr'][1] 
+				array_push($outputUsers[$user['id']],
+				($html) ? '	' . $this->html_tags['attr'][0] .'}'. $this->html_tags['attr'][1]
 				:
 				'	}');
 			}
 			if ($user['service'] != 0) {
 				///USER DEFAULT SERVICE///
 				$default_service = ($user['default_service']) ? 'permit' : 'deny';
-				array_push($outputUsers[$user['id']], 
-				($html) ? '	' . $this->html_tags['param'][0] . "default service" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] .$default_service. $this->html_tags['val'][1] 
+				array_push($outputUsers[$user['id']],
+				($html) ? '	' . $this->html_tags['param'][0] . "default service" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] .$default_service. $this->html_tags['val'][1]
 				:
 				'	default service = '. $default_service);
 				///////////////////////////////////////////
 				$service = TACServices::select()->where([['id','=',$user['service']]])->first() ;
-				array_push($outputUsers[$user['id']], 
-				($html) ? '	' . $this->html_tags['comment'][0] . "### PREDEFINED SERVICE - " .$service->name. $this->html_tags['comment'][1] 
+				array_push($outputUsers[$user['id']],
+				($html) ? '	' . $this->html_tags['comment'][0] . "### PREDEFINED SERVICE - " .$service->name. $this->html_tags['comment'][1]
 				:
 				'	### PREDEFINED SERVICE - '.$service->name );
-				
+
 				if ($service->manual_conf_only == 0){
-					array_push($outputUsers[$user['id']], 
-					($html) ? '	' . $this->html_tags['param'][0] . "service" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['attr'][0] .'shell {'. $this->html_tags['attr'][1] 
+					array_push($outputUsers[$user['id']],
+					($html) ? '	' . $this->html_tags['param'][0] . "service" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['attr'][0] .'shell {'. $this->html_tags['attr'][1]
 					:
 					'	service = shell {');
-					array_push($outputUsers[$user['id']], 
-					($html) ? '		' . $this->html_tags['param'][0] . "default cmd" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] .'permit'. $this->html_tags['val'][1] 
+					array_push($outputUsers[$user['id']],
+					($html) ? '		' . $this->html_tags['param'][0] . "default cmd" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] .'permit'. $this->html_tags['val'][1]
 					:
 					'		default cmd = permit');
-					
+
 					$service_privilege = ($service['priv-lvl'] < 0) ? 15 : $service['priv-lvl'];
 					//$service_privilege = 123;
-					array_push($outputUsers[$user['id']], 
-					($html) ? '		' . $this->html_tags['param'][0] . "set priv-lvl" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] .$service_privilege. $this->html_tags['val'][1] 
+					array_push($outputUsers[$user['id']],
+					($html) ? '		' . $this->html_tags['param'][0] . "set priv-lvl" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] .$service_privilege. $this->html_tags['val'][1]
 					:
 					'		set priv-lvl = '.$service_privilege);
 				}
-				
+
 				$arrayService=explode(PHP_EOL, $service->manual);
 				foreach($arrayService as $item)
 				{
 					array_push($outputUsers[$user['id']], '		'.$item);
 				}
-				
+
 				if ($service->manual_conf_only == 0){
-					array_push($outputUsers[$user['id']], 
-					($html) ? '	' . $this->html_tags['attr'][0] .'}'. $this->html_tags['attr'][1] 
+					array_push($outputUsers[$user['id']],
+					($html) ? '	' . $this->html_tags['attr'][0] .'}'. $this->html_tags['attr'][1]
 					:
 					'	}');
 				}
-				
+
 			}
 			elseif($user['group'] != 0){
-				array_push($outputUsers[$user['id']], 
-				($html) ? '	' . $this->html_tags['comment'][0] . "### GET SERVICES FROM GROUP" . $this->html_tags['comment'][1] 
+				array_push($outputUsers[$user['id']],
+				($html) ? '	' . $this->html_tags['comment'][0] . "### GET SERVICES FROM GROUP" . $this->html_tags['comment'][1]
 				:
 				'	### GET SERVICES FROM GROUP');
 			}
-			///USER MANUAL CONFIGURATION/// 
-			if ($user['manual']!="") 
+			///USER MANUAL CONFIGURATION///
+			if ($user['manual']!="")
 			{
-				array_push($outputUsers[$user['id']], ($html) ? $this->html_tags['comment'][0] . '###MANUAL CONFIGURATION START###' . $this->html_tags['comment'][1] 
+				array_push($outputUsers[$user['id']], ($html) ? $this->html_tags['comment'][0] . '###MANUAL CONFIGURATION START###' . $this->html_tags['comment'][1]
 				:
 				'###MANUAL CONFIGURATION START###');
 				$arrayManual=explode(PHP_EOL, $user['manual']);
@@ -631,33 +637,33 @@ class TACConfigCtrl extends Controller
 				{
 					array_push($outputUsers[$user['id']], $item);
 				}
-				array_push($outputUsers[$user['id']], ($html) ? $this->html_tags['comment'][0] . '###MANUAL CONFIGURATION END###' . $this->html_tags['comment'][1] 
+				array_push($outputUsers[$user['id']], ($html) ? $this->html_tags['comment'][0] . '###MANUAL CONFIGURATION END###' . $this->html_tags['comment'][1]
 				:
 				'###MANUAL CONFIGURATION END###');
 			}
-			
-			array_push($outputUsers[$user['id']], 
-			($html) ? '} ' . $this->html_tags['comment'][0] . '#END OF '.$user['username'] . $this->html_tags['comment'][1] 
+
+			array_push($outputUsers[$user['id']],
+			($html) ? '} ' . $this->html_tags['comment'][0] . '#END OF '.$user['username'] . $this->html_tags['comment'][1]
 			:
 			'} #END OF '.$user['username']);
-			
+
 		}
-		
+
 		return $outputUsers;
 	}
-	
+
 	private function tacMavisLdapGen($html)
 	{
 		$html = (empty($html)) ? false : true;
-		
+
 		$mavis_ldap_settings = MAVISLDAP::select()->first();
-		
+
 		if ($mavis_ldap_settings->enabled == 0) return array('title_flag' => 0, 'name' =>"");
-		
+
 		$id = $mavis_ldap_settings->id;
-		
+
 		$outputMavisLdap[0][0]=array('title_flag' => 1, 'name' =>
-		($html) ? $this->html_tags['comment'][0] . "####MAVIS LDAP MODULE####" . $this->html_tags['comment'][1] 
+		($html) ? $this->html_tags['comment'][0] . "####MAVIS LDAP MODULE####" . $this->html_tags['comment'][1]
 		:
 		"####MAVIS LDAP MODULE####");
 		///EMPTY ARRAY///
@@ -665,86 +671,86 @@ class TACConfigCtrl extends Controller
 		///MAVIS LDAP TITLE///
 		$outputMavisLdap[$id][0] = array('title_flag' => 0, 'name' =>"");
 		///MAVIS LDAP SETTINGS START///
-		array_push($outputMavisLdap[$id], 
+		array_push($outputMavisLdap[$id],
 		($html) ? $this->html_tags['attr'][0] . "mavis module" . $this->html_tags['attr'][1] . ' = ' . $this->html_tags['object'][0] . 'external' . $this->html_tags['object'][1] . ' {'
 		:
 		'mavis module = external {');
 		///LDAP SERVER TYPE///
 
-		array_push($outputMavisLdap[$id], 
+		array_push($outputMavisLdap[$id],
 		($html) ? $this->html_tags['param'][0] . "	setenv LDAP_SERVER_TYPE" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] .'"'. $mavis_ldap_settings['type'] .'"'. $this->html_tags['val'][1]
 		:
 		'	setenv LDAP_SERVER_TYPE = "'. $mavis_ldap_settings['type'].'"');
 		///LDAP HOSTS///
-		array_push($outputMavisLdap[$id], 
+		array_push($outputMavisLdap[$id],
 		($html) ? $this->html_tags['param'][0] . "	setenv LDAP_HOSTS" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] .'"'. $mavis_ldap_settings['hosts'] .'"'. $this->html_tags['val'][1]
 		:
 		'	setenv LDAP_HOSTS = "'. $mavis_ldap_settings['hosts'].'"');
 		///LDAP SCOPE///
-		array_push($outputMavisLdap[$id], 
+		array_push($outputMavisLdap[$id],
 		($html) ? $this->html_tags['param'][0] . "	setenv LDAP_SCOPE" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] . $mavis_ldap_settings['scope'] . $this->html_tags['val'][1]
 		:
 		'	setenv LDAP_SCOPE = '. $mavis_ldap_settings['scope']);
 		///LDAP BASE///
-		array_push($outputMavisLdap[$id], 
+		array_push($outputMavisLdap[$id],
 		($html) ? $this->html_tags['param'][0] . "	setenv LDAP_BASE" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] .'"'. $mavis_ldap_settings['base'] .'"'. $this->html_tags['val'][1]
 		:
 		'	setenv LDAP_BASE = "'. $mavis_ldap_settings['base'].'"');
 		///LDAP FILTER///
-		array_push($outputMavisLdap[$id], 
+		array_push($outputMavisLdap[$id],
 		($html) ? $this->html_tags['param'][0] . "	setenv LDAP_FILTER" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] .'"'. $mavis_ldap_settings['filter'] .'"'. $this->html_tags['val'][1]
 		:
 		'	setenv LDAP_FILTER = "'. $mavis_ldap_settings['filter'].'"');
 		///LDAP USER///
-		array_push($outputMavisLdap[$id], 
+		array_push($outputMavisLdap[$id],
 		($html) ? $this->html_tags['param'][0] . "	setenv LDAP_USER" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] .'"'. $mavis_ldap_settings['user'] .'"'. $this->html_tags['val'][1]
 		:
 		'	setenv LDAP_USER = "'. $mavis_ldap_settings['user'].'"');
 		///LDAP PASSWD///
-		array_push($outputMavisLdap[$id], 
+		array_push($outputMavisLdap[$id],
 		($html) ? $this->html_tags['param'][0] . "	setenv LDAP_PASSWD" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] .'"'. $mavis_ldap_settings['password'] .'"'. $this->html_tags['val'][1]
 		:
 		'	setenv LDAP_PASSWD = "'. $mavis_ldap_settings['password'].'"');
 		///LDAP AD GROUP PREFIX///
 		$commentChar = ($mavis_ldap_settings['group_prefix'] == '') ? '#' : '';
-		array_push($outputMavisLdap[$id], 
+		array_push($outputMavisLdap[$id],
 		($html) ?  $commentChar . $this->html_tags['param'][0] . "	setenv AD_GROUP_PREFIX" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] . $mavis_ldap_settings['group_prefix'] . $this->html_tags['val'][1] . '# default prefix is <i>tacacs</i>'
 		:
 		$commentChar .'	setenv AD_GROUP_PREFIX = '. $mavis_ldap_settings['group_prefix']);
 		///LDAP PRIFIX REQUIRED///
-		array_push($outputMavisLdap[$id], 
+		array_push($outputMavisLdap[$id],
 		($html) ? $this->html_tags['param'][0] . "	setenv REQUIRE_AD_GROUP_PREFIX" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] . $mavis_ldap_settings['group_prefix_flag'] . $this->html_tags['val'][1]
 		:
 		'	setenv REQUIRE_AD_GROUP_PREFIX = '. $mavis_ldap_settings['group_prefix_flag']);
 		///LDAP TLS///
-		array_push($outputMavisLdap[$id], 
+		array_push($outputMavisLdap[$id],
 		($html) ? $this->html_tags['param'][0] . "	setenv USE_TLS" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] . $mavis_ldap_settings['tls'] . $this->html_tags['val'][1]
 		:
 		'	setenv USE_TLS = '. $mavis_ldap_settings['tls']);
 		///LDAP CACHE CONN///
-		array_push($outputMavisLdap[$id], 
+		array_push($outputMavisLdap[$id],
 		($html) ? $this->html_tags['param'][0] . "	setenv FLAG_CACHE_CONNECTION" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] . $mavis_ldap_settings['cache_conn'] . $this->html_tags['val'][1]
 		:
 		'	setenv FLAG_CACHE_CONNECTION  = '. $mavis_ldap_settings['cache_conn']);
 		///LDAP MEMBEROF///
-		array_push($outputMavisLdap[$id], 
+		array_push($outputMavisLdap[$id],
 		($html) ? $this->html_tags['param'][0] . "	setenv FLAG_USE_MEMBEROF" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] . $mavis_ldap_settings['memberOf'] . $this->html_tags['val'][1]
 		:
 		'	setenv FLAG_USE_MEMBEROF  = '. $mavis_ldap_settings['memberOf']);
 		///LDAP FALLTHROUGH///
-		array_push($outputMavisLdap[$id], 
+		array_push($outputMavisLdap[$id],
 		($html) ? $this->html_tags['param'][0] . "	setenv FLAG_FALLTHROUGH" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] . $mavis_ldap_settings['fallthrough'] . $this->html_tags['val'][1]
 		:
 		'	setenv FLAG_FALLTHROUGH  = '. $mavis_ldap_settings['fallthrough']);
 		///LDAP PATH///
-		array_push($outputMavisLdap[$id], 
+		array_push($outputMavisLdap[$id],
 		($html) ? $this->html_tags['param'][0] . "	exec" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] . $mavis_ldap_settings['path'] . $this->html_tags['val'][1]
 		:
 		'	exec  = '. $mavis_ldap_settings['path']);
-		///USER MANUAL CONFIGURATION/// 
-		/*if ($group['manual']!="") 
+		///USER MANUAL CONFIGURATION///
+		/*if ($group['manual']!="")
 		{
-			array_push($outputUserGroup[$group['id']], ($html) ? $this->html_tags['comment'][0] . '###MANUAL CONFIGURATION START###' . $this->html_tags['comment'][1] 
+			array_push($outputUserGroup[$group['id']], ($html) ? $this->html_tags['comment'][0] . '###MANUAL CONFIGURATION START###' . $this->html_tags['comment'][1]
 			:
 			'###MANUAL CONFIGURATION START###');
 			$arrayManual=explode(PHP_EOL, $group['manual']);
@@ -752,30 +758,31 @@ class TACConfigCtrl extends Controller
 			{
 				array_push($outputUserGroup[$group['id']], $item);
 			}
-			array_push($outputUserGroup[$group['id']], ($html) ? $this->html_tags['comment'][0] . '###MANUAL CONFIGURATION END###' . $this->html_tags['comment'][1] 
+			array_push($outputUserGroup[$group['id']], ($html) ? $this->html_tags['comment'][0] . '###MANUAL CONFIGURATION END###' . $this->html_tags['comment'][1]
 			:
 			'###MANUAL CONFIGURATION END###');
 		}*/
-		
-		array_push($outputMavisLdap[$id], 
-		($html) ? '} ' . $this->html_tags['comment'][0] . '#END OF MAVIS LDAP SETTINGS' . $this->html_tags['comment'][1] 
+
+		array_push($outputMavisLdap[$id],
+		($html) ? '} ' . $this->html_tags['comment'][0] . '#END OF MAVIS LDAP SETTINGS' . $this->html_tags['comment'][1]
 		:
 		'} #END OF MAVIS LDAP SETTINGS');
-		
+
 		return $outputMavisLdap;
 	}
-	
+
 	private function tacMavisGeneralGen($html)
 	{
 		$html = (empty($html)) ? false : true;
-		
+
 		$mavis_ldap_settings = MAVISLDAP::select()->first();
 		$mavis_otp_settings = MAVISOTP::select()->first();
-		
-		if ($mavis_ldap_settings->enabled == 0 AND $mavis_otp_settings->enabled == 0) return array('title_flag' => 0, 'name' =>"");
-		
+		$mavis_sms_settings = MAVISSMS::select()->first();
+
+		if ($mavis_ldap_settings->enabled == 0 AND $mavis_otp_settings->enabled == 0 AND $mavis_sms_settings->enabled == 0) return array('title_flag' => 0, 'name' =>"");
+
 		$outputMavisGeneral[0][0]=array('title_flag' => 1, 'name' =>
-		($html) ? $this->html_tags['comment'][0] . "####MAVIS GENERAL SETTINGS####" . $this->html_tags['comment'][1] 
+		($html) ? $this->html_tags['comment'][0] . "####MAVIS GENERAL SETTINGS####" . $this->html_tags['comment'][1]
 		:
 		"####MAVIS GENERAL SETTINGS####");
 		///EMPTY ARRAY///
@@ -783,7 +790,7 @@ class TACConfigCtrl extends Controller
 		///MAVIS GENERAL TITLE///
 		$outputMavisGeneral[1][0] = array('title_flag' => 0, 'name' =>"");
 		///MAVIS GENERAL SETTINGS START///
-		array_push($outputMavisGeneral[1], 
+		array_push($outputMavisGeneral[1],
 		($html) ? $this->html_tags['attr'][0] . "user backend" . $this->html_tags['attr'][1] . ' = ' . $this->html_tags['object'][0] . 'mavis' . $this->html_tags['object'][1]
 		:
 		'user backend = mavis');
@@ -791,20 +798,24 @@ class TACConfigCtrl extends Controller
 		($html) ? $this->html_tags['attr'][0] . "login backend" . $this->html_tags['attr'][1] . ' = ' . $this->html_tags['object'][0] . 'mavis chalresp' . $this->html_tags['object'][1]
 		:
 		'login backend = mavis chalresp');
-		
+		array_push($outputMavisGeneral[1],
+		($html) ? $this->html_tags['attr'][0] . "pap backend" . $this->html_tags['attr'][1] . ' = ' . $this->html_tags['object'][0] . 'mavis' . $this->html_tags['object'][1]
+		:
+		'pap backend = mavis');
+
 	return $outputMavisGeneral;
-	}	
-	
+	}
+
 	private function tacMavisOTPGen($html)
 	{
 		$html = (empty($html)) ? false : true;
-		
+
 		$mavis_otp_settings = MAVISOTP::select('enabled')->first();
-		
+
 		if ($mavis_otp_settings->enabled == 0) return array('title_flag' => 0, 'name' =>"");
-		
+
 		$outputMavisOTP[0][0]=array('title_flag' => 1, 'name' =>
-		($html) ? $this->html_tags['comment'][0] . "####MAVIS OTP SETTINGS####" . $this->html_tags['comment'][1] 
+		($html) ? $this->html_tags['comment'][0] . "####MAVIS OTP SETTINGS####" . $this->html_tags['comment'][1]
 		:
 		"####MAVIS OTP SETTINGS####");
 		///EMPTY ARRAY///
@@ -812,38 +823,38 @@ class TACConfigCtrl extends Controller
 		///MAVIS OTP TITLE///
 		$outputMavisOTP[1][0] = array('title_flag' => 0, 'name' =>"");
 		///MAVIS OTP SETTINGS START///
-		array_push($outputMavisOTP[1], 
+		array_push($outputMavisOTP[1],
 		($html) ? $this->html_tags['attr'][0] . "mavis module" . $this->html_tags['attr'][1] . ' = ' . $this->html_tags['object'][0] . 'external' . $this->html_tags['object'][1] . ' {'
 		:
 		'mavis module = external {');
-		
+
 		///OTP PATH///
-		array_push($outputMavisOTP[1], 
+		array_push($outputMavisOTP[1],
 		($html) ? $this->html_tags['param'][0] . "	exec" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] . TAC_ROOT_PATH . '/mavis-modules/otp/module.php' . $this->html_tags['val'][1]
 		:
 		'	exec  = ' . TAC_ROOT_PATH . '/mavis-modules/otp/module.php');
-		
-		array_push($outputMavisOTP[1], 
-		($html) ? '} ' . $this->html_tags['comment'][0] . '#END OF MAVIS OTP SETTINGS' . $this->html_tags['comment'][1] 
+
+		array_push($outputMavisOTP[1],
+		($html) ? '} ' . $this->html_tags['comment'][0] . '#END OF MAVIS OTP SETTINGS' . $this->html_tags['comment'][1]
 		:
 		'} #END OF MAVIS OTP SETTINGS');
-		
-		
-		
+
+
+
 	return $outputMavisOTP;
-	}	
-	
+	}
+
 	////MAVIS SMS////
 	private function tacMavisSMSGen($html)
 	{
 		$html = (empty($html)) ? false : true;
-		
+
 		$mavis_sms_settings = MAVISSMS::select('enabled')->first();
-		
+
 		if ($mavis_sms_settings->enabled == 0) return array('title_flag' => 0, 'name' =>"");
-		
+
 		$outputMavisSMS[0][0]=array('title_flag' => 1, 'name' =>
-		($html) ? $this->html_tags['comment'][0] . "####MAVIS SMS SETTINGS####" . $this->html_tags['comment'][1] 
+		($html) ? $this->html_tags['comment'][0] . "####MAVIS SMS SETTINGS####" . $this->html_tags['comment'][1]
 		:
 		"####MAVIS SMS SETTINGS####");
 		///EMPTY ARRAY///
@@ -851,27 +862,27 @@ class TACConfigCtrl extends Controller
 		///MAVIS SMS TITLE///
 		$outputMavisSMS[1][0] = array('title_flag' => 0, 'name' =>"");
 		///MAVIS SMS SETTINGS START///
-		array_push($outputMavisSMS[1], 
+		array_push($outputMavisSMS[1],
 		($html) ? $this->html_tags['attr'][0] . "mavis module" . $this->html_tags['attr'][1] . ' = ' . $this->html_tags['object'][0] . 'external' . $this->html_tags['object'][1] . ' {'
 		:
 		'mavis module = external {');
-		
+
 		///SMS PATH///
-		array_push($outputMavisSMS[1], 
+		array_push($outputMavisSMS[1],
 		($html) ? $this->html_tags['param'][0] . "	exec" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] . TAC_ROOT_PATH . '/mavis-modules/sms/module.php' . $this->html_tags['val'][1]
 		:
 		'	exec  = ' . TAC_ROOT_PATH . '/mavis-modules/sms/module.php');
-		
-		array_push($outputMavisSMS[1], 
-		($html) ? '} ' . $this->html_tags['comment'][0] . '#END OF MAVIS SMS SETTINGS' . $this->html_tags['comment'][1] 
+
+		array_push($outputMavisSMS[1],
+		($html) ? '} ' . $this->html_tags['comment'][0] . '#END OF MAVIS SMS SETTINGS' . $this->html_tags['comment'][1]
 		:
 		'} #END OF MAVIS SMS SETTINGS');
-		
-		
-		
+
+
+
 	return $outputMavisSMS;
-	}	
-	
+	}
+
 	public function getConfigGen($req,$res)
 	{
 		//INITIAL CODE////START//
@@ -887,9 +898,9 @@ class TACConfigCtrl extends Controller
 			return $res -> withStatus(401) -> write(json_encode($data));
 		}
 		//INITIAL CODE////END//
-		
+
 		$html = (empty($req->getParam('html'))) ? false : true;
-		
+
 		$data['mavisGeneralConfig']=array_values($this->tacMavisGeneralGen($html));
 		$data['mavisOTPConfig']=array_values($this->tacMavisOTPGen($html));
 		$data['mavisSMSConfig']=array_values($this->tacMavisSMSGen($html));
@@ -901,7 +912,7 @@ class TACConfigCtrl extends Controller
 		$data['spawndConfig']=array_values($this->tacSpawndPartGen($html));
 		$data['tacGeneralConfig']=array_values($this->tacGeneralPartGen($html));
 		$data['tacACL']=array_values($this->tacACLPartGen($html));
-		
+
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
 	////////////////////////////////////////////////////
@@ -920,7 +931,7 @@ class TACConfigCtrl extends Controller
 			{
 				for($someLine = 0; $someLine < count($someParams); $someLine++)
 				{
-					
+
 					if ($someLine == 0) {
 						$output.=$someParams[$someLine]['name']." ".$separator; continue;
 					}
@@ -931,7 +942,7 @@ class TACConfigCtrl extends Controller
 			}
 		}
 		return $output;
-	
+
 	}
 	//////////////OUTPUT PARSER///////////////////END//
 	////////////////////////////////////////////////
@@ -941,18 +952,18 @@ class TACConfigCtrl extends Controller
 		$errorFlag=false;
 		$confTestFile = fopen(TAC_PLUS_CFG_TEST, 'w') or $errorFlag=true;
 		if ($errorFlag) return array('error' => true, 'message' => 'Unable to open '.TAC_PLUS_CFG_TEST.' file! Verify file availability and rights to it', 'errorLine' => 0);
-		
+
 		fwrite($confTestFile, $confText);
-		
+
 		if (!fclose($confTestFile)) return array('error' => true, 'message' => 'Unable to close '.TAC_PLUS_CFG_TEST.' file! Verify file availability and rights to it', 'errorLine' => 0);
-		
+
 		shell_exec('tac_plus -P '.TAC_PLUS_CFG_TEST.' 2> '.TAC_PLUS_PARSING);
-				
+
 		$openLogFile=fopen(TAC_PLUS_PARSING, 'r') or $errorFlag=true;
 		if ($errorFlag) return array('error' => true, 'message' => 'Unable to open '.TAC_PLUS_PARSING.' file! Verify file availability and rights to it', 'errorLine' => 0);
-		
+
 		$parseData=fread($openLogFile, filesize(TAC_PLUS_PARSING));
-				
+
 		if (!$parseData)
 		{
 			return array('error' => false, 'message' => 'Success', 'errorLine' => 0);
@@ -962,8 +973,8 @@ class TACConfigCtrl extends Controller
 			preg_match('/.+:(\d+):.+/',$parseData, $matches);
 			return array('error' => true, 'message' => $parseData, 'errorLine' => $matches[1]);
 		}
-		
-		
+
+
 		return array('error' => true, 'message' => 'Something goes wrong', 'errorLine' => 0);
 	}
 	////////////TEST CONFIGURATION////END//
@@ -973,18 +984,18 @@ class TACConfigCtrl extends Controller
 		$errorFlag=false;
 		$confFile = fopen(TAC_PLUS_CFG, 'w') or $errorFlag=true;
 		if ($errorFlag) return array('error' => true, 'message' => 'Unable to open '.TAC_PLUS_CFG.' file! Verify file availability and rights to it', 'errorLine' => 0);
-		
+
 		fwrite($confFile, $confText);
-		
+
 		if (!fclose($confFile)) return array('error' => true, 'message' => 'Unable to close '.TAC_PLUS_CFG.' file! Verify file availability and rights to it', 'errorLine' => 0);
-		
+
 		$someOutput = shell_exec('sudo '.TAC_DEAMON.' status');
-		
+
 		if ($someOutput == null)
 		{
 			return array('error' => true, 'message' => 'Error while get tac status. Did you set sudo rights?', 'errorLine' => 0);
 		}
-		
+
 		if(preg_match('/.+(not running|not exist).+/',$someOutput))
 		{
 			if (preg_match('/.+(not running).+/',$someOutput))
@@ -999,14 +1010,14 @@ class TACConfigCtrl extends Controller
 
 			return array('error' => true, 'message' => 'Some inside error. '.$someOutput, 'errorLine' => 0);
 		}
-		
+
 		if(preg_match('/.+(is running).+/',$someOutput))
 		{
 			$tryToReload=shell_exec('sudo '.TAC_DEAMON.' reload');
 			return array('error' => false, 'message' => 'Deamon was Reloaded. Success. '.$tryToReload, 'errorLine' => 0);
 		}
-		
-		
+
+
 		return array('error' => true, 'message' => 'Something goes wrong', 'errorLine' => 0);
 	}
 	////////////APPLY CONFIGURATION////END//
@@ -1025,9 +1036,9 @@ class TACConfigCtrl extends Controller
 		$tempSpawndConfArray=$this->tacSpawndPartGen(false);
 		$tempGlobalConfArray=$this->tacGeneralPartGen(false);
 		$tempACL=$this->tacACLPartGen(false);
-		
+
 		$output="";
-		
+
 		////////////////////////////////////
 		//SPAWND CONFIGURATION//START//
 		$output.="id = spawnd {".$lineSeparator;
@@ -1078,10 +1089,10 @@ class TACConfigCtrl extends Controller
 		//////////////////////////////////
 		$output.="}##END GLOBAL CONFIGURATION".$lineSeparator;
 		//////////////////////////////////
-		
+
 		return $output;
 	}
-	
+
 	public function getConfigGenFile($req,$res)
 	{
 		//INITIAL CODE////START//
@@ -1103,17 +1114,17 @@ class TACConfigCtrl extends Controller
 			return $res -> withStatus(403) -> write(json_encode($data));
 		}
 		//CHECK ACCESS TO THAT FUNCTION//END//
-		
+
 		$lineSeparator = ($req->getParam('contentType') == 'html' ) ? '</p>' : "\n ";
 		$contentTypeOutput = ($req->getParam('contentType') == 'html' ) ? 'text/html' : 'application/json';
 		$output="";
-		
+
 		$output = $this->createConfiguration($lineSeparator);
-		
+
 		if ($req->getParam('confSave')=='yes'){
-			
+
 			$data['confTest']=$this->testConfiguration($output);
-			
+
 			if($data['confTest']['error'])
 			{
 				$data['error']['status'] = $data['confTest']['error'];
@@ -1128,21 +1139,21 @@ class TACConfigCtrl extends Controller
 			$this->APILoggingCtrl->makeLogEntry($logEntry);
 			///LOGGING//end//
 			$data['applyStatus']=$this->applyConfiguration($output);
-			
+
 			///LOGGING//start//
 			$logEntry2 = (!$data['applyStatus']['error']) ? array('action' => 'tacacs apply conf', 'objectName' => 'tacacs configuration', 'section' => 'tacacs configuration', 'message' => 503) : array('action' => 'tacacs apply conf', 'objectName' => 'tacacs configuration', 'section' => 'tacacs configuration', 'message' => 504 );
 			$data['test']=$this->APILoggingCtrl->makeLogEntry($logEntry2);
 			///LOGGING//end//
-			
+
 			$data['changeConfiguration']= (!$data['applyStatus']['error']) ? $this->changeConfigurationFlag(['unset' => 1]) : 0;
-	
+
 			$doBackup=$req->getParam('doBackup');
-			
+
 			if (!$data['applyStatus']['error'] AND $doBackup == 'true' AND $this->checkAccess(9)) { $data['backup']=$this->APIBackupCtrl->makeBackup(array('make' => 'tcfg')); }
-			
+
 			return $res -> withStatus(200) -> withHeader('Content-type', $contentTypeOutput) -> write(json_encode($data));
 		}
-		
+
 		if($req->getParam('confTest') == 'on')
 		{
 			$data['confTest']=$this->testConfiguration($output);
@@ -1153,9 +1164,9 @@ class TACConfigCtrl extends Controller
 			///LOGGING//end//
 			return $res -> withStatus(200) -> withHeader('Content-type', $contentTypeOutput) -> write(json_encode($data));
 		}
-		
-		
-		if ($req->getParam('contentType') != 'html') 
+
+
+		if ($req->getParam('contentType') != 'html')
 		{
 			return $res -> withStatus(200) -> withHeader('Content-type', $contentTypeOutput) -> write(json_encode($data));
 		}
@@ -1180,7 +1191,7 @@ class TACConfigCtrl extends Controller
 			return $res -> withStatus(401) -> write(json_encode($data));
 		}
 		//INITIAL CODE////END//
-		
+
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
 	///////////////////////////////////////////////////
@@ -1202,7 +1213,7 @@ class TACConfigCtrl extends Controller
 		//INITIAL CODE////END//
 
 		$data['global_variables']=TACGlobalConf::select()->first();
-		
+
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
 	/////////////////////////////////////////////////
@@ -1228,7 +1239,7 @@ class TACConfigCtrl extends Controller
 			return $res -> withStatus(403) -> write(json_encode($data));
 		}
 		//CHECK ACCESS TO THAT FUNCTION//END//
-		
+
 		$validation = $this->validator->validate($req, [
 			'port' => v::noWhitespace()->notEmpty()->positive()->min(1,true)->intVal(),
 			'max_attempts' => v::noWhitespace()->notEmpty()->positive()->min(1,true)->intVal(),
@@ -1239,13 +1250,15 @@ class TACConfigCtrl extends Controller
 			'authorization' => v::notEmpty(),
 			'accounting' => v::notEmpty(),
 		]);
-		
+
 		if ($validation->failed()){
 			$data['error']['status']=true;
 			$data['error']['validation']=$validation->error_messages;
 			return $res -> withStatus(200) -> write(json_encode($data));
 		}
-		
+
+		$data['nxos_support'] = ( $req->getParam('nxos_support') == 1 ) ? 1 : 0;
+
 		$data['tglobal_update']=TACGlobalConf::where([['id','=',1]])->
 			update([
 				'port' => $req->getParam('port'),
@@ -1256,14 +1269,15 @@ class TACConfigCtrl extends Controller
 				'authentication' => $req->getParam('authentication'),
 				'authorization' => $req->getParam('authorization'),
 				'accounting' => $req->getParam('accounting'),
+				'nxos_support' => $data['nxos_support'],
 				'manual' => $req->getParam('manual'),
 			]);
-			
+
 		$data['changeConfiguration']=$this->changeConfigurationFlag(['unset' => 0]);
-			
+
 		$logEntry=array('action' => 'edit', 'objectName' => 'tacacs global settings', 'objectId' => '', 'section' => 'tacacs global settings', 'message' => 505);
 		$data['logging']=$this->APILoggingCtrl->makeLogEntry($logEntry);
-		
+
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
 	///////////////////////////////////////////////
@@ -1283,11 +1297,11 @@ class TACConfigCtrl extends Controller
 			return $res -> withStatus(401) -> write(json_encode($data));
 		}
 		//INITIAL CODE////END//
-		
+
 		$data['tacacsStatusMessage'] = trim(shell_exec('sudo '.TAC_DEAMON.' status'));
-		
+
 		$data['action'] = $action = (!empty($req->getParam('action'))) ? $req->getParam('action') : '';
-		
+
 		switch ($action) {
 			case ('start'):
 				$data['action'] = 'start';
@@ -1311,7 +1325,7 @@ class TACConfigCtrl extends Controller
 				$data['tacacsStatusMessage'] .= trim(shell_exec('sudo '.TAC_DEAMON.' status'));
 				break;
 		}
-		
+
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
 	///////////////////////////////////////////////

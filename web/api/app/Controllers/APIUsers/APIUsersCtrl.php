@@ -10,7 +10,7 @@ use Respect\Validation\Validator as v;
 class APIUsersCtrl extends Controller
 {
 ################################################
-########	Add New User	###############START###########	
+########	Add New User	###############START###########
 	#########	GET Add New User	#########
 	public function getUserAdd($req,$res)
 	{
@@ -27,10 +27,10 @@ class APIUsersCtrl extends Controller
 			return $res -> withStatus(401) -> write(json_encode($data));
 		}
 		//INITIAL CODE////END//
-		
+
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
-	
+
 	#########	POST Add New User	#########
 	public function postUserAdd($req,$res)
 	{
@@ -59,15 +59,15 @@ class APIUsersCtrl extends Controller
 			'password' => v::noWhitespace()->notContainChars()->length(5, 24)->notEmpty()->checkPassword($req->getParam('repPassword')),
 			'repPassword' => v::noWhitespace()->notEmpty()->checkPassword($req->getParam('password')),
 		]);
-		
+
 		if ($validation->failed()){
 			$data['error']['status']=true;
 			$data['error']['validation']=$validation->error_messages;
 			return $res -> withStatus(200) -> write(json_encode($data));
 		}
-		
+
 		$data['changePasswd'] = ($req->getParam('changePasswd') == 'true') ? 1 : 0;
-		
+
 		$user = APIUsers::create([
 			'username' => strtolower($req->getParam('username')),
 			'password' => password_hash($req->getParam('password'), PASSWORD_DEFAULT),
@@ -78,16 +78,16 @@ class APIUsersCtrl extends Controller
 			'group' => $req->getParam('group') ,
 			'changePasswd' => $data['changePasswd'] ,
 		]);
-		
+
 		$logEntry=array('action' => 'add', 'objectName' => $user->username, 'objectId' => $user->id, 'section' => 'api users', 'message' => 205);
 		$data['logging']=$this->APILoggingCtrl->makeLogEntry($logEntry);
-		
+
 		//$this->auth->check();
-		$data['user']=$user; 
-		
+		$data['user']=$user;
+
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
-########	Add New User	###############END###########	
+########	Add New User	###############END###########
 ################################################
 ########	Edit User	###############START###########
 	#########	GET Edit User	#########
@@ -106,16 +106,16 @@ class APIUsersCtrl extends Controller
 			return $res -> withStatus(401) -> write(json_encode($data));
 		}
 		//INITIAL CODE////END//
-		
+
 		$data['user']=APIUsers::select()->where([['id','=',$req->getParam('id')],['username','=',$req->getParam('username')]])->first();
-		
+
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
-	
+
 	#########	POST Edit User	#########
 	public function postUserEdit($req,$res)
 	{
-		
+
 		//INITIAL CODE////START//
 		$data=array();
 		$data=$this->initialData([
@@ -130,30 +130,31 @@ class APIUsersCtrl extends Controller
 		}
 		//INITIAL CODE////END//
 		//CHECK ACCESS TO THAT FUNCTION//START//
-		if(!$this->checkAccess(7))
+		$data['test01']=(!$this->checkAccess(7) AND $this->checkAccess(0));
+		if( $this->checkAccess(0) OR ( !$this->checkAccess(7) AND ( $req->getParam('id') != @$_SESSION['uid'] ) ) )
 		{
 			return $res -> withStatus(403) -> write(json_encode($data));
 		}
 		//CHECK ACCESS TO THAT FUNCTION//END//
-		
+
 		$validation = $this->validator->validate($req, [
 			'email' => v::noWhitespace(),//->email(),//->notEmpty()->emailAvailable(),
 			'password' => v::noWhitespace()->notContainChars()->checkPassword($req->getParam('repPassword')),
 			'repPassword' => v::noWhitespace()->checkPassword($req->getParam('password')),
 			//'repPassword' => v::noWhitespace()->notContainChars()->notEmpty()->checkPassword(),
 		]);
-		
+
 		if ($validation->failed()){
 			$data['error']['status']=true;
 			$data['error']['validation']=$validation->error_messages;
 			return $res -> withStatus(200) -> write(json_encode($data));
 		}
-		
+
 		$data['changePasswd'] = ($req->getParam('changePasswd') == 'true') ? 1 : 0;
-		
+
 		$data['user_woPasswd']=APIUsers::where([['id','=',$req->getParam('id')],['username','=',$req->getParam('username')]])->
 			update([
-				'email' => $req->getParam('email'), 
+				'email' => $req->getParam('email'),
 				'firstname' => $req->getParam('firstname'),
 				'surname' => $req->getParam('surname'),
 				'position' => $req->getParam('position'),
@@ -167,10 +168,10 @@ class APIUsersCtrl extends Controller
 					'password' => password_hash($req->getParam('password'), PASSWORD_DEFAULT)
 				]);
 		}
-		
+
 		$logEntry=array('action' => 'edit', 'objectName' => $req->getParam('username'), 'objectId' => $req->getParam('id'), 'section' => 'api users', 'message' => 305);
 		$data['logging']=$this->APILoggingCtrl->makeLogEntry($logEntry);
-		
+
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
 ########	Edit User	###############END###########
@@ -192,10 +193,10 @@ class APIUsersCtrl extends Controller
 			return $res -> withStatus(401) -> write(json_encode($data));
 		}
 		//INITIAL CODE////END//
-		
+
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
-	
+
 	#########	POST Delete User	#########
 	public function postUserDelete($req,$res)
 	{
@@ -218,12 +219,12 @@ class APIUsersCtrl extends Controller
 			return $res -> withStatus(403) -> write(json_encode($data));
 		}
 		//CHECK ACCESS TO THAT FUNCTION//END//
-		
+
 		if ($_SESSION['uid'] == $req->getParam('id'))
 		{
 			return $res -> withStatus(403) -> write(json_encode($data));
 		}
-		
+
 		$data['deleteUser']=APIUsers::where([
 			['id','=',$req->getParam('id')],
 			['username','=',$req->getParam('username')],
@@ -231,10 +232,10 @@ class APIUsersCtrl extends Controller
 		$data['id']=$req->getParam('id');
 		$data['username
 		']=$req->getParam('username');
-		
+
 		$logEntry=array('action' => 'delete', 'objectName' => $req->getParam('username'), 'objectId' => $req->getParam('id'), 'section' => 'api users', 'message' => 405);
 		$data['logging']=$this->APILoggingCtrl->makeLogEntry($logEntry);
-		
+
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
 ########	Delete User	###############END###########
@@ -256,14 +257,14 @@ class APIUsersCtrl extends Controller
 			return $res -> withStatus(401) -> write(json_encode($data));
 		}
 		//INITIAL CODE////END//
-		
+
 		unset($data['error']);//BEACAUSE DATATABLES USES THAT VARIABLE//
-		
+
 		$params=$req->getParams(); //Get ALL parameters form Datatables
-		
-		$columns = array( 
+
+		$columns = array(
 		// datatable column index  => database column name
-			0 => 'id', 
+			0 => 'id',
 			1 => 'username',
 			2 => 'email',
 			3 => 'firstname',
@@ -272,20 +273,20 @@ class APIUsersCtrl extends Controller
 			6 => 'group',
 			//6 => 'description'
 		); //Array of all columnes that will used
-		
+
 		//Get temp data for Datatables with Fliter and some other parameters
 		$tempData = APIUsers::select($columns)->
-			when($params['columns'][0]['search']['value'], 
+			when($params['columns'][0]['search']['value'],
 				function($query) use ($params,$columns)
 				{
 					return $query->where($columns[0],'LIKE','%'.$params['columns'][0]['search']['value'].'%');
 				}) ->
-			when($params['columns'][1]['search']['value'], 
+			when($params['columns'][1]['search']['value'],
 				function($query) use ($params,$columns)
 				{
 					return $query->where($columns[1],'LIKE','%'.$params['columns'][1]['search']['value'].'%');
 				}) ->
-			when($params['columns'][2]['search']['value'], 
+			when($params['columns'][2]['search']['value'],
 				function($query) use ($params,$columns)
 				{
 					return $query->where($columns[2],'LIKE','%'.$params['columns'][2]['search']['value'].'%');
@@ -294,18 +295,18 @@ class APIUsersCtrl extends Controller
 			take($params['length'])->
 			offset($params['start'])->
 			get()->toArray();
-		
+
 		$tempGroups = APIUserGrps::select()->get()->toArray();
-		
+
 		foreach($tempGroups as $group){
 			$tempGroupsNew[$group['id']] = array('name' => $group['name']);
 		}
-		
+
 		$tempGroupsNew[0] = array('name' => 'None');
-		
-		//Creating correct array of answer to Datatables 
+
+		//Creating correct array of answer to Datatables
 		$data['data']=array();
-		
+
 		foreach($tempData as $user){
 			$buttons='<button class="btn btn-warning btn-xs btn-flat" onclick="editUser(\''.$user['id'].'\',\''.$user['username'].'\')">Edit</button> <button class="btn btn-danger btn-xs btn-flat" onclick="deleteUser(\''.$user['id'].'\',\''.$user['username'].'\')">Del</button>';
 			$user['buttons']=$buttons;
@@ -317,29 +318,29 @@ class APIUsersCtrl extends Controller
 		$data['draw']=intval( $params['draw'] );
 		$data['recordsTotal'] = APIUsers::count();
 		$data['recordsFiltered'] = APIUsers::select($columns)->
-			when($params['columns'][0]['search']['value'], 
+			when($params['columns'][0]['search']['value'],
 				function($query) use ($params,$columns)
 				{
 					return $query->where($columns[0],'LIKE','%'.$params['columns'][0]['search']['value'].'%');
 				}) ->
-			when($params['columns'][1]['search']['value'], 
+			when($params['columns'][1]['search']['value'],
 				function($query) use ($params,$columns)
 				{
 					return $query->where($columns[1],'LIKE','%'.$params['columns'][1]['search']['value'].'%');
 				}) ->
-			when($params['columns'][2]['search']['value'], 
+			when($params['columns'][2]['search']['value'],
 				function($query) use ($params,$columns)
 				{
 					return $query->where($columns[2],'LIKE','%'.$params['columns'][2]['search']['value'].'%');
-				}) -> 
+				}) ->
 				count();
-		
+
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
-	
+
 ########	User Datatables	###############END###########
 ################################################
-########	Get User Info	###############START###########	
+########	Get User Info	###############START###########
 	#########	GET User Info	#########
 	public function getUserInfo($req,$res)
 	{
@@ -356,15 +357,14 @@ class APIUsersCtrl extends Controller
 			return $res -> withStatus(401) -> write(json_encode($data));
 		}
 		//INITIAL CODE////END//
-		
+
 		$data['user']=APIUsers::select()->where([
 			['id','=',$_SESSION['uid']],
 			['username','=',$_SESSION['uname']],
 		])->first();
-		
+
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
-########	Get User Info	###############END###########	
+########	Get User Info	###############END###########
 ######################################################
 }//END OF CLASS//
-

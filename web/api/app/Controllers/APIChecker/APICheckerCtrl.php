@@ -10,9 +10,9 @@ class APICheckerCtrl extends Controller
 {
 
 protected $tablesNameArr = array('api_users','tac_users','tac_devices','tac_user_groups');
-		
+
 protected $tablesArr = array(
-	
+
 	'api_users' =>
 	[
 		'username' => ['string',''],
@@ -60,6 +60,7 @@ protected $tablesArr = array(
 		'context_timeout' => ['integer', 3600],
 		'max_attempts' => ['integer', 1],
 		'backoff' => ['integer', 1],
+		'nxos_support' => ['integer', 1],
 		'manual' => ['text', '_'],
 		'changeFlag' => ['integer', '0'],
 	],
@@ -77,6 +78,7 @@ protected $tablesArr = array(
 		'manual' => ['text', '_'],
 		'acl' => ['integer', '0'],
 		'service' => ['integer', '0'],
+		'nxos_support' => ['integer', '0'],
 		'priv-lvl' => ['integer', -1],
 		'mavis_otp_enabled' => ['integer', '0'],
 		'mavis_otp_secret' => ['text', '_'],
@@ -233,8 +235,8 @@ protected $tablesArr = array(
 		'destination' => ['string', ''],
 		'status' => ['string', ''],
 	],
-	
-);	
+
+);
 
 	public function myFirstTable()
 	{
@@ -245,7 +247,7 @@ protected $tablesArr = array(
 		$this->setDefaultValues('api_user_groups');
 		$this->setDefaultValues('api_logging');
 	}
-	
+
 	private function createTable($tableName,$tableColumns)
 	{
 		$this->db::schema()->create($tableName, function($table) use ($tableColumns){
@@ -266,13 +268,13 @@ protected $tablesArr = array(
 						break;
 				}
 				if( (isset($columnAttr[1]) OR $columnAttr[1] == 0)
-					AND 
+					AND
 					($columnAttr[0]=='integer' AND $columnAttr[1] != '_')
 					OR
 					($columnAttr[1]!='_' AND $columnAttr[0]=='string')
 					OR
 					($columnAttr[1]!='_' AND $columnAttr[0]=='text')
-				)//end if 
+				)//end if
 				{
 					$columnObj->default($columnAttr[1]);
 				}
@@ -282,9 +284,9 @@ protected $tablesArr = array(
 				}
 			}
 			$table->timestamps();
-		});		
+		});
 	}
-	
+
 	private function setDefaultValues($tableName)
 	{
 		switch ($tableName) {
@@ -328,7 +330,7 @@ protected $tablesArr = array(
 					"log = authorization_log {\n".
 					"	destination = \"| ".TAC_ROOT_PATH."/parser/tacacs_parser.sh authorization\"\n".
 					"	log separator = \"|!|\"}",
-					
+
 					'created_at' => date('Y-m-d H:i:s', time()),
 					'updated_at' => date('Y-m-d H:i:s', time())
 				]);
@@ -390,7 +392,7 @@ protected $tablesArr = array(
 				break;
 		}
 	}
-	
+
 ################################################
 	public function getCheckDatabase($req,$res)
 	{
@@ -407,7 +409,7 @@ protected $tablesArr = array(
 			return $res -> withStatus(401) -> write(json_encode($data));
 		}
 		//INITIAL CODE////END//
-		
+
 		foreach($this->tablesArr as $tableName => $tableColumns){
 			if(!$this->db::schema()->hasTable($tableName))
 			{
@@ -423,14 +425,14 @@ protected $tablesArr = array(
 			//IF TABLE ALREADY EXIST CHECK COLUMNS//
 			else if(!$this->db::schema()->hasColumns($tableName,array_keys($tableColumns)))
 			{
-				$preColumnName='id';//IN EVERY TABLE THE FIRST COLUMN IS id// 
+				$preColumnName='id';//IN EVERY TABLE THE FIRST COLUMN IS id//
 				//ADD COLUMNS CHECK//
 				foreach($tableColumns as $columnName => $columnType)
 				{
 					if(!$this->db::schema()->hasColumn($tableName,$columnName))
 					{
 						//ADD COLUMN//
-						$this->db::schema()->table($tableName, function(Blueprint $table) use ($columnName,$preColumnName,$tableColumns) 
+						$this->db::schema()->table($tableName, function(Blueprint $table) use ($columnName,$preColumnName,$tableColumns)
 						{
 							switch ($tableColumns[$columnName][0]) {
 								case 'string':
@@ -446,10 +448,10 @@ protected $tablesArr = array(
 									$columnObj = $table->timestamp($columnName);
 								break;
 							}
-							
+
 							$columnObj -> after($preColumnName);
-							if(isset($tableColumns[$columnName][1]) 
-								AND 
+							if(isset($tableColumns[$columnName][1])
+								AND
 								($tableColumns[$columnName][0]=='integer' AND $tableColumns[$columnName][1]!= '_' )
 								OR
 								($tableColumns[$columnName][1]!='_' AND $tableColumns[$columnName][0]=='string')
@@ -491,9 +493,9 @@ protected $tablesArr = array(
 			return $res -> withStatus(401) -> write(json_encode($data));
 		}
 		//INITIAL CODE////END//
-		
+
 		$data['configuration']=TACGlobalConf::select('changeFlag')->first();
-		
+
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
 	################################################
@@ -513,11 +515,11 @@ protected $tablesArr = array(
 			return $res -> withStatus(401) -> write(json_encode($data));
 		}
 		//INITIAL CODE////END//
-		
+
 		$data['time']=trim(shell_exec('date +"%T %D"'));
-		
+
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
 	################################################
-	
+
 }

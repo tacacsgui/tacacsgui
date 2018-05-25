@@ -1,4 +1,10 @@
 ##############################
+Version_0.9.9 20180525
+	*Added NX-OS Support (if true user will get pap parameter)
+	*API User without right to Add/Edit/Del API User can change yourself settings
+	*Fixed bug with enable/disable Tac User
+	*Fixed bug SMS Test Auth
+##############################
 Version_0.9.7 20180513
 	*Fix bug accounting log for Accedian devices
 ##############################
@@ -15,8 +21,8 @@ Version_0.9.3 20180405
 Version_0.9.2 20180404
 	*Added services for tac_user and tac_user_group
 	*Now you can't delete yorself as api user
-	*When you delete ACL or Service that was used, it will be replaced as None 
-	*Some critical bugs fixed, related to php 7.2 
+	*When you delete ACL or Service that was used, it will be replaced as None
+	*Some critical bugs fixed, related to php 7.2
 ##############################
 Version_0.9.1 20180330
 	*Added OTP Authorization limits for period and digits
@@ -53,4 +59,4 @@ Version_0.8.4 20180319
 	* Added README description
 	* Added some kind of debug output for dashboard
 	* Fixed bug: DES encryption work properly now
-	* Fixed bug: changed "failed auth" link on dashboard 
+	* Fixed bug: changed "failed auth" link on dashboard
