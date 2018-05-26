@@ -409,12 +409,14 @@ class TACConfigCtrl extends Controller
 					($html) ? '	' . $this->html_tags['param'][0] . "service" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['attr'][0] .'shell {'. $this->html_tags['attr'][1]
 					:
 					'	service = shell {');
+					$default_cmd = ($service['default_cmd'] == 1) ? 'permit' : 'deny';
 					array_push($outputUserGroup[$group['id']],
-					($html) ? '		' . $this->html_tags['param'][0] . "default cmd" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] .'permit'. $this->html_tags['val'][1]
+					($html) ? '		' . $this->html_tags['param'][0] . "default cmd" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] . $default_cmd . $this->html_tags['val'][1]
 					:
-					'		default cmd = permit');
+					'		default cmd = ' . $default_cmd);
 
-					$service_privilege = ($service['priv-lvl'] < 0) ? 15 : $service['priv-lvl'];
+					$service_privilege = ($group['priv-lvl'] < 0) ? 0 : $group['priv-lvl'];
+					if (!$service_privilege) $service_privilege = ($service['priv-lvl'] < 0) ? 15 : $service['priv-lvl'];
 					//$service_privilege = 123;
 					array_push($outputUserGroup[$group['id']],
 					($html) ? '		' . $this->html_tags['param'][0] . "set priv-lvl" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] .$service_privilege. $this->html_tags['val'][1]
@@ -593,12 +595,14 @@ class TACConfigCtrl extends Controller
 					($html) ? '	' . $this->html_tags['param'][0] . "service" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['attr'][0] .'shell {'. $this->html_tags['attr'][1]
 					:
 					'	service = shell {');
+					$default_cmd = ($service['default_cmd'] == 1) ? 'permit' : 'deny';
 					array_push($outputUsers[$user['id']],
-					($html) ? '		' . $this->html_tags['param'][0] . "default cmd" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] .'permit'. $this->html_tags['val'][1]
+					($html) ? '		' . $this->html_tags['param'][0] . "default cmd" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] . $default_cmd . $this->html_tags['val'][1]
 					:
-					'		default cmd = permit');
+					'		default cmd = '. $default_cmd);
 
-					$service_privilege = ($service['priv-lvl'] < 0) ? 15 : $service['priv-lvl'];
+					$service_privilege = ($user['priv-lvl'] < 0) ? 0 : $user['priv-lvl'];
+					if (!$service_privilege) $service_privilege = ($service['priv-lvl'] < 0) ? 15 : $service['priv-lvl'];
 					//$service_privilege = 123;
 					array_push($outputUsers[$user['id']],
 					($html) ? '		' . $this->html_tags['param'][0] . "set priv-lvl" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] .$service_privilege. $this->html_tags['val'][1]

@@ -24,19 +24,19 @@ require __DIR__ . '/templates/header.php';
 
 <!--ADDITIONAL CSS FILES END-->
 
-<?php 
+<?php
 
-require __DIR__ . '/templates/body_start.php'; 
+require __DIR__ . '/templates/body_start.php';
 
 ?>
 <!--MAIN CONTENT START-->
 
 <div class="error-page">
 	<h2 class="headline text-yellow"> 404</h2>
-	
+
 	<div class="error-content">
 		<h3><i class="fa fa-warning text-yellow"></i> Oops! Page not found.</h3>
-		
+
 		<p>
 			We could not find the page you were looking for.
 			Meanwhile, you may <a href="/">return to home page</a>.
@@ -47,9 +47,9 @@ require __DIR__ . '/templates/body_start.php';
 
 <!--MAIN CONTENT END-->
 
-<?php 
+<?php
 
-require __DIR__ . '/templates/body_end.php'; 
+require __DIR__ . '/templates/body_end.php';
 
 ?>
 
@@ -60,7 +60,9 @@ require __DIR__ . '/templates/footer_end.php';
 
 ?>
 <!-- ADDITIONAL JS FILES START-->
-
+<script>
+$('div.loading').hide();
+</script>
 <!-- ADDITIONAL JS FILES END-->
 </body>
 

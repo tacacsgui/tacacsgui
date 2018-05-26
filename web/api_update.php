@@ -62,7 +62,7 @@ require __DIR__ . '/templates/body_start.php';
 			<label>Check after sign in</label>
 			<div class="checkbox icheck">
 				<label>
-					<input type="checkbox" class="update_signin" disabled> Check update after sign in
+					<input type="checkbox" class="update_signin" disabled> <s>Check update after sign in</s> (doesn't work yet)
 				</label>
 			</div>
 		</div>
@@ -100,6 +100,7 @@ require __DIR__ . '/templates/body_start.php';
 <p class="text-center">Info will appeared here</p>
 </pre>		
 		</div>
+<p>The last 6 updates list you can find <a href="https://tacacsgui.com/updates/" target="_blank">here</a></p>
 	</div>
 	<!-- /.box-body -->
 	

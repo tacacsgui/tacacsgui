@@ -2,15 +2,20 @@
   <aside class="control-sidebar control-sidebar-dark">
     <!-- Create the tabs -->
     <ul class="nav nav-tabs nav-justified control-sidebar-tabs">
-      <li class="active"><a href="#control-sidebar-home-tab" data-toggle="tab"><i class="fa fa-home"></i></a></li>
-      <li><a href="#control-sidebar-settings-tab" data-toggle="tab"><i class="fa fa-gears"></i></a></li>
+      <li class="active"><a href="#control-sidebar-debug-tab" data-toggle="tab"><i class="fa fa-gears"></i></a></li>
+      <li><a href="#control-sidebar-settings-tab" data-toggle="tab"><i class="fa fa-home"></i></a></li>
     </ul>
     <!-- Tab panes -->
     <div class="tab-content">
       <!-- Home tab content -->
-      <div class="tab-pane active" id="control-sidebar-home-tab">
-        
-		<p>I'll add something here later, maybe</p>
+      <div class="tab-pane active" id="control-sidebar-debug-tab">
+
+		<p>Debug info:</p>
+    <ul>
+      <li>PHP version: <?php echo explode('+',phpversion())[0]; ?></li>
+      <li>API version: <apiversion></apiversion></li>
+      <li>tac_plus version: <tacversion></tacversion></li>
+    </ul>
         <!-- /.control-sidebar-menu -->
 		<textarea class="form-control debug-output">
 		</textarea>

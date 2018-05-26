@@ -1,4 +1,8 @@
 ##############################
+Version_0.9.10 20180526
+	*Fixed bug this privilege-level and default cmd service for Service section
+	*Fixed 404 page
+##############################
 Version_0.9.9 20180525
 	*Added NX-OS Support (if true user will get pap parameter)
 	*API User without right to Add/Edit/Del API User can change yourself settings
