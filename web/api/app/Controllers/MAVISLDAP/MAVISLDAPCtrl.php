@@ -9,7 +9,7 @@ use Respect\Validation\Validator as v;
 class MAVISLDAPCtrl extends Controller
 {
 ################################################
-########	MAVIS LDAP Parameters	###############START###########	
+########	MAVIS LDAP Parameters	###############START###########
 	#########	GET LDAP Params	#########
 	public function getLDAPParams($req,$res)
 	{
@@ -26,12 +26,12 @@ class MAVISLDAPCtrl extends Controller
 			return $res -> withStatus(401) -> write(json_encode($data));
 		}
 		//INITIAL CODE////END//
-		
+
 		$data['LDAP_Params']=MAVISLDAP::select()->first();
-		
+
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
-	
+
 	#########	POST LDAP Params	#########
 	public function postLDAPParams($req,$res)
 	{
@@ -54,7 +54,7 @@ class MAVISLDAPCtrl extends Controller
 			return $res -> withStatus(403) -> write(json_encode($data));
 		}
 		//CHECK ACCESS TO THAT FUNCTION//END//
-		
+
 		$data['mavis_ldap_update'] = MAVISLDAP::where([['id','=',1]])->
 			update([
 				'enabled' => $req->getParam('enabled'),
@@ -65,6 +65,7 @@ class MAVISLDAPCtrl extends Controller
 				'filter' => $req->getParam('filter'),
 				'user' => $req->getParam('user'),
 				'password' => $req->getParam('password'),
+				'password_hide' => $req->getParam('password_hide'),
 				'group_prefix' => $req->getParam('group_prefix'),
 				'group_prefix_flag' => $req->getParam('group_prefix_flag'),
 				'memberOf' => $req->getParam('memberOf'),
@@ -73,15 +74,15 @@ class MAVISLDAPCtrl extends Controller
 				'tls' => $req->getParam('tls'),
 				'path' => $req->getParam('path'),
 			]);
-		
+
 		$data['changeConfiguration']=$this->changeConfigurationFlag(['unset' => 0]);
-		
+
 		$logEntry=array('action' => 'edit', 'objectName' => 'MAVIS', 'objectId' => 'LDAP', 'section' => 'MAVIS LDAP', 'message' => 701);
 		$data['logging']=$this->APILoggingCtrl->makeLogEntry($logEntry);
-		
+
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
-########	MAVIS LDAP Parameters	###############END###########	
+########	MAVIS LDAP Parameters	###############END###########
 ################################################
 ########	MAVIS LDAP Check	###############START###########
 	public function postLDAPCheck($req,$res)
@@ -99,11 +100,11 @@ class MAVISLDAPCtrl extends Controller
 			return $res -> withStatus(401) -> write(json_encode($data));
 		}
 		//INITIAL CODE////END//
-		
+
 		$data['test_configuration'] = $this->TACConfigCtrl->testConfiguration($this->TACConfigCtrl->createConfiguration("\n "));
-		
+
 		$data['ldap_check']=shell_exec(TAC_ROOT_PATH . '/main.sh check mavis '.$req->getParam('username').' '.$req->getParam('password').' 2>&1');
-		
+
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
 ########	MAVIS LDAP Check	###############END###########

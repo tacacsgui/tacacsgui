@@ -10,17 +10,17 @@ $PAGE_TITLE = 'TacacsGUI';
 $PAGE_SUBTITLE = 'MAVIS LDAP Auth';
 $BREADCRUMB = array(
 	'Home' => [
-		'name' => 'MAVIS', 
-		'href' => '', 
-		'icon' => 'fa fa-cog', 
+		'name' => 'MAVIS',
+		'href' => '',
+		'icon' => 'fa fa-cog',
 		'class' => ''  //last item should have active class!!
-	], 
+	],
 	'Tacacs' => [
-		'name' => 'LDAP Auth', 
-		'href' => '', 
-		'icon' => 'fa fa-cog', 
+		'name' => 'LDAP Auth',
+		'href' => '',
+		'icon' => 'fa fa-cog',
 		'class' => 'active'  //last item should have active class!!
-	], 
+	],
 );
 ///!!!!!////
 $ACTIVE_MENU_ID=900;
@@ -38,9 +38,9 @@ require __DIR__ . '/templates/header.php';
 	<!-- iCheck -->
 	<link rel="stylesheet" href="/plugins/iCheck/square/blue.css">
 <!--ADDITIONAL CSS FILES END-->
-<?php 
+<?php
 
-require __DIR__ . '/templates/body_start.php'; 
+require __DIR__ . '/templates/body_start.php';
 
 ?>
 <!--MAIN CONTENT START-->
@@ -142,6 +142,16 @@ require __DIR__ . '/templates/body_start.php';
 					<input type="password" class="form-control password" placeholder="LDAP User Password"/>
 					<p class="help-block">password for LDAP User</p>
                 </div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-6">
+				<div class="checkbox icheck password_hide">
+					<label>
+						<input type="checkbox" > Hide password
+					</label>
+					<p class="help-block">if checked password of the LDAP user will be hided in the global configuration, checked by default</p>
+				</div>
 			</div>
 		</div>
 		<div class="row">
@@ -276,9 +286,9 @@ Info will appeared here
 
 <!--MAIN CONTENT END-->
 
-<?php 
+<?php
 
-require __DIR__ . '/templates/body_end.php'; 
+require __DIR__ . '/templates/body_end.php';
 
 ?>
 
@@ -291,7 +301,7 @@ require __DIR__ . '/templates/footer_end.php';
 <!-- ADDITIONAL JS FILES START-->
 	<!-- iCheck -->
 	<script src="/plugins/iCheck/icheck.min.js"></script>
-	
+
 	<!-- main js MAIN Functions -->
     <script src="dist/js/pages/mavis_ldap/main.js"></script>
 

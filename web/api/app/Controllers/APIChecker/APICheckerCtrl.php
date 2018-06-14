@@ -203,6 +203,7 @@ protected $tablesArr = array(
 		'filter' => ['string', ''],
 		'user' => ['string', ''],
 		'password' => ['string', ''],
+		'password_hide' => ['integer', '1'],
 		'group_prefix' => ['string', ''],
 		'group_prefix_flag' => ['integer', '0'],
 		'memberOf' => ['integer', '0'],

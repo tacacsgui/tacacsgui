@@ -22,7 +22,7 @@ function getLdapParams()
 	var data = {
 		"action": "GET",
 		"test" : "none"
-		};	
+		};
 	$.ajax({
 		type: "GET",
 		dataType: "json",
@@ -40,6 +40,7 @@ function getLdapParams()
 			$('input.hosts').val(data.LDAP_Params.hosts);
 			$('input.user').val(data.LDAP_Params.user);
 			$('input.password').val(data.LDAP_Params.password);
+			$('div.password_hide input').iCheck( (data.LDAP_Params.password_hide == 1) ? 'check' : 'uncheck');
 			$('input.base').val(data.LDAP_Params.base);
 			$('input.filter').val(data.LDAP_Params.filter);
 			$('div.memberOf input').iCheck( (data.LDAP_Params.memberOf == 1) ? 'check' : 'uncheck');
@@ -68,6 +69,7 @@ $('button.submit').click(function(){
 		"hosts" : $('input.hosts').val(),
 		"user" : $('input.user').val(),
 		"password" : $('input.password').val(),
+		"password_hide" : ( ( $('div.password_hide input').prop( "checked" ) ) ? 1 : 0 ) ,
 		"base" : $('input.base').val(),
 		"filter" : $('input.filter').val(),
 		"memberOf" : ( ( $('div.memberOf input').prop( "checked" ) ) ? 1 : 0 ) ,
@@ -77,7 +79,7 @@ $('button.submit').click(function(){
 		"fallthrough" : ( ( $('div.fallthrough input').prop( "checked" ) ) ? 1 : 0 ) ,
 		"path" : $('input.path').val(),
 		"test" : "none",
-		};	
+		};
 	$.ajax({
 		type: "POST",
 		dataType: "json",
@@ -105,32 +107,32 @@ $('button.submit').click(function(){
 $('button.ldap-check').click(function(){
 	$('pre.ldap-check-output').empty().append('Loading...'+"\n");
 	$('div.ldap-check-alert').empty().hide();
-	
+
 	username = $('input.ldap-check-username').val()
 	password = $('input.ldap-check-password').val()
-	
+
 	errormessage = '';
-	
+
 	if (username == ''){
 		errormessage += '<p>Where is username?!</p>';
 	}
-	
+
 	if (password == ''){
 		errormessage += '<p>Where is password?!</p>';
 	}
-	
+
 	if (errormessage !== ''){
 		$('div.ldap-check-alert').append(errormessage).show();
 		$('pre.ldap-check-output').empty().append(errormessage);
 		return;
 	}
-	
+
 	var data = {
 		"action": "POST",
 		"username" : username,
 		"password" : password,
 		"test" : "none",
-		};	
+		};
 	$.ajax({
 		type: "POST",
 		dataType: "json",
@@ -147,5 +149,5 @@ $('button.ldap-check').click(function(){
 			//console.log(data);
 			errorHere(data);
 		}
-	});	
+	});
 })

@@ -59,9 +59,9 @@ class TACUsersCtrl extends Controller
 		$validation = $this->validator->validate($req, [
 			'username' => v::noWhitespace()->notEmpty()->userTacAvailable(0),
 			'group' => v::noWhitespace(),
-			'enable' => v::noWhitespace(),
+			'enable' => v::noWhitespace()->prohibitedChars(),
 			'enable_flag' => v::noWhitespace()->numeric(),
-			'login' => v::noWhitespace()->notEmpty(),
+			'login' => v::noWhitespace()->notEmpty()->prohibitedChars(),
 			'login_flag' => v::noWhitespace()->numeric(),
 		]);
 
@@ -82,8 +82,7 @@ class TACUsersCtrl extends Controller
 			if ($req->getParam('login_flag') == 1)
 			{
 				$data['login']=trim(shell_exec('openssl passwd -1 '.$data['login']));
-			}
-			if ($req->getParam('login_flag') == 2)
+			} elseif ($req->getParam('login_flag') == 2)
 			{
 				$data['login']=trim(shell_exec('openssl passwd -crypt '.$data['login']));
 			}
@@ -190,9 +189,9 @@ class TACUsersCtrl extends Controller
 		$validation = $this->validator->validate($req, [
 			'username' => v::noWhitespace()->notEmpty()->userTacAvailable($req->getParam('id')),
 			'group' => v::noWhitespace()->numeric(),
-			'enable' => v::noWhitespace(),
+			'enable' => v::noWhitespace()->prohibitedChars(),
 			'enable_flag' => v::noWhitespace()->numeric(),
-			'login' => v::noWhitespace()->notEmpty(),
+			'login' => v::noWhitespace()->notEmpty()->prohibitedChars(),
 			'login_flag' => v::noWhitespace()->numeric(),
 			'mavis_otp_period' => v::noWhitespace()->intVal()->between(30, 120),
 			'mavis_otp_digits' => v::noWhitespace()->intVal()->between(5, 8),

@@ -170,12 +170,12 @@ class TACConfigCtrl extends Controller
 			'address = "'.$host['ipaddr'].'/'.$host['prefix'].'"');
 			///DEVICE KEY///
 			if ($host['key']!='')array_push($outputDevices[$host['id']],
-			($html) ? $this->html_tags['param'][0] . "key" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] .$host['key']. $this->html_tags['val'][1]
+			($html) ? $this->html_tags['param'][0] . "key" . $this->html_tags['param'][1] . ' = "' . $this->html_tags['val'][0] .$host['key']. $this->html_tags['val'][1].'"'
 			:
-			'key = '.$host['key']);
+			'key = "'.$host['key'].'"');
 			///DEVICE ENABLE///
 			if ($host['enable']!='')array_push($outputDevices[$host['id']],
-			($html) ? $this->html_tags['param'][0] . "enable" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] .$this->crypto_flag[$host['enable_flag']].' '.$host['enable']. $this->html_tags['val'][1]
+			($html) ? $this->html_tags['param'][0] . "enable" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] .$this->crypto_flag[$host['enable_flag']] . ' '. $host['enable'] . $this->html_tags['val'][1]
 			:
 			'enable = '.$this->crypto_flag[$host['enable_flag']].' '.$host['enable']);
 			///DEVICE BANNER WELCOME///
@@ -712,7 +712,7 @@ class TACConfigCtrl extends Controller
 		'	setenv LDAP_USER = "'. $mavis_ldap_settings['user'].'"');
 		///LDAP PASSWD///
 		array_push($outputMavisLdap[$id],
-		($html) ? $this->html_tags['param'][0] . "	setenv LDAP_PASSWD" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] .'"'. $mavis_ldap_settings['password'] .'"'. $this->html_tags['val'][1]
+		($html) ? $this->html_tags['param'][0] . "	setenv LDAP_PASSWD" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] .'"'. ( (!$mavis_ldap_settings['password_hide'] ) ? $mavis_ldap_settings['password'] : '********')  .'"'. $this->html_tags['val'][1]
 		:
 		'	setenv LDAP_PASSWD = "'. $mavis_ldap_settings['password'].'"');
 		///LDAP AD GROUP PREFIX///
