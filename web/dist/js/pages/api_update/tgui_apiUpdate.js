@@ -104,6 +104,7 @@ var tgui_apiUpdate = {
 
     ajaxRequest.send(ajaxProps).then(function(resp) {
       console.log(resp);
+      tgui_apiUser.signout();
     }).fail(function(err){
       tgui_error.getStatus(err, ajaxProps)
     })
