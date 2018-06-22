@@ -94,5 +94,18 @@ var tgui_apiUpdate = {
     }).fail(function(err){
       tgui_error.getStatus(err, ajaxProps)
     })
+  },
+  upgrade: function() {
+    var self = this;
+
+    var ajaxProps = {
+      url: API_LINK+"update/upgrade/"
+    };//ajaxProps END
+
+    ajaxRequest.send(ajaxProps).then(function(resp) {
+      console.log(resp);
+    }).fail(function(err){
+      tgui_error.getStatus(err, ajaxProps)
+    })
   }
 }

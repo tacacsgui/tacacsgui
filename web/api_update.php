@@ -105,7 +105,7 @@ require __DIR__ . '/templates/body_start.php';
 	<!-- /.box-body -->
 
 	<div class="box-footer upgrade text-center" style="display:none">
-		<button class="btn btn-success btn-flat upgrade" onclick="upgrade()">Update</button>
+		<button class="btn btn-success btn-flat" onclick="tgui_apiUpdate.upgrade()">Update</button>
 	</div>
 	<div class="overlay update_output" style="display:none;">
 		<i class="fa fa-refresh fa-spin"></i>
