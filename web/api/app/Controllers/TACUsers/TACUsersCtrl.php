@@ -59,9 +59,11 @@ class TACUsersCtrl extends Controller
 		$validation = $this->validator->validate($req, [
 			'username' => v::noWhitespace()->notEmpty()->userTacAvailable(0),
 			'group' => v::noWhitespace(),
-			'enable' => v::noWhitespace()->prohibitedChars(),
+			'enable' => v::noWhitespace()->prohibitedChars()->desRestriction($req->getParam('enable_flag')),
 			'enable_flag' => v::noWhitespace()->numeric(),
-			'login' => v::noWhitespace()->notEmpty()->prohibitedChars(),
+			'pap' => v::noWhitespace()->prohibitedChars()->desRestriction($req->getParam('enable_flag')),
+			'pap_flag' => v::noWhitespace()->numeric(),
+			'login' => v::noWhitespace()->notEmpty()->prohibitedChars()->desRestriction($req->getParam('login_flag')),
 			'login_flag' => v::noWhitespace()->numeric(),
 		]);
 
@@ -75,33 +77,15 @@ class TACUsersCtrl extends Controller
 
 		if ( (!empty($allParams['enable']) AND (@$allParams['enable_encrypt'] == 1)) AND (intval( @$allParams['enable_flag'] ) !== 0) )
 		{
-			if ($allParams['enable_flag'] == 1)
-			{
-				$allParams['enable']=trim(shell_exec('openssl passwd -1 '.$allParams['enable']));
-			} elseif ($allParams['enable_flag'] == 2)
-			{
-				$allParams['enable']=trim(shell_exec('openssl passwd -crypt '.$allParams['enable']));
-			}
+			$allParams['enable'] = $this->encryption( $allParams['enable'], $allParams['enable_flag'] );
 		}
 		if ( (!empty($allParams['login']) AND (@$allParams['login_encrypt'] == 1)) AND (intval( @$allParams['login_flag'] ) !== 0) )
 		{
-			if ($allParams['login_flag'] == 1)
-			{
-				$allParams['login']=trim(shell_exec('openssl passwd -1 '.$allParams['login']));
-			} elseif ($allParams['login_flag'] == 2)
-			{
-				$allParams['login']=trim(shell_exec('openssl passwd -crypt '.$allParams['login']));
-			}
+			$allParams['login'] = $this->encryption( $allParams['login'], $allParams['login_flag'] );
 		}
 		if ( (!empty($allParams['pap']) AND (@$allParams['pap_encrypt'] == 1)) AND (intval( @$allParams['pap_flag'] ) !== 0) )
 		{
-			if ($allParams['pap_flag'] == 1)
-			{
-				$allParams['pap']=trim(shell_exec('openssl passwd -1 '.$allParams['pap']));
-			} elseif ($allParams['pap_flag'] == 2)
-			{
-				$allParams['pap']=trim(shell_exec('openssl passwd -crypt '.$allParams['pap']));
-			}
+			$allParams['pap'] = $this->encryption( $allParams['pap'], $allParams['pap_flag'] );
 		}
 
 		$otp_default = MAVISOTP::select()->first();
@@ -177,10 +161,12 @@ class TACUsersCtrl extends Controller
 		$validation = $this->validator->validate($req, [
 			'username' => v::noWhitespace()->when( v::nullType() , v::alwaysValid(), v::notEmpty()->userTacAvailable($req->getParam('id'))),
 			'group' => v::noWhitespace()->when( v::nullType() , v::alwaysValid(), v::numeric()),
-			'enable' => v::noWhitespace()->prohibitedChars(),
+			'enable' => v::noWhitespace()->prohibitedChars()->desRestriction($req->getParam('enable_flag')),
 			'enable_flag' => v::noWhitespace()->when( v::nullType() , v::alwaysValid(), v::numeric()),
-			'login' => v::noWhitespace()->when( v::nullType() , v::alwaysValid(), v::prohibitedChars()),
+			'login' => v::noWhitespace()->when( v::nullType() , v::alwaysValid(), v::prohibitedChars()->desRestriction($req->getParam('login_flag'))),
 			'login_flag' => v::noWhitespace()->when( v::nullType() , v::alwaysValid(), v::numeric()),
+			'pap' => v::noWhitespace()->prohibitedChars()->desRestriction($req->getParam('enable_flag')),
+			'pap_flag' => v::noWhitespace()->when( v::nullType() , v::alwaysValid(), v::numeric()),
 			'mavis_otp_period' => v::noWhitespace()->when( v::nullType() , v::alwaysValid(), v::intVal()->between(30, 120)),
 			'mavis_otp_digits' => v::noWhitespace()->when( v::nullType() , v::alwaysValid(), v::intVal()->between(5, 8)),
 		]);
@@ -195,33 +181,15 @@ class TACUsersCtrl extends Controller
 
 		if ( (!empty($allParams['enable']) AND (@$allParams['enable_encrypt'] == 1)) AND (intval( @$allParams['enable_flag'] ) !== 0) )
 		{
-			if ($allParams['enable_flag'] == 1)
-			{
-				$allParams['enable']=trim(shell_exec('openssl passwd -1 '.$allParams['enable']));
-			} elseif ($allParams['enable_flag'] == 2)
-			{
-				$allParams['enable']=trim(shell_exec('openssl passwd -crypt '.$allParams['enable']));
-			}
+			$allParams['enable'] = $this->encryption( $allParams['enable'], $allParams['enable_flag'] );
 		}
 		if ( (!empty($allParams['login']) AND (@$allParams['login_encrypt'] == 1)) AND (intval( @$allParams['login_flag'] ) !== 0) )
 		{
-			if ($allParams['login_flag'] == 1)
-			{
-				$allParams['login']=trim(shell_exec('openssl passwd -1 '.$allParams['login']));
-			} elseif ($allParams['login_flag'] == 2)
-			{
-				$allParams['login']=trim(shell_exec('openssl passwd -crypt '.$allParams['login']));
-			}
+			$allParams['login'] = $this->encryption( $allParams['login'], $allParams['login_flag'] );
 		}
 		if ( (!empty($allParams['pap']) AND (@$allParams['pap_encrypt'] == 1)) AND (intval( @$allParams['pap_flag'] ) !== 0) )
 		{
-			if ($allParams['pap_flag'] == 1)
-			{
-				$allParams['pap']=trim(shell_exec('openssl passwd -1 '.$allParams['pap']));
-			} elseif ($allParams['pap_flag'] == 2)
-			{
-				$allParams['pap']=trim(shell_exec('openssl passwd -crypt '.$allParams['pap']));
-			}
+			$allParams['pap'] = $this->encryption( $allParams['pap'], $allParams['pap_flag'] );
 		}
 
 		$id = $allParams['id'];

@@ -114,13 +114,7 @@ class TACDevicesCtrl extends Controller
 
 		if ( (!empty($allParams['enable']) AND (@$allParams['enable_encrypt'] == 1)) AND (intval( @$allParams['enable_flag'] ) !== 0) )
 		{
-			if ($allParams['enable_flag'] == 1)
-			{
-				$allParams['enable']=trim(shell_exec('openssl passwd -1 '.$allParams['enable']));
-			} elseif ($allParams['enable_flag'] == 2)
-			{
-				$allParams['enable']=trim(shell_exec('openssl passwd -crypt '.$allParams['enable']));
-			}
+			$allParams['enable'] = $this->encryption( $allParams['enable'], $allParams['enable_flag'] );
 		}
 
 		$device = TACDevices::create($allParams);
@@ -205,13 +199,7 @@ class TACDevicesCtrl extends Controller
 
 		if ( (!empty($allParams['enable']) AND (@$allParams['enable_encrypt'] == 1)) AND (intval( @$allParams['enable_flag'] ) !== 0) )
 		{
-			if ($allParams['enable_flag'] == 1)
-			{
-				$allParams['enable']=trim(shell_exec( 'openssl passwd -1 '.$allParams['enable']) );
-			} elseif ($allParams['enable_flag'] == 2)
-			{
-				$allParams['enable']=trim(shell_exec( 'openssl passwd -crypt '.$allParams['enable']) );
-			}
+			$allParams['enable'] = $this->encryption( $allParams['enable'], $allParams['enable_flag'] );
 		}
 
 		$id = $allParams['id'];

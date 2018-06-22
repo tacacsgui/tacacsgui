@@ -1,4 +1,9 @@
 ##############################
+Version_0.9.14 20180623
+	*Extra Options added to configuration generator
+	*Added restriction for passwords, you can use char *
+	*Added restriction for DES passwords, it must be less or equal 8
+##############################
 Version_0.9.13 20180614
 	*Code optimization (new JS), more stability. e.g. ACL editor works in different browsers now
 	*Fixed bug with tacacs key for device groups

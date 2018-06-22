@@ -56,7 +56,7 @@ class TACUserGrpsCtrl extends Controller
 
 		$validation = $this->validator->validate($req, [
 			'name' => v::noWhitespace()->notEmpty()->userGroupTacAvailable(0),
-			'enable' => v::noWhitespace(),
+			'enable' => v::noWhitespace()->desRestriction($req->getParam('enable_flag')),
 			'enable_flag' => v::noWhitespace()->numeric(),
 		]);
 
@@ -70,13 +70,7 @@ class TACUserGrpsCtrl extends Controller
 
 		if ( (!empty($allParams['enable']) AND (@$allParams['enable_encrypt'] == 1)) AND (intval( @$allParams['enable_flag'] ) !== 0) )
 		{
-			if ($allParams['enable_flag'] == 1)
-			{
-				$allParams['enable']=trim(shell_exec('openssl passwd -1 '.$allParams['enable']));
-			} elseif ($allParams['enable_flag'] == 2)
-			{
-				$allParams['enable']=trim(shell_exec('openssl passwd -crypt '.$allParams['enable']));
-			}
+			$allParams['enable'] = $this->encryption( $allParams['enable'], $allParams['enable_flag'] );
 		}
 
 		$group = TACUserGrps::create($allParams);
@@ -141,7 +135,7 @@ class TACUserGrpsCtrl extends Controller
 
 		$validation = $this->validator->validate($req, [
 			'name' => v::noWhitespace()->when( v::nullType() , v::alwaysValid(), v::userGroupTacAvailable($req->getParam('id'))),
-			'enable' => v::noWhitespace()->prohibitedChars(),
+			'enable' => v::when( v::nullType() , v::alwaysValid(), v::noWhitespace()->prohibitedChars()->desRestriction($req->getParam('enable_flag'))),
 			'enable_flag' => v::noWhitespace()->when( v::nullType() , v::alwaysValid(), v::numeric()),
 		]);
 
@@ -155,13 +149,7 @@ class TACUserGrpsCtrl extends Controller
 
 		if ( (!empty($allParams['enable']) AND (@$allParams['enable_encrypt'] == 1)) AND (intval( @$allParams['enable_flag'] ) !== 0) )
 		{
-			if ($allParams['enable_flag'] == 1)
-			{
-				$allParams['enable']=trim(shell_exec('openssl passwd -1 '.$allParams['enable']));
-			} elseif ($allParams['enable_flag'] == 2)
-			{
-				$allParams['enable']=trim(shell_exec('openssl passwd -crypt '.$allParams['enable']));
-			}
+			$allParams['enable'] = $this->encryption( $allParams['enable'], $allParams['enable_flag'] );
 		}
 
 		$id = $allParams['id'];

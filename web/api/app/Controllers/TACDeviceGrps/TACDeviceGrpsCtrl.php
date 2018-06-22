@@ -71,15 +71,9 @@ class TACDeviceGrpsCtrl extends Controller
 
 		if ($allParams['default_flag']) TACDeviceGrps::where([['default_flag', '=', 1]])->update(['default_flag' => 0]);
 
-		if ( !empty($allParams['enable'] ) AND intval( @$allParams['enable_flag'] ) !== 0 )
+		if ( (!empty($allParams['enable']) AND (@$allParams['enable_encrypt'] == 1)) AND (intval( @$allParams['enable_flag'] ) !== 0) )
 		{
-			if ($allParams['enable_encrypt'] == 1)
-			{
-				$allParams['enable']=trim(shell_exec('openssl passwd -1 '.$allParams['enable']));
-			} elseif ($allParams['enable_encrypt'] == 2)
-			{
-				$allParams['enable']=trim(shell_exec('openssl passwd crypt '.$allParams['enable']));
-			}
+			$allParams['enable'] = $this->encryption( $allParams['enable'], $allParams['enable_flag'] );
 		}
 
 		$deviceGroup = TACDeviceGrps::create($allParams);
@@ -160,15 +154,9 @@ class TACDeviceGrpsCtrl extends Controller
 
 		if ($allParams['default_flag']) TACDeviceGrps::where([['default_flag', '=', 1]])->update(['default_flag' => 0]);
 
-		if ( !empty($allParams['enable'] ) AND intval( @$allParams['enable_flag'] ) !== 0 )
+		if ( (!empty($allParams['enable']) AND (@$allParams['enable_encrypt'] == 1)) AND (intval( @$allParams['enable_flag'] ) !== 0) )
 		{
-			if ($allParams['enable_encrypt'] == 1)
-			{
-				$allParams['enable']=trim(shell_exec('openssl passwd -1 '.$allParams['enable']));
-			} elseif ($allParams['enable_encrypt'] == 2)
-			{
-				$allParams['enable']=trim(shell_exec('openssl passwd crypt '.$allParams['enable']));
-			}
+			$allParams['enable'] = $this->encryption( $allParams['enable'], $allParams['enable_flag'] );
 		}
 
 		$id = $allParams['id'];

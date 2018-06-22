@@ -525,10 +525,24 @@ class TACConfigCtrl extends Controller
 			:
 			'	login = '. $login);
 			///USER PAP///
-			if ($user['nxos_support'] == 1) array_push($outputUsers[$user['id']],
+			if ($user['pap_clone'] == 1) array_push($outputUsers[$user['id']],
 			($html) ? '	'.$this->html_tags['param'][0] . "pap" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] . $login . $this->html_tags['val'][1]
 			:
 			'	pap = '. $login);
+			if ($user['pap_clone'] !== 1 AND !empty($user['pap'])) array_push($outputUsers[$user['id']],
+			($html) ? '	'.$this->html_tags['param'][0] . "pap" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] . $this->crypto_flag[$user['pap_flag']].' '.$user['pap'] . $this->html_tags['val'][1]
+			:
+			'	pap = '. $this->crypto_flag[$user['pap_flag']].' '.$user['pap']);
+			///USER CHAP///
+			if (!empty($user['chap'])) array_push($outputUsers[$user['id']],
+			($html) ? '	'.$this->html_tags['param'][0] . "chap" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] . 'clear '.$user['chap'] . $this->html_tags['val'][1]
+			:
+			'	chap = '. 'clear '.$user['chap']);
+			///USER MS-CHAP///
+			if (!empty($user['ms-chap'])) array_push($outputUsers[$user['id']],
+			($html) ? '	'.$this->html_tags['param'][0] . "ms-chap" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] . 'clear '.$user['ms-chap'] . $this->html_tags['val'][1]
+			:
+			'	ms-chap = '. 'clear '.$user['ms-chap']);
 			///USER ENABLE///
 			if ($user['enable']!='')array_push($outputUsers[$user['id']],
 			($html) ? '	'.$this->html_tags['param'][0] . "enable" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] . $this->crypto_flag[$user['enable_flag']].' '.$user['enable']. $this->html_tags['val'][1]

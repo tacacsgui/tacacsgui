@@ -105,4 +105,18 @@ class Controller
 		}
 		return $randomString;
 	}
+	////////////////////////////////////////
+	protected function encryption( $password = '', $type = 0 )
+	{
+		if ($type == 1)
+		{
+			return trim(shell_exec('openssl passwd -1 \''.$password."'"));
+		} elseif ($type == 2)
+		{
+			return trim(shell_exec('openssl passwd -crypt \''.$password."'"));
+		}
+	}
+	////////////////////////////////////////
+	
+	////////////////////////////////////////
 }

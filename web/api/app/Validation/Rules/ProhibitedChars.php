@@ -10,6 +10,6 @@ class ProhibitedChars extends AbstractRule
 	public function validate($input)
 	{
 
-		return !preg_match('/["\'\\\]/',$input);
+		return !preg_match('/["\'\\\\*]/',$input);
 	}
 }
