@@ -10,14 +10,14 @@ $PAGE_TITLE = 'TacacsGUI';
 $PAGE_SUBTITLE = 'Tacacs Users';
 $BREADCRUMB = array(
 	'Tacacs' => [
-		'name' => 'Tacacs', 
-		'href' => '', 
-		'icon' => 'fa fa-cogs', 
+		'name' => 'Tacacs',
+		'href' => '',
+		'icon' => 'fa fa-cogs',
 		'class' => ''  //last item should have active class!!
-	], 
+	],
 	'Users' => [
-		'name' => 'Users', 
-		'href' => '', 
+		'name' => 'Users',
+		'href' => '',
 		'icon' => 'fa fa-child', //leave empty if you won't put icon
 		'class' => 'active' //last item should have active class!!
 	]
@@ -43,13 +43,13 @@ require __DIR__ . '/templates/header.php';
 </head>
 <!--ADDITIONAL CSS FILES END-->
 
-<?php 
+<?php
 
-require __DIR__ . '/templates/body_start.php'; 
+require __DIR__ . '/templates/body_start.php';
 ?>
 <!--MAIN CONTENT START-->
 
-<div class="row"> 
+<div class="row">
 	<div class="col-xs-12">
 		<div class="box box-primary">
 			<div class="box-header">
@@ -62,31 +62,31 @@ require __DIR__ . '/templates/body_start.php';
 			<div class="box-body">
 				<div class="table-responsive">
 					<table id="usersDataTable" class="table-striped display table table-bordered" style="overflow: auto;">
-						
-					</table>	
+
+					</table>
 				</div>
 			</div><!-- /.box-body -->
-		</div><!-- /.box --> 
+		</div><!-- /.box -->
 	</div><!-- /.col -->
 </div><!-- /.row -->
 
 <!--MAIN CONTENT END-->
 
-<?php 
+<?php
 
-require __DIR__ . '/templates/pages/tac_users/modalAddUser.php'; 
-
-?>
-
-<?php 
-
-require __DIR__ . '/templates/pages/tac_users/modalEditUser.php'; 
+require __DIR__ . '/templates/pages/tac_users/modalAddUser.php';
 
 ?>
 
-<?php 
+<?php
 
-require __DIR__ . '/templates/body_end.php'; 
+require __DIR__ . '/templates/pages/tac_users/modalEditUser.php';
+
+?>
+
+<?php
+
+require __DIR__ . '/templates/body_end.php';
 
 ?>
 
@@ -104,18 +104,18 @@ require __DIR__ . '/templates/footer_end.php';
 	<script src="/plugins/iCheck/icheck.min.js"></script>
 	<!-- Select2 -->
 	<script src="bower_components/select2/dist/js/select2.full.min.js"></script>
-	
+
 	<script type="text/javascript" src="/plugins/qrcode/jquery.qrcode.min.js"></script>
 
 
-
-	
-	<!-- main js User MAIN Functions -->
-	<script src="dist/js/pages/tac_users/select.js"></script>
-    <script src="dist/js/pages/tac_users/main.js"></script>
-    
 	<!-- DATATABLES MAIN -->
-    <script src="dist/js/pages/tac_users/datatables.js"></script>
+  <script src="dist/js/pages/tac_users/datatables.js"></script>
+	<!-- Select2 Object -->
+	<script src="dist/js/tgui_select2.js"></script>
+	<!-- MAIN Object-->
+  <script src="dist/js/pages/tac_users/tgui_tacUser.js"></script>
+
+  <script src="dist/js/pages/tac_users/main.js"></script>
 <!-- ADDITIONAL JS FILES END-->
 </body>
 

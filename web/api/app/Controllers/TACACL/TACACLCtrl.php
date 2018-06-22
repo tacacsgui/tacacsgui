@@ -12,25 +12,25 @@ class TACACLCtrl extends Controller
 {
 ################################################
 ########	Add New ACL	###############START###########
-	#########	GET Add New ACL	#########
-	public function getACLAdd($req,$res)
-	{
-		//INITIAL CODE////START//
-		$data=array();
-		$data=$this->initialData([
-			'type' => 'get',
-			'object' => 'acl',
-			'action' => 'add',
-		]);
-		#check error#
-		if ($_SESSION['error']['status']){
-			$data['error']=$_SESSION['error'];
-			return $res -> withStatus(401) -> write(json_encode($data));
-		}
-		//INITIAL CODE////END//
-
-		return $res -> withStatus(200) -> write(json_encode($data));
-	}
+	// #########	GET Add New ACL	#########
+	// public function getACLAdd($req,$res)
+	// {
+	// 	//INITIAL CODE////START//
+	// 	$data=array();
+	// 	$data=$this->initialData([
+	// 		'type' => 'get',
+	// 		'object' => 'acl',
+	// 		'action' => 'add',
+	// 	]);
+	// 	#check error#
+	// 	if ($_SESSION['error']['status']){
+	// 		$data['error']=$_SESSION['error'];
+	// 		return $res -> withStatus(401) -> write(json_encode($data));
+	// 	}
+	// 	//INITIAL CODE////END//
+	//
+	// 	return $res -> withStatus(200) -> write(json_encode($data));
+	// }
 
 	#########	POST Add New ACL	#########
 	public function postACLAdd($req,$res)
@@ -111,7 +111,7 @@ class TACACLCtrl extends Controller
 			return $res -> withStatus(401) -> write(json_encode($data));
 		}
 		//INITIAL CODE////END//
-
+		unset($data['error']);//BEACAUSE DATATABLES USES THAT VARIABLE//
 		$data['data']=array();
 		$data['recordsTotal'] = 0;
 		$data['recordsFiltered'] = 0;
@@ -127,10 +127,10 @@ class TACACLCtrl extends Controller
 		$data['data']=array();
 		foreach($tempData as $acl){
 			$buttons='<div class="btn-group text-center">'.
-		'<button type="button" class="btn btn-default" onclick="moveRow(event, \'down\',\'editForm\')"><i class="fa fa-caret-down"></i></button>'.
-		'<button type="button" class="btn btn-default" onclick="moveRow(event, \'up\',\'editForm\')"><i class="fa fa-caret-up"></i></button>'.
-		'<button type="button" class="btn btn-warning" onclick="editRow(event,\'editForm\')"><i class="fa fa-edit"></i></button>'.
-		'<button type="button" class="btn btn-danger" onclick="deleteRow(event,\'editForm\')"><i class="fa fa-trash"></i></button>'.
+		'<button type="button" class="btn btn-default" onclick="tgui_acl.ace.move(this, \'down\')"><i class="fa fa-caret-down"></i></button>'.
+		'<button type="button" class="btn btn-default" onclick="tgui_acl.ace.move(this, \'up\')"><i class="fa fa-caret-up"></i></button>'.
+		'<button type="button" class="btn btn-warning" onclick="tgui_acl.ace.edit(this)"><i class="fa fa-edit"></i></button>'.
+		'<button type="button" class="btn btn-danger" onclick="tgui_acl.ace.delete(this)"><i class="fa fa-trash"></i></button>'.
 		'</div>';
 			$acl['buttons'] = $buttons;
 			array_push($data['data'],$acl);
@@ -175,9 +175,9 @@ class TACACLCtrl extends Controller
 			if (count($ACEs) < 2) $data['error']['validation']['ACEs'][0]='You should add at least one entry';
 			return $res -> withStatus(200) -> write(json_encode($data));
 		}
-
-		if ($req->getParam('name') != $req->getParam('name_old')){
-			TACACL::where([['name','=',$req->getParam('name_old')]])->
+		//var_dump(123);die();
+		if ( !empty( $req->getParam('name') ) AND !empty( $req->getParam('name_native') )){
+			TACACL::where([['name','=',$req->getParam('name_native')]])->
 			update(['name' => $req->getParam('name')]);
 		}
 
@@ -188,11 +188,10 @@ class TACACLCtrl extends Controller
 		foreach ($ACEs as $ACE)
 		{
 			$ACE['name']=$req->getParam('name');
-			if (!empty($ACE['id'])) { array_push($data['ace'],$ACE); $aceId=$ACE['id']; unset($ACE['id']); TACACL::where([['id','=',$aceId]])->
-			update($ACE);}
+			if (!empty($ACE['id'])) { array_push($data['ace'],$ACE); $aceId=$ACE['id']; unset($ACE['id']); TACACL::where([['id','=',$aceId]])->update($ACE); }
 			else {
 				$ACE['action']=$ACE['action'];
-				$data['test1']=$ACE;
+				$data['test1'][count($data['test1'])]=$ACE;
 				array_push($data['ace'],TACACL::create($ACE));
 			}
 
@@ -213,24 +212,24 @@ class TACACLCtrl extends Controller
 ################################################
 ########	Delete ACL	###############START###########
 	#########	GET Delete ACL	#########
-	public function getACLDelete($req,$res)
-	{
-		//INITIAL CODE////START//
-		$data=array();
-		$data=$this->initialData([
-			'type' => 'get',
-			'object' => 'acl',
-			'action' => 'delete',
-		]);
-		#check error#
-		if ($_SESSION['error']['status']){
-			$data['error']=$_SESSION['error'];
-			return $res -> withStatus(401) -> write(json_encode($data));
-		}
-		//INITIAL CODE////END//
-
-		return $res -> withStatus(200) -> write(json_encode($data));
-	}
+	// public function getACLDelete($req,$res)
+	// {
+	// 	//INITIAL CODE////START//
+	// 	$data=array();
+	// 	$data=$this->initialData([
+	// 		'type' => 'get',
+	// 		'object' => 'acl',
+	// 		'action' => 'delete',
+	// 	]);
+	// 	#check error#
+	// 	if ($_SESSION['error']['status']){
+	// 		$data['error']=$_SESSION['error'];
+	// 		return $res -> withStatus(401) -> write(json_encode($data));
+	// 	}
+	// 	//INITIAL CODE////END//
+	//
+	// 	return $res -> withStatus(200) -> write(json_encode($data));
+	// }
 
 	#########	POST Delete ACL	#########
 	public function postACLDelete($req,$res)
@@ -255,7 +254,7 @@ class TACACLCtrl extends Controller
 		}
 		//CHECK ACCESS TO THAT FUNCTION//END//
 
-		$data['deleteACL']=TACACL::where([
+		$data['result']=TACACL::where([
 			['name','=',$req->getParam('name')],
 		])->delete();
 		$data['id']=$req->getParam('id');
@@ -325,7 +324,7 @@ class TACACLCtrl extends Controller
 		//Creating correct array of answer to Datatables
 		$data['data']=array();
 		foreach($tempData as $acl){
-			$buttons='<button class="btn btn-warning btn-xs btn-flat" onclick="editACL(\''.$acl['id'].'\',\''.$acl['name'].'\')">Edit</button> <button class="btn btn-danger btn-xs btn-flat" onclick="deleteACL(\''.$acl['id'].'\',\''.$acl['name'].'\')">Del</button>';
+			$buttons='<button class="btn btn-warning btn-xs btn-flat" onclick="tgui_acl.getAcl(\''.$acl['id'].'\',\''.$acl['name'].'\')">Edit</button> <button class="btn btn-danger btn-xs btn-flat" onclick="tgui_acl.delete(\''.$acl['id'].'\',\''.$acl['name'].'\')">Del</button>';
 			$acl['buttons'] = $buttons;
 			array_push($data['data'],$acl);
 		}
@@ -349,7 +348,6 @@ class TACACLCtrl extends Controller
 					return $query->where($columns[2],'LIKE','%'.$params['columns'][2]['search']['value'].'%');
 				}) ->
 				count();
-
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
 
@@ -375,14 +373,14 @@ class TACACLCtrl extends Controller
 		//INITIAL CODE////END//
 		$noneItem = array('id' => 0, 'text' => 'None');
 		///IF GROUPID SET///
-		if ($req->getParam('aclId') != null){
-			if ($req->getParam('aclId') == 0)
+		if ($req->getParam('byId') != null){
+			if ($req->getParam('byId') == 0)
 			{
 				$data['item']=$noneItem;
 				return $res -> withStatus(200) -> write(json_encode($data));
 			}
 			$data['item'] = TACACL::select(['id','name'])->
-			where([['id', '=', $req->getParam('aclId')],['line_number','=',0]])->
+			where([['id', '=', $req->getParam('byId')],['line_number','=',0]])->
 			first();
 
 			$data['item']['text'] = $data['item']['name'];

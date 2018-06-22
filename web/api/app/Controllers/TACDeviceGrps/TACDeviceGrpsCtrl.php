@@ -12,24 +12,24 @@ class TACDeviceGrpsCtrl extends Controller
 ################################################
 ########	Add New Device Group	###############START###########
 	#########	GET Add New Device Group	#########
-	public function getDeviceGroupAdd($req,$res)
-	{
-		//INITIAL CODE////START//
-		$data=array();
-		$data=$this->initialData([
-			'type' => 'get',
-			'object' => 'device group',
-			'action' => 'add',
-		]);
-		#check error#
-		if ($_SESSION['error']['status']){
-			$data['error']=$_SESSION['error'];
-			return $res -> withStatus(401) -> write(json_encode($data));
-		}
-		//INITIAL CODE////END//
-
-		return $res -> withStatus(200) -> write(json_encode($data));
-	}
+	// public function getDeviceGroupAdd($req,$res)
+	// {
+	// 	//INITIAL CODE////START//
+	// 	$data=array();
+	// 	$data=$this->initialData([
+	// 		'type' => 'get',
+	// 		'object' => 'device group',
+	// 		'action' => 'add',
+	// 	]);
+	// 	#check error#
+	// 	if ($_SESSION['error']['status']){
+	// 		$data['error']=$_SESSION['error'];
+	// 		return $res -> withStatus(401) -> write(json_encode($data));
+	// 	}
+	// 	//INITIAL CODE////END//
+	//
+	// 	return $res -> withStatus(200) -> write(json_encode($data));
+	// }
 
 	#########	POST Add New Device	Group#########
 	public function postDeviceGroupAdd($req,$res)
@@ -67,36 +67,23 @@ class TACDeviceGrpsCtrl extends Controller
 			return $res -> withStatus(200) -> write(json_encode($data));
 		}
 
-		$data['default_flag'] = ($req->getParam('default_flag') === true OR $req->getParam('default_flag') === 'true') ? 1 : 0;
+		$allParams = $req->getParams();
 
-		if ($data['default_flag']) TACDeviceGrps::where([['default_flag', '=', 1]])->update(['default_flag' => 0]);
+		if ($allParams['default_flag']) TACDeviceGrps::where([['default_flag', '=', 1]])->update(['default_flag' => 0]);
 
-		$data['enable']=$req->getParam('enable');
-
-		if (isset($data['enable']) AND ($req->getParam('enable_encrypt') === true OR $req->getParam('enable_encrypt') === 'true'))
+		if ( !empty($allParams['enable'] ) AND intval( @$allParams['enable_flag'] ) !== 0 )
 		{
-			if ($req->getParam('enable_flag') == 1)
+			if ($allParams['enable_encrypt'] == 1)
 			{
-				$data['enable']=trim(shell_exec('openssl passwd -1 '.$data['enable']));
-			} elseif ($req->getParam('enable_flag') == 2)
+				$allParams['enable']=trim(shell_exec('openssl passwd -1 '.$allParams['enable']));
+			} elseif ($allParams['enable_encrypt'] == 2)
 			{
-				$data['enable']=trim(shell_exec('openssl passwd crypt '.$data['enable']));
+				$allParams['enable']=trim(shell_exec('openssl passwd crypt '.$allParams['enable']));
 			}
 		}
 
-		$deviceGroup = TACDeviceGrps::create([
-			'name' => $req->getParam('name'),
-			'key' => $req->getParam('key'),
-			'enable' => $data['enable'],
-			'enable_flag' => $req->getParam('enable_flag'),
-			'banner_welcome' => $req->getParam('banner_welcome'),
-			'banner_motd' => $req->getParam('banner_motd'),
-			'banner_failed' => $req->getParam('banner_failed'),
-			'default_flag' => $data['default_flag'],
-			'manual' => $req->getParam('manual'),
-		]);
+		$deviceGroup = TACDeviceGrps::create($allParams);
 
-		//$this->auth->check();
 		$data['deviceGroup']=$deviceGroup;
 
 		$data['changeConfiguration']=$this->changeConfigurationFlag(['unset' => 0]);
@@ -157,10 +144,10 @@ class TACDeviceGrpsCtrl extends Controller
 		//CHECK ACCESS TO THAT FUNCTION//END//
 
 		$validation = $this->validator->validate($req, [
-			'name' => v::noWhitespace()->notEmpty()->deviceGroupAvailable($req->getParam('id')),
-			'enable' => v::noWhitespace()->prohibitedChars(),
-			'enable_flag' => v::noWhitespace()->numeric(),
-			'key' => v::noWhitespace()->prohibitedChars(),
+			'name' => v::noWhitespace()->when( v::nullType() , v::alwaysValid(), v::deviceGroupAvailable($req->getParam('id'))),
+			'enable' => v::noWhitespace()->when( v::nullType() , v::alwaysValid(), v::prohibitedChars()),
+			'enable_flag' => v::noWhitespace()->when( v::nullType() , v::alwaysValid(), v::numeric()),
+			'key' => v::noWhitespace()->when( v::nullType() , v::alwaysValid(), v::prohibitedChars()),
 		]);
 
 		if ($validation->failed()){
@@ -169,39 +156,34 @@ class TACDeviceGrpsCtrl extends Controller
 			return $res -> withStatus(200) -> write(json_encode($data));
 		}
 
-		$data['default_flag'] = ($req->getParam('default_flag') === true OR $req->getParam('default_flag') === 'true') ? 1 : 0;
+		$allParams = $req->getParams();
 
-		if ($data['default_flag']) TACDeviceGrps::where([['default_flag', '=', 1]])->update(['default_flag' => 0]);
+		if ($allParams['default_flag']) TACDeviceGrps::where([['default_flag', '=', 1]])->update(['default_flag' => 0]);
 
-		$data['enable']=$req->getParam('enable');
-
-		if (isset($data['enable']) AND ($req->getParam('enable_encrypt') === true OR $req->getParam('enable_encrypt') === 'true'))
+		if ( !empty($allParams['enable'] ) AND intval( @$allParams['enable_flag'] ) !== 0 )
 		{
-			if ($req->getParam('enable_flag') == 1)
+			if ($allParams['enable_encrypt'] == 1)
 			{
-				$data['enable']=trim(shell_exec('openssl passwd -1 '.$data['enable']));
-			} elseif ($req->getParam('enable_flag') == 2)
+				$allParams['enable']=trim(shell_exec('openssl passwd -1 '.$allParams['enable']));
+			} elseif ($allParams['enable_encrypt'] == 2)
 			{
-				$data['enable']=trim(shell_exec('openssl passwd crypt '.$data['enable']));
+				$allParams['enable']=trim(shell_exec('openssl passwd crypt '.$allParams['enable']));
 			}
 		}
 
-		$data['group_update']=TACDeviceGrps::where([['id','=',$req->getParam('id')],['name','=',$req->getParam('name_old')]])->
-			update([
-				'name' => $req->getParam('name'),
-				'default_flag' => $data['default_flag'],
-				'key' => $req->getParam('key'),
-				'enable' => $data['enable'],
-				'enable_flag' => $req->getParam('enable_flag'),
-				'banner_welcome' => $req->getParam('banner_welcome'),
-				'banner_motd' => $req->getParam('banner_motd'),
-				'banner_failed' => $req->getParam('banner_failed'),
-				'manual' => $req->getParam('manual'),
-			]);
+		$id = $allParams['id'];
+
+		unset($allParams['id']);
+		unset($allParams['enable_encrypt']);
+
+		$data['group_update']=TACDeviceGrps::where([['id','=',$id]])->
+			update($allParams);
 
 		$data['changeConfiguration']=$this->changeConfigurationFlag(['unset' => 0]);
 
-		$logEntry=array('action' => 'edit', 'objectName' => $req->getParam('name'), 'objectId' => $req->getParam('id'), 'section' => 'tacacs device groups', 'message' => 302);
+		$name = TACDeviceGrps::select('name')->where([['id','=',$id]])->first();
+
+		$logEntry=array('action' => 'edit', 'objectName' => $name['name'], 'objectId' => $id, 'section' => 'tacacs device groups', 'message' => 302);
 		$data['logging']=$this->APILoggingCtrl->makeLogEntry($logEntry);
 
 		return $res -> withStatus(200) -> write(json_encode($data));
@@ -210,24 +192,24 @@ class TACDeviceGrpsCtrl extends Controller
 ################################################
 ########	Delete Device Group	###############START###########
 	#########	GET Delete Device Group	#########
-	public function getDeviceGroupDelete($req,$res)
-	{
-		//INITIAL CODE////START//
-		$data=array();
-		$data=$this->initialData([
-			'type' => 'get',
-			'object' => 'device group',
-			'action' => 'delete',
-		]);
-		#check error#
-		if ($_SESSION['error']['status']){
-			$data['error']=$_SESSION['error'];
-			return $res -> withStatus(401) -> write(json_encode($data));
-		}
-		//INITIAL CODE////END//
-
-		return $res -> withStatus(200) -> write(json_encode($data));
-	}
+	// public function getDeviceGroupDelete($req,$res)
+	// {
+	// 	//INITIAL CODE////START//
+	// 	$data=array();
+	// 	$data=$this->initialData([
+	// 		'type' => 'get',
+	// 		'object' => 'device group',
+	// 		'action' => 'delete',
+	// 	]);
+	// 	#check error#
+	// 	if ($_SESSION['error']['status']){
+	// 		$data['error']=$_SESSION['error'];
+	// 		return $res -> withStatus(401) -> write(json_encode($data));
+	// 	}
+	// 	//INITIAL CODE////END//
+	//
+	// 	return $res -> withStatus(200) -> write(json_encode($data));
+	// }
 
 	#########	POST Delete Device	Group#########
 	public function postDeviceGroupDelete($req,$res)
@@ -259,6 +241,8 @@ class TACDeviceGrpsCtrl extends Controller
 			return $res -> withStatus(200) -> write(json_encode($data));
 		}
 
+		$data['result'] = 0;
+
 		if (TACDevices::where([['group','=',$req->getParam('id')]])->count())
 		{
 			$defaultGroup=TACDeviceGrps::select('id')->where([['default_flag','=',1]])->first();
@@ -267,7 +251,7 @@ class TACDeviceGrpsCtrl extends Controller
 			]);
 		}
 
-		$data['deleteGroup']=TACDeviceGrps::where([
+		$data['result']=TACDeviceGrps::where([
 			['id','=',$req->getParam('id')],
 			['name','=',$req->getParam('name')],
 		])->delete();
@@ -334,7 +318,7 @@ class TACDeviceGrpsCtrl extends Controller
 		$data['data']=array();
 
 		foreach($tempData as $deviceGroup){
-			$buttons='<button class="btn btn-warning btn-xs btn-flat" onclick="editDeviceGroup(\''.$deviceGroup['id'].'\',\''.$deviceGroup['name'].'\')">Edit</button> <button class="btn btn-danger btn-xs btn-flat" onclick="deleteDeviceGroup(\''.$deviceGroup['id'].'\',\''.$deviceGroup['name'].'\')">Del</button>';
+			$buttons='<button class="btn btn-warning btn-xs btn-flat" onclick="tgui_devGrp.getGrpInfo(\''.$deviceGroup['id'].'\',\''.$deviceGroup['name'].'\')">Edit</button> <button class="btn btn-danger btn-xs btn-flat" onclick="tgui_devGrp.delete(\''.$deviceGroup['id'].'\',\''.$deviceGroup['name'].'\')">Del</button>';
 			$deviceGroup['buttons']=$buttons;
 			$deviceGroup['key']= ($deviceGroup['key'] != '') ? true : false;
 			$deviceGroup['enable']=($deviceGroup['enable'] != '') ? true : false;
@@ -381,8 +365,8 @@ class TACDeviceGrpsCtrl extends Controller
 		//INITIAL CODE////END//
 
 		///IF GROUPID SET///
-		if ($req->getParam('groupId') != null){
-			if ($req->getParam('groupId') == 0) {
+		if ($req->getParam('byId') != null){
+			if ($req->getParam('byId') == 0) {
 				$data['item'] = TACDeviceGrps::select(['id','name','key','enable','default_flag'])->
 				where([['default_flag', '=', 1]])->
 				first();
@@ -391,10 +375,10 @@ class TACDeviceGrpsCtrl extends Controller
 				$data['item']['enable'] = ($data['item']['enable'] != '') ? true : false;
 				$data['item']['default_flag'] = ($data['item']['default_flag'] == 1) ? true : false;
 			}
-			if ($req->getParam('groupId') > 0)
+			if ($req->getParam('byId') > 0)
 			{
 				$data['item'] = TACDeviceGrps::select(['id','name','key','enable','default_flag'])->
-				where([['id', '=', $req->getParam('groupId')]])->
+				where([['id', '=', $req->getParam('byId')]])->
 				first();
 				$data['item']['text'] = $data['item']['name'];
 				$data['item']['key'] = ($data['item']['key'] != '') ? true : false;

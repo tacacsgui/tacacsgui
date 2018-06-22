@@ -23,8 +23,9 @@ function checkDatabase()
 {
 	var data = {
 			"action": "get",
+			"update": 1,
 			"test" : "none"
-			};	
+			};
 	$.ajax({
 			type: "GET",
 			dataType: "json",
@@ -34,13 +35,13 @@ function checkDatabase()
 			//async: false,
 			success: function(data) {
 				console.log(data);
-				if (data.message != undefined) { 
+				if (data.messages.length) {
 					if ( $('div.message-container').is(':empty') ) {
 						addMessage("Let's begin!");
 					}
-					addMessage(data.message);
-					checkDatabase(); return; 
-				} 
+					addMessage(data.messages[0]);
+					checkDatabase(); return;
+				}
 				else
 				{
 					if ( $('div.message-container').is(':empty') ) {
@@ -56,7 +57,7 @@ function checkDatabase()
 			},
 			error: function(data) {
 				console.log(data['responseJSON']);
-				window.location.replace('/');
+				//window.location.replace('/');
 			}
 	});
 	return;

@@ -12,24 +12,24 @@ class APIUsersCtrl extends Controller
 ################################################
 ########	Add New User	###############START###########
 	#########	GET Add New User	#########
-	public function getUserAdd($req,$res)
-	{
-		//INITIAL CODE////START//
-		$data=array();
-		$data=$this->initialData([
-			'type' => 'get',
-			'object' => 'user',
-			'action' => 'add',
-		]);
-		#check error#
-		if ($_SESSION['error']['status']){
-			$data['error']=$_SESSION['error'];
-			return $res -> withStatus(401) -> write(json_encode($data));
-		}
-		//INITIAL CODE////END//
-
-		return $res -> withStatus(200) -> write(json_encode($data));
-	}
+	// public function getUserAdd($req,$res)
+	// {
+	// 	//INITIAL CODE////START//
+	// 	$data=array();
+	// 	$data=$this->initialData([
+	// 		'type' => 'get',
+	// 		'object' => 'user',
+	// 		'action' => 'add',
+	// 	]);
+	// 	#check error#
+	// 	if ($_SESSION['error']['status']){
+	// 		$data['error']=$_SESSION['error'];
+	// 		return $res -> withStatus(401) -> write(json_encode($data));
+	// 	}
+	// 	//INITIAL CODE////END//
+	//
+	// 	return $res -> withStatus(200) -> write(json_encode($data));
+	// }
 
 	#########	POST Add New User	#########
 	public function postUserAdd($req,$res)
@@ -56,8 +56,8 @@ class APIUsersCtrl extends Controller
 		$validation = $this->validator->validate($req, [
 			'email' => v::noWhitespace(),//->email(),//->notEmpty()->emailAvailable(),
 			'username' => v::noWhitespace()->notEmpty()->usernameAvailable(),
-			'password' => v::noWhitespace()->notContainChars()->length(5, 24)->notEmpty()->checkPassword($req->getParam('repPassword')),
-			'repPassword' => v::noWhitespace()->notEmpty()->checkPassword($req->getParam('password')),
+			'password' => v::noWhitespace()->notContainChars()->length(5, 24)->notEmpty()->checkPassword($req->getParam('rep_password')),
+			'rep_password' => v::noWhitespace()->notEmpty()->checkPassword($req->getParam('password')),
 		]);
 
 		if ($validation->failed()){
@@ -66,18 +66,9 @@ class APIUsersCtrl extends Controller
 			return $res -> withStatus(200) -> write(json_encode($data));
 		}
 
-		$data['changePasswd'] = ($req->getParam('changePasswd') == 'true') ? 1 : 0;
+		$allParams = $req->getParams();
 
-		$user = APIUsers::create([
-			'username' => strtolower($req->getParam('username')),
-			'password' => password_hash($req->getParam('password'), PASSWORD_DEFAULT),
-			'email' => $req->getParam('email'),
-			'firstname' => $req->getParam('firstname'),
-			'surname' => $req->getParam('surname'),
-			'position' => $req->getParam('position'),
-			'group' => $req->getParam('group') ,
-			'changePasswd' => $data['changePasswd'] ,
-		]);
+		$user = APIUsers::create($allParams);
 
 		$logEntry=array('action' => 'add', 'objectName' => $user->username, 'objectId' => $user->id, 'section' => 'api users', 'message' => 205);
 		$data['logging']=$this->APILoggingCtrl->makeLogEntry($logEntry);
@@ -130,8 +121,8 @@ class APIUsersCtrl extends Controller
 		}
 		//INITIAL CODE////END//
 		//CHECK ACCESS TO THAT FUNCTION//START//
-		$data['test01']=(!$this->checkAccess(7) AND $this->checkAccess(0));
-		if( $this->checkAccess(0) OR ( !$this->checkAccess(7) AND ( $req->getParam('id') != @$_SESSION['uid'] ) ) )
+		//$data['test01']=(!$this->checkAccess(7) AND $this->checkAccess(0));
+		if( !$this->checkAccess(0) OR ( !$this->checkAccess(7) AND ( $req->getParam('id') != @$_SESSION['uid'] ) ) )
 		{
 			return $res -> withStatus(403) -> write(json_encode($data));
 		}
@@ -139,8 +130,8 @@ class APIUsersCtrl extends Controller
 
 		$validation = $this->validator->validate($req, [
 			'email' => v::noWhitespace(),//->email(),//->notEmpty()->emailAvailable(),
-			'password' => v::noWhitespace()->notContainChars()->checkPassword($req->getParam('repPassword')),
-			'repPassword' => v::noWhitespace()->checkPassword($req->getParam('password')),
+			'password' => v::notContainChars()->checkPassword($req->getParam('rep_password')),
+			'rep_password' => v::checkPassword($req->getParam('password')),
 			//'repPassword' => v::noWhitespace()->notContainChars()->notEmpty()->checkPassword(),
 		]);
 
@@ -150,26 +141,28 @@ class APIUsersCtrl extends Controller
 			return $res -> withStatus(200) -> write(json_encode($data));
 		}
 
-		$data['changePasswd'] = ($req->getParam('changePasswd') == 'true') ? 1 : 0;
+		$allParams = $req->getParams();
 
-		$data['user_woPasswd']=APIUsers::where([['id','=',$req->getParam('id')],['username','=',$req->getParam('username')]])->
-			update([
-				'email' => $req->getParam('email'),
-				'firstname' => $req->getParam('firstname'),
-				'surname' => $req->getParam('surname'),
-				'position' => $req->getParam('position'),
-				'group' => $req->getParam('group'),
-				'changePasswd' => $data['changePasswd'] ,
-			]);
-		$data['user_wPasswd']=0;
-		if ($req->getParam('password') !== ''){
-			$data['user_wPasswd']=APIUsers::where([['id','=',$req->getParam('id')],['username','=',$req->getParam('username')]])->
+		$password = ( !empty($allParams) ) ? $allParams['password'] : '';
+		$id = $allParams['id'];
+
+		unset($allParams['id']);
+		unset($allParams['password']);
+		unset($allParams['rep_password']);
+
+		$data['user_woPasswd']=APIUsers::where([['id','=',$id]])->
+			update($allParams);
+
+		if ($password !== ''){
+			$data['user_wPasswd']=APIUsers::where([['id','=',$id]])->
 				update([
-					'password' => password_hash($req->getParam('password'), PASSWORD_DEFAULT)
+					'password' => password_hash($password, PASSWORD_DEFAULT)
 				]);
 		}
 
-		$logEntry=array('action' => 'edit', 'objectName' => $req->getParam('username'), 'objectId' => $req->getParam('id'), 'section' => 'api users', 'message' => 305);
+		$username = APIUsers::select('username')->where([['id','=',$id]])->first()->username;
+
+		$logEntry=array('action' => 'edit', 'objectName' => $username, 'objectId' => $id, 'section' => 'api users', 'message' => 305);
 		$data['logging']=$this->APILoggingCtrl->makeLogEntry($logEntry);
 
 		return $res -> withStatus(200) -> write(json_encode($data));
@@ -178,24 +171,24 @@ class APIUsersCtrl extends Controller
 ################################################
 ########	Delete User	###############START###########
 	#########	GET Delete User	#########
-	public function getUserDelete($req,$res)
-	{
-		//INITIAL CODE////START//
-		$data=array();
-		$data=$this->initialData([
-			'type' => 'get',
-			'object' => 'user',
-			'action' => 'delete',
-		]);
-		#check error#
-		if ($_SESSION['error']['status']){
-			$data['error']=$_SESSION['error'];
-			return $res -> withStatus(401) -> write(json_encode($data));
-		}
-		//INITIAL CODE////END//
-
-		return $res -> withStatus(200) -> write(json_encode($data));
-	}
+	// public function getUserDelete($req,$res)
+	// {
+	// 	//INITIAL CODE////START//
+	// 	$data=array();
+	// 	$data=$this->initialData([
+	// 		'type' => 'get',
+	// 		'object' => 'user',
+	// 		'action' => 'delete',
+	// 	]);
+	// 	#check error#
+	// 	if ($_SESSION['error']['status']){
+	// 		$data['error']=$_SESSION['error'];
+	// 		return $res -> withStatus(401) -> write(json_encode($data));
+	// 	}
+	// 	//INITIAL CODE////END//
+	//
+	// 	return $res -> withStatus(200) -> write(json_encode($data));
+	// }
 
 	#########	POST Delete User	#########
 	public function postUserDelete($req,$res)
@@ -225,7 +218,7 @@ class APIUsersCtrl extends Controller
 			return $res -> withStatus(403) -> write(json_encode($data));
 		}
 
-		$data['deleteUser']=APIUsers::where([
+		$data['result']=APIUsers::where([
 			['id','=',$req->getParam('id')],
 			['username','=',$req->getParam('username')],
 		])->delete();
@@ -308,7 +301,7 @@ class APIUsersCtrl extends Controller
 		$data['data']=array();
 
 		foreach($tempData as $user){
-			$buttons='<button class="btn btn-warning btn-xs btn-flat" onclick="editUser(\''.$user['id'].'\',\''.$user['username'].'\')">Edit</button> <button class="btn btn-danger btn-xs btn-flat" onclick="deleteUser(\''.$user['id'].'\',\''.$user['username'].'\')">Del</button>';
+			$buttons='<button class="btn btn-warning btn-xs btn-flat" onclick="tgui_userApi.getInfo(\''.$user['id'].'\',\''.$user['username'].'\')">Edit</button> <button class="btn btn-danger btn-xs btn-flat" onclick="tgui_userApi.delete(\''.$user['id'].'\',\''.$user['username'].'\')">Del</button>';
 			$user['buttons']=$buttons;
 			$grpID=$user['group'];
 			$user['group']=$tempGroupsNew[$grpID]['name'];

@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class MAVISLDAP extends Model
 {
 	protected $table = 'mavis_ldap';
-	
+
 	protected $fillable = [
 		'enabled',
 		'type',

@@ -1,4 +1,8 @@
 ##############################
+Version_0.9.13 20180614
+	*Code optimization (new JS), more stability. e.g. ACL editor works in different browsers now
+	*Fixed bug with tacacs key for device groups
+##############################
 Version_0.9.11 20180614
 	*Fixed bug with tacacs key, now you can use = char but also added restriction to ',",/ - these chars now forbitten
 	*Added ability to hide LDAP Password

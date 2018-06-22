@@ -60,9 +60,9 @@ require __DIR__ . '/templates/footer_end.php';
 
 ?>
 <!-- ADDITIONAL JS FILES START-->
-<script>
-$('div.loading').hide();
-</script>
+
+<script src="dist/js/pages/404/main.js"></script>
+
 <!-- ADDITIONAL JS FILES END-->
 </body>
 

@@ -1,5 +1,20 @@
-checkConfiguration()
-getUserInfo()
+$('document').ready(function(){
+	Promise.resolve(tgui_apiUser.getInfo()).then(function(resp) {
+	  tgui_apiUser.fulfill(resp);
+    //Get System Info//
+    Promise.resolve(tgui_status.getStatus({url: API_LINK+"apicheck/status/"})).then(function(resp) {
+      tgui_status.fulfill(resp);
+			//MAIN CODE//Start
+			tgui_tacUserGrp.init();
+			//MAIN CODE//END
+      $('div.loading').hide();/*---*/
+    }).catch(function(err){
+			tgui_error.getStatus(err, tgui_status.ajaxProps)
+    })//Get System Info//end
+	}).catch(function(err){
+	  tgui_error.getStatus(err, tgui_apiUser.ajaxProps)
+	})
+});
 var editForm='form#editGroupForm';
 var addForm='form#addGroupForm';
 ///////////////////////////////////////
@@ -53,7 +68,7 @@ $('form#editGroupForm select[name="enable_flag"]').change(function(){
 function addGroup(){
 	console.log('Adding new tacacs user group');
 	$('.form-group.has-error').removeClass('has-error');
-	$('p.text-red').remove();
+	//tgui_errorremove();
 	$('p.help-block').show();
 	/////////ADD NEW DEVICE///START//
 	var data = {
@@ -69,7 +84,7 @@ function addGroup(){
 		"manual": $('form#addGroupForm textarea[name="manual"]').val(),
 		"default_service": $('form#addGroupForm input[name="default_service"]').prop('checked'),
 		"test" : "none"
-		};	
+		};
 		console.log($('form#addGroupForm input.select_acl').val())
 	$.ajax({
 		type: "POST",
@@ -108,7 +123,7 @@ function addGroup(){
 			//errorHere(data);
 		}
 	});
-	
+
 }
 ///////////////////////////
 function clearAddGroupModal(){
@@ -120,15 +135,15 @@ function clearAddGroupModal(){
 	$('form#addGroupForm textarea[name="message"]').val('')
 	$('form#addGroupForm textarea[name="manual"]').val('')
 	$('.form-group.has-error').removeClass('has-error');
-	
+
 	$('form#addGroupForm input[name="default_service"]').iCheck('check')
-	
+
 	// Select first tab
-	$('form#addGroupForm .nav-tabs-custom a:first').tab('show') 
-	
+	$('form#addGroupForm .nav-tabs-custom a:first').tab('show')
+
 	$('p.text-red').remove();
 	$('p.help-block').show();
-	
+
 	//Unset Priv-Lvl//
 	$('input[name="priv-lvl"]').val(-1);
 }
@@ -155,25 +170,25 @@ function editGroup(id,name){ //GET INFO ABOUT USER//
 			$(editForm + ' input[name="name_old"]').val(data['group']['name'])
 			$(editForm + ' input[name="enable"]').val(data['group']['enable'])
 			$(editForm + ' input[name="id"]').val(data['group']['id'])
-			
+
 			$(editForm + ' input[name="priv-lvl"]').val(data['group']['priv-lvl'])
-			
+
 			preSelection_acl(data['group']['acl'], 'editModal');
 			preSelection_service(data['group']['service'], 'editModal');
-			
+
 			var enable_encryption = ( (data['group']['enable_flag'] == 1 || data['group']['enable_flag'] == 2) && data['group']['enable'] != '') ? 'uncheck' : 'check';
 			$(editForm + ' input[name="enable_encrypt"]').iCheck(enable_encryption)
 			if (data['group']['enable_flag'] == 0) {$(editForm + ' div.enable_encrypt_section').hide()}
 			else ($(editForm + ' div.enable_encrypt_section').show())
-			
+
 			$(editForm + ' select[name="enable_flag"] option[value="'+data['group']['enable_flag']+'"]').prop('selected', true)
-			
+
 			var default_service = (data['group']['default_service'] == 1) ? 'check' : 'uncheck';
 			$(editForm + ' input[name="default_service"]').iCheck(default_service)
-			
+
 			$(editForm + ' textarea[name="message"]').val(data['group']['message'])
 			$(editForm + ' textarea[name="manual"]').val(data['group']['manual'])
-			
+
 			$('text.created_at').text('Created at '+data['group']['created_at']);
 			$('text.updated_at').text('Last update was at '+data['group']['updated_at']);
 			$('#editGroup').modal('show')
@@ -251,15 +266,15 @@ function clearEditGroupModal(){
 	$(editForm + ' textarea[name="message"]').val('')
 	$(editForm + ' textarea[name="manual"]').val('')
 	$('.form-group.has-error').removeClass('has-error');
-	
+
 	$(editForm + ' input[name="default_service"]').iCheck('check')
 
 	// Select first tab
-	$(editForm + ' .nav-tabs-custom a:first').tab('show') 
-	
+	$(editForm + ' .nav-tabs-custom a:first').tab('show')
+
 	$('p.text-red').remove();
 	$('p.help-block').show();
-	
+
 	//Unset Priv-Lvl//
 	$('input[name="priv-lvl"]').val(-1);
 }
@@ -276,7 +291,7 @@ function deleteGroup(id,name){
 			"name": name,
 			"id": id,
 			"test" : "none"
-			};	
+			};
 		$.ajax({
 			type: "POST",
 			dataType: "json",
@@ -287,7 +302,7 @@ function deleteGroup(id,name){
 				console.log(data);
 				if(data['deleteGroup']!=1){toastr["error"]("Oops! Unknown error appeared :(");return;}
 				toastr["success"]("User Group "+ name +" was deleted")
-				changeApplyStatus(data['changeConfiguration'])				
+				changeApplyStatus(data['changeConfiguration'])
 				setTimeout( function () {dataTable.ajax.reload()}, 2000 );
 			},
 			error: function(data) {

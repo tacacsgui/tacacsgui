@@ -15,14 +15,14 @@ class MAVISOTPCtrl extends Controller
 	{
 		return trim(Base32::encodeUpper(random_bytes(128)), '=');
 	}
-	
+
 	public function globalStatus()
-	
+
 	{
 		return MAVISOTP::select('enabled')->first()->enabled;
 	}
 ################################################
-########	MAVIS OTP Secret	###############START###########	
+########	MAVIS OTP Secret	###############START###########
 	public function postOTPSecret($req,$res)
 	{
 		//INITIAL CODE////START//
@@ -38,28 +38,28 @@ class MAVISOTPCtrl extends Controller
 			return $res -> withStatus(401) -> write(json_encode($data));
 		}
 		//INITIAL CODE////END//
-		
+
 		$secret = $req->getParam('secret');
 		$period = $req->getParam('period');
 		$digits = $req->getParam('digits');
 		$digest = $req->getParam('digest');
-		
+
 		$user = TACUsers::select('username')->where([['id','=',$req->getParam('id')]])->first();
-		
-		$data['secret'] = ($secret == '') ? $this->secret() : $secret;
+
+		$data['secret'] = ($secret == 'new') ? $this->secret() : $secret;
 		$otp = TOTP::create(
 				$data['secret'],
 				intVal($period),     // The period (30 seconds)
 				$digest, // The digest algorithm
-				intVal($digits)     
+				intVal($digits)
 			);
 		$otp->setLabel($user->username); // The label (string)
 		$otp->setIssuer('tacacsgui');
 		$data['url'] = $otp->getProvisioningUri();
-		
+
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
-########	MAVIS OTP Secret	###############END###########	
+########	MAVIS OTP Secret	###############END###########
 ################################################
 ########	MAVIS OTP URL	###############START###########
 	public function postOTPurl($req,$res)
@@ -77,7 +77,7 @@ class MAVISOTPCtrl extends Controller
 			return $res -> withStatus(401) -> write(json_encode($data));
 		}
 		//INITIAL CODE////END//
-		
+
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
 ########	MAVIS OTP URL	###############END###########
@@ -100,7 +100,7 @@ class MAVISOTPCtrl extends Controller
 		//INITIAL CODE////END//
 
 		$data['OTP_Params']=MAVISOTP::select()->first();
-		
+
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
 ########	MAVIS OTP Parameters GET	###############END###########
@@ -127,31 +127,28 @@ class MAVISOTPCtrl extends Controller
 			return $res -> withStatus(403) -> write(json_encode($data));
 		}
 		//CHECK ACCESS TO THAT FUNCTION//END//
-		
+
 		$validation = $this->validator->validate($req, [
-			'period' => v::noWhitespace()->intVal()->between(30, 120),
-			'digits' => v::noWhitespace()->intVal()->between(5, 8),
+			'period' => v::when( v::nullType() , v::alwaysValid(), v::noWhitespace()->intVal()->between(30, 120)),
+			'digits' => v::when( v::nullType() , v::alwaysValid(), v::noWhitespace()->intVal()->between(5, 8)),
+			'digest' => v::when( v::nullType() , v::alwaysValid(), v::oneOf(v::equals('sha1'), v::equals('md5'))),
 		]);
-		
+
 		if ($validation->failed()){
 			$data['error']['status']=true;
 			$data['error']['validation']=$validation->error_messages;
 			return $res -> withStatus(200) -> write(json_encode($data));
 		}
-		
-		$data['mavis_otp_update'] = MAVISOTP::where([['id','=',1]])->
-			update([
-				'enabled' => $req->getParam('enabled'),
-				'period' => $req->getParam('period'),
-				'digits' => $req->getParam('digits'),
-				'digest' => $req->getParam('digest'),
-			]);
-		
+
+		$allParams = $req->getParams();
+
+		$data['mavis_otp_update'] = MAVISOTP::where([['id','=',1]])->update($allParams);
+
 		$data['changeConfiguration']=$this->changeConfigurationFlag(['unset' => 0]);
-		
+
 		$logEntry=array('action' => 'edit', 'objectName' => 'MAVIS', 'objectId' => 'OTP', 'section' => 'MAVIS OTP', 'message' => 702);
 		$data['logging']=$this->APILoggingCtrl->makeLogEntry($logEntry);
-		
+
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
 ########	MAVIS OTP Parameters POST	###############END###########
@@ -172,11 +169,22 @@ class MAVISOTPCtrl extends Controller
 			return $res -> withStatus(401) -> write(json_encode($data));
 		}
 		//INITIAL CODE////END//
-		
+
+		$validation = $this->validator->validate($req, [
+			'username' => v::notEmpty(),
+			'ot_password' => v::notEmpty()->numeric(),
+		]);
+
+		if ($validation->failed()){
+			$data['error']['status']=true;
+			$data['error']['validation']=$validation->error_messages;
+			return $res -> withStatus(200) -> write(json_encode($data));
+		}
+
 		$data['test_configuration'] = $this->TACConfigCtrl->testConfiguration($this->TACConfigCtrl->createConfiguration("\n "));
-		
-		$data['ldap_check']=shell_exec(TAC_ROOT_PATH . '/main.sh check mavis '.$req->getParam('username').' '.$req->getParam('password').' 2>&1');
-		
+
+		$data['check_result']=shell_exec(TAC_ROOT_PATH . '/main.sh check mavis '.$req->getParam('username').' '.$req->getParam('ot_password').' 2>&1');
+
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
 ########	MAVIS OTP Check	###############END###########

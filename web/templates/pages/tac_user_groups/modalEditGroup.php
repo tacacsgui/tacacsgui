@@ -19,8 +19,6 @@
             <div class="tab-content">
 				<div class="tab-pane active" id="general_info_edit">
 					<?php include __DIR__ . '/tabGeneralInfo.php';?>
-					<input type="hidden" value="" name="id"/>
-					<input type="hidden" value="" name="name_old"/>
 				</div>
 				<!-- /.tab-pane -->
 				<div class="tab-pane" id="message_edit">
@@ -37,14 +35,14 @@
 				<!-- /.tab-pane -->
             </div>
             <!-- /.tab-content -->
-		</div>	
+		</div>
 		</form>
 		<p class="text-muted"><text class="created_at"></text><text class="updated_at pull-right"></text></p>
 		</div>
 		<div class="modal-footer">
 			<button type="button" class="btn btn-flat pull-left" data-dismiss="modal">Close</button>
-			<button type="button" class="btn btn-flat btn-success" onclick="submitGroupChanges()">Edit Group</button>
-		</div>			
+			<button type="button" class="btn btn-flat btn-success" onclick="tgui_tacUserGrp.edit()">Edit Group</button>
+		</div>
 	</div>
 	</div>
 </div>

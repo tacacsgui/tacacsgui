@@ -1,5 +1,21 @@
-checkConfiguration()
-getUserInfo()
+$('document').ready(function(){
+	Promise.resolve(tgui_apiUser.getInfo()).then(function(resp) {
+	  tgui_apiUser.fulfill(resp);
+    //Get System Info//
+    Promise.resolve(tgui_status.getStatus({url: API_LINK+"apicheck/status/"})).then(function(resp) {
+      tgui_status.fulfill(resp);
+			//MAIN CODE//Start
+
+			//MAIN CODE//END
+			$('div.loading').hide();/*---*/
+    }).catch(function(err){
+			tgui_error.getStatus(err, tgui_status.ajaxProps)
+    })//Get System Info//end
+	}).catch(function(err){
+	  tgui_error.getStatus(err, tgui_apiUser.ajaxProps)
+	})
+});
+
 ////DELETE Backup FUNCTION////START//
 function deleteBackup(name){
 	console.log('Deleting backup with name '+name)
@@ -9,7 +25,7 @@ function deleteBackup(name){
 			"action": "POST",
 			"name": name,
 			"test" : "none"
-			};	
+			};
 		$.ajax({
 			type: "POST",
 			dataType: "json",
@@ -19,7 +35,7 @@ function deleteBackup(name){
 			success: function(data) {
 				console.log(data);
 				if(data['deleteBackup']!=1){toastr["error"]("Oops! Unknown error appeared :(");return;}
-				toastr["success"]("Backup "+ name +" was deleted")	
+				toastr["success"]("Backup "+ name +" was deleted")
 				setTimeout( function () {dataTable.ajax.reload()}, 2000 );
 			},
 			error: function(data) {
@@ -42,7 +58,7 @@ function restoreBackup(name){
 			"action": "POST",
 			"name": name,
 			"test" : "none"
-			};	
+			};
 		$.ajax({
 			type: "POST",
 			dataType: "json",
@@ -52,7 +68,7 @@ function restoreBackup(name){
 			success: function(data) {
 				console.log(data);
 				if(data['restore']!=1){toastr["error"]("Oops! Unknown error appeared :(");return;}
-				toastr["success"]("Backup "+ name +" was restored")	
+				toastr["success"]("Backup "+ name +" was restored")
 				changeApplyStatus(1)
 				setTimeout( function () {dataTable.ajax.reload()}, 2000 );
 			},

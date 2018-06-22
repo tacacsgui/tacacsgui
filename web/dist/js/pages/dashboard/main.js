@@ -1,82 +1,72 @@
 $('document').ready(function(){
-	checkDatabase().done(function(){
-		checkConfiguration()
-		getUserInfo()
-		widgetsData()
-	});
+	Promise.resolve(tgui_apiUser.getInfo()).then(function(resp) {
+	  tgui_apiUser.fulfill(resp);
+	  //Check Updates//
+	  Promise.resolve(tgui_status.getStatus({url: API_LINK+"apicheck/database/"})).then(function(resp) {
+			if (resp.messages.length) throw {update: true};
+	    //Get System Info//
+	    Promise.resolve(tgui_status.getStatus({url: API_LINK+"apicheck/status/"})).then(function(resp) {
+	      tgui_status.fulfill(resp);
+
+				tacacsWidgets.getGeneral().then(function(resp) {
+					tacacsWidgets.dashboardStatus(resp).diagrams1(resp);
+
+				}).fail(function(err) {
+					tgui_error.getStatus(err, tacacsWidgets.ajaxProps)
+				});//end widgets general
+
+	      $('div.loading').hide();/*---*/
+	    }).catch(function(err){
+				tgui_error.getStatus(err, tgui_status.ajaxProps)
+	    })//Get System Info//end
+	  }).catch(function(err){
+			console.log(err.update)
+			if (err.update) window.location.replace('/update.php');
+			else tgui_error.getStatus(err, tgui_status.ajaxProps)
+	  })//Check Updates//end
+	}).catch(function(err){
+	  tgui_error.getStatus(err, tgui_apiUser.ajaxProps)
+	})
 });
-///////////////////////////////
-/////////CHECK DATABASE///START//
-function checkDatabase()
-{
-	var d = $.Deferred();
-	var data = {
-			"action": "get",
-			"test" : "none"
-			};	
-	$.ajax({
-			type: "GET",
-			dataType: "json",
-			url: API_LINK+"apicheck/database/",
-			cache: false,
-			data: data,
-			async: false,
-			success: function(data) {
-				console.log(data);
-				if (data.message != undefined) { 
-					window.location.replace('/update.php');
-					return d.reject();
-				}
-			},
-			error: function(data) {
-				console.log(data['responseJSON']);
-				window.location.replace('/');
-			}
-	});
-	return d.resolve();
-}
-/////////CHECK DATABESE///END////
 ///////////////////////////////////
 /////////Widgets///////Start///
-var topUsers
-var topDevices = [];
-function widgetsData()
-{
-	var data = {
-			"action": "get",
-			"test" : "none"
-			};	
-	$.ajax({
-			type: "GET",
-			dataType: "json",
-			url: API_LINK+"tacacs/reports/general/",
-			cache: false,
-			data: data,
-			//async: false,
-			success: function(data) {
-				console.log(data);
-				if (data['tacacsStatus']==1){$('.tacacsStatus').text('Enabled')}
-				else $('.tacacsStatus').text("Disabled");
-				$('.numberOfDevices').text(data['numberOfDevices'])
-				$('.numberOfUsers').text(data['numberOfUsers'])
-				$('.numberOfAuthFails').text(data['numberOfAuthFails'])
-				console.log(configForUsers.data)
-				topUsers = data['topUsers']
-				//topDevices[0] = data['topDevices']
-				topDevices = data['topDevicesNamed']
-				$('textarea.debug-output').val((print_r(data)));
-				configForUsers.data.datasets[0].data=Object.values(topUsers);
-				configForUsers.data.labels=Object.keys(topUsers)
-				window.usersPie.update();
-				configForDevices.data.datasets[0].data=Object.values(topDevices);
-				configForDevices.data.labels=Object.keys(topDevices)
-				window.devicesPie.update();
-			},
-			error: function(data) {
-				console.log(data['responseJSON']);
-				window.location.replace('/');
-			}
-	});
+var tacacsWidgets = {
+	topUsers:0,
+	topDevices:0,
+	ajaxProps:{
+    url:API_LINK+"tacacs/reports/general/",
+    type: "GET"
+  },
+  getGeneral: function(props) {
+    props = props || {}
+    for (var prop in props) {
+      if (props.hasOwnProperty(prop)) {
+        this.ajaxProps[prop] = props[prop];
+      }
+    }
+    mainData = ajaxRequest.send(this.ajaxProps)
+    return mainData
+  },
+	dashboardStatus: function(data){
+		if (data.tacacsStatus == 1 ){$('.tacacsStatus').removeClass('lds-dual-ring').text('Enabled')}
+		else $('.tacacsStatus').removeClass('lds-dual-ring').text("Disabled");
+		$('.numberOfDevices').removeClass('lds-dual-ring').text(data.numberOfDevices)
+		$('.numberOfUsers').removeClass('lds-dual-ring').text(data.numberOfUsers)
+		$('.numberOfAuthFails').removeClass('lds-dual-ring').text(data.numberOfAuthFails)
+		return this;
+	},
+	diagrams1:function(data){
+		topUsers = data.topUsers
+		$('.userPieLoading').removeClass('lds-dual-ring lds-black');
+		$('.devicePieLoading').removeClass('lds-dual-ring lds-black');
+		topDevices = data.topDevices
+		var configForUsers = new pieSettings(topUsers);
+		var configForDevices = new pieSettings(topDevices);
+		if (configForUsers.data.labels.length) new Chart($(".chart-area1"), configForUsers);
+		else $('.userPieLoading').append('No data');
+		if (configForDevices.data.labels.length) new Chart($(".chart-area2"), configForDevices);
+		else $('.devicePieLoading').append('No data');
+	}
 }
 /////////Widgets///////END///
 ///////////////////////////////

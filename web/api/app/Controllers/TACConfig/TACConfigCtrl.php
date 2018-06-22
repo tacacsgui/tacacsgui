@@ -246,9 +246,9 @@ class TACConfigCtrl extends Controller
 			'host = '.$group['name'].' {');
 			///GROUP KEY///
 			if ($group['key']!='')array_push($outputDeviceGroups[$group['id']],
-			($html) ? $this->html_tags['param'][0] . "key" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] .$group['key']. $this->html_tags['val'][1]
+			($html) ? $this->html_tags['param'][0] . "key" . $this->html_tags['param'][1] . ' = "' . $this->html_tags['val'][0] .$group['key']. $this->html_tags['val'][1] .'"'
 			:
-			'key = '.$group['key']);
+			'key = "'.$group['key'] .'"');
 			///GROUP ENABLE///
 			if ($group['enable']!='')array_push($outputDeviceGroups[$group['id']],
 			($html) ? $this->html_tags['param'][0] . "enable" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] . $this->crypto_flag[$group['enable_flag']] . ' ' . $group['enable']. $this->html_tags['val'][1]
@@ -1245,14 +1245,14 @@ class TACConfigCtrl extends Controller
 		//CHECK ACCESS TO THAT FUNCTION//END//
 
 		$validation = $this->validator->validate($req, [
-			'port' => v::noWhitespace()->notEmpty()->positive()->min(1,true)->intVal(),
-			'max_attempts' => v::noWhitespace()->notEmpty()->positive()->min(1,true)->intVal(),
-			'backoff' => v::noWhitespace()->notEmpty()->positive()->min(1,true)->intVal(),
-			'connection_timeout' => v::noWhitespace()->notEmpty()->positive()->min(1,true)->intVal(),
-			'context_timeout' => v::noWhitespace()->notEmpty()->positive()->min(1,true)->intVal(),
-			'authentication' => v::notEmpty(),
-			'authorization' => v::notEmpty(),
-			'accounting' => v::notEmpty(),
+			'port' => v::noWhitespace()->when( v::nullType() , v::alwaysValid(), v::positive()->min(1,true)->intVal()),
+			'max_attempts' => v::noWhitespace()->when( v::nullType() , v::alwaysValid(), v::positive()->min(1,true)->intVal()),
+			'backoff' => v::noWhitespace()->when( v::nullType() , v::alwaysValid(), v::positive()->min(1,true)->intVal()),
+			'connection_timeout' => v::noWhitespace()->when( v::nullType() , v::alwaysValid(), v::positive()->min(1,true)->intVal()),
+			'context_timeout' => v::noWhitespace()->when( v::nullType() , v::alwaysValid(), v::positive()->min(1,true)->intVal()),
+			'authentication' => v::when( v::nullType() , v::alwaysValid(), v::notEmpty()),
+			'authorization' => v::when( v::nullType() , v::alwaysValid(), v::notEmpty()),
+			'accounting' => v::when( v::nullType() , v::alwaysValid(), v::notEmpty()),
 		]);
 
 		if ($validation->failed()){
@@ -1261,21 +1261,10 @@ class TACConfigCtrl extends Controller
 			return $res -> withStatus(200) -> write(json_encode($data));
 		}
 
-		$data['nxos_support'] = ( $req->getParam('nxos_support') == 1 ) ? 1 : 0;
+		$allParams = $req->getParams();
 
 		$data['tglobal_update']=TACGlobalConf::where([['id','=',1]])->
-			update([
-				'port' => $req->getParam('port'),
-				'max_attempts' => $req->getParam('max_attempts'),
-				'backoff' => $req->getParam('backoff'),
-				'connection_timeout' => $req->getParam('connection_timeout'),
-				'context_timeout' => $req->getParam('context_timeout'),
-				'authentication' => $req->getParam('authentication'),
-				'authorization' => $req->getParam('authorization'),
-				'accounting' => $req->getParam('accounting'),
-				'nxos_support' => $data['nxos_support'],
-				'manual' => $req->getParam('manual'),
-			]);
+			update($allParams);
 
 		$data['changeConfiguration']=$this->changeConfigurationFlag(['unset' => 0]);
 

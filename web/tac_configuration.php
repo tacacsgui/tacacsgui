@@ -10,14 +10,14 @@ $PAGE_TITLE = 'TacacsGUI';
 $PAGE_SUBTITLE = 'Tacacs Configuration File';
 $BREADCRUMB = array(
 	'Tacacs' => [
-		'name' => 'Tacacs', 
-		'href' => '', 
-		'icon' => 'fa fa-cogs', 
+		'name' => 'Tacacs',
+		'href' => '',
+		'icon' => 'fa fa-cogs',
 		'class' => ''  //last item should have active class!!
-	], 
+	],
 	'Devices' => [
-		'name' => 'Configuration File', 
-		'href' => '', 
+		'name' => 'Configuration File',
+		'href' => '',
 		'icon' => 'fa fa-cog', //leave empty if you won't put icon
 		'class' => 'active' //last item should have active class!!
 	]
@@ -36,16 +36,16 @@ require __DIR__ . '/templates/header.php';
 <!--ADDITIONAL CSS FILES START-->
 	<!-- iCheck -->
 	<link rel="stylesheet" href="/plugins/iCheck/square/blue.css">
-	
+
 	<!-- Custom Style -->
 	<link rel="stylesheet" href="/dist/css/pages/tac_configuration/main.css">
 	<link rel="stylesheet" href="/dist/css/pages/tac_configuration/theme-stripped.css">
 </head>
 <!--ADDITIONAL CSS FILES END-->
 
-<?php 
+<?php
 
-require __DIR__ . '/templates/body_start.php'; 
+require __DIR__ . '/templates/body_start.php';
 
 ?>
 <!--MAIN CONTENT START-->
@@ -60,14 +60,14 @@ require __DIR__ . '/templates/body_start.php';
 			<div class="box-body">
 				<div class="row">
 				<div class="col-md-3">
-					<div class="form-group"><a class="btn btn-app bg-green testConfigurationBtn">
+					<div class="form-group"><a class="btn btn-app bg-green" onclick="tgui_configEngine.testConf()">
 						<i class="fa fa-gears"></i> Test
 					</a>
-					<a class="btn btn-app bg-orange applyConfigurationBtn">
+					<a class="btn btn-app bg-orange" onclick="tgui_configEngine.applyConf()">
 						<i class="fa fa-save"></i> Apply
 					</a></div>
 					</br>
-					<div class="form-group"><input type="checkbox" class="doBackup from-control" checked> Make backup after applying</div>
+					<div class="form-group icheck"><input type="checkbox" class="doBackup from-control" checked> Make backup after applying</div>
 				</div>
 				<div class="col-md-9">
 					<ul class="timeline">
@@ -79,15 +79,15 @@ require __DIR__ . '/templates/body_start.php';
 						<!-- timeline item -->
 						<li class="testConfigurationItem">
 						<i class="fa fa-gears bg-gray testIcon"></i>
-						
+
 						<div class="timeline-item">
 							<!-- <span class="time"><i class="fa fa-clock-o"></i> 12:05</span> -->
-						
-							<h3 class="timeline-header">Test configuration  
+
+							<h3 class="timeline-header">Test configuration
 								<i class="fa fa-check text-green testSuccess" style="display:none"></i>
 								<i class="fa fa-times-circle text-red testError" style="display:none"></i>
 							</h3>
-						
+
 							<div class="timeline-body testItemBody">
 								Output of test will appear here...
 							</div>
@@ -101,10 +101,10 @@ require __DIR__ . '/templates/body_start.php';
 						<!-- timeline item -->
 						<li class="applyConfigurationItem">
 						<i class="fa fa-save bg-gray applyIcon"></i>
-						
+
 						<div class="timeline-item">
 							<!-- <span class="time"><i class="fa fa-clock-o"></i> 5 mins ago</span> -->
-						
+
 							<h3 class="timeline-header no-border">Apply and Save Configuration
 								<i class="fa fa-check text-green applySuccess" style="display:none"></i>
 								<i class="fa fa-times-circle text-red applyError" style="display:none"></i>
@@ -131,9 +131,9 @@ Loading...
 </pre>
 <!--MAIN CONTENT END-->
 
-<?php 
+<?php
 
-require __DIR__ . '/templates/body_end.php'; 
+require __DIR__ . '/templates/body_end.php';
 
 ?>
 
@@ -145,19 +145,12 @@ require __DIR__ . '/templates/footer_end.php';
 ?>
 <!-- ADDITIONAL JS FILES START-->
 	<!-- iCheck -->
-	<script src="/plugins/iCheck/icheck.min.js"></script>	
-	
-<script>
-  $(function () {
-    $('input.doBackup').iCheck({
-      checkboxClass: 'icheckbox_square-blue',
-      radioClass: 'iradio_square-blue',
-      increaseArea: '20%' // optional
-    });
-  });
-</script>	 
+	<script src="/plugins/iCheck/icheck.min.js"></script>
+
 	<!-- main js User MAIN Functions -->
-    <script src="dist/js/pages/tac_configuration/main.js"></script>
+  <script src="dist/js/pages/tac_configuration/tgui_configEngine.js"></script>
+	<!-- main js User MAIN Functions -->
+  <script src="dist/js/pages/tac_configuration/main.js"></script>
 <!-- ADDITIONAL JS FILES END-->
 </body>
 

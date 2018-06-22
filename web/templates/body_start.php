@@ -7,10 +7,12 @@
   <link rel="stylesheet" href="dist/css/skins/_all-skins.css">
   <!-- MAIN CSS FOR TGUI -->
   <link rel="stylesheet" href="dist/css/main.css">
+  <!-- m-progress -->
+  <link rel="stylesheet" href="dist/css/m-progress.css">
   <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
   <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
   <link rel="shortcut icon" href="dist/img/favicon.ico">
-  
+
    <!-- Google Font -->
   <link rel="stylesheet"
         href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic">
@@ -20,6 +22,19 @@
 <div class="loading">
 	<div class="text-center"><p class="loading_text">Loading...</p>
 	</div>
+</div>
+<div class="server-error">
+  <div class="error-body">
+    <div class="error-header"><h2>Server Error Appeared!</h2></div>
+    <div class="error-message"><h4>Description:</h4>
+      <div class="error-message-body">Unexpected Error (Template Message)</div>
+    </div>
+    <hr>
+    <div class="error-footer">
+      <p>Please try to reload the page with <kbd> Ctrl </kbd> <b>+</b> <kbd> Shift </kbd> <b>+</b> <kbd> R </kbd>.</p>
+      <p>If error appered againg you can concat the developer - <a href="mailto:developer@tacacsgui.com">developer@tacacsgui.com</a></p>
+    </div>
+  </div>
 </div>
 <div class="wrapper">
 
@@ -44,12 +59,12 @@
 		foreach ($BREADCRUMB as $item){
 			//echo '<li><a href="'.$item['href'].'"><i class="'.$item['icon'].'"></i> '.$item['name'].'</a></li>';
 			echo '<li';
-			echo ($item['class']!='') ? ' class="'.$item['class'].'">': '>'; 
+			echo ($item['class']!='') ? ' class="'.$item['class'].'">': '>';
 			echo ($item['href']!='') ? '<a href="'.$item['href'].'">': '';
 			echo ($item['icon']!='') ? '<i class="'.$item['icon'].'"></i> ': '';
 			echo  $item['name'];
 			echo ($item['href']!='') ? '</a>': '';
-			echo '</li>'; 
+			echo '</li>';
 		}
 		?>
       </ol>
@@ -57,4 +72,3 @@
 
     <!-- Main content -->
     <section class="content container-fluid">
-	

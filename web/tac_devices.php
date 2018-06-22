@@ -10,14 +10,14 @@ $PAGE_TITLE = 'TacacsGUI';
 $PAGE_SUBTITLE = 'Tacacs Devices';
 $BREADCRUMB = array(
 	'Tacacs' => [
-		'name' => 'Tacacs', 
-		'href' => '', 
-		'icon' => 'fa fa-cogs', 
+		'name' => 'Tacacs',
+		'href' => '',
+		'icon' => 'fa fa-cogs',
 		'class' => ''  //last item should have active class!!
-	], 
+	],
 	'Devices' => [
-		'name' => 'Devices', 
-		'href' => '', 
+		'name' => 'Devices',
+		'href' => '',
 		'icon' => 'fa fa-server', //leave empty if you won't put icon
 		'class' => 'active' //last item should have active class!!
 	]
@@ -49,14 +49,14 @@ require __DIR__ . '/templates/header.php';
 	</style>
 <!--ADDITIONAL CSS FILES END-->
 
-<?php 
+<?php
 
-require __DIR__ . '/templates/body_start.php'; 
+require __DIR__ . '/templates/body_start.php';
 
 ?>
 <!--MAIN CONTENT START-->
 
-<div class="row"> 
+<div class="row">
 	<div class="col-xs-12">
 		<div class="box box-primary">
 			<div class="box-header">
@@ -69,31 +69,31 @@ require __DIR__ . '/templates/body_start.php';
 			<div class="box-body">
 				<div class="table-responsive">
 					<table id="devicesDataTable" class="table-striped display table table-bordered" style="overflow: auto;">
-	
-					</table>	
+
+					</table>
 				</div>
 			</div><!-- /.box-body -->
-		</div><!-- /.box --> 
+		</div><!-- /.box -->
 	</div><!-- /.col -->
 </div><!-- /.row -->
 
 <!--MAIN CONTENT END-->
 
-<?php 
+<?php
 
-require __DIR__ . '/templates/pages/tac_devices/modalAddDevice.php'; 
-
-?>
-
-<?php 
-
-require __DIR__ . '/templates/pages/tac_devices/modalEditDevice.php'; 
+require __DIR__ . '/templates/pages/tac_devices/modalAddDevice.php';
 
 ?>
 
-<?php 
+<?php
 
-require __DIR__ . '/templates/body_end.php'; 
+require __DIR__ . '/templates/pages/tac_devices/modalEditDevice.php';
+
+?>
+
+<?php
+
+require __DIR__ . '/templates/body_end.php';
 
 ?>
 
@@ -110,14 +110,18 @@ require __DIR__ . '/templates/footer_end.php';
 	<!-- Bootstrap slider -->
 	<script src="/plugins/bootstrap-slider/bootstrap-slider.js"></script>
 	<!-- iCheck -->
-	<script src="/plugins/iCheck/icheck.min.js"></script>	
+	<script src="/plugins/iCheck/icheck.min.js"></script>
 	<!-- Select2 -->
 	<script src="bower_components/select2/dist/js/select2.full.min.js"></script>
-	
+
 	<!-- DATATABLES MAIN -->
-    <script src="dist/js/pages/tac_devices/datatables.js"></script>
+  <script src="dist/js/pages/tac_devices/datatables.js"></script>
+	<!-- Select2 Object -->
+  <script src="dist/js/tgui_select2.js"></script>
+	<!-- main js Device Object -->
+  <script src="dist/js/pages/tac_devices/tgui_device.js"></script>
 	<!-- main js Device MAIN Functions -->
-    <script src="dist/js/pages/tac_devices/main.js"></script>
+  <script src="dist/js/pages/tac_devices/main.js"></script>
 <!-- ADDITIONAL JS FILES END-->
 </body>
 

@@ -52,24 +52,24 @@ class TACDevicesCtrl extends Controller
 ################################################
 ########	Add New Device	###############START###########
 	#########	GET Add New Device	#########
-	public function getDeviceAdd($req,$res)
-	{
-		//INITIAL CODE////START//
-		$data=array();
-		$data=$this->initialData([
-			'type' => 'get',
-			'object' => 'device',
-			'action' => 'add',
-		]);
-		#check error#
-		if ($_SESSION['error']['status']){
-			$data['error']=$_SESSION['error'];
-			return $res -> withStatus(401) -> write(json_encode($data));
-		}
-		//INITIAL CODE////END//
-
-		return $res -> withStatus(200) -> write(json_encode($data));
-	}
+	// public function getDeviceAdd($req,$res)
+	// {
+	// 	//INITIAL CODE////START//
+	// 	$data=array();
+	// 	$data=$this->initialData([
+	// 		'type' => 'get',
+	// 		'object' => 'device',
+	// 		'action' => 'add',
+	// 	]);
+	// 	#check error#
+	// 	if ($_SESSION['error']['status']){
+	// 		$data['error']=$_SESSION['error'];
+	// 		return $res -> withStatus(401) -> write(json_encode($data));
+	// 	}
+	// 	//INITIAL CODE////END//
+	//
+	// 	return $res -> withStatus(200) -> write(json_encode($data));
+	// }
 
 	#########	POST Add New Device	#########
 	public function postDeviceAdd($req,$res)
@@ -110,34 +110,20 @@ class TACDevicesCtrl extends Controller
 			return $res -> withStatus(200) -> write(json_encode($data));
 		}
 
-		$data['enable']=$req->getParam('enable');
-		$data['group']=$req->getParam('group');
+		$allParams = $req->getParams();
 
-		if (isset($data['enable']) AND ($req->getParam('enable_encrypt') === true OR $req->getParam('enable_encrypt') === 'true'))
+		if ( (!empty($allParams['enable']) AND (@$allParams['enable_encrypt'] == 1)) AND (intval( @$allParams['enable_flag'] ) !== 0) )
 		{
-			if ($req->getParam('enable_flag') == 1)
+			if ($allParams['enable_flag'] == 1)
 			{
-				$data['enable']=trim(shell_exec('openssl passwd -1 '.$data['enable']));
-			} elseif ($req->getParam('enable_flag') == 2)
+				$allParams['enable']=trim(shell_exec('openssl passwd -1 '.$allParams['enable']));
+			} elseif ($allParams['enable_flag'] == 2)
 			{
-				$data['enable']=trim(shell_exec('openssl passwd crypt '.$data['enable']));
+				$allParams['enable']=trim(shell_exec('openssl passwd -crypt '.$allParams['enable']));
 			}
 		}
 
-		$device = TACDevices::create([
-			'name' => $req->getParam('name'),
-			'disabled' => intval($req->getParam('disabled')),
-			'ipaddr' => $req->getParam('ipaddr'),
-			'prefix' => $req->getParam('prefix'),
-			'key' => $req->getParam('key'),
-			'enable' => $data['enable'],
-			'group' => $data['group'],
-			'enable_flag' => $req->getParam('enable_flag'),
-			'banner_welcome' => $req->getParam('banner_welcome'),
-			'banner_motd' => $req->getParam('banner_motd'),
-			'banner_failed' => $req->getParam('banner_failed'),
-			'manual' => $req->getParam('manual'),
-		]);
+		$device = TACDevices::create($allParams);
 
 		$data['device']=$device;
 
@@ -199,13 +185,13 @@ class TACDevicesCtrl extends Controller
 		//CHECK ACCESS TO THAT FUNCTION//END//
 
 		$validation = $this->validator->validate($req, [
-			'name' => v::noWhitespace()->notEmpty()->deviceNameAvailable($req->getParam('id')),
-			'group' => v::noWhitespace()->notEmpty(),
+			'name' => v::noWhitespace()->when( v::nullType() , v::alwaysValid(), v::notEmpty()->deviceNameAvailable($req->getParam('id'))),
+			'group' => v::noWhitespace(),
 			'enable' => v::noWhitespace()->prohibitedChars(),
-			'enable_flag' => v::noWhitespace()->numeric(),
-			'key' => v::noWhitespace()->tacacsKeyAvailable($req->getParam('group'))->prohibitedChars(),
-			'ipaddr' => v::noWhitespace()->notEmpty()->ip(),
-			'prefix' => v::noWhitespace()->notEmpty(),
+			'enable_flag' => v::noWhitespace()->when( v::nullType() , v::alwaysValid(), v::numeric()),
+			'key' => v::noWhitespace()->when( v::nullType() , v::alwaysValid(), v::tacacsKeyAvailable($req->getParam('group'))->prohibitedChars()),
+			'ipaddr' => v::noWhitespace()->when( v::nullType() , v::alwaysValid(), v::ip()),
+			'prefix' => v::noWhitespace()
 		]);
 
 		if ($validation->failed()){
@@ -214,39 +200,32 @@ class TACDevicesCtrl extends Controller
 			return $res -> withStatus(200) -> write(json_encode($data));
 		}
 
-		$data['enable']=$req->getParam('enable');
-		$data['group']=$req->getParam('group');
+		$allParams = $req->getParams();
+		//var_dump((!empty($allParams['enable']) AND (@$allParams['enable_encrypt'] == 1)));die();
 
-		if (isset($data['enable']) AND ($req->getParam('enable_encrypt') === true OR $req->getParam('enable_encrypt') === 'true'))
+		if ( (!empty($allParams['enable']) AND (@$allParams['enable_encrypt'] == 1)) AND (intval( @$allParams['enable_flag'] ) !== 0) )
 		{
-			if ($req->getParam('enable_flag') == 1)
+			if ($allParams['enable_flag'] == 1)
 			{
-				$data['enable']=trim(shell_exec('openssl passwd -1 '.$data['enable']));
-			} elseif ($req->getParam('enable_flag') == 2)
+				$allParams['enable']=trim(shell_exec( 'openssl passwd -1 '.$allParams['enable']) );
+			} elseif ($allParams['enable_flag'] == 2)
 			{
-				$data['enable']=trim(shell_exec('openssl passwd crypt '.$data['enable']));
+				$allParams['enable']=trim(shell_exec( 'openssl passwd -crypt '.$allParams['enable']) );
 			}
 		}
 
-		$data['device_update']=TACDevices::where([['id','=',$req->getParam('id')],['name','=',$req->getParam('name_old')]])->
-			update([
-				'name' => $req->getParam('name'),
-				'disabled' => intval($req->getParam('disabled')),
-				'group' => $req->getParam('group'),
-				'ipaddr' => $req->getParam('ipaddr'),
-				'prefix' => $req->getParam('prefix'),
-				'key' => $req->getParam('key'),
-				'enable' => $data['enable'],
-				'enable_flag' => $req->getParam('enable_flag'),
-				'banner_welcome' => $req->getParam('banner_welcome'),
-				'banner_motd' => $req->getParam('banner_motd'),
-				'banner_failed' => $req->getParam('banner_failed'),
-				'manual' => $req->getParam('manual'),
-			]);
+		$id = $allParams['id'];
+
+		unset($allParams['id']);
+		unset($allParams['enable_encrypt']);
+
+		$data['device_update']=TACDevices::where([['id','=',$id]])->update($allParams);
 
 		$data['changeConfiguration']=$this->changeConfigurationFlag(['unset' => 0]);
 
-		$logEntry=array('action' => 'edit', 'objectName' => $req->getParam('name'), 'objectId' => $req->getParam('id'), 'section' => 'tacacs devices', 'message' => 301);
+		$name = TACDevices::select('name')->where([['id','=',$id]])->first();
+
+		$logEntry=array('action' => 'edit', 'objectName' => $name['name'], 'objectId' => $id, 'section' => 'tacacs devices', 'message' => 301);
 		$data['logging']=$this->APILoggingCtrl->makeLogEntry($logEntry);
 
 		return $res -> withStatus(200) -> write(json_encode($data));
@@ -255,24 +234,24 @@ class TACDevicesCtrl extends Controller
 ################################################
 ########	Delete Device	###############START###########
 	#########	GET Delete Device	#########
-	public function getDeviceDelete($req,$res)
-	{
-		//INITIAL CODE////START//
-		$data=array();
-		$data=$this->initialData([
-			'type' => 'get',
-			'object' => 'device',
-			'action' => 'delete',
-		]);
-		#check error#
-		if ($_SESSION['error']['status']){
-			$data['error']=$_SESSION['error'];
-			return $res -> withStatus(401) -> write(json_encode($data));
-		}
-		//INITIAL CODE////END//
-
-		return $res -> withStatus(200) -> write(json_encode($data));
-	}
+	// public function getDeviceDelete($req,$res)
+	// {
+	// 	//INITIAL CODE////START//
+	// 	$data=array();
+	// 	$data=$this->initialData([
+	// 		'type' => 'get',
+	// 		'object' => 'device',
+	// 		'action' => 'delete',
+	// 	]);
+	// 	#check error#
+	// 	if ($_SESSION['error']['status']){
+	// 		$data['error']=$_SESSION['error'];
+	// 		return $res -> withStatus(401) -> write(json_encode($data));
+	// 	}
+	// 	//INITIAL CODE////END//
+	//
+	// 	return $res -> withStatus(200) -> write(json_encode($data));
+	// }
 
 	#########	POST Delete Device	#########
 	public function postDeviceDelete($req,$res)
@@ -297,7 +276,7 @@ class TACDevicesCtrl extends Controller
 		}
 		//CHECK ACCESS TO THAT FUNCTION//END//
 
-		$data['deleteDevice']=TACDevices::where([
+		$data['result']=TACDevices::where([
 			['id','=',$req->getParam('id')],
 			['name','=',$req->getParam('name')],
 		])->delete();
@@ -382,7 +361,7 @@ class TACDevicesCtrl extends Controller
 		}
 
 		foreach($tempData as $device){
-			$buttons='<button class="btn btn-warning btn-xs btn-flat" onclick="editDevice(\''.$device['id'].'\',\''.$device['name'].'\')">Edit</button> <button class="btn btn-danger btn-xs btn-flat" onclick="deleteDevice(\''.$device['id'].'\',\''.$device['name'].'\')">Del</button>';
+			$buttons='<button class="btn btn-warning btn-xs btn-flat" onclick="tgui_device.getDevInfo(\''.$device['id'].'\',\''.$device['name'].'\')">Edit</button> <button class="btn btn-danger btn-xs btn-flat" onclick="tgui_device.delete(\''.$device['id'].'\',\''.$device['name'].'\')">Del</button>';
 			$device['buttons'] = $buttons;
 			$device['ipaddr'].="/".$device['prefix'];
 			$grpID=$device['group'];

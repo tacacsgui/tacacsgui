@@ -35,13 +35,13 @@
 				<!-- /.tab-pane -->
             </div>
             <!-- /.tab-content -->
-		</div>	
+		</div>
 		</form>
 		</div>
 		<div class="modal-footer">
 			<button type="button" class="btn btn-flat pull-left" data-dismiss="modal">Close</button>
-			<button type="button" class="btn btn-flat btn-success" onclick="addGroup()">Add Group</button>
-		</div>			
+			<button type="button" class="btn btn-flat btn-success" onclick="tgui_tacUserGrp.add()">Add Group</button>
+		</div>
 	</div>
 	</div>
 </div>

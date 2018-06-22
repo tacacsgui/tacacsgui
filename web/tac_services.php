@@ -10,20 +10,20 @@ $PAGE_TITLE = 'TacacsGUI';
 $PAGE_SUBTITLE = 'Tacacs Services';
 $BREADCRUMB = array(
 	'Tacacs' => [
-		'name' => 'Tacacs', 
-		'href' => '', 
-		'icon' => 'fa fa-cogs', 
+		'name' => 'Tacacs',
+		'href' => '',
+		'icon' => 'fa fa-cogs',
 		'class' => ''  //last item should have active class!!
-	], 
+	],
 	'access_rules' => [
-		'name' => 'Access Rules', 
-		'href' => '', 
+		'name' => 'Access Rules',
+		'href' => '',
 		'icon' => 'fa fa-exchange', //leave empty if you won't put icon
 		'class' => '' //last item should have active class!!
 	],
 	'Services' => [
-		'name' => 'Services', 
-		'href' => '', 
+		'name' => 'Services',
+		'href' => '',
 		'icon' => '', //leave empty if you won't put icon
 		'class' => 'active' //last item should have active class!!
 	]
@@ -47,14 +47,14 @@ require __DIR__ . '/templates/header.php';
 	<link rel="stylesheet" href="/plugins/iCheck/square/blue.css">
 <!--ADDITIONAL CSS FILES END-->
 
-<?php 
+<?php
 
-require __DIR__ . '/templates/body_start.php'; 
+require __DIR__ . '/templates/body_start.php';
 
 ?>
 <!--MAIN CONTENT START-->
 
-<div class="row"> 
+<div class="row">
 	<div class="col-xs-12">
 		<div class="box box-primary">
 			<div class="box-header">
@@ -67,31 +67,31 @@ require __DIR__ . '/templates/body_start.php';
 			<div class="box-body">
 				<div class="table-responsive">
 					<table id="servicesDataTable" class="table-striped display table table-bordered" style="overflow: auto;">
-	
-					</table>	
+
+					</table>
 				</div>
 			</div><!-- /.box-body -->
-		</div><!-- /.box --> 
+		</div><!-- /.box -->
 	</div><!-- /.col -->
 </div><!-- /.row -->
 
 <!--MAIN CONTENT END-->
 
-<?php 
+<?php
 
-require __DIR__ . '/templates/pages/tac_services/modalAddService.php'; 
-
-?>
-
-<?php 
-
-require __DIR__ . '/templates/pages/tac_services/modalEditService.php'; 
+require __DIR__ . '/templates/pages/tac_services/modalAddService.php';
 
 ?>
 
-<?php 
+<?php
 
-require __DIR__ . '/templates/body_end.php'; 
+require __DIR__ . '/templates/pages/tac_services/modalEditService.php';
+
+?>
+
+<?php
+
+require __DIR__ . '/templates/body_end.php';
 
 ?>
 
@@ -109,11 +109,12 @@ require __DIR__ . '/templates/footer_end.php';
 	<!-- iCheck -->
 	<script src="/plugins/iCheck/icheck.min.js"></script>
 
-	<script>var addForm="form#addServiceForm"; var editForm="form#editServiceForm"</script>
 	<!-- DATATABLES MAIN -->
-    <script src="dist/js/pages/tac_services/datatables.js"></script>
+  <script src="dist/js/pages/tac_services/datatables.js"></script>
+	<!-- main Object -->
+  <script src="dist/js/pages/tac_services/tgui_service.js"></script>
 	<!-- main js tac services MAIN Functions -->
-    <script src="dist/js/pages/tac_services/main.js"></script>
+  <script src="dist/js/pages/tac_services/main.js"></script>
 <!-- ADDITIONAL JS FILES END-->
 </body>
 

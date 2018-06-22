@@ -10,17 +10,17 @@ $PAGE_TITLE = 'TacacsGUI';
 $PAGE_SUBTITLE = 'API Update';
 $BREADCRUMB = array(
 	'Home' => [
-		'name' => 'Administration', 
-		'href' => '', 
-		'icon' => 'fa fa-cog', 
+		'name' => 'Administration',
+		'href' => '',
+		'icon' => 'fa fa-cog',
 		'class' => ''  //last item should have active class!!
-	], 
+	],
 	'Tacacs' => [
-		'name' => 'API Update', 
-		'href' => '', 
-		'icon' => 'fa fa-database', 
+		'name' => 'API Update',
+		'href' => '',
+		'icon' => 'fa fa-database',
 		'class' => 'active'  //last item should have active class!!
-	], 
+	],
 );
 ///!!!!!////
 $ACTIVE_MENU_ID=1000;
@@ -40,9 +40,9 @@ require __DIR__ . '/templates/header.php';
 
 <!--ADDITIONAL CSS FILES END-->
 
-<?php 
+<?php
 
-require __DIR__ . '/templates/body_start.php'; 
+require __DIR__ . '/templates/body_start.php';
 
 ?>
 <!--MAIN CONTENT START-->
@@ -56,13 +56,13 @@ require __DIR__ . '/templates/body_start.php';
 	<div class="box-body">
 		<div class="form-group">
 			<label>Update URL</label>
-			<input type="text" class="form-control update_url" disabled>
+			<input type="text" class="form-control" name="update_url" data-type="input" data-default="" data-pickup="true" disabled>
 		</div>
 		<div class="form-group">
 			<label>Check after sign in</label>
 			<div class="checkbox icheck">
 				<label>
-					<input type="checkbox" class="update_signin" disabled> <s>Check update after sign in</s> (doesn't work yet)
+					<input type="checkbox" name="update_signin" data-type="checkbox" data-default="uncheck" data-pickup="true"> <s>Check update after sign in</s> (doesn't work yet)
 				</label>
 			</div>
 		</div>
@@ -70,16 +70,16 @@ require __DIR__ . '/templates/body_start.php';
 			<label>Update Key</label>
 			<div class="input-group margin">
 				<span class="input-group-addon activated"></span>
-                <input type="text" class="form-control update_key" disabled>
+                <input type="text" class="form-control" name="update_key" data-type="input" data-default="" data-pickup="true" disabled>
                     <span class="input-group-btn">
-                      <button type="button" class="btn btn-warning btn-flat generate">Generate New</button>
+                      <button type="button" class="btn btn-warning btn-flat" onclick="tgui_apiUpdate.newKey()">Generate New</button>
                     </span>
 			</div>
 			<p class="help-block"> add that key to your <a href="https://tacacsgui.com/profile/" target="_blank">tacacsgui.com</a> profile</p>
 		</div>
 	</div>
 	<!-- /.box-body -->
-	
+
 	<!-- <div class="box-footer">
 		<button type="submit" class="btn btn-success btn-flat">Apply</button>
 	</div> -->
@@ -93,17 +93,17 @@ require __DIR__ . '/templates/body_start.php';
 	<!-- form start -->
 	<div class="box-body">
 		<div class="form-group">
-			<button class="btn btn-success btn-flat check_update">Check Update</button>
+			<button class="btn btn-success btn-flat" onclick="tgui_apiUpdate.checkUpdate()">Check Update</button>
 		</div>
 		<div class="form-group">
 <pre class="update_log">
 <p class="text-center">Info will appeared here</p>
-</pre>		
+</pre>
 		</div>
 <p>The last 6 updates list you can find <a href="https://tacacsgui.com/updates/" target="_blank">here</a></p>
 	</div>
 	<!-- /.box-body -->
-	
+
 	<div class="box-footer upgrade text-center" style="display:none">
 		<button class="btn btn-success btn-flat upgrade" onclick="upgrade()">Update</button>
 	</div>
@@ -120,9 +120,9 @@ require __DIR__ . '/templates/body_start.php';
 
 <!--MAIN CONTENT END-->
 
-<?php 
+<?php
 
-require __DIR__ . '/templates/body_end.php'; 
+require __DIR__ . '/templates/body_end.php';
 
 ?>
 
@@ -136,9 +136,11 @@ require __DIR__ . '/templates/footer_end.php';
 
 	<!-- iCheck -->
 	<script src="/plugins/iCheck/icheck.min.js"></script>
-	
+
+	<!-- main Object -->
+  <script src="dist/js/pages/api_update/tgui_apiUpdate.js"></script>
 	<!-- main js MAIN Functions -->
-    <script src="dist/js/pages/api_update/main.js"></script>
+  <script src="dist/js/pages/api_update/main.js"></script>
 
 <!-- ADDITIONAL JS FILES END-->
 </body>

@@ -10,11 +10,11 @@ $PAGE_TITLE = 'TacacsGUI';
 $PAGE_SUBTITLE = 'Dashboard';
 $BREADCRUMB = array(
 	'Dashboard' => [
-		'name' => 'Dashboard', 
-		'href' => '', 
-		'icon' => 'fa fa-dashboard', 
+		'name' => 'Dashboard',
+		'href' => '',
+		'icon' => 'fa fa-dashboard',
 		'class' => ''  //last item should have active class!!
-	], 
+	],
 );
 ///!!!!!////
 $ACTIVE_MENU_ID=10;
@@ -32,9 +32,9 @@ require __DIR__ . '/templates/header.php';
 </head>
 <!--ADDITIONAL CSS FILES END-->
 
-<?php 
+<?php
 
-require __DIR__ . '/templates/body_start.php'; 
+require __DIR__ . '/templates/body_start.php';
 
 ?>
 <!--MAIN CONTENT START-->
@@ -45,8 +45,8 @@ require __DIR__ . '/templates/body_start.php';
 		<!-- small box -->
 		<div class="small-box bg-green">
 			<div class="inner">
-			<h3 class="tacacsStatus">loading...</h3>
-		
+			<h3 class="tacacsStatus lds-dual-ring"></h3>
+
 			<p>tacacs status</p>
 			</div>
 			<div class="icon">
@@ -62,8 +62,8 @@ require __DIR__ . '/templates/body_start.php';
 	<!-- small box -->
 		<div class="small-box bg-blue">
 			<div class="inner">
-			<h3 class="numberOfDevices">0</h3>
-		
+			<h3 class="numberOfDevices lds-dual-ring"></h3>
+
 			<p>Devices</p>
 			</div>
 			<div class="icon">
@@ -79,8 +79,8 @@ require __DIR__ . '/templates/body_start.php';
 	<!-- small box -->
 		<div class="small-box bg-yellow">
 			<div class="inner">
-			<h3 class="numberOfUsers">0</h3>
-		
+			<h3 class="numberOfUsers lds-dual-ring"></h3>
+
 			<p>Users</p>
 			</div>
 			<div class="icon">
@@ -96,8 +96,8 @@ require __DIR__ . '/templates/body_start.php';
 	<!-- small box -->
 		<div class="small-box bg-teal">
 			<div class="inner">
-			<h3 class="numberOfAuthFails">0</h3>
-		
+			<h3 class="numberOfAuthFails lds-dual-ring"></h3>
+
 			<p>Failed authentication (during the week)</p>
 			</div>
 			<div class="icon">
@@ -113,12 +113,12 @@ require __DIR__ . '/templates/body_start.php';
       <!-- /.row -->
 
       <!-- =========================================================== -->
-	  
+
 <!-- DONUT CHART -->
 	<div class="box box-success">
 		<div class="box-header with-border">
 			<h3 class="box-title">Top Chart</h3>
-		
+
 			<div class="box-tools pull-right">
 			<button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
 			</button>
@@ -129,26 +129,28 @@ require __DIR__ . '/templates/body_start.php';
 			<div class="row">
 				<div class="col-lg-6 col-md-6">
 					<div class="text-center"><h3>Top 5 Active Users</h3> <small>number of authentication per week</small></div>
+					<div class="lds-dual-ring lds-black lds-absolute userPieLoading"></div>
 					<div id="canvas-holder">
 						<canvas class="chart-area1" />
 					</div>
-				</div>	
+				</div>
 				<div class="col-lg-6 col-md-6">
 					<div class="text-center"><h3>Top 5 Used Devices</h3> <small>number of authentication per week</small></div>
+					<div class="lds-dual-ring lds-black lds-absolute devicePieLoading"></div>
 					<div id="canvas-holder">
 						<canvas class="chart-area2" />
 					</div>
-				</div>	
-			</div>	
+				</div>
+			</div>
 		</div>
 		<!-- /.box-body -->
 	</div>
 <!-- /.box -->
 
 <!--MAIN CONTENT END-->
-<?php 
+<?php
 
-require __DIR__ . '/templates/body_end.php'; 
+require __DIR__ . '/templates/body_end.php';
 
 ?>
 
@@ -162,7 +164,7 @@ require __DIR__ . '/templates/footer_end.php';
 	<!-- ChartJS -->
 	<script src="bower_components/chart.js/Chart.bundle.js"></script>
 	<script src="bower_components/chart.js/utils.js"></script>
-	
+
 	<!-- chartjs js -->
     <script src="dist/js/pages/dashboard/chartjs.js"></script>
 	<!-- main js User MAIN Functions -->

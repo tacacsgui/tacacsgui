@@ -1,10 +1,11 @@
 <div class="row ">
 <div class="col-md-6">
-<div class="form-group sms_enabled">
+<div class="form-group mavis_sms_enabled">
 	<div class="checkbox icheck">
 		<label>
-			<input type="checkbox" name="sms_enabled" checked> Enable SMS Auth
+			<input type="checkbox" name="mavis_sms_enabled" data-type="checkbox" data-default="" data-pickup="true" checked> Enable SMS Auth
 		</label>
+		<input type="hidden" name="mavis_sms_enabled_native" value="">
 		<p class="help-block">if you check it, it will mean that that user can be authenticated only with this way</p>
 	</div>
 </div>
@@ -22,7 +23,8 @@
 <div class="col-md-6">
 <div class="form-group">
 	<label>Phone Number</label>
-	<input type="text" class="form-control mavis_sms_number" name="number">
+	<input type="text" class="form-control" data-type="input" data-default="" data-pickup="true" name="mavis_sms_number">
+	<input type="hidden" name="mavis_sms_number_native" value="">
 </div>
 </div>
 </div>

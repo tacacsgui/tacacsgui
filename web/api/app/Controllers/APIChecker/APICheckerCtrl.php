@@ -33,7 +33,7 @@ protected $tablesArr = array(
 	'api_settings' =>
 	[
 		'timezone' => ['string', ''],
-		'update_url' => ['string', 'https://tacacsgui.com/api/tacacsgui/update/'],
+		'update_url' => ['string', 'https://tacacsgui.com/updates/'],
 		'update_activated' => ['integer', '0'],
 		'update_signin' => ['integer', '1'],
 		'api_logging_max_entries' => ['integer', 500],
@@ -78,8 +78,12 @@ protected $tablesArr = array(
 		'manual' => ['text', '_'],
 		'acl' => ['integer', '0'],
 		'service' => ['integer', '0'],
-		'nxos_support' => ['integer', '0'],
-		'priv-lvl' => ['integer', -1],
+		'pap' => ['string', '_'],
+		'pap_flag' => ['integer', '0'],
+		'pap_clone' => ['integer', '0'],
+		'chap' => ['string', '_'],
+		'ms-chap' => ['string', '_'],
+		'priv-lvl' => ['integer', '15'],
 		'mavis_otp_enabled' => ['integer', '0'],
 		'mavis_otp_secret' => ['text', '_'],
 		'mavis_otp_period' => ['integer', '30'],
@@ -410,18 +414,21 @@ protected $tablesArr = array(
 			return $res -> withStatus(401) -> write(json_encode($data));
 		}
 		//INITIAL CODE////END//
-
+		$updateFlag = (@$req->getParam('update')) ? 1 : 0;
+		//var_dump($req->getParam('update'));die();
+		$data['messages'] = array( );
 		foreach($this->tablesArr as $tableName => $tableColumns){
 			if(!$this->db::schema()->hasTable($tableName))
 			{
-				//CREATE TABLE//
-				$this->createTable($tableName,$tableColumns);
-				////////////DEFAULT VALUES/////////
-				$this->setDefaultValues($tableName);
-				///////////////////////////////////
-				$data["message"]="Table ".$tableName." created";
-				sleep(1);
-				return $res -> withStatus(200) -> write(json_encode($data));
+				$data["messages"][count($data["messages"])] = "Table ".$tableName." created";
+				if ($updateFlag) {
+					//CREATE TABLE//
+					$this->createTable($tableName,$tableColumns);
+					////////////DEFAULT VALUES/////////
+					$this->setDefaultValues($tableName);
+					///////////////////////////////////
+					sleep(1); return $res -> withStatus(200) -> write(json_encode($data));
+				}
 			}
 			//IF TABLE ALREADY EXIST CHECK COLUMNS//
 			else if(!$this->db::schema()->hasColumns($tableName,array_keys($tableColumns)))
@@ -432,44 +439,45 @@ protected $tablesArr = array(
 				{
 					if(!$this->db::schema()->hasColumn($tableName,$columnName))
 					{
-						//ADD COLUMN//
-						$this->db::schema()->table($tableName, function(Blueprint $table) use ($columnName,$preColumnName,$tableColumns)
-						{
-							switch ($tableColumns[$columnName][0]) {
-								case 'string':
-									$columnObj = $table->string($columnName);
+						$data["messages"][count($data["messages"])]="Column ".$columnName." in the table ".$tableName." created";
+						if ($updateFlag) {
+							//ADD COLUMN//
+							$this->db::schema()->table($tableName, function(Blueprint $table) use ($columnName,$preColumnName,$tableColumns)
+							{
+								switch ($tableColumns[$columnName][0]) {
+									case 'string':
+										$columnObj = $table->string($columnName);
+										break;
+									case 'integer':
+										$columnObj = $table->integer($columnName);
+										break;
+									case 'text':
+										$columnObj = $table->text($columnName);
+										break;
+									case 'timestamp':
+										$columnObj = $table->timestamp($columnName);
 									break;
-								case 'integer':
-									$columnObj = $table->integer($columnName);
-									break;
-								case 'text':
-									$columnObj = $table->text($columnName);
-									break;
-								case 'timestamp':
-									$columnObj = $table->timestamp($columnName);
-								break;
-							}
+								}
 
-							$columnObj -> after($preColumnName);
-							if(isset($tableColumns[$columnName][1])
-								AND
-								($tableColumns[$columnName][0]=='integer' AND $tableColumns[$columnName][1]!= '_' )
-								OR
-								($tableColumns[$columnName][1]!='_' AND $tableColumns[$columnName][0]=='string')
-								OR
-								($tableColumns[$columnName][1]!='_' AND $tableColumns[$columnName][0]=='text')
-							)//end if
-							{
-								$columnObj -> default($tableColumns[$columnName][1]);//ADD DEFAULT VALUE IF SET////
-							}
-							else
-							{
-								$columnObj -> nullable();
-							}
-						});
-						$data["message"]="Column ".$columnName." in the table ".$tableName." created";
-						sleep(1);
-						return $res -> withStatus(200) -> write(json_encode($data));
+								$columnObj -> after($preColumnName);
+								if(isset($tableColumns[$columnName][1])
+									AND
+									($tableColumns[$columnName][0]=='integer' AND $tableColumns[$columnName][1]!= '_' )
+									OR
+									($tableColumns[$columnName][1]!='_' AND $tableColumns[$columnName][0]=='string')
+									OR
+									($tableColumns[$columnName][1]!='_' AND $tableColumns[$columnName][0]=='text')
+								)//end if
+								{
+									$columnObj -> default($tableColumns[$columnName][1]);//ADD DEFAULT VALUE IF SET////
+								}
+								else
+								{
+									$columnObj -> nullable();
+								}
+							});
+							sleep(1); return $res -> withStatus(200) -> write(json_encode($data));
+						}//if $updateFlag end
 					}
 					$preColumnName=$columnName;
 				}

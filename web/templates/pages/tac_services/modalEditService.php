@@ -5,7 +5,7 @@
 	<div class="modal-content">
 		<div class="modal-header">
 			<button type="button" class="close" data-dismiss="modal">&times;</button>
-			<h4 class="modal-title">Edit Service <serviceName class="text-green"></serviceName></h4>
+			<h4 class="modal-title">Edit Service <elName class="text-green"></elName></h4>
 		</div>
 		<div class="modal-body">
 		<form id="editServiceForm">
@@ -17,8 +17,6 @@
             <div class="tab-content">
 				<div class="tab-pane active" id="general_info_edit">
 					<?php include __DIR__ . '/tabGeneralInfo.php';?>
-					<input type="hidden" value="" name="id"/>
-					<input type="hidden" value="" name="name_old"/>
 				</div>
 				<!-- /.tab-pane -->
 				<div class="tab-pane" id="manual_edit">
@@ -27,14 +25,14 @@
 				<!-- /.tab-pane -->
             </div>
             <!-- /.tab-content -->
-		</div>	
+		</div>
 		</form>
 		<p class="text-muted"><text class="created_at"></text><text class="updated_at pull-right"></text></p>
 		</div>
 		<div class="modal-footer">
 			<button type="button" class="btn btn-flat pull-left" data-dismiss="modal">Close</button>
-			<button type="button" class="btn btn-flat btn-success" onclick="submitServiceChanges()">Edit Service</button>
-		</div>			
+			<button type="button" class="btn btn-flat btn-success" onclick="tgui_service.edit()">Edit Service</button>
+		</div>
 	</div>
 	</div>
 </div>

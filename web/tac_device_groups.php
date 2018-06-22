@@ -10,14 +10,14 @@ $PAGE_TITLE = 'TacacsGUI';
 $PAGE_SUBTITLE = 'Tacacs Device Groups';
 $BREADCRUMB = array(
 	'Tacacs' => [
-		'name' => 'Tacacs', 
-		'href' => '', 
-		'icon' => 'fa fa-cogs', 
+		'name' => 'Tacacs',
+		'href' => '',
+		'icon' => 'fa fa-cogs',
 		'class' => ''  //last item should have active class!!
-	], 
+	],
 	'Devices' => [
-		'name' => 'Device Groups', 
-		'href' => '', 
+		'name' => 'Device Groups',
+		'href' => '',
 		'icon' => 'fa fa-server', //leave empty if you won't put icon
 		'class' => 'active' //last item should have active class!!
 	]
@@ -46,14 +46,14 @@ require __DIR__ . '/templates/header.php';
 </head>
 <!--ADDITIONAL CSS FILES END-->
 
-<?php 
+<?php
 
-require __DIR__ . '/templates/body_start.php'; 
+require __DIR__ . '/templates/body_start.php';
 
 ?>
 <!--MAIN CONTENT START-->
 
-<div class="row"> 
+<div class="row">
 	<div class="col-xs-12">
 		<div class="box box-primary">
 			<div class="box-header">
@@ -66,31 +66,31 @@ require __DIR__ . '/templates/body_start.php';
 			<div class="box-body">
 				<div class="table-responsive">
 					<table id="deviceGroupsDataTable" class="table-striped display table table-bordered" style="overflow: auto;">
-				
-					</table>	
+
+					</table>
 				</div>
 			</div><!-- /.box-body -->
-		</div><!-- /.box --> 
+		</div><!-- /.box -->
 	</div><!-- /.col -->
 </div><!-- /.row -->
 
 <!--MAIN CONTENT END-->
 
-<?php 
+<?php
 
-require __DIR__ . '/templates/pages/tac_device_groups/modalAddGroup.php'; 
-
-?>
-
-<?php 
-
-require __DIR__ . '/templates/pages/tac_device_groups/modalEditGroup.php'; 
+require __DIR__ . '/templates/pages/tac_device_groups/modalAddGroup.php';
 
 ?>
 
-<?php 
+<?php
 
-require __DIR__ . '/templates/body_end.php'; 
+require __DIR__ . '/templates/pages/tac_device_groups/modalEditGroup.php';
+
+?>
+
+<?php
+
+require __DIR__ . '/templates/body_end.php';
 
 ?>
 
@@ -106,13 +106,15 @@ require __DIR__ . '/templates/footer_end.php';
 	<script src="bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
 	<script src="bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
 	<!-- iCheck -->
-	<script src="/plugins/iCheck/icheck.min.js"></script>	
-	
-	
+	<script src="/plugins/iCheck/icheck.min.js"></script>
+
+
 	<!-- DATATABLES MAIN -->
-    <script src="dist/js/pages/tac_device_groups/datatables.js"></script>
+  <script src="dist/js/pages/tac_device_groups/datatables.js"></script>
+	<!-- main Object -->
+	<script src="dist/js/pages/tac_device_groups/tgui_devGrp.js"></script>
 	<!-- main js User MAIN Functions -->
-    <script src="dist/js/pages/tac_device_groups/main.js"></script>
+  <script src="dist/js/pages/tac_device_groups/main.js"></script>
 
 <!-- ADDITIONAL JS FILES END-->
 </body>

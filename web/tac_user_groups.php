@@ -10,14 +10,14 @@ $PAGE_TITLE = 'TacacsGUI';
 $PAGE_SUBTITLE = 'Tacacs User Groups';
 $BREADCRUMB = array(
 	'Tacacs' => [
-		'name' => 'Tacacs', 
-		'href' => '', 
-		'icon' => 'fa fa-cogs', 
+		'name' => 'Tacacs',
+		'href' => '',
+		'icon' => 'fa fa-cogs',
 		'class' => ''  //last item should have active class!!
-	], 
+	],
 	'Groups' => [
-		'name' => 'User Groups', 
-		'href' => '', 
+		'name' => 'User Groups',
+		'href' => '',
 		'icon' => 'fa fa-users', //leave empty if you won't put icon
 		'class' => 'active' //last item should have active class!!
 	]
@@ -45,14 +45,14 @@ require __DIR__ . '/templates/header.php';
 </head>
 <!--ADDITIONAL CSS FILES END-->
 
-<?php 
+<?php
 
-require __DIR__ . '/templates/body_start.php'; 
+require __DIR__ . '/templates/body_start.php';
 
 ?>
 <!--MAIN CONTENT START-->
 
-<div class="row"> 
+<div class="row">
 	<div class="col-xs-12">
 		<div class="box box-primary">
 			<div class="box-header">
@@ -65,30 +65,30 @@ require __DIR__ . '/templates/body_start.php';
 			<div class="box-body">
 				<div class="table-responsive">
 					<table id="userGroupsDataTable" class="table-striped display table table-bordered" style="overflow: auto;">
-	
-					</table>	
+
+					</table>
 				</div>
 			</div><!-- /.box-body -->
-		</div><!-- /.box --> 
+		</div><!-- /.box -->
 	</div><!-- /.col -->
 </div><!-- /.row -->
 
 <!--MAIN CONTENT END-->
-<?php 
+<?php
 
-require __DIR__ . '/templates/body_end.php'; 
-
-?>
-
-<?php 
-
-require __DIR__ . '/templates/pages/tac_user_groups/modalAddGroup.php'; 
+require __DIR__ . '/templates/body_end.php';
 
 ?>
 
-<?php 
+<?php
 
-require __DIR__ . '/templates/pages/tac_user_groups/modalEditGroup.php';  
+require __DIR__ . '/templates/pages/tac_user_groups/modalAddGroup.php';
+
+?>
+
+<?php
+
+require __DIR__ . '/templates/pages/tac_user_groups/modalEditGroup.php';
 
 ?>
 
@@ -106,12 +106,17 @@ require __DIR__ . '/templates/footer_end.php';
 	<!-- Select2 -->
 	<script src="bower_components/select2/dist/js/select2.full.min.js"></script>
 
-	
+
 	<!-- main js User Groups MAIN Functions -->
-    <script src="dist/js/pages/tac_user_groups/select.js"></script>
-    <script src="dist/js/pages/tac_user_groups/main.js"></script>
-	<!-- DATATABLES MAIN -->
+		<!-- Select2 Object -->
+		<script src="dist/js/tgui_select2.js"></script>
+		<!-- main Object -->
+    <script src="dist/js/pages/tac_user_groups/tgui_tacUserGrp.js"></script>
+		<!-- DATATABLES MAIN -->
     <script src="dist/js/pages/tac_user_groups/datatables.js"></script>
+		<!-- MAIN Script-->
+    <script src="dist/js/pages/tac_user_groups/main.js"></script>
+
 
 <!-- ADDITIONAL JS FILES END-->
 </body>

@@ -14,24 +14,24 @@ class TACUsersCtrl extends Controller
 ################################################
 ########	Add New User	###############START###########
 	#########	GET Add New User	#########
-	public function getUserAdd($req,$res)
-	{
-		//INITIAL CODE////START//
-		$data=array();
-		$data=$this->initialData([
-			'type' => 'get',
-			'object' => 'user_tacacs',
-			'action' => 'add',
-		]);
-		#check error#
-		if ($_SESSION['error']['status']){
-			$data['error']=$_SESSION['error'];
-			return $res -> withStatus(401) -> write(json_encode($data));
-		}
-		//INITIAL CODE////END//
-
-		return $res -> withStatus(200) -> write(json_encode($data));
-	}
+	// public function getUserAdd($req,$res)
+	// {
+	// 	//INITIAL CODE////START//
+	// 	$data=array();
+	// 	$data=$this->initialData([
+	// 		'type' => 'get',
+	// 		'object' => 'user_tacacs',
+	// 		'action' => 'add',
+	// 	]);
+	// 	#check error#
+	// 	if ($_SESSION['error']['status']){
+	// 		$data['error']=$_SESSION['error'];
+	// 		return $res -> withStatus(401) -> write(json_encode($data));
+	// 	}
+	// 	//INITIAL CODE////END//
+	//
+	// 	return $res -> withStatus(200) -> write(json_encode($data));
+	// }
 
 	#########	POST Add New User	#########
 	public function postUserAdd($req,$res)
@@ -71,60 +71,48 @@ class TACUsersCtrl extends Controller
 			return $res -> withStatus(200) -> write(json_encode($data));
 		}
 
-		$data['default_service'] = ($req->getParam('default_service') === true OR $req->getParam('default_service') === 'true') ? 1 : 0;
+		$allParams = $req->getParams();
 
-		$data['enable']=$req->getParam('enable');
-		$data['login']=$req->getParam('login');
-		$data['group']=$req->getParam('group');
-
-		if (isset($data['login']) AND $req->getParam('login_encrypt') == 'true')
+		if ( (!empty($allParams['enable']) AND (@$allParams['enable_encrypt'] == 1)) AND (intval( @$allParams['enable_flag'] ) !== 0) )
 		{
-			if ($req->getParam('login_flag') == 1)
+			if ($allParams['enable_flag'] == 1)
 			{
-				$data['login']=trim(shell_exec('openssl passwd -1 '.$data['login']));
-			} elseif ($req->getParam('login_flag') == 2)
+				$allParams['enable']=trim(shell_exec('openssl passwd -1 '.$allParams['enable']));
+			} elseif ($allParams['enable_flag'] == 2)
 			{
-				$data['login']=trim(shell_exec('openssl passwd -crypt '.$data['login']));
+				$allParams['enable']=trim(shell_exec('openssl passwd -crypt '.$allParams['enable']));
 			}
 		}
-
-		if (isset($data['enable']) AND $req->getParam('enable_encrypt') == 'true')
+		if ( (!empty($allParams['login']) AND (@$allParams['login_encrypt'] == 1)) AND (intval( @$allParams['login_flag'] ) !== 0) )
 		{
-			if ($req->getParam('enable_flag') == 1)
+			if ($allParams['login_flag'] == 1)
 			{
-				$data['enable']=trim(shell_exec('openssl passwd -1 '.$data['enable']));
+				$allParams['login']=trim(shell_exec('openssl passwd -1 '.$allParams['login']));
+			} elseif ($allParams['login_flag'] == 2)
+			{
+				$allParams['login']=trim(shell_exec('openssl passwd -crypt '.$allParams['login']));
 			}
-			if ($req->getParam('enable_flag') == 2)
+		}
+		if ( (!empty($allParams['pap']) AND (@$allParams['pap_encrypt'] == 1)) AND (intval( @$allParams['pap_flag'] ) !== 0) )
+		{
+			if ($allParams['pap_flag'] == 1)
 			{
-				$data['enable']=trim(shell_exec('openssl passwd -crypt '.$data['enable']));
+				$allParams['pap']=trim(shell_exec('openssl passwd -1 '.$allParams['pap']));
+			} elseif ($allParams['pap_flag'] == 2)
+			{
+				$allParams['pap']=trim(shell_exec('openssl passwd -crypt '.$allParams['pap']));
 			}
 		}
 
 		$otp_default = MAVISOTP::select()->first();
-		$nxos_support = TACGlobalConf::select('nxos_support')->first();
+		//$nxos_support = TACGlobalConf::select('nxos_support')->first();
 
-		$user = TACUsers::create([
-			'disabled' => $req->getParam('disabled'),
-			'username' => $req->getParam('username'),
-			'login' => $data['login'],
-			'login_flag' => $req->getParam('login_flag'),
-			'enable' => $data['enable'],
-			'enable_flag' => $req->getParam('enable_flag'),
-			'group' => $req->getParam('group'),
-			'default_service' => $data['default_service'],
-			'priv-lvl' => intval($req->getParam('priv-lvl')),
-			'acl' => intval($req->getParam('acl')),
-			'service' => $req->getParam('service'),
-			'mavis_otp_secret' => $this->MAVISOTP->secret(),
-			'mavis_otp_period' => $otp_default->period,
-			'mavis_otp_digits' => $otp_default->digits,
-			'mavis_otp_digest' => $otp_default->digest,
-			'nxos_support' => $nxos_support->nxos_support,
-			'message' => $req->getParam('message'),
-			'manual' => $req->getParam('manual'),
-		]);
+		$allParams['mavis_otp_secret'] = $this->MAVISOTP->secret();
+		$allParams['mavis_otp_period'] = $otp_default->period;
+		$allParams['mavis_otp_digits'] = $otp_default->digits;
 
-		//$this->auth->check();
+		$user = TACUsers::create($allParams);
+
 		$data['user']=$user;
 
 		$data['changeConfiguration']=$this->changeConfigurationFlag(['unset' => 0]);
@@ -187,14 +175,14 @@ class TACUsersCtrl extends Controller
 		//CHECK ACCESS TO THAT FUNCTION//END//
 
 		$validation = $this->validator->validate($req, [
-			'username' => v::noWhitespace()->notEmpty()->userTacAvailable($req->getParam('id')),
-			'group' => v::noWhitespace()->numeric(),
+			'username' => v::noWhitespace()->when( v::nullType() , v::alwaysValid(), v::notEmpty()->userTacAvailable($req->getParam('id'))),
+			'group' => v::noWhitespace()->when( v::nullType() , v::alwaysValid(), v::numeric()),
 			'enable' => v::noWhitespace()->prohibitedChars(),
-			'enable_flag' => v::noWhitespace()->numeric(),
-			'login' => v::noWhitespace()->notEmpty()->prohibitedChars(),
-			'login_flag' => v::noWhitespace()->numeric(),
-			'mavis_otp_period' => v::noWhitespace()->intVal()->between(30, 120),
-			'mavis_otp_digits' => v::noWhitespace()->intVal()->between(5, 8),
+			'enable_flag' => v::noWhitespace()->when( v::nullType() , v::alwaysValid(), v::numeric()),
+			'login' => v::noWhitespace()->when( v::nullType() , v::alwaysValid(), v::prohibitedChars()),
+			'login_flag' => v::noWhitespace()->when( v::nullType() , v::alwaysValid(), v::numeric()),
+			'mavis_otp_period' => v::noWhitespace()->when( v::nullType() , v::alwaysValid(), v::intVal()->between(30, 120)),
+			'mavis_otp_digits' => v::noWhitespace()->when( v::nullType() , v::alwaysValid(), v::intVal()->between(5, 8)),
 		]);
 
 		if ($validation->failed()){
@@ -203,65 +191,54 @@ class TACUsersCtrl extends Controller
 			return $res -> withStatus(200) -> write(json_encode($data));
 		}
 
-		$data['default_service'] = ($req->getParam('default_service') === true OR $req->getParam('default_service') === 'true') ? 1 : 0;
-		$data['mavis_otp_enabled'] = ($req->getParam('mavis_otp_enabled') == 'true') ? 1 : 0;
-		$data['mavis_sms_enabled'] = ($req->getParam('mavis_sms_enabled') == 'true') ? 1 : 0;
+		$allParams = $req->getParams();
 
-		$data['enable']=$req->getParam('enable');
-		$data['login']=$req->getParam('login');
-		$data['nxos_support']= ($req->getParam('nxos_support') == 1) ? 1 : 0;
-		$data['group']=$req->getParam('group');
-
-		if (isset($data['login']) AND $req->getParam('login_encrypt') == 'true')
+		if ( (!empty($allParams['enable']) AND (@$allParams['enable_encrypt'] == 1)) AND (intval( @$allParams['enable_flag'] ) !== 0) )
 		{
-			if ($req->getParam('login_flag') == 1)
+			if ($allParams['enable_flag'] == 1)
 			{
-				$data['login']=trim(shell_exec('openssl passwd -1 '.$data['login']));
-			} elseif ($req->getParam('login_flag') == 2)
+				$allParams['enable']=trim(shell_exec('openssl passwd -1 '.$allParams['enable']));
+			} elseif ($allParams['enable_flag'] == 2)
 			{
-				$data['login']=trim(shell_exec('openssl passwd -crypt '.$data['login']));
+				$allParams['enable']=trim(shell_exec('openssl passwd -crypt '.$allParams['enable']));
+			}
+		}
+		if ( (!empty($allParams['login']) AND (@$allParams['login_encrypt'] == 1)) AND (intval( @$allParams['login_flag'] ) !== 0) )
+		{
+			if ($allParams['login_flag'] == 1)
+			{
+				$allParams['login']=trim(shell_exec('openssl passwd -1 '.$allParams['login']));
+			} elseif ($allParams['login_flag'] == 2)
+			{
+				$allParams['login']=trim(shell_exec('openssl passwd -crypt '.$allParams['login']));
+			}
+		}
+		if ( (!empty($allParams['pap']) AND (@$allParams['pap_encrypt'] == 1)) AND (intval( @$allParams['pap_flag'] ) !== 0) )
+		{
+			if ($allParams['pap_flag'] == 1)
+			{
+				$allParams['pap']=trim(shell_exec('openssl passwd -1 '.$allParams['pap']));
+			} elseif ($allParams['pap_flag'] == 2)
+			{
+				$allParams['pap']=trim(shell_exec('openssl passwd -crypt '.$allParams['pap']));
 			}
 		}
 
-		if (isset($data['enable']) AND $req->getParam('enable_encrypt') == 'true')
-		{
-			if ($req->getParam('enable_flag') == 1)
-			{
-				$data['enable']=trim(shell_exec('openssl passwd -1 '.$data['enable']));
-			} elseif ($req->getParam('enable_flag') == 2)
-			{
-				$data['enable']=trim(shell_exec('openssl passwd -crypt '.$data['enable']));
-			}
-		}
+		$id = $allParams['id'];
 
-		$data['user_update']=TACUsers::where([['id','=',$req->getParam('id')],['username','=',$req->getParam('username_old')]])->
-			update([
-				'disabled' => $req->getParam('disabled'),
-				'username' => $req->getParam('username'),
-				'login' => $data['login'],
-				'login_flag' => $req->getParam('login_flag'),
-				'enable' => $data['enable'],
-				'enable_flag' => $req->getParam('enable_flag'),
-				'nxos_support' => $data['nxos_support'],
-				'group' => $req->getParam('group'),
-				'default_service' => $data['default_service'],
-				'priv-lvl' => intval($req->getParam('priv-lvl')),
-				'acl' => intval($req->getParam('acl')),
-				'service' => $req->getParam('service'),
-				'mavis_otp_enabled' => $data['mavis_otp_enabled'],
-				'mavis_sms_enabled' => $data['mavis_sms_enabled'],
-				'mavis_otp_secret' => $req->getParam('mavis_otp_secret'),
-				'mavis_otp_digits' => $req->getParam('mavis_otp_digits'),
-				'mavis_otp_digest' => $req->getParam('mavis_otp_digest'),
-				'mavis_otp_period' => $req->getParam('mavis_otp_period'),
-				'mavis_sms_number' => $req->getParam('mavis_sms_number'),
-				'message' => $req->getParam('message'),
-				'manual' => $req->getParam('manual'),
-			]);
+		unset($allParams['id']);
+		unset($allParams['enable_encrypt']);
+		unset($allParams['login_encrypt']);
+		unset($allParams['pap_encrypt']);
+
+		$data['user_update']=TACUsers::where([['id','=',$req->getParam('id')]])->
+			update($allParams);
 
 		$data['changeConfiguration']=$this->changeConfigurationFlag(['unset' => 0]);
 
-		$logEntry=array('action' => 'edit', 'objectName' => $req->getParam('username'), 'objectId' => $req->getParam('id'), 'section' => 'tacacs users', 'message' => 303);
+		$username = TACUsers::select('username')->where([['id','=',$id]])->first();
+
+		$logEntry=array('action' => 'edit', 'objectName' => $username['username'], 'objectId' => $id, 'section' => 'tacacs users', 'message' => 303);
 		$data['logging']=$this->APILoggingCtrl->makeLogEntry($logEntry);
 
 		return $res -> withStatus(200) -> write(json_encode($data));
@@ -270,24 +247,24 @@ class TACUsersCtrl extends Controller
 ################################################
 ########	Delete User	###############START###########
 	#########	GET Delete User	#########
-	public function getUserDelete($req,$res)
-	{
-		//INITIAL CODE////START//
-		$data=array();
-		$data=$this->initialData([
-			'type' => 'get',
-			'object' => 'user_tacacs',
-			'action' => 'delete',
-		]);
-		#check error#
-		if ($_SESSION['error']['status']){
-			$data['error']=$_SESSION['error'];
-			return $res -> withStatus(401) -> write(json_encode($data));
-		}
-		//INITIAL CODE////END//
-
-		return $res -> withStatus(200) -> write(json_encode($data));
-	}
+	// public function getUserDelete($req,$res)
+	// {
+	// 	//INITIAL CODE////START//
+	// 	$data=array();
+	// 	$data=$this->initialData([
+	// 		'type' => 'get',
+	// 		'object' => 'user_tacacs',
+	// 		'action' => 'delete',
+	// 	]);
+	// 	#check error#
+	// 	if ($_SESSION['error']['status']){
+	// 		$data['error']=$_SESSION['error'];
+	// 		return $res -> withStatus(401) -> write(json_encode($data));
+	// 	}
+	// 	//INITIAL CODE////END//
+	//
+	// 	return $res -> withStatus(200) -> write(json_encode($data));
+	// }
 
 	#########	POST Delete User	#########
 	public function postUserDelete($req,$res)
@@ -312,7 +289,7 @@ class TACUsersCtrl extends Controller
 		}
 		//CHECK ACCESS TO THAT FUNCTION//END//
 
-		$data['deleteUser']=TACUsers::where([
+		$data['result']=TACUsers::where([
 			['id','=',$req->getParam('id')],
 			['username','=',$req->getParam('username')],
 		])->delete();
@@ -395,7 +372,7 @@ class TACUsersCtrl extends Controller
 		}
 
 		foreach($tempData as $user){
-			$buttons='<button class="btn btn-warning btn-xs btn-flat" onclick="editUser(\''.$user['id'].'\',\''.$user['username'].'\')">Edit</button> <button class="btn btn-danger btn-xs btn-flat" onclick="deleteUser(\''.$user['id'].'\',\''.$user['username'].'\')">Del</button>';
+			$buttons='<button class="btn btn-warning btn-xs btn-flat" onclick="tgui_tacUser.getUserInfo(\''.$user['id'].'\',\''.$user['username'].'\')">Edit</button> <button class="btn btn-danger btn-xs btn-flat" onclick="tgui_tacUser.delete(\''.$user['id'].'\',\''.$user['username'].'\')">Del</button>';
 			$grpID = $user['group'];
 			$user['group'] = (empty($tempGroupsNew[$grpID]['name'])) ? null : $tempGroupsNew[$grpID]['name'];
 			$user['groupMessage'] = (empty($tempGroupsNew[$grpID]['message'])) ? null : $tempGroupsNew[$grpID]['message'];

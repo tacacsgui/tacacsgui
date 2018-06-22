@@ -34,7 +34,7 @@ class TACReportsCtrl extends Controller
 		$data['numberOfDevicesDisables']=TACDevices::select()->where([['disabled','=','1']])->get()->count();
 		$data['numberOfUsers']=TACUsers::select()->get()->count();
 		$data['numberOfUsersDisables']=TACUsers::select()->where([['disabled','=','1']])->get()->count();
-		
+
 		$weekTimeRange=array(
 			date('Y-m-d H:i:s', (time()-(60*60*24*7+1))),
 			date('Y-m-d H:i:s', time())
@@ -42,7 +42,7 @@ class TACReportsCtrl extends Controller
 		$data['range']=$weekTimeRange;
 		/////////////NAMBER OF FAILED AUTH/////START//
 		$data['numberOfAuthFails']=Authentication::select()->whereBetween('date', $weekTimeRange)->where([['action','LIKE','%fail%']])->get()->count();
-		
+
 		$data['tacacsStatusCommand'] = 'sudo '.TAC_DEAMON.' status';
 		$data['tacacsStatusUser'] = trim(shell_exec('id -u -n'));
 		$data['tacacsStatusEmptyCommand'] = trim(shell_exec('sudo '.TAC_DEAMON));
@@ -63,7 +63,7 @@ class TACReportsCtrl extends Controller
 		{
 			if ($data['activeUserslist'][$i]['username']=='') continue;
 			$data['activeUsers'][$data['activeUserslist'][$i]['username']]=Authentication::whereBetween('date', $weekTimeRange)->where([['username','=',$data['activeUserslist'][$i]['username']]])->get()->count();
-			
+
 		}
 		arsort($data['activeUsers']);
 		$data['topUsers']=array_slice($data['activeUsers'], 0, 5);
@@ -76,7 +76,7 @@ class TACReportsCtrl extends Controller
 		{
 			if ($data['activeDeviceslist'][$i]['NAS']=='') continue;
 			$data['activeDevices'][$data['activeDeviceslist'][$i]['NAS']]=Authentication::whereBetween('date', $weekTimeRange)->where([['NAS','=',$data['activeDeviceslist'][$i]['NAS']]])->get()->count();
-			
+
 		}
 		arsort($data['activeDevices']);
 		$data['topDevices']=array_slice($data['activeDevices'], 0, 5);
@@ -112,14 +112,14 @@ class TACReportsCtrl extends Controller
 			return $res -> withStatus(401) -> write(json_encode($data));
 		}
 		//INITIAL CODE////END//
-		
+
 		unset($data['error']);//BEACAUSE DATATABLES USES THAT VARIABLE//
-		
+
 		$params=$req->getParams(); //Get ALL parameters form Datatables
-		
-		$columns = array( 
+
+		$columns = array(
 		// datatable column index  => database column name
-			0 => 'id', 
+			0 => 'id',
 			1 => 'date',
 			2 => 'NAS',
 			3 => 'username',
@@ -127,15 +127,15 @@ class TACReportsCtrl extends Controller
 			5 => 'line',
 			6 => 'cmd',
 		); //Array of all columnes that will used
-		
+
 		//Get temp data for Datatables with Fliter and some other parameters
 		$tempData = Accounting::select()->
-			when($params['columns'][0]['search']['value'], 
+			when($params['columns'][0]['search']['value'],
 				function($query) use ($params,$columns)
 				{
 					return $query->where($columns[0],'LIKE','%'.$params['columns'][0]['search']['value'].'%');
 				}) ->
-			when($params['columns'][1]['search']['value'], 
+			when($params['columns'][1]['search']['value'],
 				function($query) use ($params,$columns)
 				{
 					$dateRange=explode(' - ', $params['columns'][1]['search']['value']);
@@ -143,27 +143,27 @@ class TACReportsCtrl extends Controller
 					$dateRange[1] .= ' 23:59:59';
 					return $query->whereBetween($columns[1], $dateRange);
 				}) ->
-			when($params['columns'][2]['search']['value'], 
+			when($params['columns'][2]['search']['value'],
 				function($query) use ($params,$columns)
 				{
 					return $query->where($columns[2],'LIKE','%'.$params['columns'][2]['search']['value'].'%');
 				}) ->
-			when($params['columns'][3]['search']['value'], 
+			when($params['columns'][3]['search']['value'],
 				function($query) use ($params,$columns)
 				{
 					return $query->where($columns[3],'LIKE','%'.$params['columns'][3]['search']['value'].'%');
 				}) ->
-			when($params['columns'][4]['search']['value'], 
+			when($params['columns'][4]['search']['value'],
 				function($query) use ($params,$columns)
 				{
 					return $query->where($columns[4],'LIKE','%'.$params['columns'][4]['search']['value'].'%');
 				}) ->
-			when($params['columns'][5]['search']['value'], 
+			when($params['columns'][5]['search']['value'],
 				function($query) use ($params,$columns)
 				{
 					return $query->where($columns[5],'LIKE','%'.$params['columns'][5]['search']['value'].'%');
 				}) ->
-			when($params['columns'][6]['search']['value'], 
+			when($params['columns'][6]['search']['value'],
 				function($query) use ($params,$columns)
 				{
 					return $query->where($columns[5],'LIKE','%'.$params['columns'][5]['search']['value'].'%');
@@ -172,9 +172,9 @@ class TACReportsCtrl extends Controller
 			take($params['length'])->
 			offset($params['start'])->
 			get()->toArray();
-		//Creating correct array of answer to Datatables 
+		//Creating correct array of answer to Datatables
 		$data['data']=array();
-		
+
 		foreach($tempData as $device){
 			array_push($data['data'],$device);
 		}
@@ -182,12 +182,12 @@ class TACReportsCtrl extends Controller
 		$data['draw']=intval( $params['draw'] );
 		$data['recordsTotal'] = Accounting::count();
 		$data['recordsFiltered'] = Accounting::select($columns)->
-			when($params['columns'][0]['search']['value'], 
+			when($params['columns'][0]['search']['value'],
 				function($query) use ($params,$columns)
 				{
 					return $query->where($columns[0],'LIKE','%'.$params['columns'][0]['search']['value'].'%');
 				}) ->
-			when($params['columns'][1]['search']['value'], 
+			when($params['columns'][1]['search']['value'],
 				function($query) use ($params,$columns)
 				{
 					$dateRange=explode(' - ', $params['columns'][1]['search']['value']);
@@ -195,36 +195,36 @@ class TACReportsCtrl extends Controller
 					$dateRange[1] .= ' 23:59:59';
 					return $query->whereBetween($columns[1], $dateRange);
 				}) ->
-			when($params['columns'][2]['search']['value'], 
+			when($params['columns'][2]['search']['value'],
 				function($query) use ($params,$columns)
 				{
 					return $query->where($columns[2],'LIKE','%'.$params['columns'][2]['search']['value'].'%');
 				}) ->
-			when($params['columns'][3]['search']['value'], 
+			when($params['columns'][3]['search']['value'],
 				function($query) use ($params,$columns)
 				{
 					return $query->where($columns[3],'LIKE','%'.$params['columns'][3]['search']['value'].'%');
 				}) ->
-			when($params['columns'][4]['search']['value'], 
+			when($params['columns'][4]['search']['value'],
 				function($query) use ($params,$columns)
 				{
 					return $query->where($columns[4],'LIKE','%'.$params['columns'][4]['search']['value'].'%');
 				}) ->
-			when($params['columns'][5]['search']['value'], 
+			when($params['columns'][5]['search']['value'],
 				function($query) use ($params,$columns)
 				{
 					return $query->where($columns[5],'LIKE','%'.$params['columns'][5]['search']['value'].'%');
 				}) ->
-			when($params['columns'][6]['search']['value'], 
+			when($params['columns'][6]['search']['value'],
 				function($query) use ($params,$columns)
 				{
 					return $query->where($columns[5],'LIKE','%'.$params['columns'][5]['search']['value'].'%');
 				}) ->
 				count();
-		
+
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
-	
+
 ########	Accounting Datatables	###############END###########
 ################################################
 	################################################
@@ -245,29 +245,29 @@ class TACReportsCtrl extends Controller
 			return $res -> withStatus(401) -> write(json_encode($data));
 		}
 		//INITIAL CODE////END//
-		
+
 		unset($data['error']);//BEACAUSE DATATABLES USES THAT VARIABLE//
-		
+
 		$params=$req->getParams(); //Get ALL parameters form Datatables
-		
-		$columns = array( 
+
+		$columns = array(
 		// datatable column index  => database column name
-			0 => 'id', 
+			0 => 'id',
 			1 => 'date',
 			2 => 'NAS',
 			3 => 'username',
 			4 => 'NAC',
 			5 => 'line',
 		); //Array of all columnes that will used
-		
+
 		//Get temp data for Datatables with Fliter and some other parameters
 		$tempData = Authentication::select()->
-			when($params['columns'][0]['search']['value'], 
+			when($params['columns'][0]['search']['value'],
 				function($query) use ($params,$columns)
 				{
 					return $query->where($columns[0],'LIKE','%'.$params['columns'][0]['search']['value'].'%');
 				}) ->
-			when($params['columns'][1]['search']['value'], 
+			when($params['columns'][1]['search']['value'],
 				function($query) use ($params,$columns)
 				{
 					$dateRange=explode(' - ', $params['columns'][1]['search']['value']);
@@ -275,22 +275,22 @@ class TACReportsCtrl extends Controller
 					$dateRange[1] .= ' 23:59:59';
 					return $query->whereBetween($columns[1], $dateRange);
 				}) ->
-			when($params['columns'][2]['search']['value'], 
+			when($params['columns'][2]['search']['value'],
 				function($query) use ($params,$columns)
 				{
 					return $query->where($columns[2],'LIKE','%'.$params['columns'][2]['search']['value'].'%');
 				}) ->
-			when($params['columns'][3]['search']['value'], 
+			when($params['columns'][3]['search']['value'],
 				function($query) use ($params,$columns)
 				{
 					return $query->where($columns[3],'LIKE','%'.$params['columns'][3]['search']['value'].'%');
 				}) ->
-			when($params['columns'][4]['search']['value'], 
+			when($params['columns'][4]['search']['value'],
 				function($query) use ($params,$columns)
 				{
 					return $query->where($columns[4],'LIKE','%'.$params['columns'][4]['search']['value'].'%');
 				}) ->
-			when($params['columns'][5]['search']['value'], 
+			when($params['columns'][5]['search']['value'],
 				function($query) use ($params,$columns)
 				{
 					return $query->where($columns[5],'LIKE','%'.$params['columns'][5]['search']['value'].'%');
@@ -299,9 +299,9 @@ class TACReportsCtrl extends Controller
 			take($params['length'])->
 			offset($params['start'])->
 			get()->toArray();
-		//Creating correct array of answer to Datatables 
+		//Creating correct array of answer to Datatables
 		$data['data']=array();
-		
+
 		foreach($tempData as $device){
 			array_push($data['data'],$device);
 		}
@@ -309,12 +309,12 @@ class TACReportsCtrl extends Controller
 		$data['draw']=intval( $params['draw'] );
 		$data['recordsTotal'] = Authentication::count();
 		$data['recordsFiltered'] = Authentication::select($columns)->
-			when($params['columns'][0]['search']['value'], 
+			when($params['columns'][0]['search']['value'],
 				function($query) use ($params,$columns)
 				{
 					return $query->where($columns[0],'LIKE','%'.$params['columns'][0]['search']['value'].'%');
 				}) ->
-			when($params['columns'][1]['search']['value'], 
+			when($params['columns'][1]['search']['value'],
 				function($query) use ($params,$columns)
 				{
 					$dateRange=explode(' - ', $params['columns'][1]['search']['value']);
@@ -322,31 +322,31 @@ class TACReportsCtrl extends Controller
 					$dateRange[1] .= ' 23:59:59';
 					return $query->whereBetween($columns[1], $dateRange);
 				}) ->
-			when($params['columns'][2]['search']['value'], 
+			when($params['columns'][2]['search']['value'],
 				function($query) use ($params,$columns)
 				{
 					return $query->where($columns[2],'LIKE','%'.$params['columns'][2]['search']['value'].'%');
 				}) ->
-			when($params['columns'][3]['search']['value'], 
+			when($params['columns'][3]['search']['value'],
 				function($query) use ($params,$columns)
 				{
 					return $query->where($columns[3],'LIKE','%'.$params['columns'][3]['search']['value'].'%');
 				}) ->
-			when($params['columns'][4]['search']['value'], 
+			when($params['columns'][4]['search']['value'],
 				function($query) use ($params,$columns)
 				{
 					return $query->where($columns[4],'LIKE','%'.$params['columns'][4]['search']['value'].'%');
 				}) ->
-			when($params['columns'][5]['search']['value'], 
+			when($params['columns'][5]['search']['value'],
 				function($query) use ($params,$columns)
 				{
 					return $query->where($columns[5],'LIKE','%'.$params['columns'][5]['search']['value'].'%');
 				}) ->
 				count();
-		
+
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
-	
+
 ########	Authentication Datatables	###############END###########
 ################################################
 	################################################
@@ -367,29 +367,29 @@ class TACReportsCtrl extends Controller
 			return $res -> withStatus(401) -> write(json_encode($data));
 		}
 		//INITIAL CODE////END//
-		
+
 		unset($data['error']);//BEACAUSE DATATABLES USES THAT VARIABLE//
-		
+
 		$params=$req->getParams(); //Get ALL parameters form Datatables
-		
-		$columns = array( 
+
+		$columns = array(
 		// datatable column index  => database column name
-			0 => 'id', 
+			0 => 'id',
 			1 => 'date',
 			2 => 'NAS',
 			3 => 'username',
 			4 => 'NAC',
 			5 => 'line',
 		); //Array of all columnes that will used
-		
+
 		//Get temp data for Datatables with Fliter and some other parameters
 		$tempData = Authorization::select()->
-			when($params['columns'][0]['search']['value'], 
+			when($params['columns'][0]['search']['value'],
 				function($query) use ($params,$columns)
 				{
 					return $query->where($columns[0],'LIKE','%'.$params['columns'][0]['search']['value'].'%');
 				}) ->
-			when($params['columns'][1]['search']['value'], 
+			when($params['columns'][1]['search']['value'],
 				function($query) use ($params,$columns)
 				{
 					$dateRange=explode(' - ', $params['columns'][1]['search']['value']);
@@ -397,22 +397,22 @@ class TACReportsCtrl extends Controller
 					$dateRange[1] .= ' 23:59:59';
 					return $query->whereBetween($columns[1], $dateRange);
 				}) ->
-			when($params['columns'][2]['search']['value'], 
+			when($params['columns'][2]['search']['value'],
 				function($query) use ($params,$columns)
 				{
 					return $query->where($columns[2],'LIKE','%'.$params['columns'][2]['search']['value'].'%');
 				}) ->
-			when($params['columns'][3]['search']['value'], 
+			when($params['columns'][3]['search']['value'],
 				function($query) use ($params,$columns)
 				{
 					return $query->where($columns[3],'LIKE','%'.$params['columns'][3]['search']['value'].'%');
 				}) ->
-			when($params['columns'][4]['search']['value'], 
+			when($params['columns'][4]['search']['value'],
 				function($query) use ($params,$columns)
 				{
 					return $query->where($columns[4],'LIKE','%'.$params['columns'][4]['search']['value'].'%');
 				}) ->
-			when($params['columns'][5]['search']['value'], 
+			when($params['columns'][5]['search']['value'],
 				function($query) use ($params,$columns)
 				{
 					return $query->where($columns[5],'LIKE','%'.$params['columns'][5]['search']['value'].'%');
@@ -421,9 +421,9 @@ class TACReportsCtrl extends Controller
 			take($params['length'])->
 			offset($params['start'])->
 			get()->toArray();
-		//Creating correct array of answer to Datatables 
+		//Creating correct array of answer to Datatables
 		$data['data']=array();
-		
+
 		foreach($tempData as $device){
 			array_push($data['data'],$device);
 		}
@@ -431,12 +431,12 @@ class TACReportsCtrl extends Controller
 		$data['draw']=intval( $params['draw'] );
 		$data['recordsTotal'] = Authorization::count();
 		$data['recordsFiltered'] = Authorization::select($columns)->
-			when($params['columns'][0]['search']['value'], 
+			when($params['columns'][0]['search']['value'],
 				function($query) use ($params,$columns)
 				{
 					return $query->where($columns[0],'LIKE','%'.$params['columns'][0]['search']['value'].'%');
 				}) ->
-			when($params['columns'][1]['search']['value'], 
+			when($params['columns'][1]['search']['value'],
 				function($query) use ($params,$columns)
 				{
 					$dateRange=explode(' - ', $params['columns'][1]['search']['value']);
@@ -444,31 +444,31 @@ class TACReportsCtrl extends Controller
 					$dateRange[1] .= ' 23:59:59';
 					return $query->whereBetween($columns[1], $dateRange);
 				}) ->
-			when($params['columns'][2]['search']['value'], 
+			when($params['columns'][2]['search']['value'],
 				function($query) use ($params,$columns)
 				{
 					return $query->where($columns[2],'LIKE','%'.$params['columns'][2]['search']['value'].'%');
 				}) ->
-			when($params['columns'][3]['search']['value'], 
+			when($params['columns'][3]['search']['value'],
 				function($query) use ($params,$columns)
 				{
 					return $query->where($columns[3],'LIKE','%'.$params['columns'][3]['search']['value'].'%');
 				}) ->
-			when($params['columns'][4]['search']['value'], 
+			when($params['columns'][4]['search']['value'],
 				function($query) use ($params,$columns)
 				{
 					return $query->where($columns[4],'LIKE','%'.$params['columns'][4]['search']['value'].'%');
 				}) ->
-			when($params['columns'][5]['search']['value'], 
+			when($params['columns'][5]['search']['value'],
 				function($query) use ($params,$columns)
 				{
 					return $query->where($columns[5],'LIKE','%'.$params['columns'][5]['search']['value'].'%');
 				}) ->
 				count();
-		
+
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
-	
+
 ########	Authorization Datatables	###############END###########
 ################################################
 }

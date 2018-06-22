@@ -10,7 +10,7 @@ use Respect\Validation\Validator as v;
 class MAVISSMSCtrl extends Controller
 {
 	public function globalStatus()
-	
+
 	{
 		return MAVISSMS::select('enabled')->first()->enabled;
 	}
@@ -33,7 +33,9 @@ class MAVISSMSCtrl extends Controller
 		//INITIAL CODE////END//
 
 		$data['SMS_Params']=MAVISSMS::select()->first();
-		
+
+		$data['SMS_Params']['pass'] = $this->generateRandomString( strlen($data['SMS_Params']['pass']) );
+
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
 ########	MAVIS SMS Parameters GET	###############END###########
@@ -60,31 +62,25 @@ class MAVISSMSCtrl extends Controller
 			return $res -> withStatus(403) -> write(json_encode($data));
 		}
 		//CHECK ACCESS TO THAT FUNCTION//END//
-		
+
 		$validation = $this->validator->validate($req, [
-			'port' => v::noWhitespace()->intVal(),
+			'port' => v::when( v::nullType() , v::alwaysValid(), v::numeric())
 		]);
-		
+
 		if ($validation->failed()){
 			$data['error']['status']=true;
 			$data['error']['validation']=$validation->error_messages;
 			return $res -> withStatus(200) -> write(json_encode($data));
 		}
-		
-		$data['mavis_sms_update'] = MAVISSMS::where([['id','=',1]])->
-			update([
-				'enabled' => $req->getParam('enabled'),
-				'port' => $req->getParam('port'),
-				'ipaddr' => $req->getParam('ipaddr'),
-				'login' => $req->getParam('login'),
-				'pass' => $req->getParam('pass'),
-				'srcname' => $req->getParam('srcname'),
-			]);
-		
+
+		$allParams = $req->getParams();
+
+		$data['mavis_sms_update'] = MAVISSMS::where([['id','=',1]])->update($allParams);
+
 		$data['changeConfiguration']=$this->changeConfigurationFlag(['unset' => 0]);
-		
+
 		$logEntry=array('action' => 'edit', 'objectName' => 'MAVIS', 'objectId' => 'SMS', 'section' => 'MAVIS SMS', 'message' => 703);
-		
+
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
 ########	MAVIS SMS Parameters POST	###############END###########
@@ -104,49 +100,64 @@ class MAVISSMSCtrl extends Controller
 			$data['error']=$_SESSION['error'];
 			return $res -> withStatus(401) -> write(json_encode($data));
 		}
-		
+
 		//CHECK ACCESS TO THAT FUNCTION//START//
 		if(!$this->checkAccess(11))
 		{
 			return $res -> withStatus(403) -> write(json_encode($data));
 		}
 		//CHECK ACCESS TO THAT FUNCTION//END//
-		
+
+		$validation = $this->validator->validate($req, [
+			'port' => v::notEmpty()->numeric(),
+			'ipaddr' => v::notEmpty()->ip(),
+			'login' => v::notEmpty(),
+			'srcname' => v::notEmpty(),
+		]);
+
+		if ($validation->failed()){
+			$data['error']['status']=true;
+			$data['error']['validation']=$validation->error_messages;
+			return $res -> withStatus(200) -> write(json_encode($data));
+		}
+
 		$username = $req->getParam('username');
-		$number = $req->getParam('number');
-		
-		if ($username !== null AND $username !== '')
+		$number = $req->getParam('phone_number');
+
+		if ( !empty($username) )
 		{
 			$number = TACUsers::select('mavis_sms_number')->where([['username', '=', $username]])->first()->mavis_sms_number;
 			if ($number == null)
 			{
-				$data['smpp_check']='Number for username '. $username . ' not found';
+				$data['check_result']='Number for username '. $username . ' not found';
 				return $res -> withStatus(200) -> write(json_encode($data));
 			}
 			$data['number']=$number;
-		} elseif ( $number !== null) {
+		} elseif ( !empty($number) ) {
 			$data['number']=$number;
 			$username = '';
 		} else {
-			$data['smpp_check']='Username or Number do not set';
+			$data['check_result']='Username or Number do not set';
 			return $res -> withStatus(200) -> write(json_encode($data));
 		}
-		
+
+		$pass = MAVISSMS::select('pass')->where([['id','=',1]])->first()->pass;
+
 		$link = "/main.sh check smpp-client 'number' ".
 			'"'.$req->getParam('ipaddr').'" '.
 			'"'.$req->getParam('port').'" '.
 			'"true" '.
 			'"'.$req->getParam('login').'" '.
-			'"'.$req->getParam('pass').'" '.
+			'"'.$pass.'" '.
 			'"'.$req->getParam('srcname').'" '.
 			'"'.$number.'" '.
 			'"'.$username.'" '.
 			' 2>&1';
-		
+
 		$data['link']=$link;
-		
-		$data['smpp_check']=shell_exec(TAC_ROOT_PATH . $link);
-		
+
+		$data['check_result']=shell_exec(TAC_ROOT_PATH . $link);
+
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
 ########	MAVIS SMS Send	###############END###########
@@ -165,7 +176,22 @@ class MAVISSMSCtrl extends Controller
 			$data['error']=$_SESSION['error'];
 			return $res -> withStatus(401) -> write(json_encode($data));
 		}
-		
+
+		$validation = $this->validator->validate($req, [
+			'test_username' => v::notEmpty(),
+			'sms_password' => v::notEmpty()->numeric()
+		]);
+
+		if ($validation->failed()){
+			$data['error']['status']=true;
+			$data['error']['validation']=$validation->error_messages;
+			return $res -> withStatus(200) -> write(json_encode($data));
+		}
+
+		$data['test_configuration'] = $this->TACConfigCtrl->testConfiguration($this->TACConfigCtrl->createConfiguration("\n "));
+
+		$data['check_result']=shell_exec(TAC_ROOT_PATH . '/main.sh check mavis '.$req->getParam('test_username').' '.$req->getParam('sms_password').' 2>&1');
+
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
 ########	MAVIS SMS Check	###############END###########

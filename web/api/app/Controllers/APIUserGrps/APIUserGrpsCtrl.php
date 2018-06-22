@@ -73,20 +73,17 @@ class APIUserGrpsCtrl extends Controller
 			return $res -> withStatus(200) -> write(json_encode($data));
 		}
 
-		$data['default_flag'] = ($req->getParam('default_flag') === true OR $req->getParam('default_flag') === 'true') ? 1 : 0;
+		$allParams = $req->getParams();
 
-		if ($data['default_flag']) APIUserGrps::where([['default_flag', '=', 1]])->update(['default_flag' => 0]);
+		if ($allParams['default_flag']) APIUserGrps::where([['default_flag', '=', 1]])->update(['default_flag' => 0]);
 
-		$group = APIUserGrps::create([
-			'name' => $req->getParam('name'),
-			'rights' => $this->rightsToOneValue($req->getParam('rights')),
-			'default_flag' => $data['default_flag'],
-		]);
+		$allParams['rights'] = $this->rightsToOneValue($allParams['rights']);
+
+		$group = APIUserGrps::create($allParams);
 
 		$logEntry=array('action' => 'add', 'objectName' => $group->name, 'objectId' => $group->id, 'section' => 'api user groups', 'message' => 206);
 		$data['logging']=$this->APILoggingCtrl->makeLogEntry($logEntry);
 
-		//$this->auth->check();
 		$data['group']=$group;
 
 		return $res -> withStatus(200) -> write(json_encode($data));
@@ -144,8 +141,8 @@ class APIUserGrpsCtrl extends Controller
 		//CHECK ACCESS TO THAT FUNCTION//END//
 
 		$validation = $this->validator->validate($req, [
-			'name' => v::noWhitespace()->notEmpty()->apiUserGroupNameAvailable($req->getParam('id')),
-			'rights' => v::not(v::nullType())->notEmpty()->arrayType(),
+			'name' => v::when( v::nullType() , v::alwaysValid(), v::noWhitespace()->notEmpty()->apiUserGroupNameAvailable($req->getParam('id'))),
+			'rights' => v::when( v::nullType() , v::alwaysValid(), v::not(v::nullType())->notEmpty()->arrayType()),
 		]);
 
 		if ($validation->failed()){
@@ -154,18 +151,18 @@ class APIUserGrpsCtrl extends Controller
 			return $res -> withStatus(200) -> write(json_encode($data));
 		}
 
-		$data['default_flag'] = ($req->getParam('default_flag') === true OR $req->getParam('default_flag') === 'true') ? 1 : 0;
+		$allParams = $req->getParams();
+		if ($allParams['default_flag']) APIUserGrps::where([['default_flag', '=', 1]])->update(['default_flag' => 0]);
+		$id = $allParams['id'];
+		unset($allParams['id']);
+		$allParams['rights'] = $this->rightsToOneValue($allParams['rights']);
+		
+		$data['group_update']=APIUserGrps::where([['id','=',$id]])->
+			update($allParams);
 
-		if ($data['default_flag']) APIUserGrps::where([['default_flag', '=', 1]])->update(['default_flag' => 0]);
+		$name = APIUserGrps::select('name')->where([['id','=',$id]])->first()->name;
 
-		$data['group_update']=APIUserGrps::where([['id','=',$req->getParam('id')],['name','=',$req->getParam('name_old')]])->
-			update([
-				'name' => $req->getParam('name'),
-				'rights' => $this->rightsToOneValue($req->getParam('rights')),
-				'default_flag' => $data['default_flag'],
-			]);
-
-		$logEntry=array('action' => 'edit', 'objectName' => $req->getParam('name'), 'objectId' => $req->getParam('id'), 'section' => 'api user groups', 'message' => 306);
+		$logEntry=array('action' => 'edit', 'objectName' => $name, 'objectId' => $id, 'section' => 'api user groups', 'message' => 306);
 		$data['logging']=$this->APILoggingCtrl->makeLogEntry($logEntry);
 
 		return $res -> withStatus(200) -> write(json_encode($data));
@@ -174,24 +171,24 @@ class APIUserGrpsCtrl extends Controller
 ################################################
 ########	Delete User Group	###############START###########
 	#########	GET Delete User Group	#########
-	public function getUserGroupDelete($req,$res)
-	{
-		//INITIAL CODE////START//
-		$data=array();
-		$data=$this->initialData([
-			'type' => 'get',
-			'object' => 'user group',
-			'action' => 'delete',
-		]);
-		#check error#
-		if ($_SESSION['error']['status']){
-			$data['error']=$_SESSION['error'];
-			return $res -> withStatus(401) -> write(json_encode($data));
-		}
-		//INITIAL CODE////END//
-
-		return $res -> withStatus(200) -> write(json_encode($data));
-	}
+	// public function getUserGroupDelete($req,$res)
+	// {
+	// 	//INITIAL CODE////START//
+	// 	$data=array();
+	// 	$data=$this->initialData([
+	// 		'type' => 'get',
+	// 		'object' => 'user group',
+	// 		'action' => 'delete',
+	// 	]);
+	// 	#check error#
+	// 	if ($_SESSION['error']['status']){
+	// 		$data['error']=$_SESSION['error'];
+	// 		return $res -> withStatus(401) -> write(json_encode($data));
+	// 	}
+	// 	//INITIAL CODE////END//
+	//
+	// 	return $res -> withStatus(200) -> write(json_encode($data));
+	// }
 
 	#########	POST Delete User Group	#########
 	public function postUserGroupDelete($req,$res)
@@ -216,7 +213,7 @@ class APIUserGrpsCtrl extends Controller
 		}
 		//CHECK ACCESS TO THAT FUNCTION//END//
 
-		$data['deleteGroup']=APIUserGrps::where([
+		$data['result']=APIUserGrps::where([
 			['id','=',$req->getParam('id')],
 			['name','=',$req->getParam('name')],
 		])->delete();
@@ -280,7 +277,7 @@ class APIUserGrpsCtrl extends Controller
 		$data['data']=array();
 
 		foreach($tempData as $group){
-			$buttons='<button class="btn btn-warning btn-xs btn-flat" onclick="editGroup(\''.$group['id'].'\',\''.$group['name'].'\')">Edit</button> <button class="btn btn-danger btn-xs btn-flat" onclick="deleteGroup(\''.$group['id'].'\',\''.$group['name'].'\')">Del</button>';
+			$buttons='<button class="btn btn-warning btn-xs btn-flat" onclick="tgui_apiUserGrp.getInfo(\''.$group['id'].'\',\''.$group['name'].'\')">Edit</button> <button class="btn btn-danger btn-xs btn-flat" onclick="tgui_apiUserGrp.delete(\''.$group['id'].'\',\''.$group['name'].'\')">Del</button>';
 			$group['buttons'] = $buttons;
 			$group['rightsBinary'] = decbin($group['rights']);
 			$group['rightsBinaryArray'] = array_reverse ( str_split( decbin($group['rights']) ) );
@@ -367,10 +364,11 @@ class APIUserGrpsCtrl extends Controller
 		//INITIAL CODE////END//
 
 		///IF GROUPID SET///
-		if ($req->getParam('groupId') != null){
-			if ($req->getParam('groupId') == 0) {
+		$extra = $req->getParam('extra');
+		if ($req->getParam('byId') != null){
+			if ($req->getParam('byId') == 0) {
 
-				if (APIUserGrps::select()->where([['default_flag', '=', 1]])->count() > 0)
+				if (APIUserGrps::select()->where([['default_flag', '=', 1]])->count() > 0 AND empty($extra) )
 				{
 					$data['item'] = APIUserGrps::select()->where([['default_flag', '=', 1]])->first();
 					$data['item']['text'] = $data['item']['name'];
@@ -383,10 +381,10 @@ class APIUserGrpsCtrl extends Controller
 					$data['item']['default_flag'] = false;
 				}
 			}
-			if ($req->getParam('groupId') > 0)
+			if ($req->getParam('byId') > 0)
 			{
 				$data['item'] = APIUserGrps::select()->
-				where([['id', '=', $req->getParam('groupId')]])->
+				where([['id', '=', $req->getParam('byId')]])->
 				first();
 				$data['item']['text'] = $data['item']['name'];
 				//$data['item']['key'] = ($data['item']['key'] != '') ? true : false;

@@ -72,7 +72,7 @@ class Controller
 		//Clear DEMO//
 		if ($value == 0 AND $rightsArray[0] == 1) return true;
 		//DEMO//
-		if ($rightsArray[0] == 1 AND count($rightsArray) == 1) return false;
+		if ($rightsArray[0] == 0 AND count($rightsArray) == 1) return false;
 		//Administrator//
 		if ($rightsArray[1] == 1) return true;
 		//Add/Edit/Delete Tac Devices//

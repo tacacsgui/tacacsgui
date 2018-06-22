@@ -73,7 +73,7 @@ var dataTable =  $('#usersDataTable').DataTable( {
 			filterRow+=filter;
 		}
         $('#usersDataTable thead').append(filterRowElement);
-		tooltips();
+		tguiInit.tooltips();
     }
 
 });

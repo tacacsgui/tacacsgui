@@ -10,14 +10,14 @@ $PAGE_TITLE = 'TacacsGUI';
 $PAGE_SUBTITLE = 'Users of GUI';
 $BREADCRUMB = array(
 	'Home' => [
-		'name' => 'Administration', 
-		'href' => '', 
-		'icon' => 'fa fa-cog', 
+		'name' => 'Administration',
+		'href' => '',
+		'icon' => 'fa fa-cog',
 		'class' => ''  //last item should have active class!!
-	], 
+	],
 	'Template' => [
-		'name' => 'Users', 
-		'href' => '', 
+		'name' => 'Users',
+		'href' => '',
 		'icon' => 'fa fa-user', //leave empty if you won't put icon
 		'class' => 'active' //last item should have active class!!
 	]
@@ -43,14 +43,14 @@ require __DIR__ . '/templates/header.php';
 </head>
 <!--ADDITIONAL CSS FILES END-->
 
-<?php 
+<?php
 
-require __DIR__ . '/templates/body_start.php'; 
+require __DIR__ . '/templates/body_start.php';
 
 ?>
 <!--MAIN CONTENT START-->
 
-<div class="row"> 
+<div class="row">
 	<div class="col-xs-12">
 		<div class="box box-primary">
 			<div class="box-header">
@@ -63,31 +63,31 @@ require __DIR__ . '/templates/body_start.php';
 			<div class="box-body">
 				<div class="table-responsive">
 					<table id="usersDataTable" class="table-striped display table table-bordered" style="overflow: auto;">
-	
-					</table>	
+
+					</table>
 				</div>
 			</div><!-- /.box-body -->
-		</div><!-- /.box --> 
+		</div><!-- /.box -->
 	</div><!-- /.col -->
 </div><!-- /.row -->
 
 <!--MAIN CONTENT END-->
 
-<?php 
+<?php
 
-require __DIR__ . '/templates/pages/api_users/modalAddUser.php'; 
-
-?>
-
-<?php 
-
-require __DIR__ . '/templates/pages/api_users/modalEditUser.php'; 
+require __DIR__ . '/templates/pages/api_users/modalAddUser.php';
 
 ?>
 
-<?php 
+<?php
 
-require __DIR__ . '/templates/body_end.php'; 
+require __DIR__ . '/templates/pages/api_users/modalEditUser.php';
+
+?>
+
+<?php
+
+require __DIR__ . '/templates/body_end.php';
 
 ?>
 
@@ -104,11 +104,15 @@ require __DIR__ . '/templates/footer_end.php';
 	<script src="bower_components/select2/dist/js/select2.full.min.js"></script>
 	<!-- iCheck -->
 	<script src="/plugins/iCheck/icheck.min.js"></script>
-	
-	<!-- main js User MAIN Functions -->
-    <script src="dist/js/pages/api_users/main.js"></script>
+
+	<!-- Select2 Object -->
+  <script src="dist/js/tgui_select2.js"></script>
 	<!-- DATATABLES MAIN -->
-    <script src="dist/js/pages/api_users/datatables.js"></script>
+  <script src="dist/js/pages/api_users/datatables.js"></script>
+	<!-- main Object -->
+  <script src="dist/js/pages/api_users/tgui_apiUser.js"></script>
+	<!-- main js User MAIN Functions -->
+  <script src="dist/js/pages/api_users/main.js"></script>
 <!-- ADDITIONAL JS FILES END-->
 </body>
 

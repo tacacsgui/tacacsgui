@@ -50,7 +50,7 @@
                   <a href="/lockscreen.php" class="btn btn-default btn-flat"><i class="fa fa-lock"></i> Lock</a>
                 </div>
                 <div class="pull-right">
-                  <a href="#" class="btn btn-default btn-flat" id="singout">Sign out</a>
+                  <a href="#" class="btn btn-default btn-flat" onclick="tgui_apiUser.signout()">Sign out</a>
                 </div>
               </li>
             </ul>

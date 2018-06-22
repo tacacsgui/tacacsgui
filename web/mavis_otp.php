@@ -10,17 +10,17 @@ $PAGE_TITLE = 'TacacsGUI';
 $PAGE_SUBTITLE = 'MAVIS OTP Auth';
 $BREADCRUMB = array(
 	'Home' => [
-		'name' => 'MAVIS', 
-		'href' => '', 
-		'icon' => 'fa fa-cog', 
+		'name' => 'MAVIS',
+		'href' => '',
+		'icon' => 'fa fa-cog',
 		'class' => ''  //last item should have active class!!
-	], 
+	],
 	'Tacacs' => [
-		'name' => 'OTP Auth', 
-		'href' => '', 
-		'icon' => 'fa fa-cog', 
+		'name' => 'OTP Auth',
+		'href' => '',
+		'icon' => 'fa fa-cog',
 		'class' => 'active'  //last item should have active class!!
-	], 
+	],
 );
 ///!!!!!////
 $ACTIVE_MENU_ID=900;
@@ -38,24 +38,15 @@ require __DIR__ . '/templates/header.php';
 	<!-- iCheck -->
 	<link rel="stylesheet" href="/plugins/iCheck/square/blue.css">
 <!--ADDITIONAL CSS FILES END-->
-<?php 
+<?php
 
-require __DIR__ . '/templates/body_start.php'; 
+require __DIR__ . '/templates/body_start.php';
 
 ?>
 <!--MAIN CONTENT START-->
 <style>
 .otp-container {
 	position: relative;
-}
-.otp-enabled {
-    background-color: #ddddddc2;
-    position: absolute;
-    width: 101.6%;
-    height: 101.6%;
-    z-index: 10;
-    left: -0.8%;
-    top: -0.8%;
 }
 </style>
 
@@ -70,15 +61,16 @@ require __DIR__ . '/templates/body_start.php';
 					<label>MAVIS One Time Password Module</label>
 					<div class="checkbox icheck enabled">
 						<label>
-						<input type="checkbox" > Enabled
+						<input type="checkbox" name="enabled" data-type="checkbox" data-default="" data-pickup="true"> Enabled
 						</label>
+						<input type="hidden" name="enabled_native" value="">
 					</div>
                 </div>
 			</div>
 		</div>
 		<hr>
 		<div class="otp-container">
-		<div class="otp-enabled"></div>
+		<div class="disabled_shield"></div>
 		<div class="title text-center">
 			<h4>Default Settings</h4>
 		</div>
@@ -86,44 +78,47 @@ require __DIR__ . '/templates/body_start.php';
 			<div class="col-md-4">
 				<div class="form-group period">
 					<label>Period</label>
-					<input type="number" class="form-control period" placeholder="Period"/>
+					<input type="number" class="form-control" name="period" data-type="input" data-default="" data-pickup="true" placeholder="Period"/>
 					<p class="help-block">period of generating OTP. By default, the period for a TOTP is 30 seconds</p>
+					<input type="hidden" name="period_native" value="">
                 </div>
 			</div>
 			<div class="col-md-4">
 				<div class="form-group digits">
 					<label>Digits</label>
-					<input type="number" class="form-control digits" placeholder="Digits"/>
+					<input type="number" class="form-control" name="digits" data-type="input" data-default="" data-pickup="true" placeholder="Digits"/>
 					<p class="help-block">by default the number of digits is 6, more than 10 may be difficult to use by the owner</p>
+					<input type="hidden" name="digits_native" value="">
                 </div>
 			</div>
 			<div class="col-md-4">
 				<div class="form-group digest">
 					<label>Digest</label>
-					<select class="form-control digest">
+					<select class="form-control" name="digest" data-type="select" data-default="" data-pickup="true">
 						<option value="sha1" selected>sha1</option>
 						<option value="md5">md5</option>
 					</select>
+					<input type="hidden" name="digest_native" value="">
 					<p class="help-block">if you don't know what to choose leave it as default (first value)</p>
                 </div>
 			</div>
 		</div>
 		</div>
-<div class="form-group">
-<div class="row">
-<div class="col-lg-12 text-center">
-	<div class="form-group">
-		<p>It is time based parameter, synchronize your time before use it</p>
-		<p>Current server time is <b><time class="current-time text-warning"></time></b></p>
-		<button type="button"class="btn btn-warning btn-flat" onclick="getCurrentTime()">Check it again</button>
-	</div>
-</div>
-</div>
-</div>
+		<div class="form-group">
+		<div class="row">
+		<div class="col-lg-12 text-center">
+			<div class="form-group">
+				<p>It is time based parameter, synchronize your time before use it</p>
+				<p>Current server time is <b><time class="current-time text-warning"></time></b></p>
+				<button type="button"class="btn btn-warning btn-flat" onclick="tgui_otp.getTime()">Check it again</button>
+			</div>
+		</div>
+		</div>
+		</div>
 	</div>
 	<!-- /.box-body -->
 	<div class="box-footer">
-		<button class="btn btn-success btn-flat submit">Apply</button>
+		<button class="btn btn-success btn-flat" onclick="tgui_otp.save()">Apply</button>
 	</div>
 </div>
 
@@ -138,42 +133,36 @@ require __DIR__ . '/templates/body_start.php';
 			</div>
 		</div>
 		<div class="row">
-			<div class="col-xs-12">
-				<div class="callout callout-danger otp-check-alert" style="display:none">
+			<div class="col-md-4 col-sm-6">
+				<div class="form-group username">
+					<label>Username</label>
+					<input type="text" class="form-control" name="username" data-type="input" data-default="" placeholder="Username"/>
+					<p class="help-block">username of pre-configured user</p>
+				</div>
+			</div>
+			<div class="col-md-4 col-sm-6">
+				<div class="form-group ot_password">
+					<label>Password</label>
+					<input type="text" class="form-control" name="ot_password" data-type="input" data-default="" placeholder="One Time Password"/>
+					<p class="help-block">OTP of that user</p>
 				</div>
 			</div>
 		</div>
-		<div class="row">
-			<div class="col-md-4 col-sm-6">
-				<div class="form-group">
-					<label>Username</label>
-					<input type="text" class="form-control otp-check-username" placeholder="Username"/>
-					<p class="help-block">username of pre-configured user</p>
-                </div>
-			</div>
-			<div class="col-md-4 col-sm-6">
-				<div class="form-group">
-					<label>Password</label>
-					<input type="text" class="form-control otp-check-password" placeholder="One Time Password"/>
-					<p class="help-block">OTP of that user</p>
-                </div>
-			</div>
-		</div>
-<pre class="otp-check-output">
+<pre class="check_result">
 Info will appeared here
 </pre>
 	</div>
 	<!-- /.box-body -->
 	<div class="box-footer">
-		<button class="btn btn-warning btn-flat otp-check">Check connection</button>
+		<button class="btn btn-warning btn-flat" onclick="tgui_otp.tester()">Check connection</button>
 	</div>
 </div>
 
 <!--MAIN CONTENT END-->
 
-<?php 
+<?php
 
-require __DIR__ . '/templates/body_end.php'; 
+require __DIR__ . '/templates/body_end.php';
 
 ?>
 
@@ -186,9 +175,11 @@ require __DIR__ . '/templates/footer_end.php';
 <!-- ADDITIONAL JS FILES START-->
 	<!-- iCheck -->
 	<script src="/plugins/iCheck/icheck.min.js"></script>
-	
+
 	<!-- main js MAIN Functions -->
-    <script src="dist/js/pages/mavis_otp/main.js"></script>
+  <script src="dist/js/pages/mavis_otp/tgui_otp.js"></script>
+	<!-- main js MAIN Functions -->
+  <script src="dist/js/pages/mavis_otp/main.js"></script>
 
 <!-- ADDITIONAL JS FILES END-->
 </body>

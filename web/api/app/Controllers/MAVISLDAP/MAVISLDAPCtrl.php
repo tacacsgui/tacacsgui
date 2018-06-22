@@ -29,6 +29,8 @@ class MAVISLDAPCtrl extends Controller
 
 		$data['LDAP_Params']=MAVISLDAP::select()->first();
 
+		$data['LDAP_Params']['password'] = $this->generateRandomString( strlen($data['LDAP_Params']['password']) );
+
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
 
@@ -55,25 +57,24 @@ class MAVISLDAPCtrl extends Controller
 		}
 		//CHECK ACCESS TO THAT FUNCTION//END//
 
-		$data['mavis_ldap_update'] = MAVISLDAP::where([['id','=',1]])->
-			update([
-				'enabled' => $req->getParam('enabled'),
-				'type' => $req->getParam('ldap_type'),
-				'scope' => $req->getParam('ldap_scope'),
-				'hosts' => $req->getParam('hosts'),
-				'base' => $req->getParam('base'),
-				'filter' => $req->getParam('filter'),
-				'user' => $req->getParam('user'),
-				'password' => $req->getParam('password'),
-				'password_hide' => $req->getParam('password_hide'),
-				'group_prefix' => $req->getParam('group_prefix'),
-				'group_prefix_flag' => $req->getParam('group_prefix_flag'),
-				'memberOf' => $req->getParam('memberOf'),
-				'fallthrough' => $req->getParam('fallthrough'),
-				'cache_conn' => $req->getParam('cache_conn'),
-				'tls' => $req->getParam('tls'),
-				'path' => $req->getParam('path'),
-			]);
+		$validation = $this->validator->validate($req, [
+			'user' => v::when( v::nullType() , v::alwaysValid(), v::notEmpty()),
+			'password' => v::when( v::nullType() , v::alwaysValid(), v::notEmpty()),
+			'hosts' => v::when( v::nullType() , v::alwaysValid(), v::notEmpty()),
+			'path' => v::when( v::nullType() , v::alwaysValid(), v::notEmpty()),
+			'enabled' => v::when( v::nullType() , v::alwaysValid(), v::numeric()),
+			'password_hide' => v::when( v::nullType() , v::alwaysValid(), v::numeric())
+		]);
+
+		if ($validation->failed()){
+			$data['error']['status']=true;
+			$data['error']['validation']=$validation->error_messages;
+			return $res -> withStatus(200) -> write(json_encode($data));
+		}
+
+		$allParams = $req->getParams();
+
+		$data['mavis_ldap_update'] = MAVISLDAP::where([['id','=',1]])->update($allParams);
 
 		$data['changeConfiguration']=$this->changeConfigurationFlag(['unset' => 0]);
 
@@ -101,9 +102,20 @@ class MAVISLDAPCtrl extends Controller
 		}
 		//INITIAL CODE////END//
 
+		$validation = $this->validator->validate($req, [
+			'test_username' => v::notEmpty(),
+			'test_password' => v::notEmpty()
+		]);
+
+		if ($validation->failed()){
+			$data['error']['status']=true;
+			$data['error']['validation']=$validation->error_messages;
+			return $res -> withStatus(200) -> write(json_encode($data));
+		}
+
 		$data['test_configuration'] = $this->TACConfigCtrl->testConfiguration($this->TACConfigCtrl->createConfiguration("\n "));
 
-		$data['ldap_check']=shell_exec(TAC_ROOT_PATH . '/main.sh check mavis '.$req->getParam('username').' '.$req->getParam('password').' 2>&1');
+		$data['check_result']=shell_exec(TAC_ROOT_PATH . '/main.sh check mavis '.$req->getParam('test_username').' '.$req->getParam('test_password').' 2>&1');
 
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}

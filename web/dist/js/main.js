@@ -1,141 +1,439 @@
-function tooltips() {
-  $('[data-toggle="tooltip"]').tooltip()
-}
-tooltips()
+//AJAX Request Function//
+var ajaxRequest = {
+    send: function (props){
+      input = {
+        type: props.type || "POST",
+        url: props.url || API_LINK+"user/info/",
+        dataType: "json",
+        timeout: props.timeout || 20000,
+        data: props.data || {}
+      }
+      var ajax = $.ajax(input);
+      tgui_error.debug({},'ajaxProps: ',input, 'ajaxResp: ',ajax);
+      return ajax
+    }
+}//AJAX Request Function//end
+/*---*/
+//Tacgui Error Object//
+var tgui_error = {
+      status:704, //default status code
+      errMessage: "Unexpected Error (default message)", //default message
+      errType: "error", //default error type
+      global: { //glbal error message
+        show: function(message){
+          if (message) $('div.error-message-body').empty();
+          message = message || '';
+          $('div.error-message-body').append(message);
+          $('div.server-error').show();
+          }
+      },//global error message//end
+      local: { //local error message
+        show:function(err) {
+          err = err || {};
+          type = err.type || this.errType;
+          message = err.message || this.errMessage;
+          toastr[type](message);
+        }
+      },//local error message//end
+      getStatus:function(err, extra){
+        err = err || {}
+        this.status = err.status || this.status;
+        if (window.location.hash.substr(1) == 'debug') console.log(err)
+        switch(this.status)
+      	{
+      		case 401:
+            this.local.show({type:"error", message: "You are not authorised!"})
+      			window.location.replace('/')
+      			break;
+      		case 403:
+            this.local.show({type:"warning", message: "You do not have enough rights to do that!"})
+      			break;
+      		default:
+      			toastr["error"]("Oops! Unknown error appeared, try to move to home page. :(");
+            var message = '<p>Type: '+ ((err.name) ? err.name : '_undefined_') +': '+ ((err.stack) ? err.stack : '_undefined_') +'</p>';
+                message += '<p>Status: '+ this.status +'</p>';
+                message += '<p>Status Text: '+ ( (err.statusText)? err.statusText : 'Undefined') +'</p>';
+                message += '<p>Response Text: '+ ( (err.responseText)? err.responseText.replace(/\t+/g, "\t").replace(/\r+/g, "\r").replace(/\s+/g, " ").replace(/<style.*style>/g, '').replace(/<.*?>/g, '').replace(/<\/.*>/g, '') : 'Undefined') +'</p>';
+            if (err.responseJSON) for (var objProp in err.responseJSON) {
+              if (err.responseJSON.hasOwnProperty(objProp)) {
+                message += '<p>' + objProp + ': ' + print_r(err.responseJSON[objProp])+ '</p>'
+              }
+            }
+            if (extra) for (var objProp in extra) {
+              if (extra.hasOwnProperty(objProp)) {
+                message += '<p>' + objProp + ': ' + print_r(extra[objProp])+ '</p>'
+              }
+            }
+            this.global.show(message)
+            return this;
+      			//window.location.replace('/')
+      	}
+      	return this;
+      },
+      debug: function(){
+        if (window.location.hash.substr(1) != 'debug') return;
+        //if (arguments.length <= 1) console.log('Debug with empty output.'); return;
+        for (var i = 1, len = arguments.length; i < len; i++) {
+          console.log(arguments[i]);
+        }
+      }
+}//Tacgui Error Object//end
+/*---*/
+//Tacgui User Object//
+var tgui_apiUser = {
+  id:0,
+  username:'',
+  grpId:0,
+  grpAccess:0,
+  ajaxProps:{
+    url:API_LINK+"user/info/",
+    type: "GET"
+  },
+  getInfo: function(props){
+    props = props || {}
+    for (var prop in props) {
+      if (props.hasOwnProperty(prop)) {
+        this.ajaxProps[prop] = props[prop];
+      }
+    }
+    var info = ajaxRequest.send(this.ajaxProps)
+    return info
+  },
+  fulfill: function(resp) {
+    $('firstname_info').text(resp.user.firstname + ' ');
+    $('surname_info').text(resp.user.surname);
+    $('position_info').text(resp.user.position);
+    $('li.user span.username').text(resp.info.user.username);
+    return this;
+  },
+  signout: function(){
+    var props = {url: API_LINK+"auth/singout/", type:"GET"};
+    ajaxRequest.send(props).then( function(resp){
+      if (!resp.authorised) window.location.replace('/');
+      else throw {name: "Signout", stack:"Something goes wrong!"};
+    }).fail( function(err){
+      tgui_error.getStatus(err, props)
+    })
+    return true;
+  },
+
+}//Tacgui User Object//end
+/*---*/
+//Tacgui Status Object//
+var tgui_status = {
+  id:0,
+  username:'',
+  grpId:0,
+  grpAccess:0,
+  ajaxProps:{
+    url:API_LINK+"apicheck/database/",
+    type: "GET"
+  },
+  getStatus: function(props) {
+    props = props || {}
+    for (var prop in props) {
+      if (props.hasOwnProperty(prop)) {
+        this.ajaxProps[prop] = props[prop];
+      }
+    }
+    var info = ajaxRequest.send(this.ajaxProps)
+    return info
+  },
+  fulfill: function(resp) {
+    $('tacversion').text(resp.info.version.TACVER);
+    $('apiversion').text(resp.info.version.APIVER);
+    $('guiversion').text(GUIVER);
+    $('li.user span.username').text(resp.info.user.username);
+    this.changeStatus(resp.configuration.changeFlag)
+    return this;
+  },
+  changeStatus: function(status) {
+    if (status == 1)
+  	{
+  		$('header li.applyBtn').show()
+  		$('ul.timeline li span.configurationStatus').empty().text('Configuration was changed, you can test and apply it').removeClass('bg-green').addClass('bg-yellow')
+  	}
+  	if (status == 0)
+  	{
+  		$('header li.applyBtn').hide()
+  		$('ul.timeline li span.configurationStatus').empty().text('No changes detected').removeClass('bg-yellow').addClass('bg-green')
+  	}
+  },
+  time: function() {
+    var ajaxProps = {
+      url:API_LINK+"apicheck/time/",
+      type: "GET"
+    };
+
+    return ajaxRequest.send(ajaxProps)
+  }
+}//Tacgui Status Object//end
+/*---*/
+//Tacacs Initiator Object
+var tguiInit = {
+  tooltips: function(selector){
+    selector = selector || '[data-toggle="tooltip"]';
+    $(selector).tooltip()
+    return this;
+  },
+  iCheck: function(){
+    $('div.icheck input[type="checkbox"]').iCheck({
+    	checkboxClass: 'icheckbox_square-blue',
+    	radioClass: 'iradio_square-blue',
+    	increaseArea: '20%' // optional
+    });
+    return this;
+  },
+  slider: function(o) {
+    o = o || {};
+    var p = {
+      tooltip: o.tooltip || "always"
+    }
+    $('input.slider').slider(p)
+    return this;
+  },
+  toggleMavis: function() {
+    $('input[name="enabled"]').on('ifToggled', function(event){
+      ( $('input[name="enabled"]').prop( "checked" ) ) ? $('div.disabled_shield').hide() : $('div.disabled_shield').show()
+    });
+    return this;
+  },
+}//Tacacs Initiator Object//end
+/*-
+-
+-
+*/
+var tgui_supplier = {//Tacacs Supplier Object
+  getFormData: function(form, reference) {
+    reference = reference || false;
+    form = form || '';
+    form = (form != '') ? form + ' ' : form;
+    var obj = {};
+    var el = {};
+    for (var i = 0, len = $(form + '[data-pickup="true"]').length; i < len; i++) {
+      el = $(form + '[data-pickup="true"]')[i];
+      tgui_error.debug({},'Element: ', el);
+      switch ($(el).attr('data-type')) {
+        case 'input':
+          if (reference) {
+            obj[$(el).attr('name')] = $(el).val();
+            tgui_error.debug({},$(el).attr('name')+': ' + obj[$(el).attr('name')]);
+            if ( $(form + '[name="'+$(el).attr('name') + '_native'+'"]').length ){
+              if ($(form + '[name="'+$(el).attr('name') + '_native'+'"]').val() == $(el).val()){
+                tgui_error.debug({},$(el).attr('name')+' was deleted');
+                delete obj[$(el).attr('name')];
+                delete obj[$(el).attr('name')+'_native'];
+              }
+            }
+            break;
+          }
+          obj[$(el).attr('name')] = $(el).val();
+          tgui_error.debug({},$(el).attr('name')+': ' + obj[$(el).attr('name')]);
+          if ( obj[$(el).attr('name')] == '' ) {
+            tgui_error.debug({},$(el).attr('name')+' was deleted, it was empty');
+            delete obj[$(el).attr('name')];
+          }
+          break;
+        case 'select':
+          if (reference) {
+            obj[$(el).attr('name')] = ( $(el).val() );
+            tgui_error.debug({},$(el).attr('name')+': ' + obj[$(el).attr('name')]);
+            if ( $(form + '[name="'+$(el).attr('name') + '_native'+'"]').length ){
+              if ($(form + '[name="'+$(el).attr('name') + '_native'+'"]').val() == $(el).val()){
+                tgui_error.debug({},$(el).attr('name')+' was deleted');
+                delete obj[$(el).attr('name')];
+                delete obj[$(el).attr('name')+'_native'];
+              }
+            }
+            break;
+          }
+          obj[$(el).attr('name')] = $(el).val();
+          tgui_error.debug({},$(el).attr('name')+': ' + obj[$(el).attr('name')]);
+          break;
+        case 'checkbox':
+          if (reference) {
+            obj[$(el).attr('name')] = ($(el).prop('checked')) ? 1 : 0;
+            if ( $(form + '[name="'+$(el).attr('name') + '_native'+'"]').length ){
+              if ($(form + '[name="'+$(el).attr('name') + '_native'+'"]').val() == obj[$(el).attr('name')]){
+                delete obj[$(el).attr('name')];
+                delete obj[$(el).attr('name')+'_native'];
+              }
+            }
+            break;
+          }
+          obj[$(el).attr('name')] = ($(el).prop('checked')) ? 1 : 0;
+          tgui_error.debug({},$(el).attr('name')+': ' + obj[$(el).attr('name')]);
+          break;
+        default:
+          obj[$(el).attr('name')] = $(el).val();
+          tgui_error.debug({},$(el).attr('name')+': ' + obj[$(el).attr('name')] + '. Default choice!! Please check!');
+          if ( obj[$(el).attr('name')] == '' ) {
+            tgui_error.debug({},$(el).attr('name')+' was deleted, it was empty'+ '. Default choice!! Please check!');
+            delete obj[$(el).attr('name')];
+          }
+      }
+    }
+
+    return obj;
+  },
+  checkResponse: function(error, form){
+    $('.form-group.has-error').removeClass('has-error');
+  	$('.form-group p.text-red').remove();
+  	$('.form-group p.help-block').show();
+    if (error.status){
+      for (v in error.validation){
+        if (!(error.validation[v] == null)){
+          $(form +' div.'+v).addClass('has-error')
+          $('div.form-group.'+v+' p.help-block').hide()
+          var error_message='';
+          for (num in error.validation[v]){
+            error_message+='<p class="text-red">'+error.validation[v][num]+'</p>';
+            tgui_error.local.show({type:'error', message: error.validation[v][num]})
+          }
+          $('div.form-group.'+v).append(error_message)
+        }
+      }
+      return true;
+    }
+    return false;
+  },
+  clearForm: function(form){
+    $('.form-group.has-error').removeClass('has-error');
+  	$('.form-group p.text-red').remove();
+  	$('.form-group p.help-block').show();
+    $('.nav.nav-tabs a[href="#general_info"]').tab('show');//select first tab
+  	$('.nav.nav-tabs a[href="#general_info_edit"]').tab('show');//select first tab
+    //clear pre-defined elements
+    for (var i = 0, len = $('[data-default]').length; i < len; i++) {
+      element = $($('[data-default]')[i])
+      switch (element.attr('data-type')) {
+        case 'input':
+          element.val(element.attr('data-default'))
+          break;
+        case 'select':
+          element.val(element.attr('data-default'))
+          break;
+        case 'checkbox':
+          element.iCheck( (element.attr('data-default') == 'checked') ? 'check' : 'uncheck')
+          break;
+      }
+    }
+    return this;
+  },
+  fulfillForm: function(obj, form) {
+    form = form || "";
+    form = (form != '') ? form + ' ' : form;
+    obj = obj || {};
+    var el = {}, el_n = {};
+    for (var param in obj) {
+      if (obj.hasOwnProperty(param)) {
+        if ( $(form + '[name="'+param+'"][data-pickup="true"]').length ){
+          el = $(form + '[name="'+param+'"][data-pickup="true"]');
+          el_n = $(form + '[name="'+param+'_native"]');
+          tgui_error.debug({}, 'Fulfill. Element: ', el, 'Value: '+obj[param]);
+          switch ($(el).attr('data-type')) {
+            case 'input':
+              el.val(obj[param]);
+              if (el_n.length) el_n.val(obj[param]);
+              break;
+            case 'select':
+              el.val(obj[param]);
+              if (el_n.length) el_n.val(obj[param]);
+              break;
+            case 'checkbox':
+              tgui_error.debug({}, 'Fulfill. Checkbox: ', el, 'Value: '+obj[param]);
+              el.iCheck( (obj[param] == 1) ? 'check' : 'uncheck');
+              if (el_n.length) el_n.val(obj[param]);
+              break;
+          }
+        }
+      }
+    }
+    if ( $('elName').length && (obj.name || obj.username)) $('elName').text( (obj.name || obj.username) );
+    if ( $('.created_at').length && obj.created_at) $('.created_at').text('Created at: ' + obj.created_at);
+    if ( $('.updated_at').length && obj.updated_at) $('.updated_at').text('Updated at: ' + obj.updated_at);
+    return true;
+  },
+  toggle: function(button){
+    if (button == 'reload'){
+      $('input[name="disabled"]').val('0');
+      $('.disable-toggle').removeClass('btn-warning btn-success').addClass('btn-success').text('Enabled');
+      return;
+    }
+    if (button == 'disabled'){
+      $('.disable-toggle').removeClass('btn-warning btn-success').addClass('btn-warning').text('Disabled');
+      return;
+    }
+    var form = $(button).parents('form')[0]
+    var button = $(button)
+  	var input = $('form#'+ $(form).attr('id') +' input[name="disabled"]')
+		if (input.val() == '0'){
+			button.removeClass('btn-success').addClass('btn-warning').text('Disabled');
+			input.val('1')
+		}
+		else if (input.val() == '1'){
+			button.removeClass('btn-warning').addClass('btn-success').text('Enabled');
+			input.val('0')
+		}
+    return;
+  },
+  privLvl: function(action, button, form) {
+    action = action || 'unset';
+    button = button || -1;
+    form = form || $(button).parents('form')[0];
+    input = $('form#' + $(form).attr('id') + ' input[name="priv-lvl"]')
+    input_preview = $('form#' + $(form).attr('id') + ' input[name="priv-lvl-preview"]')
+    switch (action) {
+      case '+':
+        val = parseInt($(input).val());
+        if (val == 15 ) break;
+        $(input).val( val + 1 )
+        $(input_preview).val( $(input).val() )
+        break;
+      case '-':
+        val = parseInt($(input).val());
+        if (val == -1 ) { $(input_preview).val( 'Undefined' ); break;}
+        $(input).val( val - 1 )
+        $(input_preview).val( $(input).val() )
+        if (parseInt($(input).val()) == -1 ) $(input_preview).val( 'Undefined' )
+        break;
+      case 'set':
+        //
+        break;
+      default:
+        $(input).val(-1)
+        $(input_preview).val( 'Undefined' )
+    }
+  },
+  validateIp: function(address){
+    address = address || false;
+    if (address=='0.0.0.0/0') return true;
+    if (/^([1-9]|[1-9][0-9]|[1-9][0-9][0-9])\.([0-9]|[1-9][0-9]|[1-9][0-9][0-9])\.([0-9]|[1-9][0-9]|[1-9][0-9][0-9])\.([0-9]|[1-9][0-9]|[1-9][0-9][0-9])\/([1-9]|[1-3][0-9])$/.test(address)) return true;
+    console.log(/^([1-9]|[1-9][0-9]|[1-9][0-9][0-9])\.([0-9]|[1-9][0-9]|[1-9][0-9][0-9])\.([0-9]|[1-9][0-9]|[1-9][0-9][0-9])\.([0-9]|[1-9][0-9]|[1-9][0-9][0-9])\/([1-9]|[1-3][0-9])$/.test(address))
+    return false;
+  },
+  loadElement: function(param) {
+    param = param || {};
+    param.color = param.color || 'black';
+    param.size = param.size || 'small';
+    param.type = param.type || 'lds';
+    var el_class = '';
+    if (param.type == 'lds'){
+      el_class += ( param.size == 'small') ? " lds-dual-ring-small " : " lds-dual-ring ";
+      el_class += ( param.color == 'black') ? " lds-black " : "";
+    }
+
+    return '<div class="'+el_class+'"></div>';
+  }
+}//Tacacs Supplier Object//end
+
+tguiInit.tooltips();
+
 ///////TOASTR///GLOBAL OPTIONS///
 toastr.options = {
 	"positionClass": "toast-bottom-right",
 }
 ///////////////////////////////
-/////CHANGE APPLY STATUS IN THE HEADER///START//
-function changeApplyStatus(status)
-{
-	if (status == 1) 
-	{
-		$('header li.applyBtn').show()
-		$('ul.timeline li span.configurationStatus').empty().text('Configuration was changed, you can test and apply it').removeClass('bg-green').addClass('bg-yellow')
-	}
-	if (status == 0)
-	{
-		$('header li.applyBtn').hide()
-		$('ul.timeline li span.configurationStatus').empty().text('No changes detected').removeClass('bg-yellow').addClass('bg-green')
-	}
-}
-/////CHANGE APPLY STATUS IN THE HEADER///END//
-//////////////////////////////////
-////////ERROR FUNCTION////START///
-function errorHere(answer)
-{
-	switch(answer.status)
-	{
-		case 500:
-			toastr["error"]("Oops! Error on server, try to move to home page.");
-			console.log(answer)
-			window.location.replace('/')
-			break;
-		case 401:
-			toastr["error"]("You are not authorised!");
-			window.location.replace('/')
-			break;
-		case 403:
-			toastr["warning"]("You do not have enough rights to do that!");
-			break;
-		default:
-			toastr["error"]("Oops! Unknown error appeared, try to move to home page. :(");
-			console.log(answer)
-			//window.location.replace('/')
-	}
-	return;
-} 
-////////ERROR FUNCTION////END///
-///////////////////////////////////
-/////////MAIN CHECK CONFIGURATION///START//
-function checkConfiguration()
-{
-	var data = {
-			"action": "get",
-			"test" : "none"
-			};	
-	$.ajax({
-			type: "GET",
-			dataType: "json",
-			url: API_LINK+"apicheck/status/",
-			cache: false,
-			data: data,
-			async: false,
-			success: function(data) {
-				console.log(data);
-				$('tacversion').text(data['info']['version']['TACVER']);
-				$('apiversion').text(data['info']['version']['APIVER']);
-				$('guiversion').text(GUIVER);
-				$('li.user span.username').text(data['info']['user']['username']);
-				changeApplyStatus(data['configuration']['changeFlag'])
-			},
-			error: function(data) {
-				console.log(data['responseJSON']);
-				errorHere(data);
-			}
-	});
-}
-/////////MAIN CHECK CONFIGURATION///END////
-///////////////////////////////////
-/////////GET USER INFO///START//
-function getUserInfo()
-{
-	var data = {
-			"action": "get",
-			"test" : "none"
-			};	
-	$.ajax({
-			type: "GET",
-			dataType: "json",
-			url: API_LINK+"/user/info/",
-			cache: false,
-			data: data,
-			async: false,
-			success: function(data) {
-				console.log(data);
-				$('firstname_info').text(data['user']['firstname'] + ' ')
-				$('surname_info').text(data['user']['surname'])
-				$('position_info').text(data['user']['position'])
-				$('div.loading').hide();
-			},
-			error: function(data) {
-				console.log(data['responseJSON']);
-				errorHere(data);
-			}
-	});
-}
-/////////GET USER INFO///END////
-///////////////////////////////////
-/////////LOGOUT///SINGOUT///START//
-function signout(){
-	var data = {
-		"action": "get",
-		"test" : "none"
-		};	
-	$.ajax({
-		type: "GET",
-		dataType: "json",
-		url: API_LINK+"/auth/singout/",
-		cache: false,
-		data: data,
-		async: false,
-		success: function(data) {
-			console.log(data);
-			if (!data['authorised']) window.location.replace('/');
-		},
-		error: function(data) {
-			console.log(data['responseJSON']);
-			errorHere(data);
-		}
-	});
-}
-$('#singout').click(function(){
-	signout()
-})
-/////////LOGOUT///SINGOUT///END////
-///////////////////////////////////
 
 var timeoutset=1500*60*5;
 $.idleTimer(timeoutset);
@@ -154,11 +452,11 @@ function print_r(arr, level) {
             if(typeof(value) == 'object') {
                 print_red_text += level_padding + "'" + item + "' :\n";
                 print_red_text += print_r(value,level+1);
-		} 
-            else 
+		}
+            else
                 print_red_text += level_padding + "'" + item + "' => \"" + value + "\"\n";
         }
-    } 
+    }
 
     else  print_red_text = "===>"+arr+"<===("+typeof(arr)+")";
     return print_red_text;

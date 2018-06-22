@@ -55,17 +55,17 @@ require __DIR__ . '/templates/body_start.php';
 			<div class="box-body">
 				<div class="row">
 					<div class="col-xs-12">
-						<a class="btn btn-app" onclick="deamonConfig('start')">
+						<a class="btn btn-app" onclick="tgui_tacGlobal.daemon('start')">
 							<i class="fa fa-play"></i> Start
 						</a>
-						<a class="btn btn-app" onclick="deamonConfig('stop')">
+						<a class="btn btn-app" onclick="tgui_tacGlobal.daemon('stop')">
 							<i class="fa fa-pause"></i> Stop
 						</a>
 						<a class="btn btn-app">
-							<i class="fa fa-repeat" onclick="deamonConfig('reload')"></i> Reload
+							<i class="fa fa-repeat" onclick="tgui_tacGlobal.daemon('reload')"></i> Reload
 						</a>
 						<a class="btn btn-app">
-							<i class="fa fa-info" onclick="deamonConfig()"></i> Get Status
+							<i class="fa fa-info" onclick="tgui_tacGlobal.daemon()"></i> Get Status
 						</a>
 					</div>
 				</div>
@@ -93,11 +93,13 @@ require __DIR__ . '/templates/body_start.php';
 			</div>
 			<!-- /.box-header -->
 			<div class="box-body">
+				<form id="tacGlobalForm" method="post">
 				<div class="row">
 				<div class="col-md-4 col-lg-4">
 					<div class="form-group port">
 						<label>Listening Port</label>
-						<input type="number" class="form-control" name="port" placeholder="Enter Listening Port">
+						<input type="number" class="form-control" name="port" data-type="input" data-default="" data-pickup="true" placeholder="Enter Listening Port">
+						<input type="hidden" name="port_native" value="">
 					</div>
 				</div>
 				</div>
@@ -107,15 +109,17 @@ require __DIR__ . '/templates/body_start.php';
 				<div class="col-md-4 col-lg-4">
 					<div class="form-group max_attempts">
 						<label>Authentication Max Attempt</label>
-						<input type="number" class="form-control max_attempts" name="max_attempts" placeholder="Enter Max Attempt">
+						<input type="number" class="form-control max_attempts" name="max_attempts" data-type="input" data-default="" data-pickup="true" placeholder="Enter Max Attempt">
 						<p class="help-block">that parameter limits the number of <i>Password:</i> prompts per TACACS+ session at login, default: 1</p>
+						<input type="hidden" name="max_attempts_native" value="">
 					</div>
 				</div>
 				<div class="col-md-4 col-lg-4">
 					<div class="form-group backoff">
 						<label>Backoff Timer</label>
-						<input type="number" class="form-control backoff" name="backoff" placeholder="Enter Backoff Timer">
+						<input type="number" class="form-control backoff" name="backoff" data-type="input" data-default="" data-pickup="true" placeholder="Enter Backoff Timer">
 						<p class="help-block">tacacs will wait for <i>seconds</i> before returning a final authentication failure (password incorrect) message, default: 1 second</p>
+						<input type="hidden" name="backoff_native" value="">
 					</div>
 				</div>
 				</div>
@@ -125,15 +129,17 @@ require __DIR__ . '/templates/body_start.php';
 				<div class="col-md-4 col-lg-4">
 					<div class="form-group connection_timeout">
 						<label>Connection Timeout</label>
-						<input type="number" class="form-control" name="connection_timeout" placeholder="Enter Connection Timeout">
+						<input type="number" class="form-control" name="connection_timeout" data-type="input" data-default="" data-pickup="true" placeholder="Enter Connection Timeout">
 						<p class="help-block">terminate a connection to a NAS after an idle period of at least <i>s</i> seconds, default: 600 seconds</p>
+						<input type="hidden" name="connection_timeout_native" value="">
 					</div>
 				</div>
 				<div class="col-md-4 col-lg-4">
 					<div class="form-group context_timeout">
 						<label>Context Timeout</label>
-						<input type="number" class="form-control" name="context_timeout" placeholder="Enter Context Timeout">
+						<input type="number" class="form-control" name="context_timeout" data-type="input" data-default="" data-pickup="true" placeholder="Enter Context Timeout">
 						<p class="help-block">clears context cache entries after <i>s</i> seconds of inactivity, default: 3600 seconds</p>
+						<input type="hidden" name="context_timeout_native" value="">
 					</div>
 				</div>
 				</div>
@@ -144,22 +150,25 @@ require __DIR__ . '/templates/body_start.php';
 				<div class="col-md-4 col-lg-4">
 					<div class="form-group authentication">
 						<label>Authentication</label>
-						<input type="text" class="form-control" name="authentication" placeholder="Enter Authentication Settings">
+						<input type="text" class="form-control" name="authentication" data-type="input" data-default="" data-pickup="true" placeholder="Enter Authentication Settings">
 						<p class="help-block">here you can set path to file on the server, command or syslog server ip and port, <text class="text-red">by default it used for Log Parser script</text></p>
+						<input type="hidden" name="authentication_native" value="">
 					</div>
 				</div>
 				<div class="col-md-4 col-lg-4">
 					<div class="form-group authorization">
 						<label>Authorization</label>
-						<input type="text" class="form-control" name="authorization" placeholder="Enter Authorization Settings">
+						<input type="text" class="form-control" name="authorization" data-type="input" data-default="" data-pickup="true" placeholder="Enter Authorization Settings">
 						<p class="help-block">here you can set path to file on the server, command or syslog server ip and port, <text class="text-red">by default it used for Log Parser script</text></p>
+						<input type="hidden" name="authorization_native" value="">
 					</div>
 				</div>
 				<div class="col-md-4 col-lg-4">
 					<div class="form-group accounting">
 						<label>Accounting</label>
-						<input type="text" class="form-control" name="accounting" placeholder="Enter Accounting Settings">
+						<input type="text" class="form-control" name="accounting" data-type="input" data-default="" data-pickup="true" placeholder="Enter Accounting Settings">
 						<p class="help-block">here you can set path to file on the server, command or syslog server ip and port, <text class="text-red">by default it used for Log Parser script</text></p>
+						<input type="hidden" name="accounting_native" value="">
 					</div>
 				</div>
 				</div>
@@ -172,19 +181,6 @@ require __DIR__ . '/templates/body_start.php';
 					</div>
 				</div>
 				</div>-->
-				<div class="row">
-				<div class="col-md-4 col-lg-4">
-					<div class="form-group">
-						<label>NX-OS Support by default</label>
-						<div class="checkbox icheck">
-							<label>
-							<input type="checkbox" name="nxos_support"> NX-OS Support by default
-							</label>
-						</div>
-						<p class="help-block">if checked every new user will have NX-OS support by default</p>
-					</div>
-				</div>
-				</div>
 				<hr>
 				<h3>Manual Configuration</h3>
 				<small class="text-red">be careful with those settings! by default it influences on log parser script!</small>
@@ -192,17 +188,19 @@ require __DIR__ . '/templates/body_start.php';
 				<div class="row">
 				<div class="col-md-12 col-lg-12">
 					<div class="form-group manual">
-						<textarea rows="6" class="form-control" name="manual" placeholder="Manual configuration"></textarea>
+						<textarea rows="9" class="form-control" name="manual" data-type="input" data-default="" data-pickup="true" placeholder="Manual configuration"></textarea>
+						<textarea name="manual_native" value="" style="display: none"></textarea>
 					</div>
 				</div>
 				</div>
 				<hr>
 				<div class="row">
 					<div class="col-lg-4 col-lg-offset-4 col-md-4 col-md-offset-4 col-sm-6 col-sm-offset-3 col-xs-8 col-xs-offset-2">
-						<button type="button" class="btn btn-block btn-warning btn-flat applySettings">Apply Global Settings</button>
+						<button type="button" class="btn btn-block btn-warning btn-flat" onclick="tgui_tacGlobal.edit()">Apply Global Settings</button>
 					</div>
 				</div>
 				<!-- <div class="row"><div class="col-xs-12"><p class="text-muted pull-right">Last update was: <lastupdate></lastupdate></p></div></div> -->
+			</form>
 			</div>
 			<!-- /.box-body -->
 		</div>
@@ -228,8 +226,10 @@ require __DIR__ . '/templates/footer_end.php';
 <!-- ADDITIONAL JS FILES START-->
 <!-- iCheck -->
 <script src="/plugins/iCheck/icheck.min.js"></script>
+	<!-- main Object -->
+  <script src="dist/js/pages/tac_global_settings/tgui_tacGlobal.js"></script>
 	<!-- main js Device MAIN Functions -->
-    <script src="dist/js/pages/tac_global_settings/main.js"></script>
+  <script src="dist/js/pages/tac_global_settings/main.js"></script>
 <!-- ADDITIONAL JS FILES END-->
 </body>
 
