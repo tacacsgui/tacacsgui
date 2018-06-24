@@ -28,7 +28,7 @@ class TACReportsCtrl extends Controller
 			return $res -> withStatus(401) -> write(json_encode($data));
 		}
 		//INITIAL CODE////END//
-		
+
 		//$data['22']=Authentication::select()->distinct(['action'])->get()->toArray();
 		$data['numberOfDevices']=TACDevices::select()->get()->count();
 		$data['numberOfDevicesDisables']=TACDevices::select()->where([['disabled','=','1']])->get()->count();
@@ -63,10 +63,11 @@ class TACReportsCtrl extends Controller
 		{
 			if ($data['activeUserslist'][$i]['username']=='') continue;
 			$data['activeUsers'][$data['activeUserslist'][$i]['username']]=Authentication::whereBetween('date', $weekTimeRange)->where([['username','=',$data['activeUserslist'][$i]['username']]])->get()->count();
-
+			if ($i >= 4) break;
 		}
 		arsort($data['activeUsers']);
-		$data['topUsers']=array_slice($data['activeUsers'], 0, 5);
+		$data['topUsers'] = $data['activeUsers'];
+		//$data['topUsers']=array_slice($data['activeUsers'], 0, 5);
 		//////////Top users///end//
 		//////////////////////////////
 		//////////Top Devices///start//
@@ -76,10 +77,11 @@ class TACReportsCtrl extends Controller
 		{
 			if ($data['activeDeviceslist'][$i]['NAS']=='') continue;
 			$data['activeDevices'][$data['activeDeviceslist'][$i]['NAS']]=Authentication::whereBetween('date', $weekTimeRange)->where([['NAS','=',$data['activeDeviceslist'][$i]['NAS']]])->get()->count();
-
+			if ($i >= 4) break;
 		}
 		arsort($data['activeDevices']);
-		$data['topDevices']=array_slice($data['activeDevices'], 0, 5);
+		$data['topDevices'] = $data['activeDevices'];
+		//$data['topDevices']=array_slice($data['activeDevices'], 0, 5);
 		$data['nameOfDevices']=TACDevices::whereIn('ipaddr',array_keys($data['topDevices']))->get(['name', 'ipaddr']);
 		$data['topDevicesNamed']=array();
 		foreach ($data['topDevices'] as $ipaddress => $numberOfAuth)
@@ -88,6 +90,7 @@ class TACReportsCtrl extends Controller
 			{
 				if ($data['nameOfDevices'][$y]['ipaddr']==$ipaddress) $data['topDevicesNamed'][$data['nameOfDevices'][$y]['name']] = $numberOfAuth;
 			}
+			if ($i >= 5) break;
 		}
 		//////////Top Devices///end//
 		return $res -> withStatus(200) -> write(json_encode($data));

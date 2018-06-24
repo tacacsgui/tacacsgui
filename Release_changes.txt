@@ -1,4 +1,7 @@
 ##############################
+Version_0.9.17 20180623
+	*Fixed bug with huge number of queries for the dashboard statistics
+##############################
 Version_0.9.16 20180623
 	*Fixed bug with update button (one more time, I hope it is the last one)
 ##############################
