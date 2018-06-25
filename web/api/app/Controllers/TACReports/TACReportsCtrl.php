@@ -42,7 +42,90 @@ class TACReportsCtrl extends Controller
 		$data['range']=$weekTimeRange;
 		/////////////NAMBER OF FAILED AUTH/////START//
 		$data['numberOfAuthFails']=Authentication::select()->whereBetween('date', $weekTimeRange)->where([['action','LIKE','%fail%']])->get()->count();
+		/////////////NUMBER OF FAILED AUTH/////end//
+		return $res -> withStatus(200) -> write(json_encode($data));
+	}
+	##########STATISTICS PLEASE#######END##
+	################################################
+	public function getTopAccess($req,$res)
+	{
+		//INITIAL CODE////START//
+		$data=array();
+		$data=$this->initialData([
+			'type' => 'post',
+			'object' => 'general report',
+			'action' => 'get',
+		]);
+		#check error#
+		if ($_SESSION['error']['status']){
+			$data['error']=$_SESSION['error'];
+			return $res -> withStatus(401) -> write(json_encode($data));
+		}
+		//INITIAL CODE////END//
+		$weekTimeRange=array(
+			date('Y-m-d H:i:s', (time()-(60*60*24*7+1))),
+			date('Y-m-d H:i:s', time())
+		);
+		$data['range']=$weekTimeRange;
 
+		$allParams = $req->getParams();
+		$allParams['users'] = ( !empty($allParams['users']) ) ? $allParams['users'] : 5;
+		$allParams['devices'] = ( !empty($allParams['devices']) ) ? $allParams['devices'] : 5;
+		//$allParams['devicesReload'] = ( !empty($allParams['devicesReload']) ) ? $allParams['devicesReload'] : 1;
+		//$allParams['usersReload'] = ( !empty($allParams['usersReload']) ) ? $allParams['usersReload'] : 1;
+		if ($allParams['usersReload']){
+			//////////Top users///start//
+			$activeUserslist=Authentication::whereBetween('date', $weekTimeRange)->distinct()->limit($allParams['users'])->get(['username']);
+			$data['topUsers']=array();
+			for ($i=0; $i < count($activeUserslist); $i++)
+			{
+				if ($activeUserslist[$i]['username']=='') continue;
+				$data['topUsers'][$activeUserslist[$i]['username']]=Authentication::whereBetween('date', $weekTimeRange)->where([['username','=',$activeUserslist[$i]['username']]])->get()->count();
+			}
+			//arsort($data['topUsers']);
+			$data['topUsers'] = $data['topUsers'];
+			//////////Top users///end//
+		}
+		//////////////////////////////
+		//////////Top Devices///start//
+		if ($allParams['devicesReload']){
+			$activeDeviceslist=Authentication::whereBetween('date', $weekTimeRange)->distinct()->limit($allParams['devices'])->get(['NAS']);
+			$data['activeDevices']=array();
+			for ($i=0; $i < count($activeDeviceslist); $i++)
+			{
+				if ($activeDeviceslist[$i]['NAS']=='') continue;
+				$data['activeDevices'][$activeDeviceslist[$i]['NAS']]=Authentication::whereBetween('date', $weekTimeRange)->where([['NAS','=',$activeDeviceslist[$i]['NAS']]])->get()->count();
+			}
+			arsort($data['activeDevices']);
+			$data['topDevices'] = $data['activeDevices'];
+			$data['nameOfDevices']=TACDevices::whereIn('ipaddr',array_keys($data['topDevices']))->get(['name', 'ipaddr']);
+			$data['topDevicesNamed']=array();
+			foreach ($data['topDevices'] as $ipaddress => $numberOfAuth)
+			{
+				for ($y=0; $y < count($data['nameOfDevices']);$y++)
+				{
+					if ($data['nameOfDevices'][$y]['ipaddr']==$ipaddress) $data['topDevicesNamed'][$data['nameOfDevices'][$y]['name']] = $numberOfAuth;
+				}
+			}
+		}
+		//////////Top Devices///end//
+		return $res -> withStatus(200) -> write(json_encode($data));
+	}
+	public function getDaemonStatus($req,$res)
+	{
+		//INITIAL CODE////START//
+		$data=array();
+		$data=$this->initialData([
+			'type' => 'post',
+			'object' => 'general report',
+			'action' => 'get',
+		]);
+		#check error#
+		if ($_SESSION['error']['status']){
+			$data['error']=$_SESSION['error'];
+			return $res -> withStatus(401) -> write(json_encode($data));
+		}
+		//INITIAL CODE////END//
 		$data['tacacsStatusCommand'] = 'sudo '.TAC_DEAMON.' status';
 		$data['tacacsStatusUser'] = trim(shell_exec('id -u -n'));
 		$data['tacacsStatusEmptyCommand'] = trim(shell_exec('sudo '.TAC_DEAMON));
@@ -55,47 +138,8 @@ class TACReportsCtrl extends Controller
 		{
 			$data['tacacsStatus']=1;
 		}
-		/////////////NAMBER OF FAILED AUTH/////end//
-		//////////Top users///start//
-		$data['activeUserslist']=Authentication::whereBetween('date', $weekTimeRange)->distinct()->get(['username']);
-		$data['activeUsers']=array();
-		for ($i=0; $i < count($data['activeUserslist']); $i++)
-		{
-			if ($data['activeUserslist'][$i]['username']=='') continue;
-			$data['activeUsers'][$data['activeUserslist'][$i]['username']]=Authentication::whereBetween('date', $weekTimeRange)->where([['username','=',$data['activeUserslist'][$i]['username']]])->get()->count();
-			if ($i >= 4) break;
-		}
-		arsort($data['activeUsers']);
-		$data['topUsers'] = $data['activeUsers'];
-		//$data['topUsers']=array_slice($data['activeUsers'], 0, 5);
-		//////////Top users///end//
-		//////////////////////////////
-		//////////Top Devices///start//
-		$data['activeDeviceslist']=Authentication::whereBetween('date', $weekTimeRange)->distinct()->get(['NAS']);
-		$data['activeDevices']=array();
-		for ($i=0; $i < count($data['activeDeviceslist']); $i++)
-		{
-			if ($data['activeDeviceslist'][$i]['NAS']=='') continue;
-			$data['activeDevices'][$data['activeDeviceslist'][$i]['NAS']]=Authentication::whereBetween('date', $weekTimeRange)->where([['NAS','=',$data['activeDeviceslist'][$i]['NAS']]])->get()->count();
-			if ($i >= 4) break;
-		}
-		arsort($data['activeDevices']);
-		$data['topDevices'] = $data['activeDevices'];
-		//$data['topDevices']=array_slice($data['activeDevices'], 0, 5);
-		$data['nameOfDevices']=TACDevices::whereIn('ipaddr',array_keys($data['topDevices']))->get(['name', 'ipaddr']);
-		$data['topDevicesNamed']=array();
-		foreach ($data['topDevices'] as $ipaddress => $numberOfAuth)
-		{
-			for ($y=0; $y < count($data['nameOfDevices']);$y++)
-			{
-				if ($data['nameOfDevices'][$y]['ipaddr']==$ipaddress) $data['topDevicesNamed'][$data['nameOfDevices'][$y]['name']] = $numberOfAuth;
-			}
-			if ($i >= 5) break;
-		}
-		//////////Top Devices///end//
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
-	##########STATISTICS PLEASE#######END##
 	################################################
 	################################################
 ########	Accounting Datatables ###############START###########

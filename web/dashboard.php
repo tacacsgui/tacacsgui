@@ -133,12 +133,26 @@ require __DIR__ . '/templates/body_start.php';
 					<div id="canvas-holder">
 						<canvas class="chart-area1" />
 					</div>
+					<div class="text-center">
+						<div class="btn-group">
+	            <button type="button" class="btn btn-default btn-flat num_users num_users_5" onclick="tacacsWidgets.topAccess({users: 5})">5</button>
+	            <button type="button" class="btn btn-default btn-flat num_users num_users_10" onclick="tacacsWidgets.topAccess({users: 10})">10</button>
+	            <button type="button" class="btn btn-default btn-flat num_users num_users_15" onclick="tacacsWidgets.topAccess({users: 15})">15</button>
+	          </div>
+					</div>
 				</div>
 				<div class="col-lg-6 col-md-6">
 					<div class="text-center"><h3>Top 5 Used Devices</h3> <small>number of authentication per week</small></div>
 					<div class="lds-dual-ring lds-black lds-absolute devicePieLoading"></div>
 					<div id="canvas-holder">
 						<canvas class="chart-area2" />
+					</div>
+					<div class="text-center">
+						<div class="btn-group">
+							<button type="button" class="btn btn-default btn-flat num_devices num_devices_5" onclick="tacacsWidgets.topAccess({devices: 5})">5</button>
+							<button type="button" class="btn btn-default btn-flat num_devices num_devices_10" onclick="tacacsWidgets.topAccess({devices: 10})">10</button>
+							<button type="button" class="btn btn-default btn-flat num_devices num_devices_15" onclick="tacacsWidgets.topAccess({devices: 15})">15</button>
+						</div>
 					</div>
 				</div>
 			</div>

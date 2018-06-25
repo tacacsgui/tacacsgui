@@ -104,6 +104,8 @@ $app->post('/tacacs/reports/accounting/datatables/', 'TACReportsCtrl:postAccount
 $app->post('/tacacs/reports/authentication/datatables/', 'TACReportsCtrl:postAuthenticationDatatables');
 $app->post('/tacacs/reports/authorization/datatables/', 'TACReportsCtrl:postAuthorizationDatatables');
 $app->get('/tacacs/reports/general/', 'TACReportsCtrl:getGeneralReport');
+$app->get('/tacacs/reports/daemon/status/', 'TACReportsCtrl:getDaemonStatus');
+$app->get('/tacacs/reports/top/access/', 'TACReportsCtrl:getTopAccess');
 #####################################################
 
 ###APIChecker Routes#######################################

@@ -1,4 +1,8 @@
 ##############################
+Version_0.9.18 20180625
+	*Dashboard request was separated on three parts (daemon status, general statistics, top users and devices)
+	*Added pie filtering on dashboard
+##############################
 Version_0.9.17 20180623
 	*Fixed bug with huge number of queries for the dashboard statistics
 ##############################
