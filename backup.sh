@@ -66,7 +66,10 @@ case $1 in
 			#echo "NEW: $NEW";
 			#echo "OLD: $OLD";
 			if [[ $OLD = "" ]]; then
-				echo 999; exit 0;
+				echo 999; exit 1;
+			fi
+			if [[ $NEW = "" ]]; then
+				echo 999; exit 1;
 			fi
 			diff -I "Dump completed" $ROOT_PATH/backups/database/$NEW $ROOT_PATH/backups/database/$OLD | wc -l
 	;;

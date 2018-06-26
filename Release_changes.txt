@@ -1,4 +1,7 @@
 ##############################
+Version_0.9.21 20180626
+	*Bug fixing. I hope backup work properly now
+##############################
 Version_0.9.20 20180626
 	*Bug fixing ( and add new bugs :( )
 ##############################

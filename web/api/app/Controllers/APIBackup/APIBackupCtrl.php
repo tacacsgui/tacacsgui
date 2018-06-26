@@ -18,17 +18,19 @@ private $listOfTacacsReportsTables = '--tables tac_log_accounting tac_log_author
 	{
 		$backupPart=$attrArray['make'];
 		shell_exec(TAC_ROOT_PATH . '/backup.sh check'); //check
-		$data['make'] = shell_exec(TAC_ROOT_PATH . '/backup.sh make '. DB_USER . ' ' . DB_PASSWORD . ' '. DB_NAME. ' '. $backupPart );//make
+		$data['make'] = shell_exec(TAC_ROOT_PATH . '/backup.sh make '. DB_USER . ' ' . DB_PASSWORD . ' '. DB_NAME ." '". $backupPart ."'");//make
 		$revision = TACGlobalConf::find(1);
-		$data['diff'] = trim( shell_exec(TAC_ROOT_PATH . '/backup.sh diff ' . $backupPart .' '. $revision->revisionNum ) );//diff
+		$data['diff'] = intval( trim( shell_exec(TAC_ROOT_PATH . '/backup.sh diff ' ."'". $backupPart ."' '". $revision->revisionNum ."'") ) );//diff
+		if ( $revision->revisionNum == 0 ) $data['diff'] = 999;
 		if ( $data['diff'] == 0) {
 			shell_exec(TAC_ROOT_PATH . '/backup.sh removeLast' );
-			return ['status'=> false, 'message'=> 'Changes not found'];
+			return ['status'=> false, 'message'=> 'Changes not found '];
 		}
 
 		shell_exec(TAC_ROOT_PATH . '/backup.sh removeLast' );
-
+		$revision->timestamps = false;
 		$revision->revisionNum += 1;
+		$revision->changeFlag = 0;
 		$revision->save();
 		$data['make'] = shell_exec(TAC_ROOT_PATH . '/backup.sh make '. DB_USER . ' ' . DB_PASSWORD . ' '. DB_NAME. ' '. $backupPart .' '. $revision->revisionNum);//make
 		$logEntry=array('action' => 'add', 'objectName' => $backupPart, 'section' => 'api backup', 'message' => 601);
