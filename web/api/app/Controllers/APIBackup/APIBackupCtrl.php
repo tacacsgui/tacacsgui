@@ -20,7 +20,7 @@ private $listOfTacacsReportsTables = '--tables tac_log_accounting tac_log_author
 		shell_exec(TAC_ROOT_PATH . '/backup.sh check'); //check
 		$data['make'] = shell_exec(TAC_ROOT_PATH . '/backup.sh make '. DB_USER . ' ' . DB_PASSWORD . ' '. DB_NAME. ' '. $backupPart );//make
 		$revision = TACGlobalConf::find(1);
-		$data['diff'] = trim( shell_exec(TAC_ROOT_PATH . '/backup.sh diff ' . $backupPart .' '. $revision ) );//diff
+		$data['diff'] = trim( shell_exec(TAC_ROOT_PATH . '/backup.sh diff ' . $backupPart .' '. $revision->revisionNum ) );//diff
 		if ( $data['diff'] == 0) {
 			shell_exec(TAC_ROOT_PATH . '/backup.sh removeLast' );
 			return ['status'=> false, 'message'=> 'Changes not found'];
