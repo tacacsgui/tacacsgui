@@ -18,7 +18,7 @@ class TACGlobalConf extends Model
 		'max_attempts',
 		'backoff',
 		'manual',
-		'nxos_support',
 		'changeFlag',
+		'revisionNum',
 	];
 }

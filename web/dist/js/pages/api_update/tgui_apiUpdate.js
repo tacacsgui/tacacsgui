@@ -2,10 +2,9 @@
 var tgui_apiUpdate = {
   init: function() {
     var self = this;
-    $('[name="update_signin"]').on('ifClicked', function(){
-    	self.autoCheck()
-    })
-    return Promise.resolve(this.getInfo());
+    this.getInfo()
+
+    return true;
   },
   getInfo: function() {
     var self = this;
@@ -20,6 +19,9 @@ var tgui_apiUpdate = {
         ajaxRequest.send(ajaxProps).then(function(resp) {
           tgui_supplier.fulfillForm(resp.info, '');
           $('span.activated').text( (resp.info.update_activated) ? 'Activated' : 'Not Activated' );
+          $('[name="update_signin"]').on('ifChanged', function(){
+            self.autoCheck()
+          })
         }).fail(function(err){
           tgui_error.getStatus(err, ajaxProps)
         })
@@ -42,7 +44,7 @@ var tgui_apiUpdate = {
   },
   autoCheck: function() {
     var self = this;
-
+    console.log($('[name="update_signin"]').prop('checked'));
     var ajaxProps = {
       url: API_LINK+"update/change/",
       data: {settings: 1, update_signin: ( ( $('[name="update_signin"]').prop('checked') ) ? 1 : 0 ) }

@@ -60,9 +60,9 @@ protected $tablesArr = array(
 		'context_timeout' => ['integer', 3600],
 		'max_attempts' => ['integer', 1],
 		'backoff' => ['integer', 1],
-		'nxos_support' => ['integer', 1],
 		'manual' => ['text', '_'],
 		'changeFlag' => ['integer', '0'],
+		'revisionNum' => ['integer', '0'],
 	],
 	'tac_users' =>
 	[

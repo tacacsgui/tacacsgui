@@ -62,7 +62,7 @@ require __DIR__ . '/templates/body_start.php';
 			<label>Check after sign in</label>
 			<div class="checkbox icheck">
 				<label>
-					<input type="checkbox" name="update_signin" data-type="checkbox" data-default="uncheck" data-pickup="true"> <s>Check update after sign in</s> (doesn't work yet)
+					<input type="checkbox" name="update_signin" data-type="checkbox" data-default="uncheck" data-pickup="true"> Check update after sign in
 				</label>
 			</div>
 		</div>

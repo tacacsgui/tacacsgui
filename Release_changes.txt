@@ -1,3 +1,7 @@
+Version_0.9.19 20180626
+	*Bug fixing
+	*Check update in sign in
+	*Added first steps on backup
 ##############################
 Version_0.9.18 20180625
 	*Dashboard request was separated on three parts (daemon status, general statistics, top users and devices)

@@ -31,6 +31,7 @@ var tacacsWidgets = {
     type: "GET"
   },
   getGeneral: function(props) {
+		var self = this;
 		var ajaxProps = {
         url: API_LINK+"tacacs/reports/general/",
       	type: 'get',
@@ -40,6 +41,7 @@ var tacacsWidgets = {
 			$('.numberOfDevices').removeClass('lds-dual-ring').text(resp.numberOfDevices)
 			$('.numberOfUsers').removeClass('lds-dual-ring').text(resp.numberOfUsers)
 			$('.numberOfAuthFails').removeClass('lds-dual-ring').text(resp.numberOfAuthFails)
+			if (resp.update_check) self.updates();
     }).fail(function(err){
       tgui_error.getStatus(err, ajaxProps)
     })
@@ -59,7 +61,10 @@ var tacacsWidgets = {
     })
     return this;
 	},
+	userChart: { destroy: function() {return false;} },
+	deviceChart: { destroy: function() {return false;} },
 	topAccess: function(o) {
+		var self = this;
 		o = o || {}
 		o = {
 			usersReload: (o.users) ? 1 : 0,
@@ -91,19 +96,62 @@ var tacacsWidgets = {
 			if (resp.topUsers){
 				$('.userPieLoading').removeClass('lds-dual-ring lds-black');
 				var configForUsers = new pieSettings(resp.topUsers);
-				if (configForUsers.data.labels.length) new Chart($(".chart-area1"), configForUsers);
+				if (configForUsers.data.labels.length) {
+					self.userChart.destroy()
+					self.userChart = new Chart($(".chart-area1"), configForUsers);
+					self.userChart.update()
+				}
 				else $('.userPieLoading').append('No data');
 			}
 			if (resp.topDevices){
 				$('.devicePieLoading').removeClass('lds-dual-ring lds-black');
 				var configForDevices = new pieSettings(resp.topDevices);
-				if (configForDevices.data.labels.length) new Chart($(".chart-area2"), configForDevices);
+				if (configForDevices.data.labels.length) {
+					self.deviceChart.destroy();
+					self.deviceChart = new Chart($(".chart-area2"), configForDevices);
+					self.deviceChart.update()
+				}
 				else $('.devicePieLoading').append('No data');
 			}
     }).fail(function(err){
       tgui_error.getStatus(err, ajaxProps)
     })
     return this;
+	},
+	updates: function(){
+		$('.updatesBtn').show();
+		var self = this;
+		var ajaxProps = {
+      url: API_LINK + "update/",
+      		type: 'POST',
+      };//ajaxProps END
+			ajaxRequest.send(ajaxProps).then(function(resp) {
+				console.log(resp);
+				$('.updatesBtn .fa-spinner').hide();
+
+				if ( resp.output && resp.output.error && resp.output.error.message) {
+					console.log(resp.output.error.message);
+					if (resp.output.error.type == 'not match') $('.updatesBtn text').text('Unregistered copy');
+					else $('.updatesBtn text').text('Updates error');
+					$('.updatesBtn .fa-meh-o').show();
+					return
+				}
+
+				if ( resp.output && resp.output.last_version) {
+					if (resp.output.last_version.version == resp.info.version.APIVER) $('.updatesBtn').hide();
+					else {
+						$('.updatesBtn text').text('Updates');
+						$('.updatesBtn .fa-line-chart').show();
+					}
+					return;
+				}
+
+				$('.updatesBtn text').text('Updates error');
+				$('.updatesBtn .fa-meh-o').show();
+	    }).fail(function(err){
+	      tgui_error.getStatus(err, ajaxProps)
+	    })
+	    return this;
 	}
 }
 /////////Widgets///////END///

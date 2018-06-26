@@ -1156,6 +1156,15 @@ class TACConfigCtrl extends Controller
 			$logEntry = array('action' => 'tacacs test conf', 'objectName' => 'tacacs configuration', 'section' => 'tacacs configuration', 'message' => 501);
 			$this->APILoggingCtrl->makeLogEntry($logEntry);
 			///LOGGING//end//
+			$doBackup=$req->getParam('doBackup');
+			if ( $doBackup == 'true') {
+				$doBackup = $this->APIBackupCtrl->makeBackup(['make' => 'tcfg']);
+				if ( !$doBackup['status'] ) {
+					$data['applyStatus'] = ['error' => true, 'message' => $doBackup['message'], 'errorLine' => 0];
+					return $res -> withStatus(200) -> withHeader('Content-type', $contentTypeOutput) -> write(json_encode($data));
+				}
+			}
+			///LOGGING//
 			$data['applyStatus']=$this->applyConfiguration($output);
 
 			///LOGGING//start//
@@ -1164,10 +1173,6 @@ class TACConfigCtrl extends Controller
 			///LOGGING//end//
 
 			$data['changeConfiguration']= (!$data['applyStatus']['error']) ? $this->changeConfigurationFlag(['unset' => 1]) : 0;
-
-			$doBackup=$req->getParam('doBackup');
-
-			if (!$data['applyStatus']['error'] AND $doBackup == 'true' AND $this->checkAccess(9)) { $data['backup']=$this->APIBackupCtrl->makeBackup(array('make' => 'tcfg')); }
 
 			return $res -> withStatus(200) -> withHeader('Content-type', $contentTypeOutput) -> write(json_encode($data));
 		}

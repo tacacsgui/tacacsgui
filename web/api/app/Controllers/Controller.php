@@ -58,10 +58,15 @@ class Controller
 	////INITIAL DATA FUNCTION////END//
 	///////////////////////////////////
 	////CHANGE CONFIGURATION STATUS////START//
-	protected function changeConfigurationFlag($array)
+	protected function changeConfigurationFlag($array = ['unset'=>1])
 	{
 		$variable = ($array['unset']) ? 0 : 1;
-		return TACGlobalConf::where([['id','=',1]])->update(['changeFlag' => $variable]);
+		$changeFlag = TACGlobalConf::find(1);
+		$changeFlag->timestamps = false;
+		$changeFlag->changeFlag = $variable;
+		$changeFlag->save();
+		return $variable;
+		//return TACGlobalConf::where([['id','=',1]])->update(['changeFlag' => $variable]);
 	}
 	////CHANGE CONFIGURATION STATUS////END//
 	////////////////////////////////////////
@@ -70,7 +75,7 @@ class Controller
 	{
 		$rightsArray = array_reverse ( str_split( decbin($_SESSION['groupRights']) ) );
 		//Clear DEMO//
-		if ($value == 0 AND $rightsArray[0] == 1) return true;
+		if ($value == 0 AND $rightsArray[0] == 1) return false;
 		//DEMO//
 		if ($rightsArray[0] == 0 AND count($rightsArray) == 1) return false;
 		//Administrator//
@@ -117,6 +122,6 @@ class Controller
 		}
 	}
 	////////////////////////////////////////
-	
+
 	////////////////////////////////////////
 }

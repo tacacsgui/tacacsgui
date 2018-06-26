@@ -95,7 +95,7 @@ require __DIR__ . '/templates/body_start.php';
 					<p class="help-block">if you don't know what to choose leave it as default (first value)</p>
                 </div>
 			</div>
-			<div class="col-md-4" style="display:none;">
+			<div class="col-md-4">
 				<div class="form-group">
 					<label>TLS Support</label>
 					<div class="checkbox icheck">

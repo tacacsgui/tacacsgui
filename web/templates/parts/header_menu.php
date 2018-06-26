@@ -19,12 +19,22 @@
       <div class="navbar-custom-menu">
         <ul class="nav navbar-nav">
           <!-- Apply changes button -->
-		  <li class="applyBtn bg-red" style="display: none;">
+            <li class="updatesBtn bg-yellow" style="display: none;">
+            <a href="./api_update.php">
+              <i class="fa fa-line-chart" style="display: none;"></i>
+              <i class="fa fa-meh-o text-black" style="display: none;"></i>
+              <i class="fa fa-spinner fa-pulse fa-fw"></i>
+              <text></text>
+              <span class="label label-success">!</span>
+            </a>
+            </li>
+            <!-- Apply changes button -->
+		        <li class="applyBtn bg-red" style="display: none;">
             <a href="./tac_configuration.php">
               <i class="fa fa-refresh"></i> Apply Changes
               <span class="label label-warning">!</span>
             </a>
-          </li>
+            </li>
           <!-- User Account Menu -->
           <li class="dropdown user user-menu">
             <!-- Menu Toggle Button -->

@@ -7,6 +7,7 @@ use tgui\Models\TACUsers;
 use tgui\Models\Accounting;
 use tgui\Models\Authentication;
 use tgui\Models\Authorization;
+use tgui\Models\APISettings;
 use tgui\Controllers\Controller;
 
 class TACReportsCtrl extends Controller
@@ -34,7 +35,7 @@ class TACReportsCtrl extends Controller
 		$data['numberOfDevicesDisables']=TACDevices::select()->where([['disabled','=','1']])->get()->count();
 		$data['numberOfUsers']=TACUsers::select()->get()->count();
 		$data['numberOfUsersDisables']=TACUsers::select()->where([['disabled','=','1']])->get()->count();
-
+		$data['update_check'] = APISettings::find(1)->update_signin;
 		$weekTimeRange=array(
 			date('Y-m-d H:i:s', (time()-(60*60*24*7+1))),
 			date('Y-m-d H:i:s', time())
