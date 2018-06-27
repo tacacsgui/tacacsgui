@@ -742,9 +742,9 @@ class TACConfigCtrl extends Controller
 		'	setenv REQUIRE_AD_GROUP_PREFIX = '. $mavis_ldap_settings['group_prefix_flag']);
 		///LDAP TLS///
 		array_push($outputMavisLdap[$id],
-		($html) ? $this->html_tags['param'][0] . "	setenv USE_TLS" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] . $mavis_ldap_settings['tls'] . $this->html_tags['val'][1]
+		($html) ? ( ($mavis_ldap_settings['tls']) ? '': '#') . $this->html_tags['param'][0] . "	setenv USE_TLS" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] . $mavis_ldap_settings['tls'] . $this->html_tags['val'][1]
 		:
-		'	setenv USE_TLS = '. $mavis_ldap_settings['tls']);
+		( ($mavis_ldap_settings['tls']) ? '': '#') . '	setenv USE_TLS = '. $mavis_ldap_settings['tls']);
 		///LDAP CACHE CONN///
 		array_push($outputMavisLdap[$id],
 		($html) ? $this->html_tags['param'][0] . "	setenv FLAG_CACHE_CONNECTION" . $this->html_tags['param'][1] . ' = ' . $this->html_tags['val'][0] . $mavis_ldap_settings['cache_conn'] . $this->html_tags['val'][1]
@@ -1309,6 +1309,12 @@ class TACConfigCtrl extends Controller
 			return $res -> withStatus(401) -> write(json_encode($data));
 		}
 		//INITIAL CODE////END//
+		//CHECK ACCESS TO THAT FUNCTION//START//
+		if(!$this->checkAccess(6))
+		{
+			return $res -> withStatus(403) -> write(json_encode($data));
+		}
+		//CHECK ACCESS TO THAT FUNCTION//END//
 
 		$data['tacacsStatusMessage'] = trim(shell_exec('sudo '.TAC_DEAMON.' status'));
 

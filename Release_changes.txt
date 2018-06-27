@@ -1,4 +1,8 @@
 ##############################
+Version_0.9.22 20180627
+	*Added Daemon Start/Stop/Reload access restriction
+	*Fix Bug this integration with Win2016
+##############################
 Version_0.9.21 20180626
 	*Bug fixing. I hope backup work properly now
 ##############################
