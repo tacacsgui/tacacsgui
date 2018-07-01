@@ -42,6 +42,11 @@ require __DIR__ . '/templates/header.php';
 	<link rel="stylesheet" href="/plugins/iCheck/square/blue.css">
 	<!-- Select2 -->
 	<link rel="stylesheet" href="bower_components/select2/dist/css/select2.min.css">
+
+	<!-- Custom Style -->
+	<link rel="stylesheet" href="/dist/css/pages/tac_configuration/main.css">
+	<link rel="stylesheet" href="/dist/css/pages/tac_configuration/theme-stripped.css">
+	
 	<style>
 		#prefix_slider .slider-selection{
 			background:#444;
@@ -76,7 +81,7 @@ require __DIR__ . '/templates/body_start.php';
 		</div><!-- /.box -->
 	</div><!-- /.col -->
 </div><!-- /.row -->
-
+<button type="button" name="button" class="btn btn-flat" onclick="tgui_device.getConfig()">test</button>
 <!--MAIN CONTENT END-->
 
 <?php

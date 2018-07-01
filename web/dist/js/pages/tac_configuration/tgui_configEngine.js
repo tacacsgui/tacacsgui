@@ -4,7 +4,22 @@ var tgui_configEngine = {
   line_number: 0,
   init: function() {
     var self = this;
+
+    this.fulfillForm();
+
     return Promise.resolve(this.getConfig());
+  },
+  fulfillForm: function() {
+    var ajaxProps = {
+      url: API_LINK+"backup/settings/",
+      type: "GET",
+    };//ajaxProps END
+    ajaxRequest.send(ajaxProps).then(function(resp) {
+      tgui_supplier.fulfillForm(resp.settings, '#testAndApplyForm');
+
+    }).fail(function(err){
+      tgui_error.getStatus(err, ajaxProps)
+    })
   },
   getConfig: function(){
     var self = this;
@@ -220,7 +235,7 @@ var tgui_configEngine = {
         contentType: 'json',
         confTest: "on",
         confSave: "yes",
-        doBackup: $('input.doBackup').prop('checked')
+        doBackup: $('input[name="tcfgSet"]').prop('checked')
       }
     };//ajaxProps END
 

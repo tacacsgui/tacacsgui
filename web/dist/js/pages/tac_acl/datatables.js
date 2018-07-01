@@ -21,18 +21,25 @@ var dataTable =  $('#aclDataTable').DataTable( {
 	},
 
 	"columns": [
-	{"title": "ID","data" : "id"},
-	{"title": "Name","data" : "name"},
-	{"title": "Action","data" : "buttons","searchable": false},
+		{
+			"className":      'details-control',
+			"orderable":      false,
+			"data":           null,
+			"defaultContent": ''
+		},
+		{"title": "ID","data" : "id"},
+		{"title": "Name","data" : "name"},
+		{"title": "Action","data" : "buttons","searchable": false},
 	 ],
 
 	"columnDefs": [
 	{
-		"targets": [2],
+		"targets": [3],
 		"orderable": false
 	} ],
 
 	"lengthMenu": [ 10, 25, 50, 75, 100 ],
+	"order": [[1, 'asc']],
 
 	ajax: {"url": API_LINK+"tacacs/acl/datatables/",
 		"type": "POST",
@@ -69,4 +76,21 @@ $(document).on('keyup click change', '.search-input', function(){
 	var i =$(this).attr('searchCol_id');  // getting column index
 	var v =$(this).val();  // getting search input value
 	dataTable.columns(i).search(v).draw();
+} );
+
+$('#aclDataTable tbody').on('click', 'td.details-control', function () {
+    var tr = $(this).closest('tr');
+    var row = dataTable.row( tr );
+
+    if ( row.child.isShown() ) {
+        // This row is already open - close it
+        row.child.hide();
+        tr.removeClass('shown');
+    }
+    else {
+        // Open this row
+        row.child( '<pre class="partial_config partial_config_'+row.data().id+'">Loading...</pre>' ).show();
+        tr.addClass('shown');
+				row.child( tgui_supplier.showConfiguration(row.data(), 'acl') ).show();
+    }
 } );

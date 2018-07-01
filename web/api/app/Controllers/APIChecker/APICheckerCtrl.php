@@ -39,6 +39,11 @@ protected $tablesArr = array(
 		'api_logging_max_entries' => ['integer', 500],
 		'update_key' => ['string', ''],
 	],
+	'api_backup' =>
+	[
+		'tcfgSet' => ['integer', '1'],
+		'apicfgSet' => ['integer', '1'],
+	],
 	'api_logging' =>
 	[
 		'userName' => ['string',''],
@@ -320,6 +325,12 @@ protected $tablesArr = array(
 			case 'api_settings':
 				$this->db::table($tableName)->insert([
 					'update_key' => $this->generateRandomString(),
+					'created_at' => date('Y-m-d H:i:s', time()),
+					'updated_at' => date('Y-m-d H:i:s', time())
+				]);
+				break;
+			case 'api_backup':
+				$this->db::table($tableName)->insert([
 					'created_at' => date('Y-m-d H:i:s', time()),
 					'updated_at' => date('Y-m-d H:i:s', time())
 				]);

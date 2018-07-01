@@ -136,12 +136,11 @@ class TACConfigCtrl extends Controller
 		return $outputGeneralConf;
 	}
 
-	private function tacDevicesPartGen($html)
+	private function tacDevicesPartGen($html = false, $id = 0)
 	{
-		$html = (empty($html)) ? false : true;
 
-		$allDevices = TACDevices::select()->get()->toArray();
-		$outputDevices[0][0]=array('title_flag' => 1, 'name' =>
+		$allDevices = ( $id == 0 ) ? TACDevices::select()->get()->toArray() : TACDevices::select()->where('id', $id)->get()->toArray();
+		if ( $id == 0 ) $outputDevices[0][0]=array('title_flag' => 1, 'name' =>
 		($html) ? $this->html_tags['comment'][0] . "####LIST OF HOSTS####" . $this->html_tags['comment'][1]
 		:
 		"####LIST OF HOSTS####");
@@ -153,7 +152,7 @@ class TACConfigCtrl extends Controller
 		}
 		foreach($allDevices as $host)
 		{
-			if ($host['disabled']) continue;
+			if ($host['disabled'] AND $id == 0) continue;
 			///EMPTY ARRAY///
 			$outputDevices[$host['id']] = array();
 			///DEVICE TITLE///
@@ -224,12 +223,11 @@ class TACConfigCtrl extends Controller
 		return $outputDevices;
 	}
 
-	private function tacDeviceGroupsPartGen($html)
+	private function tacDeviceGroupsPartGen($html = false, $id = 0)
 	{
-		$html = (empty($html)) ? false : true;
 
-		$allDeviceGroups = TACDeviceGrps::select()->get()->toArray();
-		$outputDeviceGroups[0][0]=array('title_flag' => 1, 'name' =>
+		$allDeviceGroups = ( $id == 0 ) ? TACDeviceGrps::select()->get()->toArray() : TACDeviceGrps::select()->where('id', $id)->get()->toArray();
+		if ( $id == 0 ) $outputDeviceGroups[0][0]=array('title_flag' => 1, 'name' =>
 		($html) ? $this->html_tags['comment'][0] . "####LIST OF DEVICE GROUPS####" . $this->html_tags['comment'][1]
 		:
 		"####LIST OF DEVICE GROUPS####");
@@ -294,13 +292,11 @@ class TACConfigCtrl extends Controller
 		return $outputDeviceGroups;
 	}
 
-	private function tacACLPartGen($html)
+	private function tacACLPartGen($html = false, $id = 0)
 	{
-		$html = (empty($html)) ? false : true;
+		$allACL = ( $id == 0 ) ? TACACL::select()->where([['line_number','=',0]])->get()->toArray() : TACACL::select()->where([['line_number','=',0],['id','=',$id]])->get()->toArray();
 
-		$allACL = TACACL::select()->where([['line_number','=',0]])->get()->toArray();
-
-		$outputACL[0][0]=array('title_flag' => 1, 'name' =>
+		if ( $id == 0 ) $outputACL[0][0]=array('title_flag' => 1, 'name' =>
 		($html) ? $this->html_tags['comment'][0] . "####LIST OF ACL####" . $this->html_tags['comment'][1]
 		:
 		"####LIST OF ACL####");
@@ -344,11 +340,10 @@ class TACConfigCtrl extends Controller
 		return $outputACL;
 	}
 
-	private function tacUserGroupsPartGen($html)
+	private function tacUserGroupsPartGen($html = false, $id = 0)
 	{
-		$html = (empty($html)) ? false : true;
 
-		$allUserGroups = TACUserGrps::select()->get()->toArray();
+		$allUserGroups = ( $id == 0 ) ? TACUserGrps::select()->get()->toArray() : TACUserGrps::select()->where('id', $id)->get()->toArray();
 		$allACL_array = TACACL::select('id','name')->where([['line_number','=',0]])->get()->toArray();
 
 		$allACL = array();
@@ -357,7 +352,7 @@ class TACConfigCtrl extends Controller
 			$allACL[$acl['id']]=$acl['name'];
 		}
 
-		$outputUserGroup[0][0]=array('title_flag' => 1, 'name' =>
+		if ( $id == 0 ) $outputUserGroup[0][0]=array('title_flag' => 1, 'name' =>
 		($html) ? $this->html_tags['comment'][0] . "####LIST OF USER GROUPS####" . $this->html_tags['comment'][1]
 		:
 		"####LIST OF USER GROUPS####");
@@ -481,11 +476,10 @@ class TACConfigCtrl extends Controller
 		return $outputUserGroup;
 	}
 
-	private function tacUsersPartGen($html)
+	private function tacUsersPartGen($html = false, $id = 0)
 	{
-		$html = (empty($html)) ? false : true;
 
-		$allUsers = TACUsers::select()->get()->toArray();
+		$allUsers = ($id == 0) ? TACUsers::select()->get()->toArray() : TACUsers::select()->where('id', $id)->get()->toArray();
 
 		$allACL_array = TACACL::select('id','name')->where([['line_number','=',0]])->get()->toArray();
 		$allUserGroups_array = TACUserGrps::select('id','name')->get()->toArray();
@@ -501,13 +495,13 @@ class TACConfigCtrl extends Controller
 			$allUserGroups[$ugrp['id']]=$ugrp['name'];
 		}
 
-		$outputUsers[0][0]=array('title_flag' => 1, 'name' =>
+		if ($id == 0) $outputUsers[0][0]=array('title_flag' => 1, 'name' =>
 		($html) ? $this->html_tags['comment'][0] . "####LIST OF USERS####" . $this->html_tags['comment'][1]
 		:
 		"####LIST OF USERS####");
 		foreach($allUsers as $user)
 		{
-			if ($user['disabled'] == 1) continue;
+			if ($user['disabled'] == 1 AND $id == 0) continue;
 			///EMPTY ARRAY///
 			$outputUsers[$user['id']] = array();
 			///USER TITLE///
@@ -1158,7 +1152,7 @@ class TACConfigCtrl extends Controller
 			///LOGGING//end//
 			$doBackup=$req->getParam('doBackup');
 			if ( $doBackup == 'true') {
-				$doBackup = $this->APIBackupCtrl->makeBackup(['make' => 'tcfg']);
+				$data['backup'] = $doBackup = $this->APIBackupCtrl->makeBackup(['make' => 'tcfg']);
 				if ( !$doBackup['status'] ) {
 					$data['applyStatus'] = ['error' => true, 'message' => $doBackup['message'], 'errorLine' => 0];
 					return $res -> withStatus(200) -> withHeader('Content-type', $contentTypeOutput) -> write(json_encode($data));
@@ -1293,6 +1287,86 @@ class TACConfigCtrl extends Controller
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
 	///////////////////////////////////////////////
+	////////POST EDIT GLOBAL PARAMETERS//////////////
+	public function postConfPart($req,$res)
+	{
+		//INITIAL CODE////START//
+		$data=array();
+		$data=$this->initialData([
+			'type' => 'post',
+			'object' => 'config',
+			'action' => 'config part',
+		]);
+		#check error#
+		if ($_SESSION['error']['status']){
+			$data['error']=$_SESSION['error'];
+			return $res -> withStatus(401) -> write(json_encode($data));
+		}
+		//INITIAL CODE////END//
+		//CHECK ACCESS TO THAT FUNCTION//START//
+		// if(!$this->checkAccess(6))
+		// {
+		// 	return $res -> withStatus(403) -> write(json_encode($data));
+		// }
+		//CHECK ACCESS TO THAT FUNCTION//END//
+		$allParams = $req->getParams();
+
+		if ( empty($allParams['target']) ){
+			$data['error']['status']=true;
+			$data['error']['message']='Bad Request';
+			return $res -> withStatus(200) -> write(json_encode($data));
+		}
+
+		switch ($allParams['target']) {
+			case 'device':
+				if ( !isset($allParams['id']) OR $allParams['id'] == 0){
+					$data['error']['status']=true;
+					$data['error']['message']='Bad Request';
+					return $res -> withStatus(200) -> write(json_encode($data));
+				}
+				$data['output'] = $this->tacDevicesPartGen(true, $allParams['id']);
+				break;
+			case 'deviceGrp':
+				if ( !isset($allParams['id']) OR $allParams['id'] == 0){
+					$data['error']['status']=true;
+					$data['error']['message']='Bad Request';
+					return $res -> withStatus(200) -> write(json_encode($data));
+				}
+				$data['output'] = $this->tacDeviceGroupsPartGen(true, $allParams['id']);
+				break;
+			case 'user':
+				if ( !isset($allParams['id']) OR $allParams['id'] == 0){
+					$data['error']['status']=true;
+					$data['error']['message']='Bad Request';
+					return $res -> withStatus(200) -> write(json_encode($data));
+				}
+				$data['output'] = $this->tacUsersPartGen(true, $allParams['id']);
+				break;
+			case 'userGrp':
+				if ( !isset($allParams['id']) OR $allParams['id'] == 0){
+					$data['error']['status']=true;
+					$data['error']['message']='Bad Request';
+					return $res -> withStatus(200) -> write(json_encode($data));
+				}
+				$data['output'] = $this->tacUserGroupsPartGen(true, $allParams['id']);
+				break;
+			case 'acl':
+				if ( !isset($allParams['id']) OR $allParams['id'] == 0){
+					$data['error']['status']=true;
+					$data['error']['message']='Bad Request';
+					return $res -> withStatus(200) -> write(json_encode($data));
+				}
+				$data['output'] = $this->tacACLPartGen(true, $allParams['id']);
+				break;
+			default:
+				$data['error']['status']=true;
+				$data['error']['message']='Bad Request';
+				return $res -> withStatus(200) -> write(json_encode($data));
+		}
+
+		return $res -> withStatus(200) -> write(json_encode($data));
+	}
+	///////////////////////////////////////////////
 	////////POST DEAMON CONFIG//////////////
 	public function postDeamonConfig($req,$res)
 	{
@@ -1309,6 +1383,7 @@ class TACConfigCtrl extends Controller
 			return $res -> withStatus(401) -> write(json_encode($data));
 		}
 		//INITIAL CODE////END//
+		$data['tacacsStatusMessage'] = trim(shell_exec('sudo '.TAC_DEAMON.' status'));
 		//CHECK ACCESS TO THAT FUNCTION//START//
 		if(!$this->checkAccess(6))
 		{
@@ -1316,9 +1391,7 @@ class TACConfigCtrl extends Controller
 		}
 		//CHECK ACCESS TO THAT FUNCTION//END//
 
-		$data['tacacsStatusMessage'] = trim(shell_exec('sudo '.TAC_DEAMON.' status'));
-
-		$data['action'] = $action = (!empty($req->getParam('action'))) ? $req->getParam('action') : '';
+		$data['action'] = $action = ( !empty($req->getParam('action')) ) ? $req->getParam('action') : '';
 
 		switch ($action) {
 			case ('start'):

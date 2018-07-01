@@ -126,7 +126,7 @@ $TAC_CONFIGURATION = array(
 			'type' => 0, //type 0 used for linked menu item, type 1 user for header in menu
 			'submenuFlag' => 0,
 			'submenu' => [],//.submenu
-		],	
+		],
 	],//.submenu
 );
 
@@ -222,7 +222,7 @@ $MAIN_MENU = array(
 	],
 
 	'home' => $HOME,
-	
+
 	'tacacsHeader' => [
 	'name' => 'Tacacs',
 	'li-class' => 'text-center',
@@ -230,17 +230,17 @@ $MAIN_MENU = array(
 	'icon-class' => '',
 	'type' => 1, //type 0 used for linked menu item, type 1 user for header in menu
 	],
-	
+
 	'tacacs_devices' => $TAC_DEVICES,
-	
+
 	'tacacs_users' => $TAC_USERS,
-	
+
 	'tacacs_configuration' => $TAC_CONFIGURATION,
-	
+
 	'tacacs_acls' => $TAC_ACL,
-	
+
 	'tacacs_reports' => $TAC_REPORTS,
-	
+
 	'mavis_header' => [
 	'name' => 'MAVIS',
 	'li-class' => 'text-center',
@@ -248,13 +248,13 @@ $MAIN_MENU = array(
 	'icon-class' => '',
 	'type' => 1, //type 0 used for linked menu item, type 1 user for header in menu
 	],
-	
+
 	'mavis_section' => [
 		'id' => 900,
 		'name' => 'MAVIS Modules',
 		'href' => '#',
 		'li-class' => '',
-		'icon' => 'fa fa-cog',
+		'icon' => 'fa fa-cog fa-spin fa-fw',
 		'icon-class' => 'text-green',
 		'type' => 0, //type 0 used for linked menu item, type 1 user for header in menu
 		'submenuFlag' => 1,
@@ -305,7 +305,7 @@ $MAIN_MENU = array(
 			]
 		]
 	],
-	
+
 	'api_settins' => [
 	'name' => 'API Settings',
 	'li-class' => 'text-center',
@@ -313,7 +313,7 @@ $MAIN_MENU = array(
 	'icon-class' => '',
 	'type' => 1, //type 0 used for linked menu item, type 1 user for header in menu
 	],
-	
+
 	'administration' => [
 		'id' => 1000,
 		'name' => 'Administration',
@@ -370,7 +370,7 @@ $MAIN_MENU = array(
 			],
 		],//.submenu
 	],
-	
+
 	'API_Logging' => [
 		'id' => 1100,
 		'name' => 'API Logging',
@@ -382,19 +382,19 @@ $MAIN_MENU = array(
 		'submenuFlag' => 0,
 		'submenu' => [],
 	],
-	
+
 	'backup' => [
 		'id' => 1200,
-		'name' => 'Backup',
+		'name' => 'System Backup',
 		'href' => 'api_backup.php',
 		'li-class' => '',
 		'icon' => 'fa fa-database',
-		'icon-class' => '',
+		'icon-class' => 'text-green',
 		'type' => 0, //type 0 used for linked menu item, type 1 user for header in menu
 		'submenuFlag' => 0,
 		'submenu' => [],
 	],
-	
+
 /*	'end' => [
 	'name' => 'END',
 	'li-class' => '',

@@ -13,7 +13,7 @@ var tgui_tacGlobal = {
     var formData = tgui_supplier.getFormData(self.formSelector, true);
 
     var ajaxProps = {
-      url: API_LINK+"tacacs/config/global/edit",
+      url: API_LINK+"tacacs/config/global/edit/",
       type: 'POST',
       data: formData
     };//ajaxProps END
@@ -55,7 +55,7 @@ var tgui_tacGlobal = {
   fulfill: function() {
     var self = this;
     var ajaxProps = {
-      url: API_LINK+"tacacs/config/global/edit",
+      url: API_LINK+"tacacs/config/global/edit/",
       type: "GET"
     };//ajaxProps END
 

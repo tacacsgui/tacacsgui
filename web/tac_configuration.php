@@ -58,6 +58,7 @@ require __DIR__ . '/templates/body_start.php';
 			<!-- /.box-header -->
 			<!-- form start -->
 			<div class="box-body">
+				<form id="testAndApplyForm">
 				<div class="row">
 				<div class="col-md-3">
 					<div class="form-group"><a class="btn btn-app bg-green" onclick="tgui_configEngine.testConf()">
@@ -67,7 +68,9 @@ require __DIR__ . '/templates/body_start.php';
 						<i class="fa fa-save"></i> Apply
 					</a></div>
 					</br>
-					<div class="form-group icheck"><input type="checkbox" class="doBackup from-control" checked> Make backup after applying</div>
+					<div class="form-group icheck">
+						<input type="checkbox" class="from-control" name="tcfgSet" data-type="checkbox" data-default="check" data-pickup="true" checked> Make backup after applying
+					</div>
 				</div>
 				<div class="col-md-9">
 					<ul class="timeline">
@@ -121,6 +124,7 @@ require __DIR__ . '/templates/body_start.php';
 					</ul>
 				</div>
 				</div>
+				</form>
 			</div>
 		</div>
 	</div>

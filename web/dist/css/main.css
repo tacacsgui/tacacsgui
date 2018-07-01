@@ -58,3 +58,36 @@ div.server-error {
   width:  100%;
   height: 100%;
 }
+
+td.details-control {
+    background: url('/dist/img/details_open.png') no-repeat center center;
+    cursor: pointer;
+    background-size: 20px 20px;
+    padding: 15px !important;
+}
+tr.shown td.details-control {
+    background: url('/dist/img/details_close.png') no-repeat center center;
+    background-size: 20px 20px;
+    padding: 15px !important;
+}
+
+tac_comment {
+	color: #7D8B99;
+}
+tac_attr {
+	color: #f39c12;
+}
+tac_param {
+	color: #2f9c0a;
+}
+tac_val {
+	color: #1990b8;
+}
+tac_object {
+	color: #ff6357;
+}
+
+pre.partial_config {
+  background-color: #333;
+  color: #fff;
+}

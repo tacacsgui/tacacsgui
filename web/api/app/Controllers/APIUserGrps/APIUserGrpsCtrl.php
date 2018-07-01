@@ -86,6 +86,10 @@ class APIUserGrpsCtrl extends Controller
 
 		$data['group']=$group;
 
+		$data['backup_status'] = $this->APIBackupCtrl->apicfgSet();
+		if ( $this->APIBackupCtrl->apicfgSet() )
+		$data['backup'] = $this->APIBackupCtrl->makeBackup(['make' => 'apicfg']);
+
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
 ########	Add New User Group	###############END###########
@@ -156,7 +160,7 @@ class APIUserGrpsCtrl extends Controller
 		$id = $allParams['id'];
 		unset($allParams['id']);
 		$allParams['rights'] = $this->rightsToOneValue($allParams['rights']);
-		
+
 		$data['group_update']=APIUserGrps::where([['id','=',$id]])->
 			update($allParams);
 
@@ -164,6 +168,10 @@ class APIUserGrpsCtrl extends Controller
 
 		$logEntry=array('action' => 'edit', 'objectName' => $name, 'objectId' => $id, 'section' => 'api user groups', 'message' => 306);
 		$data['logging']=$this->APILoggingCtrl->makeLogEntry($logEntry);
+
+		$data['backup_status'] = $this->APIBackupCtrl->apicfgSet();
+		if ( $this->APIBackupCtrl->apicfgSet() )
+		$data['backup'] = $this->APIBackupCtrl->makeBackup(['make' => 'apicfg']);
 
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
@@ -222,6 +230,10 @@ class APIUserGrpsCtrl extends Controller
 
 		$logEntry=array('action' => 'delete', 'objectName' => $req->getParam('name'), 'objectId' => $req->getParam('id'), 'section' => 'api user groups', 'message' => 306);
 		$data['logging']=$this->APILoggingCtrl->makeLogEntry($logEntry);
+
+		$data['backup_status'] = $this->APIBackupCtrl->apicfgSet();
+		if ( $this->APIBackupCtrl->apicfgSet() )
+		$data['backup'] = $this->APIBackupCtrl->makeBackup(['make' => 'apicfg']);
 
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}

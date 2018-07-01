@@ -4,10 +4,14 @@ var ajaxRequest = {
       input = {
         type: props.type || "POST",
         url: props.url || API_LINK+"user/info/",
-        dataType: "json",
+        dataType: props.dataType || "json",
+        cache: (props.cache != undefined) ? false : true,
+        processData: (props.processData != undefined) ? false : true,
+        contentType : (props.contentType != undefined) ? false : 'application/x-www-form-urlencoded; charset=UTF-8',
         timeout: props.timeout || 20000,
         data: props.data || {}
       }
+      if (props.xhr) input.xhr = props.xhr;
       var ajax = $.ajax(input);
       tgui_error.debug({},'ajaxProps: ',input, 'ajaxResp: ',ajax);
       return ajax
@@ -252,7 +256,7 @@ var tgui_supplier = {//Tacacs Supplier Object
           break;
         case 'checkbox':
           if (reference) {
-            obj[$(el).attr('name')] = ($(el).prop('checked')) ? 1 : 0;
+            obj[$(el).attr('name')] = ( $(el).prop('checked') ) ? 1 : 0;
             if ( $(form + '[name="'+$(el).attr('name') + '_native'+'"]').length ){
               if ($(form + '[name="'+$(el).attr('name') + '_native'+'"]').val() == obj[$(el).attr('name')]){
                 delete obj[$(el).attr('name')];
@@ -424,6 +428,39 @@ var tgui_supplier = {//Tacacs Supplier Object
     }
 
     return '<div class="'+el_class+'"></div>';
+  },
+  showConfiguration: function(rowData, target) {
+    target = target || '';
+    rowData = rowData || {};
+    var self = this;
+    var pre = '';
+    var ajaxProps = {
+      url: API_LINK+"tacacs/config/part/",
+      data: {
+        target: target,
+        id: rowData.id || 0,
+        name: rowData.name || '',
+        username: rowData.username || ''
+      }
+    };//ajaxProps END
+    ajaxRequest.send(ajaxProps).then(function(resp) {
+      for (var target in resp.output) {
+        if (resp.output.hasOwnProperty(target)) {
+          el = resp.output[target];
+          for (var someLine = 0; someLine < el.length; someLine++)
+          {
+            if (someLine > 0)
+            {
+              pre += el[someLine] + '\n';
+              continue;
+            }
+          }
+        }
+      }
+      $('pre.partial_config_'+rowData.id).empty().append(pre);
+    }).fail(function(err){
+      tgui_error.getStatus(err, ajaxProps)
+    })
   }
 }//Tacacs Supplier Object//end
 

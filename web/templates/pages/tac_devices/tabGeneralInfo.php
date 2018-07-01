@@ -7,7 +7,7 @@
       <input type="hidden"  data-type="input" data-default="" data-pickup="true" name="id">
       <input type="text" class="form-control" data-type="input" data-default="" data-pickup="true" name="name" placeholder="Enter Device Name" autocomplete="off">
       <div class="input-group-btn disabled">
-        <button type="button" class="btn btn-flat btn-success disable-toggle" onclick="tac_supplier.toggle(this)">Enabled</button>
+        <button type="button" class="btn btn-flat btn-success disable-toggle" onclick="tgui_supplier.toggle(this)">Enabled</button>
         <input type="hidden" name="disabled_native" data-default="0" data-type="input" value="0">
         <input type="hidden" name="disabled" data-default="0" data-type="input" value="0" data-pickup="true">
       </div>

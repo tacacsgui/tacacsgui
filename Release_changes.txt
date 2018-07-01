@@ -1,4 +1,10 @@
 ##############################
+Version_0.9.23 20180701
+	* IMPORTANT! this update will work properly only after soft reinstallation
+	*Added Backup System, there are three variances of backup: tacacs config, api config, full (without log)
+	*Added Configuration Preview for Tac Users, Devices, Groups and ACL
+	*Some bug was fixed
+##############################
 Version_0.9.22 20180627
 	*Added Daemon Start/Stop/Reload access restriction
 	*Fix Bug this integration with Win2016

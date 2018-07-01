@@ -100,7 +100,7 @@ require __DIR__ . '/templates/body_start.php';
 					<label>TLS Support</label>
 					<div class="checkbox icheck">
 						<label>
-						<input type="checkbox" name="tls" data-type="checkbox" data-default="unchecked" data-pickup="true" disabled> Use TLS
+						<input type="checkbox" name="tls" data-type="checkbox" data-default="unchecked" data-pickup="true"> Use TLS
 						</label>
 						<input type="hidden" name="tls_native" value="">
 					</div>

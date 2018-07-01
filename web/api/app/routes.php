@@ -95,8 +95,9 @@ $app->get('/tacacs/config/generate/file/', 'TACConfigCtrl:getConfigGenFile');
 $app->get('/tacacs/config/generate/', 'TACConfigCtrl:getConfigGen');
 $app->post('/tacacs/config/generate/', 'TACConfigCtrl:postConfigGen');
 $app->post('/tacacs/config/deamon/', 'TACConfigCtrl:postDeamonConfig');
-$app->get('/tacacs/config/global/edit', 'TACConfigCtrl:getEditConfigGlobal');
-$app->post('/tacacs/config/global/edit', 'TACConfigCtrl:postEditConfigGlobal');
+$app->get('/tacacs/config/global/edit/', 'TACConfigCtrl:getEditConfigGlobal');
+$app->post('/tacacs/config/global/edit/', 'TACConfigCtrl:postEditConfigGlobal');
+$app->post('/tacacs/config/part/', 'TACConfigCtrl:postConfPart');
 #####################################################
 
 ###Tacacs Reports Routes#######################################
@@ -118,6 +119,11 @@ $app->get('/apicheck/time/', 'APICheckerCtrl:getApiTime');
 $app->post('/backup/datatables/', 'APIBackupCtrl:postBackupDatatables');
 $app->post('/backup/delete/', 'APIBackupCtrl:postBackupDelete');
 $app->post('/backup/restore/', 'APIBackupCtrl:postBackupRestore');
+$app->get('/backup/download/', 'APIBackupCtrl:getBackupDownload');
+$app->post('/backup/upload/', 'APIBackupCtrl:postBackupUpload');
+$app->post('/backup/make/', 'APIBackupCtrl:postBackupMake');
+$app->get('/backup/settings/', 'APIBackupCtrl:getBackupSettings');
+$app->post('/backup/settings/', 'APIBackupCtrl:postBackupSettings');
 #####################################################
 
 ###Update Routes#######################################

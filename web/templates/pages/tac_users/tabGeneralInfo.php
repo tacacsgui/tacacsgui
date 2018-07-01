@@ -7,7 +7,7 @@
 				<input type="hidden"  data-type="input" data-default="" name="username_native">
 				<input type="hidden"  data-type="input" data-default="" data-pickup="true" name="id">
 				<div class="input-group-btn disabled">
-					<button type="button" class="btn btn-flat btn-success" onclick="tac_supplier.toggle(this)">Enabled</button>
+					<button type="button" class="btn btn-flat btn-success" onclick="tgui_supplier.toggle(this)">Enabled</button>
 					<input type="hidden" name="disabled" value="0" data-type="input" data-default="0" data-pickup="true">
 					<input type="hidden" data-type="input" data-default="" name="disabled_native">
 				</div>

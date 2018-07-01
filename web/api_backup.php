@@ -4,13 +4,13 @@
 ///CONFIGURATION FILE///
 require __DIR__ . '/config.php';
 ///PAGE VARIABLES///START
-$PAGE_HEADER = 'Tacacs Backup';
-$PAGE_SUBHEADER = 'Backup of Tacacs Configuration';
+$PAGE_HEADER = 'System Backup';
+$PAGE_SUBHEADER = 'Backup of different configurations';
 $PAGE_TITLE = 'TacacsGUI';
-$PAGE_SUBTITLE = 'Backup';
+$PAGE_SUBTITLE = 'System Backup';
 $BREADCRUMB = array(
 	'Tacacs' => [
-		'name' => 'Backup',
+		'name' => 'System Backup',
 		'href' => '',
 		'icon' => 'fa fa-database',
 		'class' => ''  //last item should have active class!!
@@ -31,6 +31,8 @@ require __DIR__ . '/templates/header.php';
 
 	<!-- DataTables -->
 	<link rel="stylesheet" href="bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css">
+	<!-- iCheck -->
+	<link rel="stylesheet" href="/plugins/iCheck/square/blue.css">
 
 <!--ADDITIONAL CSS FILES END-->
 
@@ -45,16 +47,33 @@ require __DIR__ . '/templates/body_start.php';
 	<div class="col-xs-12">
 		<div class="box box-primary">
 			<div class="box-header">
-				<h3 class="box-title">Backup of Tacacs Configuration</h3>
+				<h3 class="box-title">Backup Tables</h3>
 				<!--<div class="dropdown pull-right">
 					<a class="btn btn-flat btn-info" id="filterButton">Filter</a>
 				</div>-->
 			</div><!-- /.box-header -->
 			<div class="box-body">
-				<div class="table-responsive">
-					<table id="accountingDataTable" class="table-striped display table table-bordered" style="overflow: auto;">
-
-					</table>
+				<div class="nav-tabs-custom">
+					<ul class="nav nav-tabs">
+						<li class="active"><a href="#tcfg" data-toggle="tab" aria-expanded="true">Tacacs CFG</a></li>
+						<li class=""><a href="#apicfg" data-toggle="tab" aria-expanded="true">API CFG</a></li>
+						<li class=""><a href="#full" data-toggle="tab" aria-expanded="true">Full Backup</a></li>
+					</ul>
+					<div class="tab-content">
+						<div class="tab-pane active" id="tcfg">
+							<?php include __DIR__ . '/templates/pages/api_backup/tab_tcfgBackup.php';?>
+						</div>
+						<!-- /.tab-pane -->
+						<div class="tab-pane" id="apicfg">
+							<?php include __DIR__ . '/templates/pages/api_backup/tab_apicfgBackup.php';?>
+						</div>
+						<!-- /.tab-pane -->
+						<div class="tab-pane" id="full">
+							<?php include __DIR__ . '/templates/pages/api_backup/tab_fullBackup.php';?>
+						</div>
+						<!-- /.tab-pane -->
+					</div>
+					<!-- /.tab-content -->
 				</div>
 			</div><!-- /.box-body -->
 		</div><!-- /.box -->
@@ -80,6 +99,8 @@ require __DIR__ . '/templates/footer_end.php';
 	<!-- DataTables -->
 	<script src="bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
 	<script src="bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+	<!-- iCheck -->
+	<script src="/plugins/iCheck/icheck.min.js"></script>
 
 	<!-- DATATABLES MAIN -->
   <script src="dist/js/pages/api_backup/datatables.js"></script>

@@ -32,7 +32,6 @@ RewriteEngine On
 #RewriteCond %{HTTP_HOST} !^www\. [NC]
 #RewriteRule .* https://www.%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
-
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^ index.php [QSA,L]

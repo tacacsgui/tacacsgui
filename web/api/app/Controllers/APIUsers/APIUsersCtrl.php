@@ -73,8 +73,11 @@ class APIUsersCtrl extends Controller
 		$logEntry=array('action' => 'add', 'objectName' => $user->username, 'objectId' => $user->id, 'section' => 'api users', 'message' => 205);
 		$data['logging']=$this->APILoggingCtrl->makeLogEntry($logEntry);
 
-		//$this->auth->check();
 		$data['user']=$user;
+
+		$data['backup_status'] = $this->APIBackupCtrl->apicfgSet();
+		if ( $this->APIBackupCtrl->apicfgSet() )
+		$data['backup'] = $this->APIBackupCtrl->makeBackup(['make' => 'apicfg']);
 
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
@@ -165,6 +168,10 @@ class APIUsersCtrl extends Controller
 		$logEntry=array('action' => 'edit', 'objectName' => $username, 'objectId' => $id, 'section' => 'api users', 'message' => 305);
 		$data['logging']=$this->APILoggingCtrl->makeLogEntry($logEntry);
 
+		$data['backup_status'] = $this->APIBackupCtrl->apicfgSet();
+		if ( $this->APIBackupCtrl->apicfgSet() )
+		$data['backup'] = $this->APIBackupCtrl->makeBackup(['make' => 'apicfg']);
+
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
 ########	Edit User	###############END###########
@@ -228,6 +235,10 @@ class APIUsersCtrl extends Controller
 
 		$logEntry=array('action' => 'delete', 'objectName' => $req->getParam('username'), 'objectId' => $req->getParam('id'), 'section' => 'api users', 'message' => 405);
 		$data['logging']=$this->APILoggingCtrl->makeLogEntry($logEntry);
+
+		$data['backup_status'] = $this->APIBackupCtrl->apicfgSet();
+		if ( $this->APIBackupCtrl->apicfgSet() )
+		$data['backup'] = $this->APIBackupCtrl->makeBackup(['make' => 'apicfg']);
 
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
