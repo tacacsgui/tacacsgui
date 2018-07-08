@@ -7,7 +7,9 @@
         "spomky-labs/otphp": "^9.1",
         "bacon/bacon-qr-code": "^1.0",
         "irazasyed/telegram-bot-sdk": "^2.0",
-        "php-smpp/php-smpp": "^1.2"
+        "php-smpp/php-smpp": "^1.2",
+        "doctrine/dbal": "^2.7",
+        "phpmailer/phpmailer": "^6.0"
     },
 	"autoload": {
 		"psr-4": {

@@ -165,58 +165,68 @@ class TACReportsCtrl extends Controller
 
 		$params=$req->getParams(); //Get ALL parameters form Datatables
 
-		$columns = array(
-		// datatable column index  => database column name
-			0 => 'id',
-			1 => 'date',
-			2 => 'NAS',
-			3 => 'username',
-			4 => 'NAC',
-			5 => 'line',
-			6 => 'cmd',
-		); //Array of all columnes that will used
+		$columns = $this->APICheckerCtrl->getTableTitles('tac_log_accounting'); //Array of all columnes that will used
+		array_unshift( $columns, 'id' );
+
+		$data['columns'] = $columns;
+		$queries = [];
+		$data['filter'] = [];
+		$data['filter']['error'] = false;
+		$data['filter']['message'] = '';
+		//Filter start
+		$searchString = ( empty($params['search']['value']) ) ? '' : $params['search']['value'];
+		$temp = $this->queriesMaker($columns, $searchString);
+		$queries = $temp['queries'];
+		$data['filter'] = $temp['filter'];
+
+		$data['queries'] = $queries;
+		$data['columns'] = $columns;
+		//Filter end
+		$data['recordsTotal'] = Accounting::count();
 
 		//Get temp data for Datatables with Fliter and some other parameters
 		$tempData = Accounting::select()->
-			when($params['columns'][0]['search']['value'],
-				function($query) use ($params,$columns)
+			when( !empty($queries),
+				function($query) use ($queries)
 				{
-					return $query->where($columns[0],'LIKE','%'.$params['columns'][0]['search']['value'].'%');
-				}) ->
-			when($params['columns'][1]['search']['value'],
-				function($query) use ($params,$columns)
-				{
-					$dateRange=explode(' - ', $params['columns'][1]['search']['value']);
-					$dateRange[0] .= ' 00:00:00';
-					$dateRange[1] .= ' 23:59:59';
-					return $query->whereBetween($columns[1], $dateRange);
-				}) ->
-			when($params['columns'][2]['search']['value'],
-				function($query) use ($params,$columns)
-				{
-					return $query->where($columns[2],'LIKE','%'.$params['columns'][2]['search']['value'].'%');
-				}) ->
-			when($params['columns'][3]['search']['value'],
-				function($query) use ($params,$columns)
-				{
-					return $query->where($columns[3],'LIKE','%'.$params['columns'][3]['search']['value'].'%');
-				}) ->
-			when($params['columns'][4]['search']['value'],
-				function($query) use ($params,$columns)
-				{
-					return $query->where($columns[4],'LIKE','%'.$params['columns'][4]['search']['value'].'%');
-				}) ->
-			when($params['columns'][5]['search']['value'],
-				function($query) use ($params,$columns)
-				{
-					return $query->where($columns[5],'LIKE','%'.$params['columns'][5]['search']['value'].'%');
-				}) ->
-			when($params['columns'][6]['search']['value'],
-				function($query) use ($params,$columns)
-				{
-					return $query->where($columns[5],'LIKE','%'.$params['columns'][5]['search']['value'].'%');
-				}) ->
-			orderBy($columns[$params['order'][0]['column']],$params['order'][0]['dir'])->
+					foreach ($queries as $condition => $attr) {
+						switch ($condition) {
+							case '!==':
+								foreach ($attr as $column => $value) {
+									$query->whereNotIn($column, $value);
+								}
+								break;
+							case '==':
+								foreach ($attr as $column => $value) {
+									$query->whereIn($column, $value);
+								}
+								break;
+							case '!=':
+								foreach ($attr as $column => $valueArr) {
+									for ($i=0; $i < count($valueArr); $i++) {
+										if ($i == 0) $query->where($column,'NOT LIKE', '%'.$valueArr[$i].'%');
+										$query->where($column,'NOT LIKE', '%'.$valueArr[$i].'%');
+									}
+								}
+								break;
+							case '=':
+								foreach ($attr as $column => $valueArr) {
+									for ($i=0; $i < count($valueArr); $i++) {
+										if ($i == 0) $query->where($column,'LIKE', '%'.$valueArr[$i].'%');
+										$query->where($column,'LIKE', '%'.$valueArr[$i].'%');
+									}
+								}
+								break;
+							default:
+								//return $query;
+								break;
+						}
+					}
+					return $query;
+				});
+			$data['recordsFiltered'] = $tempData->count();
+			$tempData = $tempData->
+			orderBy($params['columns'][$params['order'][0]['column']]['data'],$params['order'][0]['dir'])->
 			take($params['length'])->
 			offset($params['start'])->
 			get()->toArray();
@@ -228,47 +238,6 @@ class TACReportsCtrl extends Controller
 		}
 		//Some additional parameters for Datatables
 		$data['draw']=intval( $params['draw'] );
-		$data['recordsTotal'] = Accounting::count();
-		$data['recordsFiltered'] = Accounting::select($columns)->
-			when($params['columns'][0]['search']['value'],
-				function($query) use ($params,$columns)
-				{
-					return $query->where($columns[0],'LIKE','%'.$params['columns'][0]['search']['value'].'%');
-				}) ->
-			when($params['columns'][1]['search']['value'],
-				function($query) use ($params,$columns)
-				{
-					$dateRange=explode(' - ', $params['columns'][1]['search']['value']);
-					$dateRange[0] .= ' 00:00:00';
-					$dateRange[1] .= ' 23:59:59';
-					return $query->whereBetween($columns[1], $dateRange);
-				}) ->
-			when($params['columns'][2]['search']['value'],
-				function($query) use ($params,$columns)
-				{
-					return $query->where($columns[2],'LIKE','%'.$params['columns'][2]['search']['value'].'%');
-				}) ->
-			when($params['columns'][3]['search']['value'],
-				function($query) use ($params,$columns)
-				{
-					return $query->where($columns[3],'LIKE','%'.$params['columns'][3]['search']['value'].'%');
-				}) ->
-			when($params['columns'][4]['search']['value'],
-				function($query) use ($params,$columns)
-				{
-					return $query->where($columns[4],'LIKE','%'.$params['columns'][4]['search']['value'].'%');
-				}) ->
-			when($params['columns'][5]['search']['value'],
-				function($query) use ($params,$columns)
-				{
-					return $query->where($columns[5],'LIKE','%'.$params['columns'][5]['search']['value'].'%');
-				}) ->
-			when($params['columns'][6]['search']['value'],
-				function($query) use ($params,$columns)
-				{
-					return $query->where($columns[5],'LIKE','%'.$params['columns'][5]['search']['value'].'%');
-				}) ->
-				count();
 
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
@@ -298,52 +267,67 @@ class TACReportsCtrl extends Controller
 
 		$params=$req->getParams(); //Get ALL parameters form Datatables
 
-		$columns = array(
-		// datatable column index  => database column name
-			0 => 'id',
-			1 => 'date',
-			2 => 'NAS',
-			3 => 'username',
-			4 => 'NAC',
-			5 => 'line',
-		); //Array of all columnes that will used
+		$columns = $this->APICheckerCtrl->getTableTitles('tac_log_authentication'); //Array of all columnes that will used
+		array_unshift( $columns, 'id' );
 
+		$data['columns'] = $columns;
+		$queries = [];
+		$data['filter'] = [];
+		$data['filter']['error'] = false;
+		$data['filter']['message'] = '';
+		//Filter start
+		$searchString = ( empty($params['search']['value']) ) ? '' : $params['search']['value'];
+		$temp = $this->queriesMaker($columns, $searchString);
+		$queries = $temp['queries'];
+		$data['filter'] = $temp['filter'];
+
+		$data['queries'] = $queries;
+		$data['columns'] = $columns;
+		//Filter end
+		$data['recordsTotal'] = Authentication::count();
 		//Get temp data for Datatables with Fliter and some other parameters
 		$tempData = Authentication::select()->
-			when($params['columns'][0]['search']['value'],
-				function($query) use ($params,$columns)
+			when( !empty($queries),
+				function($query) use ($queries)
 				{
-					return $query->where($columns[0],'LIKE','%'.$params['columns'][0]['search']['value'].'%');
-				}) ->
-			when($params['columns'][1]['search']['value'],
-				function($query) use ($params,$columns)
-				{
-					$dateRange=explode(' - ', $params['columns'][1]['search']['value']);
-					$dateRange[0] .= ' 00:00:00';
-					$dateRange[1] .= ' 23:59:59';
-					return $query->whereBetween($columns[1], $dateRange);
-				}) ->
-			when($params['columns'][2]['search']['value'],
-				function($query) use ($params,$columns)
-				{
-					return $query->where($columns[2],'LIKE','%'.$params['columns'][2]['search']['value'].'%');
-				}) ->
-			when($params['columns'][3]['search']['value'],
-				function($query) use ($params,$columns)
-				{
-					return $query->where($columns[3],'LIKE','%'.$params['columns'][3]['search']['value'].'%');
-				}) ->
-			when($params['columns'][4]['search']['value'],
-				function($query) use ($params,$columns)
-				{
-					return $query->where($columns[4],'LIKE','%'.$params['columns'][4]['search']['value'].'%');
-				}) ->
-			when($params['columns'][5]['search']['value'],
-				function($query) use ($params,$columns)
-				{
-					return $query->where($columns[5],'LIKE','%'.$params['columns'][5]['search']['value'].'%');
-				}) ->
-			orderBy($columns[$params['order'][0]['column']],$params['order'][0]['dir'])->
+					foreach ($queries as $condition => $attr) {
+						switch ($condition) {
+							case '!==':
+								foreach ($attr as $column => $value) {
+									$query->whereNotIn($column, $value);
+								}
+								break;
+							case '==':
+								foreach ($attr as $column => $value) {
+									$query->whereIn($column, $value);
+								}
+								break;
+							case '!=':
+								foreach ($attr as $column => $valueArr) {
+									for ($i=0; $i < count($valueArr); $i++) {
+										if ($i == 0) $query->where($column,'NOT LIKE', '%'.$valueArr[$i].'%');
+										$query->where($column,'NOT LIKE', '%'.$valueArr[$i].'%');
+									}
+								}
+								break;
+							case '=':
+								foreach ($attr as $column => $valueArr) {
+									for ($i=0; $i < count($valueArr); $i++) {
+										if ($i == 0) $query->where($column,'LIKE', '%'.$valueArr[$i].'%');
+										$query->where($column,'LIKE', '%'.$valueArr[$i].'%');
+									}
+								}
+								break;
+							default:
+								//return $query;
+								break;
+						}
+					}
+					return $query;
+				});
+			$data['recordsFiltered'] = $tempData->count();
+			$tempData = $tempData->
+			orderBy($params['columns'][$params['order'][0]['column']]['data'],$params['order'][0]['dir'])->
 			take($params['length'])->
 			offset($params['start'])->
 			get()->toArray();
@@ -355,42 +339,6 @@ class TACReportsCtrl extends Controller
 		}
 		//Some additional parameters for Datatables
 		$data['draw']=intval( $params['draw'] );
-		$data['recordsTotal'] = Authentication::count();
-		$data['recordsFiltered'] = Authentication::select($columns)->
-			when($params['columns'][0]['search']['value'],
-				function($query) use ($params,$columns)
-				{
-					return $query->where($columns[0],'LIKE','%'.$params['columns'][0]['search']['value'].'%');
-				}) ->
-			when($params['columns'][1]['search']['value'],
-				function($query) use ($params,$columns)
-				{
-					$dateRange=explode(' - ', $params['columns'][1]['search']['value']);
-					$dateRange[0] .= ' 00:00:00';
-					$dateRange[1] .= ' 23:59:59';
-					return $query->whereBetween($columns[1], $dateRange);
-				}) ->
-			when($params['columns'][2]['search']['value'],
-				function($query) use ($params,$columns)
-				{
-					return $query->where($columns[2],'LIKE','%'.$params['columns'][2]['search']['value'].'%');
-				}) ->
-			when($params['columns'][3]['search']['value'],
-				function($query) use ($params,$columns)
-				{
-					return $query->where($columns[3],'LIKE','%'.$params['columns'][3]['search']['value'].'%');
-				}) ->
-			when($params['columns'][4]['search']['value'],
-				function($query) use ($params,$columns)
-				{
-					return $query->where($columns[4],'LIKE','%'.$params['columns'][4]['search']['value'].'%');
-				}) ->
-			when($params['columns'][5]['search']['value'],
-				function($query) use ($params,$columns)
-				{
-					return $query->where($columns[5],'LIKE','%'.$params['columns'][5]['search']['value'].'%');
-				}) ->
-				count();
 
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
@@ -420,52 +368,67 @@ class TACReportsCtrl extends Controller
 
 		$params=$req->getParams(); //Get ALL parameters form Datatables
 
-		$columns = array(
-		// datatable column index  => database column name
-			0 => 'id',
-			1 => 'date',
-			2 => 'NAS',
-			3 => 'username',
-			4 => 'NAC',
-			5 => 'line',
-		); //Array of all columnes that will used
+		$columns = $this->APICheckerCtrl->getTableTitles('tac_log_authorization'); //Array of all columnes that will used
+		array_unshift( $columns, 'id' );
 
+		$data['columns'] = $columns;
+		$queries = [];
+		$data['filter'] = [];
+		$data['filter']['error'] = false;
+		$data['filter']['message'] = '';
+		//Filter start
+		$searchString = ( empty($params['search']['value']) ) ? '' : $params['search']['value'];
+		$temp = $this->queriesMaker($columns, $searchString);
+		$queries = $temp['queries'];
+		$data['filter'] = $temp['filter'];
+
+		$data['queries'] = $queries;
+		$data['columns'] = $columns;
+		//Filter end
+		$data['recordsTotal'] = Authorization::count();
 		//Get temp data for Datatables with Fliter and some other parameters
 		$tempData = Authorization::select()->
-			when($params['columns'][0]['search']['value'],
-				function($query) use ($params,$columns)
+			when( !empty($queries),
+				function($query) use ($queries)
 				{
-					return $query->where($columns[0],'LIKE','%'.$params['columns'][0]['search']['value'].'%');
-				}) ->
-			when($params['columns'][1]['search']['value'],
-				function($query) use ($params,$columns)
-				{
-					$dateRange=explode(' - ', $params['columns'][1]['search']['value']);
-					$dateRange[0] .= ' 00:00:00';
-					$dateRange[1] .= ' 23:59:59';
-					return $query->whereBetween($columns[1], $dateRange);
-				}) ->
-			when($params['columns'][2]['search']['value'],
-				function($query) use ($params,$columns)
-				{
-					return $query->where($columns[2],'LIKE','%'.$params['columns'][2]['search']['value'].'%');
-				}) ->
-			when($params['columns'][3]['search']['value'],
-				function($query) use ($params,$columns)
-				{
-					return $query->where($columns[3],'LIKE','%'.$params['columns'][3]['search']['value'].'%');
-				}) ->
-			when($params['columns'][4]['search']['value'],
-				function($query) use ($params,$columns)
-				{
-					return $query->where($columns[4],'LIKE','%'.$params['columns'][4]['search']['value'].'%');
-				}) ->
-			when($params['columns'][5]['search']['value'],
-				function($query) use ($params,$columns)
-				{
-					return $query->where($columns[5],'LIKE','%'.$params['columns'][5]['search']['value'].'%');
-				}) ->
-			orderBy($columns[$params['order'][0]['column']],$params['order'][0]['dir'])->
+					foreach ($queries as $condition => $attr) {
+						switch ($condition) {
+							case '!==':
+								foreach ($attr as $column => $value) {
+									$query->whereNotIn($column, $value);
+								}
+								break;
+							case '==':
+								foreach ($attr as $column => $value) {
+									$query->whereIn($column, $value);
+								}
+								break;
+							case '!=':
+								foreach ($attr as $column => $valueArr) {
+									for ($i=0; $i < count($valueArr); $i++) {
+										if ($i == 0) $query->where($column,'NOT LIKE', '%'.$valueArr[$i].'%');
+										$query->where($column,'NOT LIKE', '%'.$valueArr[$i].'%');
+									}
+								}
+								break;
+							case '=':
+								foreach ($attr as $column => $valueArr) {
+									for ($i=0; $i < count($valueArr); $i++) {
+										if ($i == 0) $query->where($column,'LIKE', '%'.$valueArr[$i].'%');
+										$query->where($column,'LIKE', '%'.$valueArr[$i].'%');
+									}
+								}
+								break;
+							default:
+								//return $query;
+								break;
+						}
+					}
+					return $query;
+				});
+			$data['recordsFiltered'] = $tempData->count();
+			$tempData = $tempData->
+			orderBy($params['columns'][$params['order'][0]['column']]['data'],$params['order'][0]['dir'])->
 			take($params['length'])->
 			offset($params['start'])->
 			get()->toArray();
@@ -477,42 +440,6 @@ class TACReportsCtrl extends Controller
 		}
 		//Some additional parameters for Datatables
 		$data['draw']=intval( $params['draw'] );
-		$data['recordsTotal'] = Authorization::count();
-		$data['recordsFiltered'] = Authorization::select($columns)->
-			when($params['columns'][0]['search']['value'],
-				function($query) use ($params,$columns)
-				{
-					return $query->where($columns[0],'LIKE','%'.$params['columns'][0]['search']['value'].'%');
-				}) ->
-			when($params['columns'][1]['search']['value'],
-				function($query) use ($params,$columns)
-				{
-					$dateRange=explode(' - ', $params['columns'][1]['search']['value']);
-					$dateRange[0] .= ' 00:00:00';
-					$dateRange[1] .= ' 23:59:59';
-					return $query->whereBetween($columns[1], $dateRange);
-				}) ->
-			when($params['columns'][2]['search']['value'],
-				function($query) use ($params,$columns)
-				{
-					return $query->where($columns[2],'LIKE','%'.$params['columns'][2]['search']['value'].'%');
-				}) ->
-			when($params['columns'][3]['search']['value'],
-				function($query) use ($params,$columns)
-				{
-					return $query->where($columns[3],'LIKE','%'.$params['columns'][3]['search']['value'].'%');
-				}) ->
-			when($params['columns'][4]['search']['value'],
-				function($query) use ($params,$columns)
-				{
-					return $query->where($columns[4],'LIKE','%'.$params['columns'][4]['search']['value'].'%');
-				}) ->
-			when($params['columns'][5]['search']['value'],
-				function($query) use ($params,$columns)
-				{
-					return $query->where($columns[5],'LIKE','%'.$params['columns'][5]['search']['value'].'%');
-				}) ->
-				count();
 
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}

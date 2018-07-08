@@ -54,7 +54,7 @@ class AuthController extends Controller
 			$_SESSION['error']['message']='You was blocked for 10 minutes';
 			$_SESSION['blockTime'] = time();
 			///LOGGING//start//
-			$logEntry = array('userName' => $req->getParam('username'), 'userId' => 0, 'action' => 'singin', 'section' => 'api auth', 'message' => 104);
+			$logEntry = array('username' => $req->getParam('username'), 'uid' => 0, 'action' => 'singin', 'section' => 'api auth', 'message' => 104);
 			$this->APILoggingCtrl->makeLogEntry($logEntry);
 			///LOGGING//end//
 			$data['error']=$_SESSION['error'];
@@ -93,7 +93,7 @@ class AuthController extends Controller
 		if ($_SESSION['error']['status']){
 			$data['error']=$_SESSION['error'];
 			///LOGGING//start//
-			$logEntry = array('userName' => $req->getParam('username'), 'userId' => 0, 'action' => 'singin', 'section' => 'api auth', 'message' => 103);
+			$logEntry = array('username' => $req->getParam('username'), 'uid' => 0, 'action' => 'singin', 'section' => 'api auth', 'message' => 103);
 			$this->APILoggingCtrl->makeLogEntry($logEntry);
 			///LOGGING//end//
 			return $res -> withStatus(401) -> write(json_encode($data));

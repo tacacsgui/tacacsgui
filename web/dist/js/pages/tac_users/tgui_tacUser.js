@@ -18,6 +18,8 @@ var tgui_tacUser = {
   select_service_edit: '#editUserForm .select_service',
   init: function(){
     var self = this;
+
+    this.csvParser = new tgui_csvParser(this.csv);
     /*cleare forms when modal is hided*/
     $('#addUser').on('hidden.bs.modal', function(){
     	self.clearForm();
@@ -155,7 +157,7 @@ var tgui_tacUser = {
       $("#addUser").modal("hide");
       tgui_status.changeStatus(resp.changeConfiguration)
       self.clearForm();
-      setTimeout( function () {dataTable.ajax.reload()}, 2000 );
+      setTimeout( function () {dataTable.table.ajax.reload()}, 2000 );
     }).fail(function(err){
       tgui_error.getStatus(err, ajaxProps)
     })
@@ -258,17 +260,18 @@ var tgui_tacUser = {
       $("#editUser").modal("hide");
 			tgui_status.changeStatus(resp.changeConfiguration)
 			self.clearForm();
-			setTimeout( function () {dataTable.ajax.reload()}, 2000 );
+			setTimeout( function () {dataTable.table.ajax.reload()}, 2000 );
     }).fail(function(err){
       tgui_error.getStatus(err, ajaxProps)
     })
     return this;
   },
-  delete: function(id,username) {
+  delete: function(id, username, flag) {
     id = id || 0;
+    flag = (flag !== undefined) ? false : true;
     username = username || 'undefined';
     console.log('Deleting UserID:'+id+' with username '+username)
-    if (!confirm("Do you want delete '"+ username +"'?")) return;
+    if (flag && !confirm("Do you want delete '"+ username +"'?")) return;
     var ajaxProps = {
       url: API_LINK+"tacacs/user/delete/",
       data: {
@@ -282,11 +285,60 @@ var tgui_tacUser = {
       }
       tgui_error.local.show({type:'success', message: "User "+ username +" was deleted"})
       tgui_status.changeStatus(resp.changeConfiguration)
-      setTimeout( function () {dataTable.ajax.reload()}, 2000 );
+      setTimeout( function () {dataTable.table.ajax.reload()}, 2000 );
     }).fail(function(err){
       tgui_error.getStatus(err, ajaxProps)
     })
     return this;
+  },
+  csvDownload: function(idList) {
+    idList = idList || [];
+  if (! idList.length ) $('div.csv-link').empty().append(tgui_supplier.loadElement());
+  else { $('#exportLink').removeClass('m-progress').addClass('m-progress').attr('href', 'javascript: void(0)').show(); }
+  var ajaxProps = {
+    url: API_LINK+"tacacs/user/csv/",
+    data: {idList: idList}
+  };//ajaxProps END
+  ajaxRequest.send(ajaxProps).then(function(resp) {
+    if(!resp.filename) {
+      tgui_error.local.show( {type:'error', message: "Oops! Unknown error appeared :("} ); return;
+    }
+    if (! idList.length ) { $('div.csv-link').empty().append('<a href="/api/download/csv/?file=' + resp.filename + '" target="_blank">Download</a><p><small class="text-muted">Link will be valid within 15 minutes</small></p>') }
+    else {
+      $('#exportLink').removeClass('m-progress').attr('href', '/api/download/csv/?file=' + resp.filename);
+    }
+  }).fail(function(err){
+    tgui_error.getStatus(err, ajaxProps)
+  })
+  },
+  csv: {
+    columnsRequired: ['username','login'],
+    fileInputId: '#csv-file',
+    ajaxLink: 'tacacs/user/add/',
+    outputId: '#csvParserOutput',
+    ajaxHandler: function(resp,index){
+      var item = 'user';
+      if (resp.error && resp.error.status){
+        var error_message = '';
+        for (v in resp.error.validation){
+          if (!(resp.error.validation[v] == null)){
+            for (num in resp.error.validation[v]){
+              error_message+='<p class="text-danger">'+resp.error.validation[v][num]+'</p>';
+            }
+            this.csvParserOutput({tag: error_message, response: index});
+          }
+        }
+      }
+      if (resp[item] && resp[item].username) {
+        this.csvParserOutput({tag: '<p class="text-success">User <b>'+ resp[item].username + '</b> was added!</p>', response: index});
+        tgui_status.changeStatus(resp.changeConfiguration)
+      }
+      this.csvParserOutput({tag: '<hr>'});
+    },
+    finalAnswer: function() {
+      this.csvParserOutput({message: 'End of CSV file. Reload database.'})
+      setTimeout( function () {dataTable.table.ajax.reload()}, 2000 );
+    }
   },
   clearForm: function() {
     tgui_supplier.clearForm();

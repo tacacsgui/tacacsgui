@@ -62,7 +62,7 @@ var tgui_apiUserGrp = {
       tgui_error.local.show({type:'success', message: "User Group"+ $(self.formSelector_add + ' input[name="name"]').val() +" was added"})
       $("#addUserGroup").modal("hide");
       self.clearForm();
-      setTimeout( function () {dataTable.ajax.reload()}, 2000 );
+      setTimeout( function () {dataTable.table.ajax.reload()}, 2000 );
     }).fail(function(err){
       tgui_error.getStatus(err, ajaxProps)
     })
@@ -123,16 +123,17 @@ var tgui_apiUserGrp = {
       $("#editUserGroup").modal("hide");
 
       self.clearForm();
-      setTimeout( function () {dataTable.ajax.reload()}, 2000 );
+      setTimeout( function () {dataTable.table.ajax.reload()}, 2000 );
     }).fail(function(err){
       tgui_error.getStatus(err, ajaxProps)
     })
     return this;
   },
-  delete: function(id, name) {
+  delete: function(id, name, flag) {
     id = id || 0;
+    flag = (flag !== undefined) ? false : true;
     name = name || 'undefined';
-    if (!confirm("Do you want delete '"+name+"'?")) return;
+    if (flag && !confirm("Do you want delete '"+name+"'?")) return;
     var ajaxProps = {
       url: API_LINK+"user/group/delete/",
       data: {
@@ -146,7 +147,7 @@ var tgui_apiUserGrp = {
       }
       tgui_error.local.show({type:'success', message: "User Group"+ name +" was deleted"})
 
-      setTimeout( function () {dataTable.ajax.reload()}, 2000 );
+      setTimeout( function () {dataTable.table.ajax.reload()}, 2000 );
     }).fail(function(err){
       tgui_error.getStatus(err, ajaxProps)
     })

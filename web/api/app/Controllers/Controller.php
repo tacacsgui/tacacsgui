@@ -36,7 +36,7 @@ class Controller
 				'APIVER' => APIVER,
 			],
 			'user' => [
-				'id' => (isset($_SESSION['uid'])) ? $_SESSION['uid'] : 'empty',
+				'id' => ( isset($_SESSION['uid']) ) ? $_SESSION['uid'] : 'empty',
 				'username' => (isset($_SESSION['uname'])) ? $_SESSION['uname'] : 'empty',
 				'groupId' => (isset($_SESSION['groupId'])) ? $_SESSION['groupId'] : 'empty',
 				'groupRights' => (isset($_SESSION['groupRights'])) ? $_SESSION['groupRights'] : 'empty',
@@ -122,6 +122,61 @@ class Controller
 		}
 	}
 	////////////////////////////////////////
+	public function queriesMaker( $columns = [], $searchString = '' )
+	{
+		$filter = [];
+		$filter['error'] = false;
+		$filter['message'] = '';
+		$queries = [];
+		$searchRequests = explode( ',' , $searchString );
+		foreach ($searchRequests as $searchRequest) {
+			if ($filter['error']) return ['filter' => $filter, 'queries' => $queries];
+			if ( !trim( $searchRequest ) ) continue;
+			$searchRequest = $searchRequest; //delete spaces
+			switch (true) {
+				case (preg_match('/([a-zA-Z]+!==.+)/', $searchRequest)):
+						$temp = $this->searchParser('!==',$searchRequest,$queries, $filter, $columns);
+						$queries = $temp['queries'];
+						$filter = $temp['filter'];
+					break;
+				case (preg_match('/([a-zA-Z]+==.+)/', $searchRequest)):
+						$temp = $this->searchParser('==',$searchRequest,$queries, $filter, $columns);
+						$queries = $temp['queries'];
+						$filter = $temp['filter'];
+					break;
+				case (preg_match('/([a-zA-Z]+!=.+)/', $searchRequest)):
+						$temp = $this->searchParser('!=',$searchRequest,$queries, $filter, $columns);
+						$queries = $temp['queries'];
+						$filter = $temp['filter'];
+					break;
+				case (preg_match('/([a-zA-Z]+=.+)/', $searchRequest)):
+						$temp = $this->searchParser('=',$searchRequest,$queries, $filter, $columns);
+						$queries = $temp['queries'];
+						$filter = $temp['filter'];
+					break;
+				default:
+					$filter['error'] = true;
+					$filter['message'] = 'unrecognized condition';
+					break;
+			}
+		}
+		return ['filter' => $filter, 'queries' => $queries];
+	}
+	public function searchParser($condition = '', $searchRequest = '', $queries = [], $filter = [], $columns = [])
+	{
+		$search = explode($condition,$searchRequest);
+		$search[0] = trim($search[0]);
+		if ( empty($search[0]) OR is_null($search[1]) OR $search[1] == '') return ['filter' => $filter, 'queries' => $queries];
+		if ( empty( $queries[$condition]) ) $queries[$condition] = [];
 
+		if ( !array_search(strtolower($search[0]), $columns) AND !array_search(strtoupper($search[0]), $columns)) {
+			$filter['error'] = true; $filter['message'] = $search[0] . ' - attribute not found';
+			return ['filter' => $filter, 'queries' => $queries];}
+		$search[0] = ( array_search(strtolower($search[0]), $columns) ) ? $columns[array_search(strtolower($search[0]), $columns)] : $columns[array_search(strtoupper($search[0]), $columns)];
+		if ( empty($queries[$condition][$search[0]]) ) $queries[$condition][$search[0]] = [];
+		$queries[$condition][$search[0]][count($queries[$condition][$search[0]])] = $search[1];
+
+		return ['filter' => $filter, 'queries' => $queries];
+	}
 	////////////////////////////////////////
 }

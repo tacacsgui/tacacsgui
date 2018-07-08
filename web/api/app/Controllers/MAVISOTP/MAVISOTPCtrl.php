@@ -146,7 +146,7 @@ class MAVISOTPCtrl extends Controller
 
 		$data['changeConfiguration']=$this->changeConfigurationFlag(['unset' => 0]);
 
-		$logEntry=array('action' => 'edit', 'objectName' => 'MAVIS', 'objectId' => 'OTP', 'section' => 'MAVIS OTP', 'message' => 702);
+		$logEntry=array('action' => 'edit', 'obj_name' => 'MAVIS', 'obj_id' => 'OTP', 'section' => 'MAVIS OTP', 'message' => 702);
 		$data['logging']=$this->APILoggingCtrl->makeLogEntry($logEntry);
 
 		return $res -> withStatus(200) -> write(json_encode($data));

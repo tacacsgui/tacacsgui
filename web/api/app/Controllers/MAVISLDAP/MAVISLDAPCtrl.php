@@ -78,7 +78,7 @@ class MAVISLDAPCtrl extends Controller
 
 		$data['changeConfiguration']=$this->changeConfigurationFlag(['unset' => 0]);
 
-		$logEntry=array('action' => 'edit', 'objectName' => 'MAVIS', 'objectId' => 'LDAP', 'section' => 'MAVIS LDAP', 'message' => 701);
+		$logEntry=array('action' => 'edit', 'obj_name' => 'MAVIS', 'obj_id' => 'LDAP', 'section' => 'MAVIS LDAP', 'message' => 701);
 		$data['logging']=$this->APILoggingCtrl->makeLogEntry($logEntry);
 
 		return $res -> withStatus(200) -> write(json_encode($data));

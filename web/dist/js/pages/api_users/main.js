@@ -7,6 +7,13 @@ $('document').ready(function(){
 			//MAIN CODE//Start
 			tguiInit.iCheck();
 			tgui_userApi.init();
+			dataTable.init();
+
+			$('#filterInfo').popover({
+				html: true,
+				container: 'body',
+				content: $('.filter-info-content').html()
+			});
 			//MAIN CODE//END
 			$('div.loading').hide();/*---*/
     }).catch(function(err){

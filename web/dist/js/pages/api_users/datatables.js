@@ -1,76 +1,41 @@
-$("#filterButton").click(function() {
-
-	if ($("#filterFields").css('display') != 'none') {
-		$("#filterFields").hide("slow");
-		return;
-	};
-	if ($("#filterFields").css('display') == 'none') {$("#filterFields").show("slow"); return;};
-
-});
-
-var dataTable =  $('#usersDataTable').DataTable( {
-
-	//scrollX: true,
-	processing: true,
-	serverSide: true,
-	autoWidth: false,
-	orderCellsTop: true,
-
-	"createdRow": function( row, data, dataIndex){
-		if(data['disabled']==1) $(row).addClass('disabledRow');
-	},
-
-	"columns": [
-	{"title": "ID","data" : "id"},
-	{"title": "Username","data" : "username"},
-	{"title": "Group","data" : "group","searchable": false},
-	{"title": "Action","data" : "buttons","searchable": false},
-	 ],
-
-	"columnDefs": [
+var initialData =
+{
+	ajaxLink: "user/datatables/",
+	tableSelector: '#usersDataTable',
+	item: 'user',
+	deleteItems: tgui_userApi.delete,
+	exportCsv: tgui_userApi.csvDownload || function(){return false;},
+  columns:
 	{
-
+		id: {title: "ID", data : "id", orderable: true, visible: false,},
+		username: {title: "Username", data : "username", visible: true, orderable: true},
+		group: {title: "Group", data : "group", visible: true, orderable: false},
+	 	created_at: {title: "Created at", data : "created_at", visible: false, orderable: true},
+	 	updated_at: {title: "Updated at", data : "updated_at", visible: false, orderable: true},
+		buttons: {title: "Action", data : "buttons", visible: true, orderable: false},
 	},
+  column:
 	{
-		"targets": [2,3],
-		"orderable": false
-	} ],
+		select: true,
+		preview: false
+	},
+  sort:
+	{
+		column: 2,
+		order: 'asc'
+	},
+};
 
-	"lengthMenu": [ 10, 25, 50, 75, 100 ],
+var dataTable = {
+	init: function() {
+		this.settings.columnsFilter();
+		this.settings.preview();
+		this.settings.columnDefs = [],
+		console.log(this.settings);
+		this.table = $(initialData.tableSelector).DataTable(this.settings);
+	},
+	table: {},
+	settings: new tgui_datatables(initialData),
+};
 
-	ajax: {"url": API_LINK+"user/datatables/",
-		"type": "POST",
-		"data": {
-			"temp": "acc"
-		}
-	}, // json datasource
-
-
-	"drawCallback": function( settings ) {
-		var filterRow='';
-		var filterRowElement=$('<tr role="row" id="filterFields" style="display: none;"></tr>')
-		for (i = 0; i < settings.aoColumns.length; i++) {
-			filter='<td></td>';
-			if (settings.aoColumns[i].bSearchable)
-			{
-				var filter = $("<td></td>");
-				var inputElement=$('<input searchCol_id="'+i+'" class="search-input form-control">')
-				filterRowElement.append(filter.append(inputElement))
-			}
-			filterRow+=filter;
-		}
-        $('#usersDataTable thead').append(filterRowElement);
-		tguiInit.tooltips();
-    }
-
-});
-
-$.fn.dataTable.ext.errMode = 'throw';
-
-$("#usersDataTable_filter").css("display","none");  // hiding global search box
-
-$(document).on('keyup click change', '.search-input', function(){
-	var i =$(this).attr('searchCol_id');  // getting column index
-	var v =$(this).val();  // getting search input value
-	dataTable.columns(i).search(v).draw();
-} );
+//$.fn.dataTable.ext.errMode = 'throw';

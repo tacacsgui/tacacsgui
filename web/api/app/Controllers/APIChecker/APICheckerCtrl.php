@@ -46,11 +46,11 @@ protected $tablesArr = array(
 	],
 	'api_logging' =>
 	[
-		'userName' => ['string',''],
-		'userId' => ['string',''],
-		'userIp' => ['string',''],
-		'objectName' => ['string', ''],
-		'objectId' => ['string', ''],
+		'username' => ['string',''],
+		'uid' => ['string',''],
+		'user_ip' => ['string',''],
+		'obj_name' => ['string', ''],
+		'obj_id' => ['string', ''],
 		'action' => ['string', ''],
 		'section' => ['string', ''],
 		'message' => ['text', '_'],
@@ -110,6 +110,7 @@ protected $tablesArr = array(
 		'enable_flag' => ['integer', '0'],
 		'group' => ['integer', '0'],
 		'disabled' => ['integer', '0'],
+		'vendor' => ['string', ''],
 		'banner_welcome' => ['text', '_'],
 		'banner_failed' => ['text', '_'],
 		'banner_motd' => ['text', '_'],
@@ -163,10 +164,10 @@ protected $tablesArr = array(
 	'tac_log_accounting' =>
 	[
 		'date' => ['timestamp', '_'],
-		'NAS' => ['string', '_'],
+		'nas' => ['string', '_'],
 		'username' => ['string', '_'],
 		'line' => ['string', '_'],
-		'NAC' => ['string', '_'],
+		'nac' => ['string', '_'],
 		'action' => ['string', '_'],
 		'task_id' => ['string', '_'],
 		'timezone' => ['string', '_'],
@@ -185,20 +186,20 @@ protected $tablesArr = array(
 	'tac_log_authentication' =>
 	[
 		'date' => ['timestamp', '_'],
-		'NAS' => ['string', '_'],
+		'nas' => ['string', '_'],
 		'username' => ['string', '_'],
 		'line' => ['string', '_'],
-		'NAC' => ['string', '_'],
+		'nac' => ['string', '_'],
 		'action' => ['string', '_'],
 		'unknown' => ['string', '_'],
 	],
 	'tac_log_authorization' =>
 	[
 		'date' => ['timestamp', '_'],
-		'NAS' => ['string', '_'],
+		'nas' => ['string', '_'],
 		'username' => ['string', '_'],
 		'line' => ['string', '_'],
-		'NAC' => ['string', '_'],
+		'nac' => ['string', '_'],
 		'action' => ['string', '_'],
 		'cmd' => ['string', '_'],
 	],
@@ -247,6 +248,11 @@ protected $tablesArr = array(
 	],
 
 );
+
+	public function getTableTitles($table = '')
+	{
+		return ($table) ? array_keys( $this->tablesArr[$table] ) : [];
+	}
 
 	public function myFirstTable()
 	{
@@ -410,6 +416,7 @@ protected $tablesArr = array(
 	}
 
 ################################################
+
 	public function getCheckDatabase($req,$res)
 	{
 		//INITIAL CODE////START//
@@ -433,6 +440,7 @@ protected $tablesArr = array(
 			{
 				$data["messages"][count($data["messages"])] = "Table ".$tableName." created";
 				if ($updateFlag) {
+					$this->databaseFix();
 					//CREATE TABLE//
 					$this->createTable($tableName,$tableColumns);
 					////////////DEFAULT VALUES/////////
@@ -452,6 +460,12 @@ protected $tablesArr = array(
 					{
 						$data["messages"][count($data["messages"])]="Column ".$columnName." in the table ".$tableName." created";
 						if ($updateFlag) {
+							$databaseFix = $this->databaseFix();
+							if ($databaseFix['status']){
+								$data["messages"][0]=$databaseFix['message'];
+								$data['test1'] = $this->db::schema()->getColumnListing('api_logging');
+								sleep(1); return $res -> withStatus(200) -> write(json_encode($data));
+							}
 							//ADD COLUMN//
 							$this->db::schema()->table($tableName, function(Blueprint $table) use ($columnName,$preColumnName,$tableColumns)
 							{
@@ -541,5 +555,25 @@ protected $tablesArr = array(
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
 	################################################
+	private function databaseFix()
+	{
+		$response = ['status' => false, 'message' => ''];
 
+		if ( array_search('userName', $this->db::schema()->getColumnListing('api_logging')) )
+		{
+			$response['status'] = true;
+			//die();
+			//$response['status'] = false;
+			$this->db::schema()->table('api_logging', function(Blueprint $table) {
+            $table->dropColumn('userName');
+            $table->dropColumn('userId');
+            $table->dropColumn('userIp');
+            $table->dropColumn('objectName');
+            $table->dropColumn('objectId');
+      });
+			$response['message'] = 'Table fix for api_logging';
+			//$this->db::table('api_logging')->renameColumn('userName', 'username');
+		}
+		return $response;
+	}
 }

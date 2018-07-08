@@ -70,7 +70,7 @@ class APIUsersCtrl extends Controller
 
 		$user = APIUsers::create($allParams);
 
-		$logEntry=array('action' => 'add', 'objectName' => $user->username, 'objectId' => $user->id, 'section' => 'api users', 'message' => 205);
+		$logEntry=array('action' => 'add', 'obj_name' => $user->username, 'obj_id' => $user->id, 'section' => 'api users', 'message' => 205);
 		$data['logging']=$this->APILoggingCtrl->makeLogEntry($logEntry);
 
 		$data['user']=$user;
@@ -165,7 +165,7 @@ class APIUsersCtrl extends Controller
 
 		$username = APIUsers::select('username')->where([['id','=',$id]])->first()->username;
 
-		$logEntry=array('action' => 'edit', 'objectName' => $username, 'objectId' => $id, 'section' => 'api users', 'message' => 305);
+		$logEntry=array('action' => 'edit', 'obj_name' => $username, 'obj_id' => $id, 'section' => 'api users', 'message' => 305);
 		$data['logging']=$this->APILoggingCtrl->makeLogEntry($logEntry);
 
 		$data['backup_status'] = $this->APIBackupCtrl->apicfgSet();
@@ -233,7 +233,7 @@ class APIUsersCtrl extends Controller
 		$data['username
 		']=$req->getParam('username');
 
-		$logEntry=array('action' => 'delete', 'objectName' => $req->getParam('username'), 'objectId' => $req->getParam('id'), 'section' => 'api users', 'message' => 405);
+		$logEntry=array('action' => 'delete', 'obj_name' => $req->getParam('username'), 'obj_id' => $req->getParam('id'), 'section' => 'api users', 'message' => 405);
 		$data['logging']=$this->APILoggingCtrl->makeLogEntry($logEntry);
 
 		$data['backup_status'] = $this->APIBackupCtrl->apicfgSet();
@@ -266,36 +266,67 @@ class APIUsersCtrl extends Controller
 
 		$params=$req->getParams(); //Get ALL parameters form Datatables
 
-		$columns = array(
-		// datatable column index  => database column name
-			0 => 'id',
-			1 => 'username',
-			2 => 'email',
-			3 => 'firstname',
-			4 => 'surname',
-			5 => 'position',
-			6 => 'group',
-			//6 => 'description'
-		); //Array of all columnes that will used
+		$columns = $this->APICheckerCtrl->getTableTitles('api_users'); //Array of all columnes that will used
+		array_unshift( $columns, 'id' );
+		array_push( $columns, 'created_at', 'updated_at' );
+		$data['columns'] = $columns;
+		$queries = [];
+		$data['filter'] = [];
+		$data['filter']['error'] = false;
+		$data['filter']['message'] = '';
+		//Filter start
+		$searchString = ( empty($params['search']['value']) ) ? '' : $params['search']['value'];
+		$temp = $this->queriesMaker($columns, $searchString);
+		$queries = $temp['queries'];
+		$data['filter'] = $temp['filter'];
 
+		$data['queries'] = $queries;
+		$data['columns'] = $columns;
+		//Filter end
+		$data['recordsTotal'] = APIUsers::count();
 		//Get temp data for Datatables with Fliter and some other parameters
 		$tempData = APIUsers::select($columns)->
-			when($params['columns'][0]['search']['value'],
-				function($query) use ($params,$columns)
+			when( !empty($queries),
+				function($query) use ($queries)
 				{
-					return $query->where($columns[0],'LIKE','%'.$params['columns'][0]['search']['value'].'%');
-				}) ->
-			when($params['columns'][1]['search']['value'],
-				function($query) use ($params,$columns)
-				{
-					return $query->where($columns[1],'LIKE','%'.$params['columns'][1]['search']['value'].'%');
-				}) ->
-			when($params['columns'][2]['search']['value'],
-				function($query) use ($params,$columns)
-				{
-					return $query->where($columns[2],'LIKE','%'.$params['columns'][2]['search']['value'].'%');
-				}) ->
-			orderBy($columns[$params['order'][0]['column']],$params['order'][0]['dir'])->
+					foreach ($queries as $condition => $attr) {
+						switch ($condition) {
+							case '!==':
+								foreach ($attr as $column => $value) {
+									$query->whereNotIn($column, $value);
+								}
+								break;
+							case '==':
+								foreach ($attr as $column => $value) {
+									$query->whereIn($column, $value);
+								}
+								break;
+							case '!=':
+								foreach ($attr as $column => $valueArr) {
+									for ($i=0; $i < count($valueArr); $i++) {
+										if ($i == 0) $query->where($column,'NOT LIKE', '%'.$valueArr[$i].'%');
+										$query->where($column,'NOT LIKE', '%'.$valueArr[$i].'%');
+									}
+								}
+								break;
+							case '=':
+								foreach ($attr as $column => $valueArr) {
+									for ($i=0; $i < count($valueArr); $i++) {
+										if ($i == 0) $query->where($column,'LIKE', '%'.$valueArr[$i].'%');
+										$query->where($column,'LIKE', '%'.$valueArr[$i].'%');
+									}
+								}
+								break;
+							default:
+								//return $query;
+								break;
+						}
+					}
+					return $query;
+				});
+			$data['recordsFiltered'] = $tempData->count();
+			$tempData = $tempData->
+			orderBy($params['columns'][$params['order'][0]['column']]['data'],$params['order'][0]['dir'])->
 			take($params['length'])->
 			offset($params['start'])->
 			get()->toArray();
@@ -320,24 +351,6 @@ class APIUsersCtrl extends Controller
 		}
 		//Some additional parameters for Datatables
 		$data['draw']=intval( $params['draw'] );
-		$data['recordsTotal'] = APIUsers::count();
-		$data['recordsFiltered'] = APIUsers::select($columns)->
-			when($params['columns'][0]['search']['value'],
-				function($query) use ($params,$columns)
-				{
-					return $query->where($columns[0],'LIKE','%'.$params['columns'][0]['search']['value'].'%');
-				}) ->
-			when($params['columns'][1]['search']['value'],
-				function($query) use ($params,$columns)
-				{
-					return $query->where($columns[1],'LIKE','%'.$params['columns'][1]['search']['value'].'%');
-				}) ->
-			when($params['columns'][2]['search']['value'],
-				function($query) use ($params,$columns)
-				{
-					return $query->where($columns[2],'LIKE','%'.$params['columns'][2]['search']['value'].'%');
-				}) ->
-				count();
 
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}

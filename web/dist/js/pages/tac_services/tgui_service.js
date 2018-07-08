@@ -4,6 +4,8 @@ var tgui_service = {
   formSelector_edit: 'form#editServiceForm',
   init: function() {
     var self = this;
+
+    this.csvParser = new tgui_csvParser(this.csv);
     /*cleare forms when modal is hided*/
     $('#addService').on('hidden.bs.modal', function(){
     	self.clearForm();
@@ -28,7 +30,7 @@ var tgui_service = {
       $("#addService").modal("hide");
       tgui_status.changeStatus(resp.changeConfiguration)
       self.clearForm();
-      setTimeout( function () {dataTable.ajax.reload()}, 2000 );
+      setTimeout( function () {dataTable.table.ajax.reload()}, 2000 );
     }).fail(function(err){
       tgui_error.getStatus(err, ajaxProps)
     })
@@ -79,16 +81,17 @@ var tgui_service = {
       $("#editService").modal("hide");
       tgui_status.changeStatus(resp.changeConfiguration)
       self.clearForm();
-      setTimeout( function () {dataTable.ajax.reload()}, 2000 );
+      setTimeout( function () {dataTable.table.ajax.reload()}, 2000 );
     }).fail(function(err){
       tgui_error.getStatus(err, ajaxProps)
     })
     return this;
   },
-  delete: function(id, name) {
+  delete: function(id, name, flag) {
     id = id || 0;
+    flag = (flag !== undefined) ? false : true;
     name = name || 'undefined';
-    if (!confirm("Do you want delete '"+name+"'?")) return;
+    if (flag && !confirm("Do you want delete '"+name+"'?")) return;
     var ajaxProps = {
       url: API_LINK+"tacacs/services/delete/",
       data: {
@@ -102,11 +105,60 @@ var tgui_service = {
       }
       tgui_error.local.show({type:'success', message: "Service "+ name +" was deleted"})
       tgui_status.changeStatus(resp.changeConfiguration)
-      setTimeout( function () {dataTable.ajax.reload()}, 2000 );
+      setTimeout( function () {dataTable.table.ajax.reload()}, 2000 );
     }).fail(function(err){
       tgui_error.getStatus(err, ajaxProps)
     })
     return this;
+  },
+  csvDownload: function(idList) {
+    idList = idList || [];
+  if (! idList.length ) $('div.csv-link').empty().append(tgui_supplier.loadElement());
+  else { $('#exportLink').removeClass('m-progress').addClass('m-progress').attr('href', 'javascript: void(0)').show(); }
+  var ajaxProps = {
+    url: API_LINK+"tacacs/services/csv/",
+    data: {idList: idList}
+  };//ajaxProps END
+  ajaxRequest.send(ajaxProps).then(function(resp) {
+    if(!resp.filename) {
+      tgui_error.local.show( {type:'error', message: "Oops! Unknown error appeared :("} ); return;
+    }
+    if (! idList.length ) { $('div.csv-link').empty().append('<a href="/api/download/csv/?file=' + resp.filename + '" target="_blank">Download</a><p><small class="text-muted">Link will be valid within 15 minutes</small></p>') }
+    else {
+      $('#exportLink').removeClass('m-progress').attr('href', '/api/download/csv/?file=' + resp.filename);
+    }
+  }).fail(function(err){
+    tgui_error.getStatus(err, ajaxProps)
+  })
+  },
+  csv: {
+    columnsRequired: ['name'],
+    fileInputId: '#csv-file',
+    ajaxLink: 'tacacs/services/add/',
+    outputId: '#csvParserOutput',
+    ajaxHandler: function(resp,index){
+      var item = 'service';
+      if (resp.error && resp.error.status){
+        var error_message = '';
+        for (v in resp.error.validation){
+          if (!(resp.error.validation[v] == null)){
+            for (num in resp.error.validation[v]){
+              error_message+='<p class="text-danger">'+resp.error.validation[v][num]+'</p>';
+            }
+            this.csvParserOutput({tag: error_message, response: index});
+          }
+        }
+      }
+      if (resp[item] && resp[item].name) {
+        this.csvParserOutput({tag: '<p class="text-success">Service <b>'+ resp[item].name + '</b> was added!</p>', response: index});
+        tgui_status.changeStatus(resp.changeConfiguration)
+      }
+      this.csvParserOutput({tag: '<hr>'});
+    },
+    finalAnswer: function() {
+      this.csvParserOutput({message: 'End of CSV file. Reload database.'})
+      setTimeout( function () {dataTable.table.ajax.reload()}, 2000 );
+    }
   },
   clearForm: function() {
     tgui_supplier.clearForm();

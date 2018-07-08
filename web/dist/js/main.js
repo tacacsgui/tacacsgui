@@ -129,6 +129,7 @@ var tgui_status = {
   username:'',
   grpId:0,
   grpAccess:0,
+  api_version:0,
   ajaxProps:{
     url:API_LINK+"apicheck/database/",
     type: "GET"
@@ -144,6 +145,7 @@ var tgui_status = {
     return info
   },
   fulfill: function(resp) {
+    this.api_version = resp.info.version.APIVER;
     $('tacversion').text(resp.info.version.TACVER);
     $('apiversion').text(resp.info.version.APIVER);
     $('guiversion').text(GUIVER);
@@ -178,6 +180,11 @@ var tguiInit = {
   tooltips: function(selector){
     selector = selector || '[data-toggle="tooltip"]';
     $(selector).tooltip()
+    return this;
+  },
+  popover: function(selector){
+    selector = selector || '[data-toggle="popover"]';
+    $(selector).popover({container: 'body'});
     return this;
   },
   iCheck: function(){

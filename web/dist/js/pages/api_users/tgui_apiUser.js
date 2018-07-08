@@ -62,7 +62,7 @@ var tgui_userApi = {
       $("#addUser").modal("hide");
 
       self.clearForm();
-      setTimeout( function () {dataTable.ajax.reload()}, 2000 );
+      setTimeout( function () {dataTable.table.ajax.reload()}, 2000 );
     }).fail(function(err){
       tgui_error.getStatus(err, ajaxProps)
     })
@@ -118,16 +118,17 @@ var tgui_userApi = {
       $("#editUser").modal("hide");
 
       self.clearForm();
-      setTimeout( function () {dataTable.ajax.reload()}, 2000 );
+      setTimeout( function () {dataTable.table.ajax.reload()}, 2000 );
     }).fail(function(err){
       tgui_error.getStatus(err, ajaxProps)
     })
     return this;
   },
-  delete: function(id, username) {
+  delete: function(id, username, flag) {
     id = id || 0;
+    flag = (flag !== undefined) ? false : true;
     username = username || 'undefined';
-    if (!confirm("Do you want delete '"+username+"'?")) return;
+    if (flag && !confirm("Do you want delete '"+username+"'?")) return;
     var ajaxProps = {
       url: API_LINK+"user/delete/",
       data: {
@@ -141,7 +142,7 @@ var tgui_userApi = {
       }
       tgui_error.local.show({type:'success', message: "User "+ username +" was deleted"})
 
-      setTimeout( function () {dataTable.ajax.reload()}, 2000 );
+      setTimeout( function () {dataTable.table.ajax.reload()}, 2000 );
     }).fail(function(err){
       tgui_error.getStatus(err, ajaxProps)
     })

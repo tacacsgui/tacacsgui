@@ -6,6 +6,13 @@ $('document').ready(function(){
       tgui_status.fulfill(resp);
 			//MAIN CODE//Start
 			tgui_tacUserGrp.init();
+			dataTable.init();
+
+			$('#filterInfo').popover({
+				html: true,
+				container: 'body',
+				content: $('.filter-info-content').html()
+			});
 			//MAIN CODE//END
       $('div.loading').hide();/*---*/
     }).catch(function(err){

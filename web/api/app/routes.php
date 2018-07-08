@@ -39,6 +39,7 @@ $app->get('/tacacs/device/edit/', 'TACDevicesCtrl:getDeviceEdit');
 $app->post('/tacacs/device/edit/', 'TACDevicesCtrl:postDeviceEdit');
 $app->get('/tacacs/device/delete/', 'TACDevicesCtrl:getDeviceDelete');
 $app->post('/tacacs/device/delete/', 'TACDevicesCtrl:postDeviceDelete');
+$app->post('/tacacs/device/csv/', 'TACDevicesCtrl:postDeviceCsv');
 #####################################################
 ###Tacacs Device Groups Routes#######################################
 $app->post('/tacacs/device/group/datatables/', 'TACDeviceGrpsCtrl:postDeviceGroupsDatatables');
@@ -49,6 +50,7 @@ $app->post('/tacacs/device/group/edit/', 'TACDeviceGrpsCtrl:postDeviceGroupEdit'
 $app->get('/tacacs/device/group/delete/', 'TACDeviceGrpsCtrl:getDeviceGroupDelete');
 $app->post('/tacacs/device/group/delete/', 'TACDeviceGrpsCtrl:postDeviceGroupDelete');
 $app->get('/tacacs/device/group/list/', 'TACDeviceGrpsCtrl:getDeviceGroupList');
+$app->post('/tacacs/device/group/csv/', 'TACDeviceGrpsCtrl:postDeviceGroupCsv');
 #####################################################
 ###Tacacs Users Routes#######################################
 $app->post('/tacacs/user/datatables/', 'TACUsersCtrl:postUserDatatables');
@@ -58,6 +60,7 @@ $app->get('/tacacs/user/edit/', 'TACUsersCtrl:getUserEdit');
 $app->post('/tacacs/user/edit/', 'TACUsersCtrl:postUserEdit');
 $app->get('/tacacs/user/delete/', 'TACUsersCtrl:getUserDelete');
 $app->post('/tacacs/user/delete/', 'TACUsersCtrl:postUserDelete');
+$app->post('/tacacs/user/csv/', 'TACUsersCtrl:postUserCsv');
 #####################################################
 ###Tacacs User Groups Routes#######################################
 $app->post('/tacacs/user/group/datatables/', 'TACUserGrpsCtrl:postUserGroupDatatables');
@@ -68,6 +71,7 @@ $app->post('/tacacs/user/group/edit/', 'TACUserGrpsCtrl:postUserGroupEdit');
 $app->get('/tacacs/user/group/delete/', 'TACUserGrpsCtrl:getUserGroupDelete');
 $app->post('/tacacs/user/group/delete/', 'TACUserGrpsCtrl:postUserGroupDelete');
 $app->get('/tacacs/user/group/list/', 'TACUserGrpsCtrl:getUserGroupList');
+$app->post('/tacacs/user/group/csv/', 'TACUserGrpsCtrl:postUserGroupCsv');
 #####################################################
 #####################################################
 ###Tacacs ACL Routes#######################################
@@ -79,6 +83,7 @@ $app->post('/tacacs/acl/edit/', 'TACACLCtrl:postACLEdit');
 $app->get('/tacacs/acl/delete/', 'TACACLCtrl:getACLDelete');
 $app->post('/tacacs/acl/delete/', 'TACACLCtrl:postACLDelete');
 $app->get('/tacacs/acl/list/', 'TACACLCtrl:getAclList');
+$app->post('/tacacs/acl/csv/', 'TACACLCtrl:postACLCsv');
 #####################################################
 ###Tacacs ACL Routes#######################################
 $app->post('/tacacs/services/datatables/', 'TACServicesCtrl:postServiceDatatables');
@@ -89,6 +94,7 @@ $app->post('/tacacs/services/edit/', 'TACServicesCtrl:postServiceEdit');
 $app->get('/tacacs/services/delete/', 'TACServicesCtrl:getServiceDelete');
 $app->post('/tacacs/services/delete/', 'TACServicesCtrl:postServiceDelete');
 $app->get('/tacacs/services/list/', 'TACServicesCtrl:getServiceList');
+$app->post('/tacacs/services/csv/', 'TACServicesCtrl:postServiceCsv');
 #####################################################
 ###Tacacs Configuration Generator Routes#######################################
 $app->get('/tacacs/config/generate/file/', 'TACConfigCtrl:getConfigGenFile');
@@ -151,4 +157,8 @@ $app->post('/mavis/sms/check/', 'MAVISSMS:postSMSCheck');
 
 ###APIChecker Routes#######################################
 $app->post('/logging/datatables/', 'APILoggingCtrl:postLoggingDatatables');
+#####################################################
+
+###API Dounload Manager Routes#######################################
+$app->get('/download/csv/', 'APIDownloadCtrl:getDownloadCsv');
 #####################################################

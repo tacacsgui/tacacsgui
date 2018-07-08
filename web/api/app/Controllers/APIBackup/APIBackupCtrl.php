@@ -53,7 +53,7 @@ private $listOfTacacsReportsTables = '--tables tac_log_accounting tac_log_author
 			$data['make'] = shell_exec(TAC_ROOT_PATH . '/backup.sh make '. DB_USER . ' ' . DB_PASSWORD . ' '. DB_NAME. ' '. $backupPart .' '. $revision);//make
 		}
 
-		$logEntry=array('action' => 'add', 'objectName' => $backupPart, 'section' => 'api backup', 'message' => 601);
+		$logEntry=array('action' => 'add', 'obj_name' => $backupPart, 'section' => 'api backup', 'message' => 601);
 		$this->APILoggingCtrl->makeLogEntry($logEntry);
 		return ['status'=> true, 'message'=> 'Backup added ' ] ;
 	}
@@ -153,7 +153,7 @@ private $listOfTacacsReportsTables = '--tables tac_log_accounting tac_log_author
 
 		$data['result'] = trim(shell_exec(TAC_ROOT_PATH . '/backup.sh delete '. $req->getParam('name')));
 
-		$logEntry=array('action' => 'delete', 'objectName' => $req->getParam('name'), 'section' => 'api backup', 'message' => 602);
+		$logEntry=array('action' => 'delete', 'obj_name' => $req->getParam('name'), 'section' => 'api backup', 'message' => 602);
 		$data['logging']=$this->APILoggingCtrl->makeLogEntry($logEntry);
 
 		return $res -> withStatus(200) -> write(json_encode($data));
@@ -245,7 +245,7 @@ private $listOfTacacsReportsTables = '--tables tac_log_accounting tac_log_author
 
 		if ( !empty($type) AND $type != 'apicfg' ) $data['changeConfiguration']=$this->changeConfigurationFlag(['unset' => 0]);
 
-		$logEntry=array('action' => 'restore', 'objectName' => $req->getParam('name'), 'section' => 'api backup', 'message' => 603);
+		$logEntry=array('action' => 'restore', 'obj_name' => $req->getParam('name'), 'section' => 'api backup', 'message' => 603);
 		$data['logging']=$this->APILoggingCtrl->makeLogEntry($logEntry);
 
 		return $res -> withStatus(200) -> write(json_encode($data));

@@ -1,4 +1,11 @@
 ##############################
+Version_0.9.24 20180708
+	* IMPORTANT! this update will work properly only after soft reinstallation
+	*New Filter for tables
+	*CSV Import/Export
+	*Table selection
+	*Bug Fix/Bugs Added
+##############################
 Version_0.9.23 20180701
 	* IMPORTANT! this update will work properly only after soft reinstallation
 	*Added Backup System, there are three variances of backup: tacacs config, api config, full (without log)

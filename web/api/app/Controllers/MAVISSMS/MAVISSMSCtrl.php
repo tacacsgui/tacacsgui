@@ -79,7 +79,7 @@ class MAVISSMSCtrl extends Controller
 
 		$data['changeConfiguration']=$this->changeConfigurationFlag(['unset' => 0]);
 
-		$logEntry=array('action' => 'edit', 'objectName' => 'MAVIS', 'objectId' => 'SMS', 'section' => 'MAVIS SMS', 'message' => 703);
+		$logEntry=array('action' => 'edit', 'obj_name' => 'MAVIS', 'obj_id' => 'SMS', 'section' => 'MAVIS SMS', 'message' => 703);
 
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}

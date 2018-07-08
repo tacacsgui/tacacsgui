@@ -1141,13 +1141,13 @@ class TACConfigCtrl extends Controller
 			{
 				$data['error']['status'] = $data['confTest']['error'];
 				///LOGGING//start//
-				$logEntry=array('action' => 'tacacs test conf', 'objectName' => 'tacacs configuration', 'section' => 'tacacs configuration', 'message' => 502);
+				$logEntry=array('action' => 'tacacs test conf', 'obj_name' => 'tacacs configuration', 'section' => 'tacacs configuration', 'message' => 502);
 				$this->APILoggingCtrl->makeLogEntry($logEntry);
 				///LOGGING//end//
 				return $res -> withStatus(200) -> withHeader('Content-type', $contentTypeOutput) -> write(json_encode($data));
 			}
 			///LOGGING//start//
-			$logEntry = array('action' => 'tacacs test conf', 'objectName' => 'tacacs configuration', 'section' => 'tacacs configuration', 'message' => 501);
+			$logEntry = array('action' => 'tacacs test conf', 'obj_name' => 'tacacs configuration', 'section' => 'tacacs configuration', 'message' => 501);
 			$this->APILoggingCtrl->makeLogEntry($logEntry);
 			///LOGGING//end//
 			$doBackup=$req->getParam('doBackup');
@@ -1162,7 +1162,7 @@ class TACConfigCtrl extends Controller
 			$data['applyStatus']=$this->applyConfiguration($output);
 
 			///LOGGING//start//
-			$logEntry2 = (!$data['applyStatus']['error']) ? array('action' => 'tacacs apply conf', 'objectName' => 'tacacs configuration', 'section' => 'tacacs configuration', 'message' => 503) : array('action' => 'tacacs apply conf', 'objectName' => 'tacacs configuration', 'section' => 'tacacs configuration', 'message' => 504 );
+			$logEntry2 = (!$data['applyStatus']['error']) ? array('action' => 'tacacs apply conf', 'obj_name' => 'tacacs configuration', 'section' => 'tacacs configuration', 'message' => 503) : array('action' => 'tacacs apply conf', 'obj_name' => 'tacacs configuration', 'section' => 'tacacs configuration', 'message' => 504 );
 			$data['test']=$this->APILoggingCtrl->makeLogEntry($logEntry2);
 			///LOGGING//end//
 
@@ -1176,7 +1176,7 @@ class TACConfigCtrl extends Controller
 			$data['confTest']=$this->testConfiguration($output);
 			$data['error']['status'] = $data['confTest']['error'];
 			///LOGGING//start//
-			$logEntry= ($data['confTest']['error']) ? array('action' => 'tacacs test conf', 'objectName' => 'tacacs configuration', 'section' => 'tacacs configuration', 'message' => 502) : array('action' => 'tacacs test conf', 'objectName' => 'tacacs configuration', 'section' => 'tacacs configuration', 'message' => 501);
+			$logEntry= ($data['confTest']['error']) ? array('action' => 'tacacs test conf', 'obj_name' => 'tacacs configuration', 'section' => 'tacacs configuration', 'message' => 502) : array('action' => 'tacacs test conf', 'obj_name' => 'tacacs configuration', 'section' => 'tacacs configuration', 'message' => 501);
 			$this->APILoggingCtrl->makeLogEntry($logEntry);
 			///LOGGING//end//
 			return $res -> withStatus(200) -> withHeader('Content-type', $contentTypeOutput) -> write(json_encode($data));
@@ -1281,7 +1281,7 @@ class TACConfigCtrl extends Controller
 
 		$data['changeConfiguration']=$this->changeConfigurationFlag(['unset' => 0]);
 
-		$logEntry=array('action' => 'edit', 'objectName' => 'tacacs global settings', 'objectId' => '', 'section' => 'tacacs global settings', 'message' => 505);
+		$logEntry=array('action' => 'edit', 'obj_name' => 'tacacs global settings', 'obj_id' => '', 'section' => 'tacacs global settings', 'message' => 505);
 		$data['logging']=$this->APILoggingCtrl->makeLogEntry($logEntry);
 
 		return $res -> withStatus(200) -> write(json_encode($data));

@@ -61,7 +61,8 @@ var tgui_apiUpdate = {
     var self = this;
 
     var ajaxProps = {
-      url: API_LINK+"update/"
+      url: API_LINK+"update/",
+      data: { version: tgui_status.api_version }
     };//ajaxProps END
 
     ajaxRequest.send(ajaxProps).then(function(resp) {
@@ -86,8 +87,9 @@ var tgui_apiUpdate = {
 				.append('<p>Brief description: '+resp.output.last_version.description_brief+'</p>')
 				.append('<p>More description: '+resp.output.last_version.description_more+'</p>')
 			if (resp.info.version.APIVER !== resp.output.last_version.version){
-				$('pre.update_log').append('<p class="text-center"><b>Push button below to update</b></p>')
-				$('div.upgrade').show();
+				if (!resp.output.reinstall){ $('pre.update_log').append('<p class="text-center"><b>Push button below to update</b></p>')
+				 $('div.upgrade').show(); }
+        else $('pre.update_log').append('<h4 class="text-center bg-danger" ><b>To get the new version follow the instruction <a href="https://tacacsgui.com/documentation/system-reinstallation/" target="_blank">here</a></b></h4>')
 			} else {
 				$('pre.update_log').append('<p class="text-center"><b>Your have newest version</b></p>')
 			}

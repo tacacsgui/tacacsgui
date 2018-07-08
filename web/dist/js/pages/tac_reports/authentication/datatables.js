@@ -5,7 +5,13 @@ $('document').ready(function(){
     Promise.resolve(tgui_status.getStatus({url: API_LINK+"apicheck/status/"})).then(function(resp) {
       tgui_status.fulfill(resp);
 			//MAIN CODE//Start
+			dataTable.init();
 
+			$('#filterInfo').popover({
+				html: true,
+				container: 'body',
+				content: $('.filter-info-content').html()
+			});
 			//MAIN CODE//END
       $('div.loading').hide();/*---*/
     }).catch(function(err){
@@ -16,103 +22,44 @@ $('document').ready(function(){
 	})
 });
 
-$("#filterButton").click(function() {
-
-	if ($("#filterFields").css('display') != 'none') {
-		$("#filterFields").hide("slow");
-		return;
-	};
-	if ($("#filterFields").css('display') == 'none') {$("#filterFields").show("slow"); return;};
-
-});
-
-var dataTable =  $('#authenticationDataTable').DataTable( {
-
-	//scrollX: true,
-	processing: true,
-	serverSide: true,
-	autoWidth: false,
-	orderCellsTop: true,
-
-	"createdRow": function( row, data, dataIndex){
-		if(data['disabled']==1) $(row).addClass('disabledRow');
-	},
-
-	"columns": [
-	{"title": "ID", "data" : "id"},
-	{"title": "Date", "data" : "date", 'dateColumn' : true},
-	{"title": "NAS IP Addr", "data" : "NAS"},
-	{"title": "Username", "data" : "username",},
-	{"title": "NAC IP Addr", "data" : "NAC"},
-	{"title": "Line", "data" : "line"},
-	{"title": "Action", "data" : "action", "searchable": false},
-	 ],
-
-	"columnDefs": [
+var initialData =
+{
+	ajaxLink: "tacacs/reports/authentication/datatables/",
+	tableSelector: '#authenticationDataTable',
+	item: 'device',
+	//exportCsv: tgui_authentication.csvDownload || function(){return false;},
+  columns:
 	{
-		"targets": [5,6],
-		"orderable": false
-	} ],
+		id: {title: "ID", data : "id", orderable: true, visible: false,},
+		date: {title: "Date", data : "date", visible: true, orderable: true},
+		NAS: {title: "NAS IP", data : "NAS", visible: true, orderable: true},
+		username: {title: "Username", data : "username", visible: true, orderable: true},
+		NAC: {title: "NAC IP", data : "NAC", visible: true, orderable: true},
+		line: {title: "Line", data : "line", visible: false, orderable: false},
+		action: {title: "Action", data : "action", visible: true, orderable: false},
+		unknown: {title: "Unknown", data : "unknown", visible: false, orderable: true},
+	},
+  column:
+	{
+		select: true,
+		preview: false
+	},
+  sort:
+	{
+		column: 2,
+		order: 'desc'
+	},
+};
 
-	"order":[[0,'desc']],
+var dataTable = {
+	init: function() {
+		this.settings.columnsFilter();
+		this.settings.preview();
+		this.settings.columnDefs = [];
+		this.table = $(initialData.tableSelector).DataTable(this.settings);
+	},
+	table: {},
+	settings: new tgui_datatables(initialData),
+};
 
-	"lengthMenu": [ 25, 50, 75, 100 ],
-
-	ajax: {"url": API_LINK+"tacacs/reports/authentication/datatables/",
-		"type": "POST",
-		"data": {
-			"temp": "acc"
-		}
-	}, // json datasource
-
-
-	"drawCallback": function( settings ) {
-		var filterRow='';
-		var dateColumn;
-		var filterRowElement=$('<tr role="row" id="filterFields" style="display: none;"></tr>')
-		for (i = 0; i < settings.aoColumns.length; i++) {
-			filter='<td></td>';
-			if (settings.aoColumns[i].bSearchable)
-			{
-				var filter = $("<td></td>");
-				var inputElement=$('<input searchCol_id="'+i+'" class="search-input form-control">')
-				if (settings.aoColumns[i].dateColumn) {
-					inputElement=dateColumn=$('<input searchCol_id="'+i+'" class="form-control pull-right daterange">');
-				}
-				filterRowElement.append(filter.append(inputElement))
-			}
-			filterRow+=filter;
-		}
-        $('#authenticationDataTable thead').append(filterRowElement);
-		////daterange initiating////start
-		if (dateColumn) {
-			dateColumn.daterangepicker({
-				autoUpdateInput:false,
-				locale:{ format: 'YYYY-MM-DD', cancelLabel: 'Clear'},
-			})
-			dateColumn.on('apply.daterangepicker', function(ev, picker){
-				var dateRange = picker.startDate.format('YYYY-MM-DD') + ' - ' + picker.endDate.format('YYYY-MM-DD')
-				$(this).val(dateRange)
-				var i =$(this).attr('searchCol_id');  // getting column index
-				dataTable.columns(i).search(dateRange).draw();
-			})
-			dateColumn.on('cancel.daterangepicker', function(ev, picker){
-				$(this).val('')
-				var i =$(this).attr('searchCol_id');  // getting column index
-				dataTable.columns(i).search('').draw();
-			})
-		}
-		////daterange initiating////end
-    }
-
-});
-
-$.fn.dataTable.ext.errMode = 'throw';
-
-$("#authenticationDataTable_filter").css("display","none");  // hiding global search box
-
-$(document).on('keyup click change', '.search-input', function(){
-	var i =$(this).attr('searchCol_id');  // getting column index
-	var v =$(this).val();  // getting search input value
-	dataTable.columns(i).search(v).draw();
-} );
+//$.fn.dataTable.ext.errMode = 'throw';

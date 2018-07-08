@@ -12,16 +12,16 @@ class APILoggingCtrl extends Controller
 	###################	MAKE LOG ENTRIES########START##
 	public function makeLogEntry($attrArray)
 	{
-		$attrArrayStatic=array('userName' => (empty($_SESSION['uname']))? '' : $_SESSION['uname'], 'userId' => (empty($_SESSION['uid']))? '' : $_SESSION['uid'], 'userIp' => $_SERVER['REMOTE_ADDR']);
-		
+		$attrArrayStatic=array('username' => (empty($_SESSION['uname']))? '' : $_SESSION['uname'], 'uid' => (empty($_SESSION['uid']))? '' : $_SESSION['uid'], 'user_ip' => $_SERVER['REMOTE_ADDR']);
+
 		if (isset($attrArray['message']))
 		{
 			require __DIR__ . '/messages.php';
 			$attrArray['message']=$MESSAGES[$attrArray['message']];
 		}
-		
-		$logEntry = APILogging::create(array_merge($attrArrayStatic,$attrArray));
-		
+
+		$logEntry = APILogging::create( array_merge($attrArrayStatic,$attrArray) );
+
 		return $logEntry;
 	}
 	###################	MAKE LOG ENTRIES########END##
@@ -42,104 +42,85 @@ class APILoggingCtrl extends Controller
 			return $res -> withStatus(401) -> write(json_encode($data));
 		}
 		//INITIAL CODE////END//
-		
+
 		unset($data['error']);//BEACAUSE DATATABLES USES THAT VARIABLE//
-		
+
 		$params=$req->getParams(); //Get ALL parameters form Datatables
-		
-		$columns = array( 
-		// datatable column index  => database column name
-			0 => 'created_at', 
-			1 => 'userName',
-			2 => 'userId',
-			3 => 'userIp',
-			4 => 'objectName',
-			5 => 'objectId',
-			6 => 'action',
-			7 => 'section',
-			8 => 'message',
-		); //Array of all columnes that will used
-		
+
+		$columns = $this->APICheckerCtrl->getTableTitles('api_logging'); //Array of all columnes that will used
+		array_unshift( $columns, 'id' );
+
+		$data['columns'] = $columns;
+		$queries = [];
+		$data['filter'] = [];
+		$data['filter']['error'] = false;
+		$data['filter']['message'] = '';
+		//Filter start
+		$searchString = ( empty($params['search']['value']) ) ? '' : $params['search']['value'];
+		$temp = $this->queriesMaker($columns, $searchString);
+		$queries = $temp['queries'];
+		$data['filter'] = $temp['filter'];
+
+		$data['queries'] = $queries;
+		$data['columns'] = $columns;
+		//Filter end
+		$data['recordsTotal'] = APILogging::count();
+
 		//Get temp data for Datatables with Fliter and some other parameters
-		$tempData = APILogging::select($columns)->
-			when($params['columns'][0]['search']['value'], 
-				function($query) use ($params,$columns)
+		$tempData = APILogging::select()->
+			when( !empty($queries),
+				function($query) use ($queries)
 				{
-					$dateRange=explode(' - ', $params['columns'][0]['search']['value']);
-					$dateRange[0] .= ' 00:00:00';
-					$dateRange[1] .= ' 23:59:59';
-					return $query->whereBetween($columns[0], $dateRange);
-				}) ->
-			when($params['columns'][1]['search']['value'], 
-				function($query) use ($params,$columns)
-				{
-					return $query->where($columns[1],'LIKE','%'.$params['columns'][1]['search']['value'].'%')->
-					orWhere($columns[2],'LIKE','%'.$params['columns'][1]['search']['value'].'%');
-				}) ->
-			when($params['columns'][2]['search']['value'], 
-				function($query) use ($params,$columns)
-				{
-					return $query->where($columns[3],'LIKE','%'.$params['columns'][2]['search']['value'].'%');
-				}) ->
-			when($params['columns'][3]['search']['value'], 
-				function($query) use ($params,$columns)
-				{
-					return $query->where($columns[7],'LIKE','%'.$params['columns'][3]['search']['value'].'%');
-				}) ->
-			when($params['columns'][4]['search']['value'], 
-				function($query) use ($params,$columns)
-				{
-					return $query->where($columns[4],'LIKE','%'.$params['columns'][4]['search']['value'].'%')->
-					orWhere($columns[5],'LIKE','%'.$params['columns'][4]['search']['value'].'%');
-				}) ->
-			orderBy($columns[$params['order'][0]['column']],$params['order'][0]['dir'])->
+					foreach ($queries as $condition => $attr) {
+						switch ($condition) {
+							case '!==':
+								foreach ($attr as $column => $value) {
+									$query->whereNotIn($column, $value);
+								}
+								break;
+							case '==':
+								foreach ($attr as $column => $value) {
+									$query->whereIn($column, $value);
+								}
+								break;
+							case '!=':
+								foreach ($attr as $column => $valueArr) {
+									for ($i=0; $i < count($valueArr); $i++) {
+										if ($i == 0) $query->where($column,'NOT LIKE', '%'.$valueArr[$i].'%');
+										$query->where($column,'NOT LIKE', '%'.$valueArr[$i].'%');
+									}
+								}
+								break;
+							case '=':
+								foreach ($attr as $column => $valueArr) {
+									for ($i=0; $i < count($valueArr); $i++) {
+										if ($i == 0) $query->where($column,'LIKE', '%'.$valueArr[$i].'%');
+										$query->where($column,'LIKE', '%'.$valueArr[$i].'%');
+									}
+								}
+								break;
+							default:
+								//return $query;
+								break;
+						}
+					}
+					return $query;
+				});
+			$data['recordsFiltered'] = $tempData->count();
+			$tempData = $tempData->
+			orderBy($params['columns'][$params['order'][0]['column']]['data'],$params['order'][0]['dir'])->
 			take($params['length'])->
 			offset($params['start'])->
 			get()->toArray();
-		//Creating correct array of answer to Datatables 
-		$data['data']=array();
-		
+			$data['data'] = [];
 		foreach($tempData as $loggingEntry){
-			$loggingEntry['userName'] .= ($loggingEntry['userId'] !== '') ? ' ('.$loggingEntry['userId'].')' : '';
-			$loggingEntry['objectName'] .= ($loggingEntry['objectId'] !== '') ? ' ('.$loggingEntry['objectId'].')' : '';
+			$loggingEntry['username'] .= ($loggingEntry['uid'] !== '') ? ' ('.$loggingEntry['uid'].')' : '';
+			$loggingEntry['obj_name'] .= ($loggingEntry['obj_id'] !== '') ? ' ('.$loggingEntry['obj_id'].')' : '';
 			array_push($data['data'],$loggingEntry);
 		}
 		//Some additional parameters for Datatables
 		$data['draw']=intval( $params['draw'] );
-		$data['recordsTotal'] = APILogging::count();
-		$data['recordsFiltered'] = APILogging::select($columns)->
-			when($params['columns'][0]['search']['value'], 
-				function($query) use ($params,$columns)
-				{
-					$dateRange=explode(' - ', $params['columns'][0]['search']['value']);
-					$dateRange[0] .= ' 00:00:00';
-					$dateRange[1] .= ' 23:59:59';
-					return $query->whereBetween($columns[0], $dateRange);
-				}) ->
-			when($params['columns'][1]['search']['value'], 
-				function($query) use ($params,$columns)
-				{
-					return $query->where($columns[1],'LIKE','%'.$params['columns'][1]['search']['value'].'%')->
-					orWhere($columns[2],'LIKE','%'.$params['columns'][1]['search']['value'].'%');
-				}) ->
-			when($params['columns'][2]['search']['value'], 
-				function($query) use ($params,$columns)
-				{
-					return $query->where($columns[3],'LIKE','%'.$params['columns'][2]['search']['value'].'%');
-				}) ->
-			when($params['columns'][3]['search']['value'], 
-				function($query) use ($params,$columns)
-				{
-					return $query->where($columns[7],'LIKE','%'.$params['columns'][3]['search']['value'].'%');
-				}) ->
-			when($params['columns'][4]['search']['value'], 
-				function($query) use ($params,$columns)
-				{
-					return $query->where($columns[4],'LIKE','%'.$params['columns'][4]['search']['value'].'%')->
-					orWhere($columns[5],'LIKE','%'.$params['columns'][4]['search']['value'].'%');
-				}) ->
-				count();
-		
+
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
 

@@ -82,7 +82,7 @@ class TACDeviceGrpsCtrl extends Controller
 
 		$data['changeConfiguration']=$this->changeConfigurationFlag(['unset' => 0]);
 
-		$logEntry=array('action' => 'add', 'objectName' => $deviceGroup['name'], 'objectId' => $deviceGroup['id'], 'section' => 'tacacs device groups', 'message' => 202);
+		$logEntry=array('action' => 'add', 'obj_name' => $deviceGroup['name'], 'obj_id' => $deviceGroup['id'], 'section' => 'tacacs device groups', 'message' => 202);
 		$data['logging']=$this->APILoggingCtrl->makeLogEntry($logEntry);
 
 		return $res -> withStatus(200) -> write(json_encode($data));
@@ -171,7 +171,7 @@ class TACDeviceGrpsCtrl extends Controller
 
 		$name = TACDeviceGrps::select('name')->where([['id','=',$id]])->first();
 
-		$logEntry=array('action' => 'edit', 'objectName' => $name['name'], 'objectId' => $id, 'section' => 'tacacs device groups', 'message' => 302);
+		$logEntry=array('action' => 'edit', 'obj_name' => $name['name'], 'obj_id' => $id, 'section' => 'tacacs device groups', 'message' => 302);
 		$data['logging']=$this->APILoggingCtrl->makeLogEntry($logEntry);
 
 		return $res -> withStatus(200) -> write(json_encode($data));
@@ -248,12 +248,56 @@ class TACDeviceGrpsCtrl extends Controller
 
 		$data['changeConfiguration']=$this->changeConfigurationFlag(['unset' => 0]);
 
-		$logEntry=array('action' => 'delete', 'objectName' => $req->getParam('name'), 'objectId' => $req->getParam('id'), 'section' => 'tacacs device groups', 'message' => 402);
+		$logEntry=array('action' => 'delete', 'obj_name' => $req->getParam('name'), 'obj_id' => $req->getParam('id'), 'section' => 'tacacs device groups', 'message' => 402);
 		$data['logging']=$this->APILoggingCtrl->makeLogEntry($logEntry);
 
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
 ########	Delete Device Group	###############END###########
+################################################
+#########	POST CSV Device	Group#########
+public function postDeviceGroupCsv($req,$res)
+{
+	//INITIAL CODE////START//
+	$data=array();
+	$data=$this->initialData([
+		'type' => 'post',
+		'object' => 'device group',
+		'action' => 'csv',
+	]);
+	#check error#
+	if ($_SESSION['error']['status']){
+		$data['error']=$_SESSION['error'];
+		return $res -> withStatus(401) -> write(json_encode($data));
+	}
+	//INITIAL CODE////END//
+	//CHECK ACCESS TO THAT FUNCTION//START//
+	if(!$this->checkAccess(2))
+	{
+		return $res -> withStatus(403) -> write(json_encode($data));
+	}
+	//CHECK ACCESS TO THAT FUNCTION//END//
+	$data['clear'] = shell_exec( TAC_ROOT_PATH . '/main.sh delete temp');
+	$path = TAC_ROOT_PATH . '/temp/';
+	$filename = 'tac_device_groups_'. $this->generateRandomString(8) .'.csv';
+
+	$columns = $this->APICheckerCtrl->getTableTitles('tac_device_groups');
+
+  $f = fopen($path.$filename, 'w');
+	$idList = $req->getParam('idList');
+	$array = [];
+	$array = ( empty($idList) ) ? TACDeviceGrps::select($columns)->get()->toArray() : TACDeviceGrps::select($columns)->whereIn('id', $idList)->get()->toArray();
+
+	fputcsv($f, $columns /*, ',)'*/);
+  foreach ($array as $line) {
+	fputcsv($f, $line /*, ',)'*/);
+  }
+
+	$data['filename']=$filename;
+	sleep(3);
+	return $res -> withStatus(200) -> write(json_encode($data));
+}
+########	CSV Device	Group###############END###########
 ################################################
 ########	Device Groups Datatables ###############START###########
 	#########	POST Device Groups Datatables	#########
@@ -277,28 +321,67 @@ class TACDeviceGrpsCtrl extends Controller
 
 		$params=$req->getParams(); //Get ALL parameters form Datatables
 
-		$columns = array(
-		// datatable column index  => database column name
-			0 => 'id',
-			1 => 'name',
-			2 => 'default_flag',
-			3 => 'key',
-			4 => 'enable',
-		); //Array of all columnes that will used
+		$columns = $this->APICheckerCtrl->getTableTitles('tac_device_groups'); //Array of all columnes that will used
+		array_unshift( $columns, 'id' );
+		array_push( $columns, 'created_at', 'updated_at' );
+		$data['columns'] = $columns;
+		$queries = [];
+		$data['filter'] = [];
+		$data['filter']['error'] = false;
+		$data['filter']['message'] = '';
+		//Filter start
+		$searchString = ( empty($params['search']['value']) ) ? '' : $params['search']['value'];
+		$temp = $this->queriesMaker($columns, $searchString);
+		$queries = $temp['queries'];
+		$data['filter'] = $temp['filter'];
 
+		$data['queries'] = $queries;
+		$data['columns'] = $columns;
+		//Filter end
+		$data['recordsTotal'] = TACDeviceGrps::count();
 		//Get temp data for Datatables with Fliter and some other parameters
 		$tempData = TACDeviceGrps::select($columns)->
-			when($params['columns'][0]['search']['value'],
-				function($query) use ($params,$columns)
-				{
-					return $query->where($columns[0],'LIKE','%'.$params['columns'][0]['search']['value'].'%');
-				}) ->
-			when($params['columns'][1]['search']['value'],
-				function($query) use ($params,$columns)
-				{
-					return $query->where($columns[1],'LIKE','%'.$params['columns'][1]['search']['value'].'%');
-				}) ->
-			orderBy($columns[$params['order'][0]['column']],$params['order'][0]['dir'])->
+		when( !empty($queries),
+			function($query) use ($queries)
+			{
+				foreach ($queries as $condition => $attr) {
+					switch ($condition) {
+						case '!==':
+							foreach ($attr as $column => $value) {
+								$query->whereNotIn($column, $value);
+							}
+							break;
+						case '==':
+							foreach ($attr as $column => $value) {
+								$query->whereIn($column, $value);
+							}
+							break;
+						case '!=':
+							foreach ($attr as $column => $valueArr) {
+								for ($i=0; $i < count($valueArr); $i++) {
+									if ($i == 0) $query->where($column,'NOT LIKE', '%'.$valueArr[$i].'%');
+									$query->where($column,'NOT LIKE', '%'.$valueArr[$i].'%');
+								}
+							}
+							break;
+						case '=':
+							foreach ($attr as $column => $valueArr) {
+								for ($i=0; $i < count($valueArr); $i++) {
+									if ($i == 0) $query->where($column,'LIKE', '%'.$valueArr[$i].'%');
+									$query->where($column,'LIKE', '%'.$valueArr[$i].'%');
+								}
+							}
+							break;
+						default:
+							//nothing
+							break;
+					}
+				}
+				return $query;
+			});
+			$data['recordsFiltered'] = $tempData->count();
+			$tempData = $tempData->
+			orderBy($params['columns'][$params['order'][0]['column']]['data'],$params['order'][0]['dir'])->
 			take($params['length'])->
 			offset($params['start'])->
 			get()->toArray();
@@ -315,19 +398,6 @@ class TACDeviceGrpsCtrl extends Controller
 		}
 		//Some additional parameters for Datatables
 		$data['draw']=intval( $params['draw'] );
-		$data['recordsTotal'] = TACDeviceGrps::count();
-		$data['recordsFiltered'] = TACDeviceGrps::select($columns)->
-			when($params['columns'][0]['search']['value'],
-				function($query) use ($params,$columns)
-				{
-					return $query->where($columns[0],'LIKE','%'.$params['columns'][0]['search']['value'].'%');
-				}) ->
-			when($params['columns'][1]['search']['value'],
-				function($query) use ($params,$columns)
-				{
-					return $query->where($columns[1],'LIKE','%'.$params['columns'][1]['search']['value'].'%');
-				}) ->
-				count();
 
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
