@@ -4,6 +4,7 @@ namespace tgui\Controllers\TACUserGrps;
 
 use tgui\Models\TACUsers;
 use tgui\Models\TACUserGrps;
+use tgui\Models\APIPWPolicy;
 use tgui\Controllers\Controller;
 use Respect\Validation\Validator as v;
 
@@ -53,10 +54,17 @@ class TACUserGrpsCtrl extends Controller
 			return $res -> withStatus(403) -> write(json_encode($data));
 		}
 		//CHECK ACCESS TO THAT FUNCTION//END//
-
+		$policy = APIPWPolicy::select()->first(1);
 		$validation = $this->validator->validate($req, [
 			'name' => v::noWhitespace()->notEmpty()->userGroupTacAvailable(0),
-			'enable' => v::noWhitespace()->desRestriction($req->getParam('enable_flag')),
+			'enable' => v::when( v::nullType() , v::alwaysValid(), v::noWhitespace()->notContainChars()->
+				length($policy['tac_pw_length'], 64)->
+				notEmpty()->
+				passwdPolicyUppercase($policy['tac_pw_uppercase'])->
+				passwdPolicyLowercase($policy['tac_pw_lowercase'])->
+				passwdPolicySpecial($policy['tac_pw_special'])->
+				passwdPolicyNumbers($policy['tac_pw_numbers'])->
+				desRestriction($req->getParam('enable_flag'))->setName('Enable') ),
 			'enable_flag' => v::noWhitespace()->numeric(),
 		]);
 
@@ -103,6 +111,14 @@ class TACUserGrpsCtrl extends Controller
 			return $res -> withStatus(401) -> write(json_encode($data));
 		}
 		//INITIAL CODE////END//
+
+		//CHECK ACCESS TO THAT FUNCTION//START//
+		if(!$this->checkAccess(5))
+		{
+			return $res -> withStatus(403) -> write(json_encode($data));
+		}
+		//CHECK ACCESS TO THAT FUNCTION//END//
+
 		$data['group']=TACUserGrps::select()->
 			where([['id','=',$req->getParam('id')],['name','=',$req->getParam('name')]])->
 			first();
@@ -132,10 +148,17 @@ class TACUserGrpsCtrl extends Controller
 			return $res -> withStatus(403) -> write(json_encode($data));
 		}
 		//CHECK ACCESS TO THAT FUNCTION//END//
-
+		$policy = APIPWPolicy::select()->first(1);
 		$validation = $this->validator->validate($req, [
 			'name' => v::noWhitespace()->when( v::nullType() , v::alwaysValid(), v::userGroupTacAvailable($req->getParam('id'))),
-			'enable' => v::when( v::nullType() , v::alwaysValid(), v::noWhitespace()->prohibitedChars()->desRestriction($req->getParam('enable_flag'))),
+			'enable' => v::when( v::nullType() , v::alwaysValid(), v::noWhitespace()->notContainChars()->
+				length($policy['tac_pw_length'], 64)->
+				notEmpty()->
+				passwdPolicyUppercase($policy['tac_pw_uppercase'])->
+				passwdPolicyLowercase($policy['tac_pw_lowercase'])->
+				passwdPolicySpecial($policy['tac_pw_special'])->
+				passwdPolicyNumbers($policy['tac_pw_numbers'])->
+				desRestriction($req->getParam('enable_flag'))->setName('Enable') ),
 			'enable_flag' => v::noWhitespace()->when( v::nullType() , v::alwaysValid(), v::numeric()),
 		]);
 
@@ -250,7 +273,7 @@ class TACUserGrpsCtrl extends Controller
 		}
 		//INITIAL CODE////END//
 		//CHECK ACCESS TO THAT FUNCTION//START//
-		if(!$this->checkAccess(2))
+		if(!$this->checkAccess(5))
 		{
 			return $res -> withStatus(403) -> write(json_encode($data));
 		}
@@ -296,6 +319,16 @@ class TACUserGrpsCtrl extends Controller
 		//INITIAL CODE////END//
 
 		unset($data['error']);//BEACAUSE DATATABLES USES THAT VARIABLE//
+
+		//CHECK ACCESS TO THAT FUNCTION//START//
+		if(!$this->checkAccess(5, true))
+		{
+			$data['data'] = [];
+			$data['recordsTotal'] = 0;
+			$data['recordsFiltered'] = 0;
+			return $res -> withStatus(200) -> write(json_encode($data));
+		}
+		//CHECK ACCESS TO THAT FUNCTION//END//
 
 		$params=$req->getParams(); //Get ALL parameters form Datatables
 
@@ -411,6 +444,14 @@ class TACUserGrpsCtrl extends Controller
 			return $res -> withStatus(401) -> write(json_encode($data));
 		}
 		//INITIAL CODE////END//
+
+		//CHECK ACCESS TO THAT FUNCTION//START//
+		if(!$this->checkAccess(5, true))
+		{
+			return $res -> withStatus(403) -> write(json_encode($data));
+		}
+		//CHECK ACCESS TO THAT FUNCTION//END//
+
 		$noneItem = array('id' => 0, 'text' => 'None', 'message' => false, 'enable' => false);
 		///IF GROUPID SET///
 		if ($req->getParam('byId') != null){

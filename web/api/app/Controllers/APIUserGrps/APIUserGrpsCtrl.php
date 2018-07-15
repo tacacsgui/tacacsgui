@@ -20,24 +20,24 @@ class APIUserGrpsCtrl extends Controller
 ################################################
 ########	Add New User Group	###############START###########
 	#########	GET Add New User Group	#########
-	public function getUserGroupAdd($req,$res)
-	{
-		//INITIAL CODE////START//
-		$data=array();
-		$data=$this->initialData([
-			'type' => 'get',
-			'object' => 'user group',
-			'action' => 'add',
-		]);
-		#check error#
-		if ($_SESSION['error']['status']){
-			$data['error']=$_SESSION['error'];
-			return $res -> withStatus(401) -> write(json_encode($data));
-		}
-		//INITIAL CODE////END//
-
-		return $res -> withStatus(200) -> write(json_encode($data));
-	}
+	// public function getUserGroupAdd($req,$res)
+	// {
+	// 	//INITIAL CODE////START//
+	// 	$data=array();
+	// 	$data=$this->initialData([
+	// 		'type' => 'get',
+	// 		'object' => 'user group',
+	// 		'action' => 'add',
+	// 	]);
+	// 	#check error#
+	// 	if ($_SESSION['error']['status']){
+	// 		$data['error']=$_SESSION['error'];
+	// 		return $res -> withStatus(401) -> write(json_encode($data));
+	// 	}
+	// 	//INITIAL CODE////END//
+	//
+	// 	return $res -> withStatus(200) -> write(json_encode($data));
+	// }
 
 	#########	POST Add New User Group	#########
 	public function postUserGroupAdd($req,$res)
@@ -64,7 +64,7 @@ class APIUserGrpsCtrl extends Controller
 
 		$validation = $this->validator->validate($req, [
 			'name' => v::noWhitespace()->notEmpty()->apiUserGroupNameAvailable(0),
-			'rights' => v::not(v::nullType())->notEmpty()->arrayType(),
+			'rights' => v::not(v::nullType())->notEmpty()->arrayType()->adminRights(),
 		]);
 
 		if ($validation->failed()){
@@ -112,6 +112,13 @@ class APIUserGrpsCtrl extends Controller
 		}
 		//INITIAL CODE////END//
 
+		//CHECK ACCESS TO THAT FUNCTION//START//
+		if(!$this->checkAccess(8))
+		{
+			return $res -> withStatus(403) -> write(json_encode($data));
+		}
+		//CHECK ACCESS TO THAT FUNCTION//END//
+
 		$data['group']=APIUserGrps::select()->
 			where([['id','=',$req->getParam('id')],['name','=',$req->getParam('name')]])->
 			first();
@@ -146,7 +153,7 @@ class APIUserGrpsCtrl extends Controller
 
 		$validation = $this->validator->validate($req, [
 			'name' => v::when( v::nullType() , v::alwaysValid(), v::noWhitespace()->notEmpty()->apiUserGroupNameAvailable($req->getParam('id'))),
-			'rights' => v::when( v::nullType() , v::alwaysValid(), v::not(v::nullType())->notEmpty()->arrayType()),
+			'rights' => v::when( v::nullType() , v::alwaysValid(), v::not(v::nullType())->notEmpty()->arrayType()->adminRights()),
 		]);
 
 		if ($validation->failed()){
@@ -258,6 +265,16 @@ class APIUserGrpsCtrl extends Controller
 		//INITIAL CODE////END//
 
 		unset($data['error']);//BEACAUSE DATATABLES USES THAT VARIABLE//
+
+		//CHECK ACCESS TO THAT FUNCTION//START//
+		if(!$this->checkAccess(8, true))
+		{
+			$data['data'] = [];
+			$data['recordsTotal'] = 0;
+			$data['recordsFiltered'] = 0;
+			return $res -> withStatus(200) -> write(json_encode($data));
+		}
+		//CHECK ACCESS TO THAT FUNCTION//END//
 
 		$params=$req->getParams(); //Get ALL parameters form Datatables
 
@@ -403,6 +420,12 @@ class APIUserGrpsCtrl extends Controller
 		}
 		//INITIAL CODE////END//
 
+		//CHECK ACCESS TO THAT FUNCTION//START//
+		if(!$this->checkAccess(8, true))
+		{
+			return $res -> withStatus(403) -> write(json_encode($data));
+		}
+		//CHECK ACCESS TO THAT FUNCTION//END//
 		///IF GROUPID SET///
 		$extra = $req->getParam('extra');
 		if ($req->getParam('byId') != null){

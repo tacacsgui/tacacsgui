@@ -54,18 +54,19 @@ var tgui_acl = {
     return this;
   },
   getAcl: function(id, name) {
+    var self = this;
     ajaxData['name'] = name
   	ajaxData['id'] = id
 
-    console.log( dataTable_edit_acl.ajax.params() );
+    dataTable_edit_acl.ajax.reload(function(resp){
+      if (!dataTable_edit_acl.rows().data().length) return;
 
-    dataTable_edit_acl.ajax.reload()
-
-    $(this.formSelector_edit +' input[name="name"]').val(name)
-    $(this.formSelector_edit +' input[name="name_native"]').val(name)
-    $(this.formSelector_edit +' input[name="id"]').val(id)
-    $('accesslist').text(name)
-    $("#editACL").modal("show");
+      $(self.formSelector_edit +' input[name="name"]').val(name)
+      $(self.formSelector_edit +' input[name="name_native"]').val(name)
+      $(self.formSelector_edit +' input[name="id"]').val(id)
+      $('accesslist').text(name)
+      $("#editACL").modal("show");
+    });
   },
   edit: function() {
     if ( this.ace.editor() ) { return; }

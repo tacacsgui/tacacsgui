@@ -4,6 +4,7 @@ namespace tgui\Controllers\APIUsers;
 
 use tgui\Models\APIUsers;
 use tgui\Models\APIUserGrps;
+use tgui\Models\APIPWPolicy;
 use tgui\Controllers\Controller;
 use Respect\Validation\Validator as v;
 
@@ -53,12 +54,26 @@ class APIUsersCtrl extends Controller
 			return $res -> withStatus(403) -> write(json_encode($data));
 		}
 		//CHECK ACCESS TO THAT FUNCTION//END//
+
+		$policy = APIPWPolicy::select()->first(1);
+
 		$validation = $this->validator->validate($req, [
 			'email' => v::noWhitespace(),//->email(),//->notEmpty()->emailAvailable(),
 			'username' => v::noWhitespace()->notEmpty()->usernameAvailable(),
-			'password' => v::noWhitespace()->notContainChars()->length(5, 24)->notEmpty()->checkPassword($req->getParam('rep_password')),
-			'rep_password' => v::noWhitespace()->notEmpty()->checkPassword($req->getParam('password')),
+			'group' => v::adminRights(),
+			'password' => v::noWhitespace()->
+					notContainChars()->
+					length($policy['api_pw_length'], 64)->
+					notEmpty()->
+					checkPassword($req->getParam('rep_password'))->
+					passwdPolicyUppercase($policy['api_pw_uppercase'])->
+					passwdPolicyLowercase($policy['api_pw_lowercase'])->
+					passwdPolicySpecial($policy['api_pw_special'])->
+					passwdPolicyNumbers($policy['api_pw_numbers']),
+			'rep_password' => v::checkPassword($req->getParam('password'))->setName('Password Repeat'),
 		]);
+
+		$data['policy'] = $policy;
 
 		if ($validation->failed()){
 			$data['error']['status']=true;
@@ -69,6 +84,11 @@ class APIUsersCtrl extends Controller
 		$allParams = $req->getParams();
 
 		$user = APIUsers::create($allParams);
+		$password = ( !empty($allParams) ) ? $allParams['password'] : '';
+		APIUsers::where([['id','=',$user->id]])->
+				update([
+					'password' => password_hash($password, PASSWORD_DEFAULT)
+				]);
 
 		$logEntry=array('action' => 'add', 'obj_name' => $user->username, 'obj_id' => $user->id, 'section' => 'api users', 'message' => 205);
 		$data['logging']=$this->APILoggingCtrl->makeLogEntry($logEntry);
@@ -100,7 +120,12 @@ class APIUsersCtrl extends Controller
 			return $res -> withStatus(401) -> write(json_encode($data));
 		}
 		//INITIAL CODE////END//
-
+		//CHECK ACCESS TO THAT FUNCTION//START//
+		if( !$this->checkAccess(7) AND ( $req->getParam('id') != @$_SESSION['uid'] ) )
+		{
+			return $res -> withStatus(403) -> write(json_encode($data));
+		}
+		//CHECK ACCESS TO THAT FUNCTION//END//
 		$data['user']=APIUsers::select()->where([['id','=',$req->getParam('id')],['username','=',$req->getParam('username')]])->first();
 
 		return $res -> withStatus(200) -> write(json_encode($data));
@@ -122,20 +147,32 @@ class APIUsersCtrl extends Controller
 			$data['error']=$_SESSION['error'];
 			return $res -> withStatus(401) -> write(json_encode($data));
 		}
+
 		//INITIAL CODE////END//
 		//CHECK ACCESS TO THAT FUNCTION//START//
-		//$data['test01']=(!$this->checkAccess(7) AND $this->checkAccess(0));
-		if( !$this->checkAccess(0) OR ( !$this->checkAccess(7) AND ( $req->getParam('id') != @$_SESSION['uid'] ) ) )
+		if( !$this->checkAccess(7) AND ( $this->checkAccess(0) OR $req->getParam('id') != @$_SESSION['uid'] ) )
 		{
 			return $res -> withStatus(403) -> write(json_encode($data));
 		}
 		//CHECK ACCESS TO THAT FUNCTION//END//
+		$password = APIUsers::where('id', $req->getParam('id'))->first()->password;
+
+		$policy = APIPWPolicy::select()->first(1);
 
 		$validation = $this->validator->validate($req, [
-			'email' => v::noWhitespace(),//->email(),//->notEmpty()->emailAvailable(),
-			'password' => v::notContainChars()->checkPassword($req->getParam('rep_password')),
+			'email' => v::when( v::nullType() , v::alwaysValid(), v::noWhitespace()->email()->notEmpty()->emailAvailable()->setName('Email')),
+			'password' => v::when( v::nullType() , v::alwaysValid(), v::noWhitespace()->
+					notContainChars()->
+					length($policy['api_pw_length'], 64)->
+					notEmpty()->
+					checkPassword($req->getParam('rep_password'))->
+					passwdPolicyUppercase($policy['api_pw_uppercase'])->
+					passwdPolicyLowercase($policy['api_pw_lowercase'])->
+					passwdPolicySpecial($policy['api_pw_special'])->
+					passwdPolicySame($policy['api_pw_same'], $password, 'api')->
+					passwdPolicyNumbers($policy['api_pw_numbers'])->setName('Password') ),
 			'rep_password' => v::checkPassword($req->getParam('password')),
-			//'repPassword' => v::noWhitespace()->notContainChars()->notEmpty()->checkPassword(),
+			'group' => v::when( v::nullType() , v::alwaysValid(), v::checkAccess(7)->adminRights()->setName('Group'))
 		]);
 
 		if ($validation->failed()){
@@ -146,7 +183,7 @@ class APIUsersCtrl extends Controller
 
 		$allParams = $req->getParams();
 
-		$password = ( !empty($allParams) ) ? $allParams['password'] : '';
+		$password = ( !empty($allParams['password']) ) ? $allParams['password'] : '';
 		$id = $allParams['id'];
 
 		unset($allParams['id']);
@@ -283,9 +320,16 @@ class APIUsersCtrl extends Controller
 		$data['queries'] = $queries;
 		$data['columns'] = $columns;
 		//Filter end
-		$data['recordsTotal'] = APIUsers::count();
+		$data['recordsTotal'] = ( !$this->checkAccess(7, true) ) ? 1 : APIUsers::count();
 		//Get temp data for Datatables with Fliter and some other parameters
+		$userSelfId = $_SESSION['uid'];
 		$tempData = APIUsers::select($columns)->
+			when(!$this->checkAccess(7, true),
+				function($query) use ( $userSelfId )
+				{
+					return $query->where('id', $userSelfId);
+				}
+			)->
 			when( !empty($queries),
 				function($query) use ($queries)
 				{
@@ -379,6 +423,7 @@ class APIUsersCtrl extends Controller
 			['id','=',$_SESSION['uid']],
 			['username','=',$_SESSION['uname']],
 		])->first();
+		$data['user']['groupRights'] = $_SESSION['groupRights'];
 
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}

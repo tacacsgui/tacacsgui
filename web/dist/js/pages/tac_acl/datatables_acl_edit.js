@@ -1,7 +1,8 @@
 var ajaxData = {"action": "getACEs", 'name':'', 'id':''};
 function dataForDatatables()
 {
-	return ajaxData;
+	return API_LINK+"tacacs/acl/edit/?name="+ajaxData.name+'&id='+ajaxData.id;
+	// return ajaxData;
 }
 var dataTable_edit_acl =  $('form#editACLForm table.aclDT').DataTable( {
 
@@ -12,10 +13,7 @@ var dataTable_edit_acl =  $('form#editACLForm table.aclDT').DataTable( {
 	orderCellsTop: true,
 	paging: false,
 	dom: 'lrt',
-
-	"createdRow": function( row, data, dataIndex){
-		//if(data['disabled']==1) $(row).addClass('disabledRow');
-	},
+  deferLoading: 0, // here
 
 	"columns": [
 	{"name" : "line_number", "title": "Line Num","data" : "line_number", "orderable": false},
@@ -26,16 +24,27 @@ var dataTable_edit_acl =  $('form#editACLForm table.aclDT').DataTable( {
 	{"name" : "buttons", "title": "Action","data" : "buttons", "orderable": false},
 	 ],
 
-	ajax: {"url": API_LINK+"tacacs/acl/edit/",
-		"type": "GET",
-		"data": dataForDatatables,
-	}, // json datasource
+	fnServerData: function ( sSource, aoData, fnCallback ) {
+			console.log(dataForDatatables());
+			sSource = dataForDatatables();
+			aoData = dataForDatatables;
+			$.ajax( {
+			"dataType": 'json',
+			//"type": "GET",
+			"url": sSource,
+			//"data": dataForDatatables,
+			"success": fnCallback,
+			error: function(err){console.log(tgui_error.getStatus(err, {}));}
+			} );
+	},
+
+	drawCallback: function( settings ) {
+    //$("#editACL").modal("show");
+  }
 
 });
 
 //$.fn.dataTable_add_acl.ext.errMode = 'throw';
-
-$("#aclDataTable_edit_filter").css("display","none");  // hiding global search box
 
 $('#editACLForm').on("submit", function(e) {
 	e.preventDefault();

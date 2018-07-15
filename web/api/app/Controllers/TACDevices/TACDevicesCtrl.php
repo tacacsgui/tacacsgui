@@ -4,6 +4,7 @@ namespace tgui\Controllers\TACDevices;
 
 use tgui\Models\TACDevices;
 use tgui\Models\TACDeviceGrps;
+use tgui\Models\APIPWPolicy;
 use tgui\Controllers\Controller;
 use Respect\Validation\Validator as v;
 
@@ -27,10 +28,10 @@ class TACDevicesCtrl extends Controller
 		}
 		//INITIAL CODE////END//
 		//CHECK ACCESS TO THAT FUNCTION//START//
-		/*if(!$this->checkAccess(2))
+		if(!$this->checkAccess(2, true))
 		{
 			return $res -> withStatus(403) -> write(json_encode($data));
-		}*/
+		}
 		//CHECK ACCESS TO THAT FUNCTION//END//
 
 		$validation = $this->validator->validate($req, [
@@ -93,12 +94,27 @@ class TACDevicesCtrl extends Controller
 			return $res -> withStatus(403) -> write(json_encode($data));
 		}
 		//CHECK ACCESS TO THAT FUNCTION//END//
+		$policy = APIPWPolicy::select()->first(1);
 		$validation = $this->validator->validate($req, [
 			'name' => v::noWhitespace()->notEmpty()->deviceNameAvailable(0),
 			'group' => v::noWhitespace()->notEmpty(),
-			'enable' => v::noWhitespace()->prohibitedChars(),
+			'enable' => v::when( v::nullType() , v::alwaysValid(), v::noWhitespace()->notContainChars()->
+				length($policy['tac_pw_length'], 64)->
+				notEmpty()->
+				passwdPolicyUppercase($policy['tac_pw_uppercase'])->
+				passwdPolicyLowercase($policy['tac_pw_lowercase'])->
+				passwdPolicySpecial($policy['tac_pw_special'])->
+				passwdPolicyNumbers($policy['tac_pw_numbers'])->
+				desRestriction($req->getParam('enable_flag'))->setName('Enable') ),
 			'enable_flag' => v::noWhitespace(),
-			'key' => v::noWhitespace()->tacacsKeyAvailable($req->getParam('group'))->prohibitedChars(),
+			'key' => v::noWhitespace()->notContainChars()->
+				length($policy['tac_pw_length'], 64)->
+				notEmpty()->
+				passwdPolicyUppercase($policy['tac_pw_uppercase'])->
+				passwdPolicyLowercase($policy['tac_pw_lowercase'])->
+				passwdPolicySpecial($policy['tac_pw_special'])->
+				passwdPolicyNumbers($policy['tac_pw_numbers'])->
+				tacacsKeyAvailable($req->getParam('group'))->setName('Tacacs Key'),
 			'ipaddr' => v::noWhitespace()->notEmpty()->ip(),
 			'prefix' => v::noWhitespace()->notEmpty(),
 		]);
@@ -147,6 +163,13 @@ class TACDevicesCtrl extends Controller
 		}
 		//INITIAL CODE////END//
 
+		//CHECK ACCESS TO THAT FUNCTION//START//
+		if(!$this->checkAccess(2))
+		{
+			return $res -> withStatus(403) -> write(json_encode($data));
+		}
+		//CHECK ACCESS TO THAT FUNCTION//END//
+
 		$data['device']=TACDevices::select('id','name','ipaddr','prefix','key','enable','enable_flag','group','disabled','banner_welcome','banner_motd','banner_failed','manual','created_at', 'updated_at')->
 			where([['id','=',$req->getParam('id')],['name','=',$req->getParam('name')]])->
 			first();
@@ -176,13 +199,27 @@ class TACDevicesCtrl extends Controller
 			return $res -> withStatus(403) -> write(json_encode($data));
 		}
 		//CHECK ACCESS TO THAT FUNCTION//END//
-
+		$policy = APIPWPolicy::select()->first(1);
 		$validation = $this->validator->validate($req, [
 			'name' => v::noWhitespace()->when( v::nullType() , v::alwaysValid(), v::notEmpty()->deviceNameAvailable($req->getParam('id'))),
 			'group' => v::noWhitespace(),
-			'enable' => v::noWhitespace()->prohibitedChars(),
+			'enable' => v::when( v::nullType() , v::alwaysValid(), v::noWhitespace()->notContainChars()->
+				length($policy['tac_pw_length'], 64)->
+				notEmpty()->
+				passwdPolicyUppercase($policy['tac_pw_uppercase'])->
+				passwdPolicyLowercase($policy['tac_pw_lowercase'])->
+				passwdPolicySpecial($policy['tac_pw_special'])->
+				passwdPolicyNumbers($policy['tac_pw_numbers'])->
+				desRestriction($req->getParam('enable_flag'))->setName('Enable') ),
 			'enable_flag' => v::noWhitespace()->when( v::nullType() , v::alwaysValid(), v::numeric()),
-			'key' => v::noWhitespace()->when( v::nullType() , v::alwaysValid(), v::tacacsKeyAvailable($req->getParam('group'))->prohibitedChars()),
+			'key' => v::when( v::nullType() , v::alwaysValid(),  v::noWhitespace()->notContainChars()->
+				length($policy['tac_pw_length'], 64)->
+				notEmpty()->
+				passwdPolicyUppercase($policy['tac_pw_uppercase'])->
+				passwdPolicyLowercase($policy['tac_pw_lowercase'])->
+				passwdPolicySpecial($policy['tac_pw_special'])->
+				passwdPolicyNumbers($policy['tac_pw_numbers'])->
+				tacacsKeyAvailable($req->getParam('group'))->setName('Tacacs Key') ),
 			'ipaddr' => v::noWhitespace()->when( v::nullType() , v::alwaysValid(), v::ip()),
 			'prefix' => v::noWhitespace()
 		]);
@@ -343,6 +380,16 @@ public function postDeviceCsv($req,$res)
 
 		unset($data['error']);//BEACAUSE DATATABLES USES THAT VARIABLE//
 
+		//CHECK ACCESS TO THAT FUNCTION//START//
+		if(!$this->checkAccess(2, true))
+		{
+			$data['data'] = [];
+			$data['recordsTotal'] = 0;
+			$data['recordsFiltered'] = 0;
+			return $res -> withStatus(200) -> write(json_encode($data));
+		}
+		//CHECK ACCESS TO THAT FUNCTION//END//
+
 		$params=$req->getParams(); //Get ALL parameters form Datatables
 
 		//$data['columns'] = $this->APICheckerCtrl->getTableTitles('tac_devices');
@@ -364,6 +411,7 @@ public function postDeviceCsv($req,$res)
 		$data['queries'] = $queries;
 		$data['columns'] = $columns;
 		//Filter end
+		$data['recordsTotal'] = TACDevices::count();
 		//Get temp data for Datatables with Fliter and some other parameters
 		$tempData = TACDevices::select($columns)->
 			when( !empty($queries),
@@ -413,7 +461,6 @@ public function postDeviceCsv($req,$res)
 			get()->toArray();
 		//Creating correct array of answer to Datatables
 		$data['data']=array();
-		$data['recordsTotal'] = TACDevices::count();
 
 		$tempGroups = TACDeviceGrps::select('id','name','key','enable')->get()->toArray();
 

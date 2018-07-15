@@ -85,7 +85,7 @@ var tgui_device = {
     console.log('Adding new device');
     var self = this;
     var formData = tgui_supplier.getFormData(self.formSelector_add);
-        formData.group = $(this.select_group_add).select2('data')[0].id;
+        formData.group = ($(this.select_group_add).select2('data').length) ? $(this.select_group_add).select2('data')[0].id : 0;
         formData.prefix = $(self.formSelector_add + ' input[name="prefix"]').slider('getValue');
     var ajaxProps = {
       url: API_LINK+"tacacs/device/add/",
@@ -143,7 +143,7 @@ var tgui_device = {
     var self = this;
     var formData = tgui_supplier.getFormData(self.formSelector_edit, true);
 
-    if ($(this.select_group_edit).select2('data')[0].id != $(self.formSelector_edit + ' [name="group_native"]').val()) {formData.group = $(this.select_group_edit).select2('data')[0].id;}
+    if ($(this.select_group_edit).select2('data').length && $(this.select_group_edit).select2('data')[0].id != $(self.formSelector_edit + ' [name="group_native"]').val()) {formData.group = $(this.select_group_edit).select2('data')[0].id;}
 
     if ($(self.formSelector_edit + ' input[name="prefix"]').slider('getValue') != $(self.formSelector_edit + ' input[name="prefix_native"]').val()) {formData.prefix = $(self.formSelector_edit + ' input[name="prefix"]').slider('getValue');}
 
@@ -203,30 +203,10 @@ var tgui_device = {
     })
     return this;
   },/*delete device end*/
-  csvDownload: function(idList) {
-    idList = idList || [];
-  if (! idList.length ) $('div.csv-link').empty().append(tgui_supplier.loadElement());
-  else { $('#exportLink').removeClass('m-progress').addClass('m-progress').attr('href', 'javascript: void(0)').show(); }
-  var ajaxProps = {
-    url: API_LINK+"tacacs/device/csv/",
-    data: {idList: idList}
-  };//ajaxProps END
-  ajaxRequest.send(ajaxProps).then(function(resp) {
-    if(!resp.filename) {
-      tgui_error.local.show( {type:'error', message: "Oops! Unknown error appeared :("} ); return;
-    }
-    if (! idList.length ) { $('div.csv-link').empty().append('<a href="/api/download/csv/?file=' + resp.filename + '" target="_blank">Download</a><p><small class="text-muted">Link will be valid within 15 minutes</small></p>') }
-    else {
-      $('#exportLink').removeClass('m-progress').attr('href', '/api/download/csv/?file=' + resp.filename);
-    }
-  }).fail(function(err){
-    tgui_error.getStatus(err, ajaxProps)
-  })
-  },
   csv: {
     columnsRequired: ['name','ipaddr','prefix'],
     fileInputId: '#csv-file',
-    ajaxLink: 'tacacs/device/add/',
+    ajaxItem: 'device',
     outputId: '#csvParserOutput',
     ajaxHandler: function(resp,index){
       var item = 'device';

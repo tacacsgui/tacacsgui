@@ -4,6 +4,7 @@ namespace tgui\Controllers\TACDeviceGrps;
 
 use tgui\Models\TACDeviceGrps;
 use tgui\Models\TACDevices;
+use tgui\Models\APIPWPolicy;
 use tgui\Controllers\Controller;
 use Respect\Validation\Validator as v;
 
@@ -53,10 +54,17 @@ class TACDeviceGrpsCtrl extends Controller
 			return $res -> withStatus(403) -> write(json_encode($data));
 		}
 		//CHECK ACCESS TO THAT FUNCTION//END//
-
+		$policy = APIPWPolicy::select()->first(1);
 		$validation = $this->validator->validate($req, [
 			'name' => v::noWhitespace()->notEmpty()->deviceGroupAvailable(0),
-			'enable' => v::noWhitespace()->prohibitedChars(),
+			'enable' => v::when( v::nullType() , v::alwaysValid(), v::noWhitespace()->notContainChars()->
+				length($policy['tac_pw_length'], 64)->
+				notEmpty()->
+				passwdPolicyUppercase($policy['tac_pw_uppercase'])->
+				passwdPolicyLowercase($policy['tac_pw_lowercase'])->
+				passwdPolicySpecial($policy['tac_pw_special'])->
+				passwdPolicyNumbers($policy['tac_pw_numbers'])->
+				desRestriction($req->getParam('enable_flag'))->setName('Enable') ),
 			'enable_flag' => v::noWhitespace()->numeric(),
 			'key' => v::noWhitespace()->prohibitedChars(),
 		]);
@@ -107,6 +115,13 @@ class TACDeviceGrpsCtrl extends Controller
 		}
 		//INITIAL CODE////END//
 
+		//CHECK ACCESS TO THAT FUNCTION//START//
+		if(!$this->checkAccess(3))
+		{
+			return $res -> withStatus(403) -> write(json_encode($data));
+		}
+		//CHECK ACCESS TO THAT FUNCTION//END//
+
 		$data['group']=TACDeviceGrps::select('id','name','key','enable','enable_flag', 'default_flag','banner_welcome','banner_motd','banner_failed','manual','created_at', 'updated_at')->
 			where([['id','=',$req->getParam('id')],['name','=',$req->getParam('name')]])->
 			first();
@@ -136,10 +151,17 @@ class TACDeviceGrpsCtrl extends Controller
 			return $res -> withStatus(403) -> write(json_encode($data));
 		}
 		//CHECK ACCESS TO THAT FUNCTION//END//
-
+		$policy = APIPWPolicy::select()->first(1);
 		$validation = $this->validator->validate($req, [
 			'name' => v::noWhitespace()->when( v::nullType() , v::alwaysValid(), v::deviceGroupAvailable($req->getParam('id'))),
-			'enable' => v::noWhitespace()->when( v::nullType() , v::alwaysValid(), v::prohibitedChars()),
+			'enable' => v::when( v::nullType() , v::alwaysValid(), v::noWhitespace()->notContainChars()->
+				length($policy['tac_pw_length'], 64)->
+				notEmpty()->
+				passwdPolicyUppercase($policy['tac_pw_uppercase'])->
+				passwdPolicyLowercase($policy['tac_pw_lowercase'])->
+				passwdPolicySpecial($policy['tac_pw_special'])->
+				passwdPolicyNumbers($policy['tac_pw_numbers'])->
+				desRestriction($req->getParam('enable_flag'))->setName('Enable') ),
 			'enable_flag' => v::noWhitespace()->when( v::nullType() , v::alwaysValid(), v::numeric()),
 			'key' => v::noWhitespace()->when( v::nullType() , v::alwaysValid(), v::prohibitedChars()),
 		]);
@@ -272,7 +294,7 @@ public function postDeviceGroupCsv($req,$res)
 	}
 	//INITIAL CODE////END//
 	//CHECK ACCESS TO THAT FUNCTION//START//
-	if(!$this->checkAccess(2))
+	if(!$this->checkAccess(3))
 	{
 		return $res -> withStatus(403) -> write(json_encode($data));
 	}
@@ -318,6 +340,16 @@ public function postDeviceGroupCsv($req,$res)
 		//INITIAL CODE////END//
 
 		unset($data['error']);//BEACAUSE DATATABLES USES THAT VARIABLE//
+
+		//CHECK ACCESS TO THAT FUNCTION//START//
+		if(!$this->checkAccess(3, true))
+		{
+			$data['data'] = [];
+			$data['recordsTotal'] = 0;
+			$data['recordsFiltered'] = 0;
+			return $res -> withStatus(200) -> write(json_encode($data));
+		}
+		//CHECK ACCESS TO THAT FUNCTION//END//
 
 		$params=$req->getParams(); //Get ALL parameters form Datatables
 
@@ -421,6 +453,13 @@ public function postDeviceGroupCsv($req,$res)
 			return $res -> withStatus(401) -> write(json_encode($data));
 		}
 		//INITIAL CODE////END//
+
+		//CHECK ACCESS TO THAT FUNCTION//START//
+		if(!$this->checkAccess(3, true))
+		{
+			return $res -> withStatus(403) -> write(json_encode($data));
+		}
+		//CHECK ACCESS TO THAT FUNCTION//END//
 
 		///IF GROUPID SET///
 		if ($req->getParam('byId') != null){

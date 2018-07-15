@@ -170,6 +170,13 @@ class MAVISOTPCtrl extends Controller
 		}
 		//INITIAL CODE////END//
 
+		//CHECK ACCESS TO THAT FUNCTION//START//
+		if(!$this->checkAccess(11, true))
+		{
+			return $res -> withStatus(403) -> write(json_encode($data));
+		}
+		//CHECK ACCESS TO THAT FUNCTION//END//
+
 		$validation = $this->validator->validate($req, [
 			'username' => v::notEmpty(),
 			'ot_password' => v::notEmpty()->numeric(),

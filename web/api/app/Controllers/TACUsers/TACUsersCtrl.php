@@ -6,6 +6,7 @@ use tgui\Models\TACUsers;
 use tgui\Models\TACUserGrps;
 use tgui\Models\MAVISOTP;
 use tgui\Models\TACGlobalConf;
+use tgui\Models\APIPWPolicy;
 use tgui\Controllers\Controller;
 use Respect\Validation\Validator as v;
 
@@ -55,15 +56,37 @@ class TACUsersCtrl extends Controller
 			return $res -> withStatus(403) -> write(json_encode($data));
 		}
 		//CHECK ACCESS TO THAT FUNCTION//END//
-
+		$policy = APIPWPolicy::select()->first(1);
 		$validation = $this->validator->validate($req, [
 			'username' => v::noWhitespace()->notEmpty()->userTacAvailable(0),
 			'group' => v::noWhitespace(),
-			'enable' => v::noWhitespace()->prohibitedChars()->desRestriction($req->getParam('enable_flag')),
+			'enable' => v::when( v::nullType() , v::alwaysValid(), v::noWhitespace()->notContainChars()->
+				length($policy['tac_pw_length'], 64)->
+				notEmpty()->
+				passwdPolicyUppercase($policy['tac_pw_uppercase'])->
+				passwdPolicyLowercase($policy['tac_pw_lowercase'])->
+				passwdPolicySpecial($policy['tac_pw_special'])->
+				passwdPolicyNumbers($policy['tac_pw_numbers'])->
+				desRestriction($req->getParam('enable_flag'))->setName('Enable') ),
 			'enable_flag' => v::noWhitespace()->numeric(),
-			'pap' => v::noWhitespace()->prohibitedChars()->desRestriction($req->getParam('enable_flag')),
+			'pap' => v::when( v::nullType() , v::alwaysValid(), v::noWhitespace()->notContainChars()->
+				length($policy['tac_pw_length'], 64)->
+				notEmpty()->
+				passwdPolicyUppercase($policy['tac_pw_uppercase'])->
+				passwdPolicyLowercase($policy['tac_pw_lowercase'])->
+				passwdPolicySpecial($policy['tac_pw_special'])->
+				passwdPolicyNumbers($policy['tac_pw_numbers'])->
+				desRestriction($req->getParam('pap_flag'))->setName('PAP') ),
 			'pap_flag' => v::noWhitespace()->numeric(),
-			'login' => v::noWhitespace()->notEmpty()->prohibitedChars()->desRestriction($req->getParam('login_flag')),
+			'login' => v::noWhitespace()->
+					notContainChars()->
+					length($policy['tac_pw_length'], 64)->
+					notEmpty()->
+					passwdPolicyUppercase($policy['tac_pw_uppercase'])->
+					passwdPolicyLowercase($policy['tac_pw_lowercase'])->
+					passwdPolicySpecial($policy['tac_pw_special'])->
+					passwdPolicyNumbers($policy['tac_pw_numbers'])->
+					desRestriction($req->getParam('login_flag')),
 			'login_flag' => v::noWhitespace()->numeric(),
 		]);
 
@@ -126,6 +149,13 @@ class TACUsersCtrl extends Controller
 		}
 		//INITIAL CODE////END//
 
+		//CHECK ACCESS TO THAT FUNCTION//START//
+		if(!$this->checkAccess(4))
+		{
+			return $res -> withStatus(403) -> write(json_encode($data));
+		}
+		//CHECK ACCESS TO THAT FUNCTION//END//
+
 		$data['user']=TACUsers::select()->
 			where([['id','=',$req->getParam('id')],['username','=',$req->getParam('username')]])->
 			first();
@@ -157,15 +187,37 @@ class TACUsersCtrl extends Controller
 			return $res -> withStatus(403) -> write(json_encode($data));
 		}
 		//CHECK ACCESS TO THAT FUNCTION//END//
-
+		$policy = APIPWPolicy::select()->first(1);
 		$validation = $this->validator->validate($req, [
 			'username' => v::noWhitespace()->when( v::nullType() , v::alwaysValid(), v::notEmpty()->userTacAvailable($req->getParam('id'))),
 			'group' => v::noWhitespace()->when( v::nullType() , v::alwaysValid(), v::numeric()),
-			'enable' => v::noWhitespace()->prohibitedChars()->desRestriction($req->getParam('enable_flag')),
+			'enable' => v::when( v::nullType() , v::alwaysValid(), v::noWhitespace()->notContainChars()->
+				length($policy['tac_pw_length'], 64)->
+				notEmpty()->
+				passwdPolicyUppercase($policy['tac_pw_uppercase'])->
+				passwdPolicyLowercase($policy['tac_pw_lowercase'])->
+				passwdPolicySpecial($policy['tac_pw_special'])->
+				passwdPolicyNumbers($policy['tac_pw_numbers'])->
+				desRestriction($req->getParam('enable_flag'))->setName('Enable') ),
 			'enable_flag' => v::noWhitespace()->when( v::nullType() , v::alwaysValid(), v::numeric()),
-			'login' => v::noWhitespace()->when( v::nullType() , v::alwaysValid(), v::prohibitedChars()->desRestriction($req->getParam('login_flag'))),
+			'login' => v::when( v::nullType() , v::alwaysValid(), v::noWhitespace()->
+					notContainChars()->
+					length($policy['tac_pw_length'], 64)->
+					notEmpty()->
+					passwdPolicyUppercase($policy['tac_pw_uppercase'])->
+					passwdPolicyLowercase($policy['tac_pw_lowercase'])->
+					passwdPolicySpecial($policy['tac_pw_special'])->
+					passwdPolicyNumbers($policy['tac_pw_numbers'])->
+					desRestriction($req->getParam('login_flag'))->setName('Login') ),
 			'login_flag' => v::noWhitespace()->when( v::nullType() , v::alwaysValid(), v::numeric()),
-			'pap' => v::noWhitespace()->prohibitedChars()->desRestriction($req->getParam('enable_flag')),
+			'pap' => v::when( v::nullType() , v::alwaysValid(), v::noWhitespace()->notContainChars()->
+				length($policy['tac_pw_length'], 64)->
+				notEmpty()->
+				passwdPolicyUppercase($policy['tac_pw_uppercase'])->
+				passwdPolicyLowercase($policy['tac_pw_lowercase'])->
+				passwdPolicySpecial($policy['tac_pw_special'])->
+				passwdPolicyNumbers($policy['tac_pw_numbers'])->
+				desRestriction($req->getParam('pap_flag'))->setName('PAP') ),
 			'pap_flag' => v::noWhitespace()->when( v::nullType() , v::alwaysValid(), v::numeric()),
 			'mavis_otp_period' => v::noWhitespace()->when( v::nullType() , v::alwaysValid(), v::intVal()->between(30, 120)),
 			'mavis_otp_digits' => v::noWhitespace()->when( v::nullType() , v::alwaysValid(), v::intVal()->between(5, 8)),
@@ -290,7 +342,7 @@ class TACUsersCtrl extends Controller
 		}
 		//INITIAL CODE////END//
 		//CHECK ACCESS TO THAT FUNCTION//START//
-		if(!$this->checkAccess(2))
+		if(!$this->checkAccess(4))
 		{
 			return $res -> withStatus(403) -> write(json_encode($data));
 		}
@@ -336,6 +388,16 @@ class TACUsersCtrl extends Controller
 		//INITIAL CODE////END//
 
 		unset($data['error']);//BEACAUSE DATATABLES USES THAT VARIABLE//
+
+		//CHECK ACCESS TO THAT FUNCTION//START//
+		if(!$this->checkAccess(4, true))
+		{
+			$data['data'] = [];
+			$data['recordsTotal'] = 0;
+			$data['recordsFiltered'] = 0;
+			return $res -> withStatus(200) -> write(json_encode($data));
+		}
+		//CHECK ACCESS TO THAT FUNCTION//END//
 
 		$params = $req->getParams(); //Get ALL parameters form Datatables
 

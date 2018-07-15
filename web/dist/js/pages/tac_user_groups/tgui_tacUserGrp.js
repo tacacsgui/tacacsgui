@@ -65,8 +65,8 @@ var tgui_tacUserGrp = {
     console.log('Adding new group');
     var self = this;
     var formData = tgui_supplier.getFormData(self.formSelector_add);
-    formData.acl = $(this.select_acl_add).select2('data')[0].id;
-    formData.service = $(this.select_service_add).select2('data')[0].id;
+    formData.acl = ($(this.select_acl_add).select2('data').length) ? $(this.select_acl_add).select2('data')[0].id : 0;
+    formData.service = ($(this.select_service_add).select2('data')) ? $(this.select_service_add).select2('data')[0].id : 0;
 
     var ajaxProps = {
       url: API_LINK+"tacacs/user/group/add/",
@@ -123,9 +123,9 @@ var tgui_tacUserGrp = {
     var self = this;
     var formData = tgui_supplier.getFormData(self.formSelector_edit, true);
 
-    if ($(this.select_acl_edit).select2('data')[0].id != $(self.formSelector_edit + ' [name="acl_native"]').val()) { formData.acl = $(this.select_acl_edit).select2('data')[0].id;}
+    if ($(this.select_acl_edit).select2('data').length && $(this.select_acl_edit).select2('data')[0].id != $(self.formSelector_edit + ' [name="acl_native"]').val()) { formData.acl = $(this.select_acl_edit).select2('data')[0].id;}
 
-    if ($(this.select_service_edit).select2('data')[0].id != $(self.formSelector_edit + ' [name="service_native"]').val()) { formData.service = $(this.select_service_edit).select2('data')[0].id; }
+    if ($(this.select_service_edit).select2('data').length && $(this.select_service_edit).select2('data')[0].id != $(self.formSelector_edit + ' [name="service_native"]').val()) { formData.service = $(this.select_service_edit).select2('data')[0].id; }
 
     var enable_encrypt = formData.enable_encrypt;
     delete formData.enable_encrypt;

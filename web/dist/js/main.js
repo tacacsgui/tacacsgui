@@ -8,7 +8,7 @@ var ajaxRequest = {
         cache: (props.cache != undefined) ? false : true,
         processData: (props.processData != undefined) ? false : true,
         contentType : (props.contentType != undefined) ? false : 'application/x-www-form-urlencoded; charset=UTF-8',
-        timeout: props.timeout || 20000,
+        timeout: props.timeout || 60000,
         data: props.data || {}
       }
       if (props.xhr) input.xhr = props.xhr;
@@ -39,10 +39,12 @@ var tgui_error = {
           toastr[type](message);
         }
       },//local error message//end
-      getStatus:function(err, extra){
+      getStatus:function(err, extra, signin){
+        signin = signin || false;
         err = err || {}
         this.status = err.status || this.status;
         if (window.location.hash.substr(1) == 'debug') console.log(err)
+        if (signin) return true;
         switch(this.status)
       	{
       		case 401:
@@ -108,6 +110,7 @@ var tgui_apiUser = {
     $('surname_info').text(resp.user.surname);
     $('position_info').text(resp.user.position);
     $('li.user span.username').text(resp.info.user.username);
+    console.log(resp.info.user.groupRights.toString(2).split("").reverse());
     return this;
   },
   signout: function(){
@@ -134,7 +137,9 @@ var tgui_status = {
     url:API_LINK+"apicheck/database/",
     type: "GET"
   },
-  getStatus: function(props) {
+  getStatus: function(props, idle) {
+    idle = idle || true;
+    if (idle != 'signin') tguiInit.idle();
     props = props || {}
     for (var prop in props) {
       if (props.hasOwnProperty(prop)) {
@@ -209,6 +214,13 @@ var tguiInit = {
     });
     return this;
   },
+  idle: function(){
+    var timeoutset=1500*60*5;
+    $.idleTimer(timeoutset);
+    $(document).bind("idle.idleTimer", function(){
+    	window.open( "./lockscreen.php","_self");
+    });
+  }
 }//Tacacs Initiator Object//end
 /*-
 -
@@ -478,12 +490,6 @@ toastr.options = {
 	"positionClass": "toast-bottom-right",
 }
 ///////////////////////////////
-
-var timeoutset=1500*60*5;
-$.idleTimer(timeoutset);
-$(document).bind("idle.idleTimer", function(){
-	window.open( "./lockscreen.php","_self");
-});
 
 function print_r(arr, level) {
     var print_red_text = "";

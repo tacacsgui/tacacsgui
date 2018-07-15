@@ -7,13 +7,13 @@ use Illuminate\Database\Eloquent\Model;
 class Authorization extends Model
 {
 	protected $table = 'tac_log_authorization';
-	
+
 	protected $fillable = [
 		'date',
-		'NAS',
+		'nas',
 		'username',
 		'line',
-		'NAC',
+		'nac',
 		'action',
 		'cmd',
 	];

@@ -7,13 +7,13 @@ use Illuminate\Database\Eloquent\Model;
 class Accounting extends Model
 {
 	protected $table = 'tac_log_accounting';
-	
+
 	protected $fillable = [
 		'date',
-		'NAS',
+		'nas',
 		'username',
 		'line',
-		'NAC',
+		'nac',
 		'action',
 		'task_id',
 		'timezone',

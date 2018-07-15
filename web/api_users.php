@@ -59,50 +59,20 @@ require __DIR__ . '/templates/body_start.php';
 				<h3 class="box-title">Tacacs GUI Users</h3>
 			</div><!-- /.box-header -->
 			<div class="box-body">
-				<div class="row">
-					<div class="col-xs-12">
-						<div class="dropdown pull-right">
-							<a class="btn btn-flat btn-success" id="addUserBtn" data-toggle="modal" data-target="#addUser">+ Add User</a>
-							<a class="btn btn-flat btn-info" onclick="dataTable.settings.filter()">Filter</a>
-							<div class="btn-group">
-                <button type="button" class="btn btn-warning btn-flat dropdown-toggle" data-toggle="dropdown">
-                  Action <span class="caret"></span>
-                </button>
-                <ul class="dropdown-menu dropdown-menu-right">
-                  <!--<li><a href="#" onclick="dataTable.settings.exportCsv()">Export Selected (CSV)</a></li>-->
-                  <li><a href="#" onclick="dataTable.settings.deleteSelected()">Delete Selected</a></li>
-                </ul>
-              </div>
-							<a class="btn btn-flat btn-warning" href="javascript: void(0)" id="exportLink" style="display: none;" target="_blank"><i class="fa fa-download"></i></a>
-							<div class="btn-group">
-                <button type="button" class="btn btn-default btn-flat dropdown-toggle" data-toggle="dropdown">
-                  More Columns <span class="caret"></span>
-                </button>
-                <ul class="dropdown-menu dropdown-menu-right" id="columnsFilter">
+				<?php
+				$addBtn = ['name'=>'+ Add User', 'id' => 'addUserBtn', 'modalId' => '#addUser'];
+				$filterBtn = true;
+				$filterHint = 'e.g. username=user1, group=1';
+				$filterPopover =
+				[
+					'username' => 'Username',
+					'id' => 'ID',
+					'group' => 'Group ID',
+				];
+				$extraBtn = ['exportCsv' => true, 'delete' => true];
+				require __DIR__ . '/templates/parts/part_tableManager.php';
 
-                </ul>
-              </div>
-						</div>
-					</div>
-				</div>
-				<div class="datatable-filter" style="display: none;">
-				<div class="row">
-					<div class="col-xs-12">
-						<div class="form-group">
-              <label>Table Filter</label>
-							<div class="input-group input-group-sm">
-                <input type="text" class="form-control" id="filterRequest" placeholder="Filter attributes...">
-                <span class="input-group-btn">
-                  <button type="button" class="btn btn-flat btn-default" onclick="dataTable.settings.filterErase()"><i class="fa fa-close"></i></button>
-                </span>
-              </div>
-							<p class="text-muted">e.g. username=user1, group=1</p>
-							<button class="btn btn-flat btn-default" id="filterInfo" data-placement="bottom" title="Filter Info"><i class="fa fa-info"></i> Filter Info</button>
-							<div class="filterMessage pull-right" style="display: none;"></div>
-            </div>
-					</div>
-				</div>
-				</div>
+				?>
 				<div class="table-responsive">
 					<table id="usersDataTable" class="table-striped display table table-bordered" style="overflow: auto;">
 

@@ -23,17 +23,17 @@
 					echo '<li class="header '.$itemMenu['li-class'].'">'.$itemMenu['name'].'</li>';
 				} else {
 					if ($itemMenu['submenuFlag']){
-						echo '<li class="treeview '. (($itemMenu['id']==$ACTIVE_MENU_ID) ? 'active':'').'">
+						echo '<li class="treeview grp_access_parent '.$itemMenu['li-class'].' '. (($itemMenu['id']==$ACTIVE_MENU_ID) ? 'active':'').'">
 							<a href="#"><i class="'.$itemMenu['icon'].' '.$itemMenu['icon-class'].'"></i> <span>'.$itemMenu['name'].'</span>
 							<span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i>
 							</span></a>';
 						echo '<ul class="treeview-menu">';
 						foreach ($itemMenu['submenu'] as $subitemMenu){
-							echo '<li class="'. (($subitemMenu['id']==$ACTIVE_SUBMENU_ID) ? 'active':'').'"><a href="'.$subitemMenu['href'].'"><i class="'.$subitemMenu['icon'].' '.$subitemMenu['icon-class'].'"></i> '.$subitemMenu['name'].'</a></li>';
+							echo '<li class=" grp_access '.$subitemMenu['li-class'].' '. (($subitemMenu['id']==$ACTIVE_SUBMENU_ID) ? 'active':'').'"><a href="'.$subitemMenu['href'].'"><i class="'.$subitemMenu['icon'].' '.$subitemMenu['icon-class'].'"></i> '.$subitemMenu['name'].'</a></li>';
 						}
 						echo '</ul></li>';
 					} else {
-						echo '<li class="'. (($itemMenu['id']==$ACTIVE_MENU_ID) ? 'active':'').'"><a href="'.$itemMenu['href'].'"><i class="'.$itemMenu['icon'].' '.$itemMenu['icon-class'].'"></i> <span>'.$itemMenu['name'].'</span></a></li>';
+						echo '<li class=" grp_access '.$itemMenu['li-class'].' '. (($itemMenu['id']==$ACTIVE_MENU_ID) ? 'active':'').'"><a href="'.$itemMenu['href'].'"><i class="'.$itemMenu['icon'].' '.$itemMenu['icon-class'].'"></i> <span>'.$itemMenu['name'].'</span></a></li>';
 					}
 				}
 			}

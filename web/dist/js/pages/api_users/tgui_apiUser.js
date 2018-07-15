@@ -49,7 +49,7 @@ var tgui_userApi = {
     console.log('Adding new API User');
     var self = this;
     var formData = tgui_supplier.getFormData(self.formSelector_add);
-        formData.group = $(this.select_group_add).select2('data')[0].id;
+        formData.group = ($(this.select_group_add).select2('data').length) ? $(this.select_group_add).select2('data')[0].id : 0;
     var ajaxProps = {
       url: API_LINK+"user/add/",
       data: formData
@@ -96,7 +96,7 @@ var tgui_userApi = {
     var self = this;
     var formData = tgui_supplier.getFormData(self.formSelector_edit, true);
 
-    if ($(this.select_group_edit).select2('data')[0].id != $(self.formSelector_edit + ' [name="group_native"]').val()) {formData.group = $(this.select_group_edit).select2('data')[0].id;}
+    if ($(this.select_group_edit).select2('data').length && $(this.select_group_edit).select2('data')[0].id != $(self.formSelector_edit + ' [name="group_native"]').val()) {formData.group = $(this.select_group_edit).select2('data')[0].id;}
 
     var ajaxProps = {
       url: API_LINK+"user/edit/",

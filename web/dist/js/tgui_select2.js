@@ -22,7 +22,15 @@ var tgui_select2 = function(o)
       			return {
       				results: data.items
       			};
-      		}
+      		},
+          transport: function (params, success, failure) {
+            var $request = $.ajax(params);
+            console.log(123);
+            $request.then(success);
+            $request.fail(failure);
+
+            return $request;
+          }
       	},
       	escapeMarkup: function(markup){ return markup;},
       	templateResult: self.selectionTemplate,
@@ -54,7 +62,8 @@ var tgui_select2 = function(o)
   			if (selector == 'add') $(self.add).append(option).trigger('change');
   			if (selector == 'edit') $(self.edit).append(option).trigger('change');
       }).fail(function(err){
-        tgui_error.getStatus(err, ajaxProps)
+        if (err.status != 403) tgui_error.getStatus(err, ajaxProps);
+        $(self.edit).prop('disabled', true);
       })
     },
   }

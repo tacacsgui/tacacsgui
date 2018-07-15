@@ -911,6 +911,13 @@ class TACConfigCtrl extends Controller
 		}
 		//INITIAL CODE////END//
 
+		//CHECK ACCESS TO THAT FUNCTION//START//
+		if(!$this->checkAccess(6, true))
+		{
+			return $res -> withStatus(403) -> write(json_encode($data));
+		}
+		//CHECK ACCESS TO THAT FUNCTION//END//
+
 		$html = (empty($req->getParam('html'))) ? false : true;
 
 		$data['mavisGeneralConfig']=array_values($this->tacMavisGeneralGen($html));
@@ -1251,7 +1258,7 @@ class TACConfigCtrl extends Controller
 		}
 		//INITIAL CODE////END//
 		//CHECK ACCESS TO THAT FUNCTION//START//
-		if(!$this->checkAccess(6))
+		if(!$this->checkAccess(1))
 		{
 			return $res -> withStatus(403) -> write(json_encode($data));
 		}
@@ -1319,6 +1326,12 @@ class TACConfigCtrl extends Controller
 
 		switch ($allParams['target']) {
 			case 'device':
+				//CHECK ACCESS TO THAT FUNCTION//START//
+				if(!$this->checkAccess(2))
+				{
+					return $res -> withStatus(403) -> write(json_encode($data));
+				}
+				//CHECK ACCESS TO THAT FUNCTION//END//
 				if ( !isset($allParams['id']) OR $allParams['id'] == 0){
 					$data['error']['status']=true;
 					$data['error']['message']='Bad Request';
@@ -1327,6 +1340,12 @@ class TACConfigCtrl extends Controller
 				$data['output'] = $this->tacDevicesPartGen(true, $allParams['id']);
 				break;
 			case 'deviceGrp':
+				//CHECK ACCESS TO THAT FUNCTION//START//
+				if(!$this->checkAccess(3))
+				{
+					return $res -> withStatus(403) -> write(json_encode($data));
+				}
+				//CHECK ACCESS TO THAT FUNCTION//END//
 				if ( !isset($allParams['id']) OR $allParams['id'] == 0){
 					$data['error']['status']=true;
 					$data['error']['message']='Bad Request';
@@ -1335,6 +1354,12 @@ class TACConfigCtrl extends Controller
 				$data['output'] = $this->tacDeviceGroupsPartGen(true, $allParams['id']);
 				break;
 			case 'user':
+				//CHECK ACCESS TO THAT FUNCTION//START//
+				if(!$this->checkAccess(4))
+				{
+					return $res -> withStatus(403) -> write(json_encode($data));
+				}
+				//CHECK ACCESS TO THAT FUNCTION//END//
 				if ( !isset($allParams['id']) OR $allParams['id'] == 0){
 					$data['error']['status']=true;
 					$data['error']['message']='Bad Request';
@@ -1343,6 +1368,12 @@ class TACConfigCtrl extends Controller
 				$data['output'] = $this->tacUsersPartGen(true, $allParams['id']);
 				break;
 			case 'userGrp':
+				//CHECK ACCESS TO THAT FUNCTION//START//
+				if(!$this->checkAccess(5))
+				{
+					return $res -> withStatus(403) -> write(json_encode($data));
+				}
+				//CHECK ACCESS TO THAT FUNCTION//END//
 				if ( !isset($allParams['id']) OR $allParams['id'] == 0){
 					$data['error']['status']=true;
 					$data['error']['message']='Bad Request';
@@ -1351,6 +1382,12 @@ class TACConfigCtrl extends Controller
 				$data['output'] = $this->tacUserGroupsPartGen(true, $allParams['id']);
 				break;
 			case 'acl':
+				//CHECK ACCESS TO THAT FUNCTION//START//
+				if(!$this->checkAccess(11))
+				{
+					return $res -> withStatus(403) -> write(json_encode($data));
+				}
+				//CHECK ACCESS TO THAT FUNCTION//END//
 				if ( !isset($allParams['id']) OR $allParams['id'] == 0){
 					$data['error']['status']=true;
 					$data['error']['message']='Bad Request';

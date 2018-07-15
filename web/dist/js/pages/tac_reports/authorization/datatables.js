@@ -33,9 +33,9 @@ var initialData =
 	{
 		id: {title: "ID", data : "id", orderable: true, visible: false,},
 		date: {title: "Date", data : "date", visible: true, orderable: true},
-		NAS: {title: "NAS IP", data : "NAS", visible: true, orderable: true},
+		nas: {title: "NAS IP", data : "nas", visible: true, orderable: true},
 		username: {title: "Username", data : "username", visible: true, orderable: true},
-		NAC: {title: "NAC IP", data : "NAC", visible: true, orderable: true},
+		nac: {title: "NAC IP", data : "nac", visible: true, orderable: true},
 		line: {title: "Line", data : "line", visible: false, orderable: false},
 		action: {title: "Action", data : "action", visible: true, orderable: false},
 		cmd: {title: "Command", data : "cmd", visible: true, orderable: false},

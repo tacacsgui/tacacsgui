@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<?php 
+<?php
 //////////////////////////////////////////////////
 /*CONFIGURATION FILE*/require __DIR__ . '/config.php';
 //////////////////////////////////////////////////
@@ -21,9 +21,11 @@
   <link rel="stylesheet" href="/dist/css/AdminLTE.min.css">
   <!-- iCheck -->
   <link rel="stylesheet" href="/plugins/iCheck/square/blue.css">
+  <!-- toastr -->
+  <link rel="stylesheet" href="plugins/toastr/toastr.min.css">
   <!-- MAIN CSS FOR TGUI -->
   <link rel="stylesheet" href="/dist/css/main.css">
-  
+
   <link rel="shortcut icon" href="dist/img/favicon.ico">
 
   <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
@@ -53,7 +55,7 @@
     position: relative;
     padding: 5px;
   }
-  
+
   </style>
 </head>
 <body class="hold-transition login-page">
@@ -66,16 +68,20 @@
   <div class="login-box-body">
 	<div class="form_block text-center"> <h3>Loading...</h3> </div>
     <p class="login-box-msg">Sign in to get control</p>
-	<div class="alert alert-danger hidden"></div>
+	<div class="alert alert-danger" style="display:none;"></div>
 	<div class="alert alert-warning changePasswd" style="display:none">Hello <username><i></i></username>. Please change your password</div>
-    <form method="post" class="signin">
-      <div class="form-group has-feedback input-group">
-        <input type="text" class="form-control" placeholder="Login" id="username" required="true" value=''>
-        <span class="input-group-addon"><i class="glyphicon glyphicon-user"></i></span>
+    <form id="signinForm" onsubmit="return tgui_signin.signin()">
+      <div class="form-group username">
+        <div class="input-group">
+          <input type="text" class="form-control" placeholder="Login" name="username" data-type="input" data-default="" data-pickup="true" value=''>
+          <span class="input-group-addon"><i class="glyphicon glyphicon-user"></i></span>
+        </div>
       </div>
-      <div class="form-group has-feedback input-group">
-        <input type="password" class="form-control" placeholder="Password" id="password" required="true" value=''>
-        <span class="input-group-addon"><i class="glyphicon glyphicon-lock"></i></span>
+      <div class="form-group password">
+        <div class="input-group">
+          <input type="password" class="form-control" placeholder="Password" name="password" data-type="input" data-default="" data-pickup="true" value=''>
+          <span class="input-group-addon"><i class="glyphicon glyphicon-lock"></i></span>
+        </div>
       </div>
       <div class="row">
         <div class="col-xs-8">
@@ -87,25 +93,29 @@
         </div>
         <!-- /.col -->
         <div class="col-xs-4">
-          <button type="submit" class="btn btn-primary btn-block btn-flat" id="submit_btn">Sign In</button>
+          <button type="submit" class="btn btn-primary btn-block btn-flat">Sign In</button>
         </div>
         <!-- /.col -->
       </div>
     </form>
 	<!-- CHANGE PASSWORD FORM-->
-	<form method="post" class="changePasswd" style="display:none">
-		<div class="form-group has-feedback input-group">
-			<input type="password" class="form-control" placeholder="Password" id="change_password" required="true" value=''>
-			<span class="input-group-addon"><i class="glyphicon glyphicon-lock"></i></span>
+	<form id="chngPaswdForm" onsubmit="return tgui_signin.chngPasswd()" style="display:none">
+		<div class="form-group change_passwd">
+  		<div class="input-group ">
+  			<input type="password" class="form-control" placeholder="Password" name="change_passwd" data-type="input" data-default="" data-pickup="true" value=''>
+  			<span class="input-group-addon"><i class="glyphicon glyphicon-lock"></i></span>
+  		</div>
 		</div>
-		<div class="form-group has-feedback input-group">
-			<input type="password" class="form-control" placeholder="Repeat Password" id="change_reppassword" required="true" value=''>
-			<span class="input-group-addon"><i class="glyphicon glyphicon-lock"></i></span>
+		<div class="form-group change_passwd_repeat">
+  		<div class="input-group">
+  			<input type="password" class="form-control" placeholder="Repeat Password" name="change_passwd_repeat" data-type="input" data-default="" data-pickup="true" value=''>
+  			<span class="input-group-addon"><i class="glyphicon glyphicon-lock"></i></span>
+  		</div>
 		</div>
 		<div class="row">
 			<!-- /.col -->
 			<div class="col-xs-12 text-center">
-				<button type="submit" class="btn btn-primary btn-flat" id="change_submit_btn">Change Password</button>
+				<button type="submit" class="btn btn-primary btn-flat">Change Password</button>
 			</div>
 			<!-- /.col -->
 		</div>
@@ -124,10 +134,17 @@
 <script src="/bower_components/jquery/dist/jquery.min.js"></script>
 <!-- Bootstrap 3.3.7 -->
 <script src="/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+<!-- toastr -->
+<script src="plugins/toastr/toastr.min.js"></script>
+
+<!-- Main Object -->
+<script src="dist/js/main.js"></script>
 <!-- iCheck -->
 <script src="/plugins/iCheck/icheck.min.js"></script>
-<!-- singin main file -->
+<!-- singin object -->
 <script src="/dist/js/pages/singin/singin.js"></script>
+<!-- singin main -->
+<script src="/dist/js/pages/singin/main.js"></script>
 <script>
   $(function () {
     $('input').iCheck({

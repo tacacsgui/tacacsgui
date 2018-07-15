@@ -31,7 +31,7 @@
   </div>
 </div>
 <div class="col-lg-6 col-md-6">
-  <div class="form-group repPassword">
+  <div class="form-group rep_password">
     <label for="rep_password">Repeat Password</label>
     <div class="input-group">
       <input type="password" class="form-control" name="rep_password" data-type="input" data-default="" data-pickup="true" placeholder="Repeat Password" autocomplete="off">

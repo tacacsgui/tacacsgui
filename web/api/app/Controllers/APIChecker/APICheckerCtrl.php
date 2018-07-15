@@ -39,6 +39,30 @@ protected $tablesArr = array(
 		'api_logging_max_entries' => ['integer', 500],
 		'update_key' => ['string', ''],
 	],
+	'api_password_policy' =>
+	[
+		'api_pw_length' => ['integer', '8'],
+		'api_pw_uppercase' => ['integer', '0'],
+		'api_pw_lowercase' => ['integer', '0'],
+		'api_pw_numbers' => ['integer', '0'],
+		'api_pw_special' => ['integer', '0'],
+		'api_pw_same' => ['integer', '0'],
+		'tac_pw_length' => ['integer', '8'],
+		'tac_pw_uppercase' => ['integer', '0'],
+		'tac_pw_lowercase' => ['integer', '0'],
+		'tac_pw_numbers' => ['integer', '0'],
+		'tac_pw_special' => ['integer', '0'],
+		'tac_pw_same' => ['integer', '0'],
+	],
+	'api_smtp' =>
+	[
+		'smtp_servers' => ['string', ''],
+		'smtp_auth' => ['integer', '1'],
+		'smtp_username' => ['string', ''],
+		'smtp_password' => ['string', ''],
+		'smtp_port' => ['integer', '465'],
+		'smtp_secure' => ['string', 'ssl'],
+	],
 	'api_backup' =>
 	[
 		'tcfgSet' => ['integer', '1'],
@@ -111,6 +135,7 @@ protected $tablesArr = array(
 		'group' => ['integer', '0'],
 		'disabled' => ['integer', '0'],
 		'vendor' => ['string', ''],
+		'sn' => ['string', ''],
 		'banner_welcome' => ['text', '_'],
 		'banner_failed' => ['text', '_'],
 		'banner_motd' => ['text', '_'],
@@ -331,6 +356,18 @@ protected $tablesArr = array(
 			case 'api_settings':
 				$this->db::table($tableName)->insert([
 					'update_key' => $this->generateRandomString(),
+					'created_at' => date('Y-m-d H:i:s', time()),
+					'updated_at' => date('Y-m-d H:i:s', time())
+				]);
+				break;
+			case 'api_password_policy':
+				$this->db::table($tableName)->insert([
+					'created_at' => date('Y-m-d H:i:s', time()),
+					'updated_at' => date('Y-m-d H:i:s', time())
+				]);
+				break;
+			case 'api_smtp':
+				$this->db::table($tableName)->insert([
 					'created_at' => date('Y-m-d H:i:s', time()),
 					'updated_at' => date('Y-m-d H:i:s', time())
 				]);
@@ -562,8 +599,6 @@ protected $tablesArr = array(
 		if ( array_search('userName', $this->db::schema()->getColumnListing('api_logging')) )
 		{
 			$response['status'] = true;
-			//die();
-			//$response['status'] = false;
 			$this->db::schema()->table('api_logging', function(Blueprint $table) {
             $table->dropColumn('userName');
             $table->dropColumn('userId');
@@ -573,6 +608,24 @@ protected $tablesArr = array(
       });
 			$response['message'] = 'Table fix for api_logging';
 			//$this->db::table('api_logging')->renameColumn('userName', 'username');
+		}
+
+		if ( array_search('NAS', $this->db::schema()->getColumnListing('tac_log_authentication')) )
+		{
+			$response['status'] = true;
+			$this->db::schema()->table('tac_log_authentication', function(Blueprint $table) {
+            $table->renameColumn('NAS', 'nas');
+            $table->renameColumn('NAC', 'nac');
+      });
+			$this->db::schema()->table('tac_log_authorization', function(Blueprint $table) {
+            $table->renameColumn('NAS', 'nas');
+						$table->renameColumn('NAC', 'nac');
+      });
+			$this->db::schema()->table('tac_log_accounting', function(Blueprint $table) {
+            $table->renameColumn('NAS', 'nas');
+						$table->renameColumn('NAC', 'nac');
+      });
+			$response['message'] = 'Table fix for tac_log_* tables';
 		}
 		return $response;
 	}

@@ -10,17 +10,17 @@ $PAGE_TITLE = 'TacacsGUI';
 $PAGE_SUBTITLE = 'API Settings';
 $BREADCRUMB = array(
 	'Home' => [
-		'name' => 'Administration', 
-		'href' => '', 
-		'icon' => 'fa fa-cog', 
+		'name' => 'Administration',
+		'href' => '',
+		'icon' => 'fa fa-cog',
 		'class' => ''  //last item should have active class!!
-	], 
+	],
 	'Tacacs' => [
-		'name' => 'API Settings', 
-		'href' => '', 
-		'icon' => 'fa fa-cog', 
+		'name' => 'API Settings',
+		'href' => '',
+		'icon' => 'fa fa-cog',
 		'class' => 'active'  //last item should have active class!!
-	], 
+	],
 );
 ///!!!!!////
 $ACTIVE_MENU_ID=1000;
@@ -35,11 +35,14 @@ require __DIR__ . '/templates/header.php';
 ?>
 <!--ADDITIONAL CSS FILES START-->
 
+<!-- jqueryfiletree -->
+<link rel="stylesheet" href="plugins/jQueryFileTree/jQueryFileTree.min.css">
+<!-- iCheck -->
+<link rel="stylesheet" href="/plugins/iCheck/square/blue.css">
 <!--ADDITIONAL CSS FILES END-->
+<?php
 
-<?php 
-
-require __DIR__ . '/templates/body_start.php'; 
+require __DIR__ . '/templates/body_start.php';
 
 ?>
 <!--MAIN CONTENT START-->
@@ -47,22 +50,27 @@ require __DIR__ . '/templates/body_start.php';
 <div class="box box-solid">
 	<div class="box-body">
 		<div class="nav-tabs-custom">
-            <ul class="nav nav-tabs">
-              <li class="active"><a href="#general" data-toggle="tab">General</a></li>
-              <li><a href="#time_settings" data-toggle="tab">Time settings</a></li>
-              <li><a href="#logging" data-toggle="tab">Logging</a></li>
+            <ul class="nav nav-tabs api_settings">
+							<li class="active"><a href="#time_settings" data-toggle="tab" data-section="time">Time settings</a></li>
+							<li><a href="#smtp" data-toggle="tab" data-section="smtp">SMTP Server</a></li>
+              <li><a href="#passwd_policy" data-toggle="tab" data-section="passwords">Password Policy</a></li>
+              <li><a href="#logging" data-toggle="tab" data-section="logging">Logging</a></li>
             </ul>
             <div class="tab-content">
-              <div class="tab-pane active" id="general">
+							<div class="tab-pane active" id="time_settings">
                 It will be added soon
               </div>
               <!-- /.tab-pane -->
-              <div class="tab-pane" id="time_settings">
-                It will be added soon
+							<div class="tab-pane" id="smtp">
+                <?php include __DIR__ . '/templates/pages/api_settings/tab_smtp.php';?>
+              </div>
+              <!-- /.tab-pane -->
+              <div class="tab-pane" id="passwd_policy">
+                <?php include __DIR__ . '/templates/pages/api_settings/tab_passwd_policy.php';?>
               </div>
               <!-- /.tab-pane -->
               <div class="tab-pane" id="logging">
-                It will be added soon
+                <?php include __DIR__ . '/templates/pages/api_settings/tab_logging.php';?>
               </div>
               <!-- /.tab-pane -->
             </div>
@@ -74,9 +82,9 @@ require __DIR__ . '/templates/body_start.php';
 
 <!--MAIN CONTENT END-->
 
-<?php 
+<?php
 
-require __DIR__ . '/templates/body_end.php'; 
+require __DIR__ . '/templates/body_end.php';
 
 ?>
 
@@ -87,9 +95,15 @@ require __DIR__ . '/templates/footer_end.php';
 
 ?>
 <!-- ADDITIONAL JS FILES START-->
+	<!-- jqueryfiletree -->
+	<script src="plugins/jQueryFileTree/jQueryFileTree.min.js"></script>
+	<!-- iCheck -->
+	<script src="plugins/iCheck/icheck.min.js"></script>
 
+	<!-- main Object -->
+  <script src="dist/js/pages/api_settings/tgui_apiSettings.js"></script>
 	<!-- main js MAIN Functions -->
-    <script src="dist/js/pages/api_settings/main.js"></script>
+  <script src="dist/js/pages/api_settings/main.js"></script>
 
 <!-- ADDITIONAL JS FILES END-->
 </body>

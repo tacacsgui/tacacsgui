@@ -446,4 +446,118 @@ class TACReportsCtrl extends Controller
 
 ########	Authorization Datatables	###############END###########
 ################################################
+########	File Tree ###############START###########
+	#########	POST	#########
+	public function postFileTree($req,$res)
+	{
+		//INITIAL CODE////START//
+		$data=array();
+		$data=$this->initialData([
+			'type' => 'post',
+			'object' => 'file tree',
+			'action' => 'tree',
+		]);
+		#check error#
+		if ($_SESSION['error']['status']){
+			$data['error']=$_SESSION['error'];
+			return $res -> withStatus(401) -> write(json_encode($data));
+		}
+		//INITIAL CODE////END//
+		$allParams = $req->getParams();
+		$root = TAC_ROOT_PATH . '/log/tacacs';
+		if( !$root ) exit("ERROR: Root filesystem directory not set in jqueryFileTree.php");
+		$postDir = rawurldecode($root.(isset($allParams['dir']) ? $allParams['dir'] : null ));
+		// set checkbox if multiSelect set to true
+		$checkbox = ( isset($allParams['multiSelect']) && $allParams['multiSelect'] == 'true' ) ? "<input type='checkbox' />" : null;
+		$onlyFolders = ( isset($allParams['onlyFolders']) && $allParams['onlyFolders'] == 'true' ) ? true : false;
+		$onlyFiles = ( isset($allParams['onlyFiles']) && $allParams['onlyFiles'] == 'true' ) ? true : false;
+		if( file_exists($postDir) ) {
+			$files		= scandir($postDir);
+			$returnDir	= substr($postDir, strlen($root));
+			natcasesort($files);
+			if( count($files) > 2 ) { // The 2 accounts for . and ..
+				echo "<ul class='jqueryFileTree'>";
+				foreach( $files as $file ) {
+					$htmlRel	= htmlentities($returnDir . $file,ENT_QUOTES);
+					$htmlName	= htmlentities($file);
+					$ext		= preg_replace('/^.*\./', '', $file);
+					if( file_exists($postDir . $file) && $file != '.' && $file != '..' ) {
+						if( is_dir($postDir . $file) && (!$onlyFiles || $onlyFolders) )
+							echo "<li class='directory collapsed'>{$checkbox}<a rel='" .$htmlRel. "/'>" . $htmlName . "</a></li>";
+						else if ( (!$onlyFolders || $onlyFiles) AND $htmlName != '.gitkeep')
+							echo "<li class='file ext_{$ext}'>{$checkbox}<a rel='" . $htmlRel . "' href=\"/api/download/log/?file=".$htmlRel."&filename=".$htmlName."\" target=\"_blank\">" . $htmlName . "</a></li>";
+					}
+				}
+				echo "</ul>";
+			}
+		}
+
+		return $res -> withStatus(200);
+	}
+	########	File Tree	###############END###########
+	################################################
+	########	Delete Log ###############START###########
+	#########	POST	#########
+	public function postLogDelete($req,$res)
+	{
+		//INITIAL CODE////START//
+		$data=array();
+		$data=$this->initialData([
+			'type' => 'post',
+			'object' => 'tac log',
+			'action' => 'delete',
+		]);
+		#check error#
+		if ($_SESSION['error']['status']){
+			$data['error']=$_SESSION['error'];
+			return $res -> withStatus(401) -> write(json_encode($data));
+		}
+		//INITIAL CODE////END//
+
+		//CHECK ACCESS TO THAT FUNCTION//START//
+		if(!$this->checkAccess(1))
+		{
+			return $res -> withStatus(403) -> write(json_encode($data));
+		}
+		//CHECK ACCESS TO THAT FUNCTION//END//
+
+		$allParams = $req->getParams();
+
+		$allParams = $req->getParams();
+		$period = '';
+		if (!preg_match('/^[0-9]\s(year[s]{0,1}|month[s]{0,1})', $allParams['period']))
+		{
+			$dateCount = new \DateTime;
+			$dateCount->modify('-'.$allParams['period']);
+			$period = $dateCount->format('Y-m-d H:i:s');
+		}
+		if ($allParams['period'] == 'all') $period = 'all';
+
+		if (empty($period) OR empty($allParams['target'])){
+			$data['error']=true;
+			return $res -> withStatus(200) -> write(json_encode($data));
+		}
+		$data['period'] = $period;
+		switch ($allParams['target']) {
+			case 'accounting':
+				$data['result'] = ($period == 'all') ?  Accounting::delete() : Accounting::where('date','<=',$period)->delete();
+				break;
+
+			case 'authentication':
+				$data['result'] = ($period == 'all') ?  Authentication::delete() : Authentication::where('date','<=',$period)->delete();
+				break;
+
+			case 'authorization':
+				$data['result'] = ($period == 'all') ?  Authorization::delete() : Authorization::where('date','<=',$period)->delete();
+				break;
+
+			default:
+				$data['error']=true;
+				return $res -> withStatus(200) -> write(json_encode($data));
+				break;
+		}
+
+		return $res -> withStatus(200) -> write(json_encode($data));
+	}
+	########	Delete Log ###############END###########
 }

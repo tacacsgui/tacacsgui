@@ -90,6 +90,7 @@ var tgui_configEngine = {
           resolve(true);
         }).fail(function(err){
           tgui_error.getStatus(err, ajaxProps)
+          resolve(true);
         })
       }
     );

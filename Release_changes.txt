@@ -1,4 +1,10 @@
 ##############################
+Version_0.9.25 20180715
+	* API User rights rebuilded (now user won't see database if it doesn't have special rights)
+	* Added Password Policy
+	* Added SMTP Engine
+	* Bug Fix/Bugs Added
+##############################
 Version_0.9.24 20180708
 	* IMPORTANT! this update will work properly only after soft reinstallation
 	*New Filter for tables

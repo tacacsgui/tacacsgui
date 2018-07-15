@@ -123,6 +123,47 @@ class APILoggingCtrl extends Controller
 
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
-
 	###################	POST LOGGING DATATABLES ########END##
+	public function postLoggingDelete($req,$res)
+	{
+		//INITIAL CODE////START//
+		$data=array();
+		$data=$this->initialData([
+			'type' => 'post',
+			'object' => 'logging',
+			'action' => 'delete',
+		]);
+		#check error#
+		if ($_SESSION['error']['status']){
+			$data['error']=$_SESSION['error'];
+			return $res -> withStatus(401) -> write(json_encode($data));
+		}
+		//INITIAL CODE////END//
+
+		//CHECK ACCESS TO THAT FUNCTION//START//
+		if(!$this->checkAccess(1))
+		{
+			return $res -> withStatus(403) -> write(json_encode($data));
+		}
+		//CHECK ACCESS TO THAT FUNCTION//END//
+
+		$allParams = $req->getParams();
+		$period = '';
+		if (!preg_match('/^[0-9]\s(year[s]{0,1}|month[s]{0,1})', $allParams['period']))
+		{
+			$dateCount = new \DateTime;
+			$dateCount->modify('-'.$allParams['period']);
+			$period = $dateCount->format('Y-m-d H:i:s');
+		}
+		if ($allParams['period'] == 'all') $period = 'all';
+
+		if (empty($period)){
+			$data['error']=true;
+			return $res -> withStatus(200) -> write(json_encode($data));
+		}
+		$data['period'] = $period;
+		$data['result'] = ($period == 'all') ?  APILogging::delete() : APILogging::where('created_at','<=',$period)->delete();
+
+		return $res -> withStatus(200) -> write(json_encode($data));
+	}
 }

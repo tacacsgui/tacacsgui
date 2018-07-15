@@ -3,6 +3,7 @@
 namespace tgui\Controllers\Auth;
 
 use tgui\Models\APIUsers;
+use tgui\Models\APIPWPolicy;
 use tgui\Controllers\Controller;
 use Respect\Validation\Validator as v;
 
@@ -46,15 +47,16 @@ class AuthController extends Controller
 		$data['authorised']=false;
 
 		$_SESSION['failedLoginCount'] = (empty($_SESSION['failedLoginCount'])) ? 1 : $_SESSION['failedLoginCount']+1;
-		$lockTime = 6;
-		$badLoginLimit = 10;
+		$lockTime = 0;
+		$badLoginLimit = 7;
 
 		if ($_SESSION['failedLoginCount'] > $badLoginLimit AND empty($_SESSION['blockTime'])){
 			$_SESSION['error']['status']=true;
-			$_SESSION['error']['message']='You was blocked for 10 minutes';
+			$_SESSION['error']['message']='You was blocked for 5 minutes';
 			$_SESSION['blockTime'] = time();
 			///LOGGING//start//
-			$logEntry = array('username' => $req->getParam('username'), 'uid' => 0, 'action' => 'singin', 'section' => 'api auth', 'message' => 104);
+			$username = $req->getParam('username');
+			$logEntry = array('username' => empty($username) ? '' : $username, 'uid' => 0, 'action' => 'singin', 'section' => 'api auth', 'message' => 104);
 			$this->APILoggingCtrl->makeLogEntry($logEntry);
 			///LOGGING//end//
 			$data['error']=$_SESSION['error'];
@@ -84,6 +86,16 @@ class AuthController extends Controller
 			$this->APICheckerCtrl->myFirstTable();
 		}
 
+		$validation = $this->validator->validate($req, [
+			'username' => v::notEmpty(),
+			'password' => v::notEmpty()
+		]);
+
+		if ($validation->failed()){
+			$data['error']['status']=true;
+			$data['error']['validation']=$validation->error_messages;
+			return $res -> withStatus(401) -> write(json_encode($data));
+		}
 
 		$auth = $this->auth->attempt(
 			$req->getParam('username'),
@@ -130,10 +142,19 @@ class AuthController extends Controller
 			return $res -> withStatus(401) -> write(json_encode($data));
 		}
 		//INITIAL CODE////END//
-
+		$password = APIUsers::where('id', $_SESSION['uid'])->first()->password;
+		$policy = APIPWPolicy::select()->first(1);
 		$validation = $this->validator->validate($req, [
-			'password' => v::noWhitespace()->notContainChars()->length(5, 24)->notEmpty()->checkPassword($req->getParam('reppassword')),
-			//'reppassword' => v::noWhitespace()->notEmpty()->checkPassword($req->getParam('password')),
+			'change_passwd' => v::when( v::alwaysValid() , v::notContainChars()->
+					length($policy['api_pw_length'], 64)->
+					notEmpty()->
+					passwdPolicyUppercase($policy['api_pw_uppercase'])->
+					passwdPolicyLowercase($policy['api_pw_lowercase'])->
+					passwdPolicySpecial($policy['api_pw_special'])->
+					passwdPolicySame($policy['api_pw_same'], $password, 'api')->
+					passwdPolicyNumbers($policy['api_pw_numbers'])->
+					checkPassword($req->getParam('change_passwd_repeat'))->setName('Password') ),
+			'change_passwd_repeat' => v::checkPassword($req->getParam('change_passwd')),
 		]);
 
 		if ($validation->failed()){
@@ -152,7 +173,7 @@ class AuthController extends Controller
 
 		$data['status']=APIUsers::where([['id','=',$_SESSION['uid']]])->
 			update([
-				'password' => password_hash($req->getParam('password'), PASSWORD_DEFAULT),
+				'password' => password_hash($req->getParam('change_passwd'), PASSWORD_DEFAULT),
 				'changePasswd' => 0
 			]);
 		$_SESSION['changePasswd'] = 0;

@@ -71,31 +71,39 @@ class Controller
 	////CHANGE CONFIGURATION STATUS////END//
 	////////////////////////////////////////
 	////CHECK ACCESS FOR USER////START//
-	protected function checkAccess($value)
+	public static function checkAccess($value = 0, $demo = false)
 	{
 		$rightsArray = array_reverse ( str_split( decbin($_SESSION['groupRights']) ) );
 		//Clear DEMO//
-		if ($value == 0 AND $rightsArray[0] == 1) return false;
+		if (count($rightsArray) !== 1 AND $rightsArray[0] !== 1) $demo = false;
 		//DEMO//
-		if ($rightsArray[0] == 0 AND count($rightsArray) == 1) return false;
+		if ($value == 0 AND count($rightsArray) == 1 AND $rightsArray[0] == 1) return true;
 		//Administrator//
 		if ($rightsArray[1] == 1) return true;
 		//Add/Edit/Delete Tac Devices//
-		if ($value == 2 AND $rightsArray[2] == 1) return true;
+		if ($value == 2 AND $rightsArray[2] == 1 OR $demo) return true;
 		//Add/Edit/Delete Tac Device Groups//
-		if ($value == 3 AND $rightsArray[3] == 1) return true;
+		if ($value == 3 AND $rightsArray[3] == 1 OR $demo) return true;
 		//Add/Edit/Delete Tac Users//
-		if ($value == 4 AND $rightsArray[4] == 1) return true;
+		if ($value == 4 AND $rightsArray[4] == 1 OR $demo) return true;
 		//Add/Edit/Delete Tac User Groups//
-		if ($value == 5 AND $rightsArray[5] == 1) return true;
+		if ($value == 5 AND $rightsArray[5] == 1 OR $demo) return true;
 		//Apply/Test Tac Configuration//
-		if ($value == 6 AND $rightsArray[6] == 1) return true;
+		if ($value == 6 AND $rightsArray[6] == 1 OR $demo) return true;
 		//Add/Edit/Delete API Users//
-		if ($value == 7 AND $rightsArray[7] == 1) return true;
+		if ($value == 7 AND $rightsArray[7] == 1 OR $demo) return true;
 		//Add/Edit/Delete API User Groups//
-		if ($value == 8 AND $rightsArray[8] == 1) return true;
+		if ($value == 8 AND $rightsArray[8] == 1 OR $demo) return true;
 		//Delete/Restore Backups//
-		if ($value == 9 AND $rightsArray[9] == 1) return true;
+		if ($value == 9 AND $rightsArray[9] == 1 OR $demo) return true;
+		//Upgrade API//
+		if ($value == 10 AND $rightsArray[10] == 1 OR $demo) return true;
+		//MAVIS//
+		if ($value == 11 AND $rightsArray[11] == 1 OR $demo) return true;
+		//Add/Edit/Delete Tac ACL//
+		if ($value == 12 AND $rightsArray[12] == 1 OR $demo) return true;
+		//Add/Edit/Delete Tac Services//
+		if ($value == 13 AND $rightsArray[13] == 1 OR $demo) return true;
 		//Default false//
 		return false;
 	}

@@ -30,6 +30,13 @@ $app->post('/user/group/delete/', 'APIUserGrpsCtrl:postUserGroupDelete');
 $app->post('/user/group/rights/', 'APIUserGrpsCtrl:postUserGroupRightsList');
 $app->get('/user/group/list/', 'APIUserGrpsCtrl:getUserGroupList');
 #####################################################
+###API Settings Routes#############################
+$app->get('/settings/pwpolicy/', 'APISettingsCtrl:getPasswdPolicy');
+$app->post('/settings/pwpolicy/', 'APISettingsCtrl:postPasswdPolicy');
+$app->get('/settings/smtp/', 'APISettingsCtrl:getSmtp');
+$app->post('/settings/smtp/', 'APISettingsCtrl:postSmtp');
+$app->post('/settings/smtp/test/', 'APISettingsCtrl:postSmtpTest');
+#####################################################
 ###Tacacs Devices Routes#######################################
 $app->post('/tacacs/device/datatables/', 'TACDevicesCtrl:postDeviceDatatables');
 $app->get('/tacacs/device/ping/', 'TACDevicesCtrl:getDevicePing');
@@ -113,6 +120,8 @@ $app->post('/tacacs/reports/authorization/datatables/', 'TACReportsCtrl:postAuth
 $app->get('/tacacs/reports/general/', 'TACReportsCtrl:getGeneralReport');
 $app->get('/tacacs/reports/daemon/status/', 'TACReportsCtrl:getDaemonStatus');
 $app->get('/tacacs/reports/top/access/', 'TACReportsCtrl:getTopAccess');
+$app->post('/tacacs/reports/tree/', 'TACReportsCtrl:postFileTree');
+$app->post('/tacacs/reports/delete/', 'TACReportsCtrl:postLogDelete');
 #####################################################
 
 ###APIChecker Routes#######################################
@@ -157,8 +166,10 @@ $app->post('/mavis/sms/check/', 'MAVISSMS:postSMSCheck');
 
 ###APIChecker Routes#######################################
 $app->post('/logging/datatables/', 'APILoggingCtrl:postLoggingDatatables');
+$app->post('/logging/delete/', 'APILoggingCtrl:postLoggingDelete');
 #####################################################
 
 ###API Dounload Manager Routes#######################################
 $app->get('/download/csv/', 'APIDownloadCtrl:getDownloadCsv');
+$app->get('/download/log/', 'APIDownloadCtrl:getDownloadLog');
 #####################################################

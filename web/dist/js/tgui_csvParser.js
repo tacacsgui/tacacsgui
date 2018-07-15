@@ -4,6 +4,7 @@ function tgui_csvParser(csv) {
   csv.outputId = csv.outputId || '#csvParserOutput';
   csv.fileInputId = csv.fileInputId || '#csv-file';
   csv.ajaxLink = csv.ajaxLink || 'tacacs/device/add/';
+  csv.ajaxItem = csv.ajaxItem || 'device';
   csv.columnsRequired = csv.columnsRequired || [];
   csv.ajaxHandler = csv.ajaxHandler || function(){ return false};
   csv.finalAnswer = csv.finalAnswer || function(){ return false};
@@ -87,7 +88,7 @@ function tgui_csvParser(csv) {
           var name = row.name || row.username
           self.csvParserOutput({message:'Adding '+name+'. Send to server...'});
           var ajaxProps = {
-              url: API_LINK+csv.ajaxLink,
+              url: API_LINK+'tacacs/'+csv.ajaxItem+'/add/',
               data: row
             };//ajaxProps END
 
@@ -100,6 +101,7 @@ function tgui_csvParser(csv) {
             }
             else resolve(true);
           }).fail(function(err){
+            self.csvParserOutput({tag: '<h4 class="text-danger">Access Restricted!</h4>', response: index});
             tgui_error.getStatus(err, ajaxProps)
           })
       }/*end of promise function*/)
@@ -109,6 +111,27 @@ function tgui_csvParser(csv) {
       if (o.response != undefined) {$('div.server_response_' + o.response).empty().append(o.tag); return; }
       if (o.message) { $(this.csvOutputId).append('<p class="'+ ( (o.class) ? o.class : '' ) +'">'+ o.message +'</p>'); return; }
       if (o.tag) { $(this.csvOutputId).append(o.tag); return; }
-    }
+    },
+    csvDownload: function(idList) {
+      idList = idList || [];
+    if (! idList.length ) $('div.csv-link').empty().append(tgui_supplier.loadElement());
+    else { $('#exportLink').removeClass('m-progress').addClass('m-progress').attr('href', 'javascript: void(0)').show(); }
+    var ajaxProps = {
+      url: API_LINK+"tacacs/"+csv.ajaxItem+"/csv/",
+      data: {idList: idList}
+    };//ajaxProps END
+    ajaxRequest.send(ajaxProps).then(function(resp) {
+      if(!resp.filename) {
+        tgui_error.local.show( {type:'error', message: "Oops! Unknown error appeared :("} ); return;
+      }
+      if (! idList.length ) { $('div.csv-link').empty().append('<a href="/api/download/csv/?file=' + resp.filename + '" target="_blank">Download</a><p><small class="text-muted">Link will be valid within 15 minutes</small></p>') }
+      else {
+        $('#exportLink').removeClass('m-progress').attr('href', '/api/download/csv/?file=' + resp.filename);
+      }
+    }).fail(function(err){
+      if (err.status == 403) $('div.csv-link').empty().append('<h4 class="text-danger">Access Restricted!</h4>');
+      tgui_error.getStatus(err, ajaxProps)
+    })
+    },
   } //end of return
 } //end of construct
