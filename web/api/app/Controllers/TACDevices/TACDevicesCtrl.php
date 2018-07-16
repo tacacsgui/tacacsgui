@@ -170,7 +170,7 @@ class TACDevicesCtrl extends Controller
 		}
 		//CHECK ACCESS TO THAT FUNCTION//END//
 
-		$data['device']=TACDevices::select('id','name','ipaddr','prefix','key','enable','enable_flag','group','disabled','banner_welcome','banner_motd','banner_failed','manual','created_at', 'updated_at')->
+		$data['device']=TACDevices::select()->
 			where([['id','=',$req->getParam('id')],['name','=',$req->getParam('name')]])->
 			first();
 

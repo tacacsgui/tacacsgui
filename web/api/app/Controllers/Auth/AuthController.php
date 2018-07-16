@@ -142,8 +142,15 @@ class AuthController extends Controller
 			return $res -> withStatus(401) -> write(json_encode($data));
 		}
 		//INITIAL CODE////END//
+
 		$password = APIUsers::where('id', $_SESSION['uid'])->first()->password;
-		$policy = APIPWPolicy::select()->first(1);
+
+		if($this->db::schema()->hasTable('api_password_policy'))
+		{
+			$policy = APIPWPolicy::select()->first(1);
+		} else {
+			$policy = ['api_pw_length' => 8, 'api_pw_same' => true];
+		}
 		$validation = $this->validator->validate($req, [
 			'change_passwd' => v::when( v::alwaysValid() , v::notContainChars()->
 					length($policy['api_pw_length'], 64)->

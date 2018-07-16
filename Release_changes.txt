@@ -1,4 +1,8 @@
 ##############################
+Version_0.9.26 20180716
+	* Added tab Device Info 
+	* Bug Fix/Bugs Added
+##############################
 Version_0.9.25 20180715
 	* API User rights rebuilded (now user won't see database if it doesn't have special rights)
 	* Added Password Policy

@@ -113,7 +113,7 @@ case $1 in
 			else
 				REVISION=$((REVISION+1));
 			fi
-			TABLES="--tables mavis_ldap mavis_otp mavis_sms tac_acl tac_devices tac_device_groups tac_global_settings tac_services tac_users tac_user_groups api_users api_user_groups api_settings";
+			TABLES="--tables mavis_ldap mavis_otp mavis_sms tac_acl tac_devices tac_device_groups tac_global_settings tac_services tac_users tac_user_groups api_users api_user_groups api_settings api_password_policy api_smtp";
 		elif [ $TABLES = "tcfg" ]; then
 			TYPE=$TABLES
 			TABLES="--tables mavis_ldap mavis_otp mavis_sms tac_acl tac_devices tac_device_groups tac_global_settings tac_services tac_users tac_user_groups"
@@ -129,7 +129,7 @@ case $1 in
 			else
 				REVISION=$((REVISION+1));
 			fi
-			TABLES="api_users api_user_groups api_settings api_backup"
+			TABLES="api_users api_user_groups api_settings api_backup api_password_policy api_smtp"
 		elif [ $TABLES = "api_log" ]; then
 			TYPE=$TABLES
 			TABLES="api_logging"

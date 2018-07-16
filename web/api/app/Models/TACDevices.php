@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class TACDevices extends Model
 {
 	protected $table = 'tac_devices';
-	
+
 	protected $fillable = [
 		'ipaddr',
 		'name',
@@ -16,6 +16,10 @@ class TACDevices extends Model
 		'enable',
 		'enable_flag',
 		'group',
+		'model',
+		'vendor',
+		'type',
+		'sn',
 		'disabled',
 		'banner_welcome',
 		'banner_motd',

@@ -14,6 +14,7 @@
 					<li class="active"><a href="#general_info_edit" data-toggle="tab" aria-expanded="true">General</a></li>
 					<li class=""><a href="#messages_edit" data-toggle="tab" aria-expanded="false">Messages</a></li>
 					<li class=""><a href="#access_edit" data-toggle="tab" aria-expanded="false">Access</a></li>
+					<li class=""><a href="#info_edit" data-toggle="tab" aria-expanded="false">Info</a></li>
 					<li class="pull-right"><a href="#manual_edit" data-toggle="tab" aria-expanded="false" class="text-muted"><i class="fa fa-gear"></i></a></li>
 				</ul>
 				<div class="tab-content">
@@ -27,6 +28,10 @@
 					<!-- /.tab-pane -->
 					<div class="tab-pane" id="access_edit">
 						<?php include __DIR__ . '/tabAccessRules.php';?>
+					</div>
+					<!-- /.tab-pane -->
+					<div class="tab-pane" id="info_edit">
+						<?php include __DIR__ . '/tabInfo.php';?>
 					</div>
 					<!-- /.tab-pane -->
 					<div class="tab-pane" id="manual_edit">
