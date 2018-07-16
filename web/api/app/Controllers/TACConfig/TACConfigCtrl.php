@@ -1327,7 +1327,7 @@ class TACConfigCtrl extends Controller
 		switch ($allParams['target']) {
 			case 'device':
 				//CHECK ACCESS TO THAT FUNCTION//START//
-				if(!$this->checkAccess(2))
+				if(!$this->checkAccess(2, true))
 				{
 					return $res -> withStatus(403) -> write(json_encode($data));
 				}
@@ -1341,7 +1341,7 @@ class TACConfigCtrl extends Controller
 				break;
 			case 'deviceGrp':
 				//CHECK ACCESS TO THAT FUNCTION//START//
-				if(!$this->checkAccess(3))
+				if(!$this->checkAccess(3, true))
 				{
 					return $res -> withStatus(403) -> write(json_encode($data));
 				}
@@ -1355,7 +1355,7 @@ class TACConfigCtrl extends Controller
 				break;
 			case 'user':
 				//CHECK ACCESS TO THAT FUNCTION//START//
-				if(!$this->checkAccess(4))
+				if(!$this->checkAccess(4, true))
 				{
 					return $res -> withStatus(403) -> write(json_encode($data));
 				}
@@ -1369,7 +1369,7 @@ class TACConfigCtrl extends Controller
 				break;
 			case 'userGrp':
 				//CHECK ACCESS TO THAT FUNCTION//START//
-				if(!$this->checkAccess(5))
+				if(!$this->checkAccess(5, true))
 				{
 					return $res -> withStatus(403) -> write(json_encode($data));
 				}
@@ -1383,7 +1383,7 @@ class TACConfigCtrl extends Controller
 				break;
 			case 'acl':
 				//CHECK ACCESS TO THAT FUNCTION//START//
-				if(!$this->checkAccess(11))
+				if(!$this->checkAccess(11, true))
 				{
 					return $res -> withStatus(403) -> write(json_encode($data));
 				}

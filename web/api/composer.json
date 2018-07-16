@@ -15,5 +15,8 @@
 		"psr-4": {
 			"tgui\\": "app"
 		}
-	}
+	},
+  "repositories": {
+    "packagist": { "url": "https://packagist.org", "type": "composer" }
+  },
 }

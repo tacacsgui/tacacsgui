@@ -1,6 +1,9 @@
 ##############################
+Version_0.9.27 20180716
+	* Quick Fix
+##############################
 Version_0.9.26 20180716
-	* Added tab Device Info 
+	* Added tab Device Info
 	* Bug Fix/Bugs Added
 ##############################
 Version_0.9.25 20180715

@@ -44,6 +44,12 @@ case $1 in
 		else echo 'non ';
 		fi
 	;;
+	ntp)
+		#sudo systemctl restart ntp.service
+		#sudo vim /etc/ntp.conf
+		#timedatectl list-timezones
+		#ntpq -p
+	;;
 	*)
 		echo 'Unexpected main argument. Exit.'
 		exit 0
