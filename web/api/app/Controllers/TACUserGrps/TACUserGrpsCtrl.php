@@ -473,14 +473,30 @@ class TACUserGrpsCtrl extends Controller
 		////LIST OF GROUPS////
 		$data['incomplete_results'] = false;
 		$data['totalCount'] = TACUserGrps::select(['id','name'])->count();
-		$tempData = TACUserGrps::select(['id','name','enable','message'])->get()->toArray();
-		$data['items']=array( 0 => $noneItem);
+		$search = $req->getParam('search');
+		$take = 10 * $req->getParam('page');
+		$offset = 10 * ($req->getParam('page') - 1);
+		$data['take'] = $take;
+		$data['offset'] = $offset;
+		$tempData = TACUserGrps::select(['id','name','enable','message'])->
+			when( !empty($search), function($query) use ($search)
+			{
+				$query->where('name','LIKE', '%'.$search.'%');
+			})->
+			take($take)->
+			offset($offset);
+
+		$tempCounter = $tempData->count();
+
+		$tempData = $tempData->get()->toArray();
+		$data['pagination'] = (!$tempData OR $tempCounter < 10) ? ['more' => false] : [ 'more' => true];
+		$data['results']= ( $take == 10 AND empty($search) ) ? array( 0 => $noneItem) : array();
 		foreach($tempData as $group)
 		{
 			$group['text'] = $group['name'];
 			$group['message'] = ($group['message'] != '') ? true : false;
 			$group['enable'] = ($group['enable'] != '') ? true : false;
-			array_push($data['items'],$group);
+			array_push($data['results'],$group);
 		}
 
 		return $res -> withStatus(200) -> write(json_encode($data));

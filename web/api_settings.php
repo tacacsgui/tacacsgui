@@ -39,6 +39,8 @@ require __DIR__ . '/templates/header.php';
 <link rel="stylesheet" href="plugins/jQueryFileTree/jQueryFileTree.min.css">
 <!-- iCheck -->
 <link rel="stylesheet" href="/plugins/iCheck/square/blue.css">
+<!-- Select2 -->
+<link rel="stylesheet" href="bower_components/select2/dist/css/select2.min.css">
 <!--ADDITIONAL CSS FILES END-->
 <?php
 
@@ -58,7 +60,7 @@ require __DIR__ . '/templates/body_start.php';
             </ul>
             <div class="tab-content">
 							<div class="tab-pane active" id="time_settings">
-                It will be added soon
+                <?php include __DIR__ . '/templates/pages/api_settings/tab_time.php';?>
               </div>
               <!-- /.tab-pane -->
 							<div class="tab-pane" id="smtp">
@@ -99,7 +101,11 @@ require __DIR__ . '/templates/footer_end.php';
 	<script src="plugins/jQueryFileTree/jQueryFileTree.min.js"></script>
 	<!-- iCheck -->
 	<script src="plugins/iCheck/icheck.min.js"></script>
+	<!-- Select2 -->
+	<script src="bower_components/select2/dist/js/select2.full.min.js"></script>
 
+	<!-- Select2 Object -->
+	<script src="dist/js/tgui_select2.js"></script>
 	<!-- main Object -->
   <script src="dist/js/pages/api_settings/tgui_apiSettings.js"></script>
 	<!-- main js MAIN Functions -->

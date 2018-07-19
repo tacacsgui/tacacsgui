@@ -36,6 +36,10 @@ $app->post('/settings/pwpolicy/', 'APISettingsCtrl:postPasswdPolicy');
 $app->get('/settings/smtp/', 'APISettingsCtrl:getSmtp');
 $app->post('/settings/smtp/', 'APISettingsCtrl:postSmtp');
 $app->post('/settings/smtp/test/', 'APISettingsCtrl:postSmtpTest');
+$app->get('/settings/time/timezones/', 'APISettingsCtrl:getTimeTimezones');
+$app->post('/settings/time/', 'APISettingsCtrl:postTimeSettings');
+$app->get('/settings/time/', 'APISettingsCtrl:getTimeSettings');
+$app->get('/settings/time/status/', 'APISettingsCtrl:getTimeStatus');
 #####################################################
 ###Tacacs Devices Routes#######################################
 $app->post('/tacacs/device/datatables/', 'TACDevicesCtrl:postDeviceDatatables');

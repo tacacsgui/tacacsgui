@@ -1,4 +1,10 @@
 ##############################
+Version_0.9.28 20180719
+	* Added Time settings
+	* Added search for select2.js elements
+	* Added offline google fonts
+	* Maybe some bugs fixed
+##############################
 Version_0.9.27 20180716
 	* Quick Fix
 ##############################

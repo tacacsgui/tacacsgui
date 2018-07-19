@@ -16,16 +16,25 @@ var tgui_select2 = function(o)
       return {
       	ajax:{
       		url: this.ajaxUrl,
+          delay: 250,
       		dataType: 'json',
-      		processResults: function (data) {
-      			// Tranforms the top-level key of the response object from 'items' to 'results'
-      			return {
-      				results: data.items
-      			};
-      		},
+          data: function (params) {
+            var query = {
+              search: params.term,
+              page: params.page || 1,
+              type: 'public'
+            }
+            // Query parameters will be ?search=[term]&type=public
+            return query;
+          },
+      		// processResults: function (data) {
+      		// 	// Tranforms the top-level key of the response object from 'items' to 'results'
+      		// 	return {
+      		// 		results: data.items
+      		// 	};
+      		// },
           transport: function (params, success, failure) {
             var $request = $.ajax(params);
-            console.log(123);
             $request.then(success);
             $request.fail(failure);
 
@@ -35,7 +44,7 @@ var tgui_select2 = function(o)
       	escapeMarkup: function(markup){ return markup;},
       	templateResult: self.selectionTemplate,
       	templateSelection: self.selectionTemplate,
-      	minimumResultsForSearch: Infinity
+      	//minimumResultsForSearch: Infinity
       };
     },
 

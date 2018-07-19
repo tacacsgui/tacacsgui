@@ -32,10 +32,11 @@ protected $tablesArr = array(
 	],
 	'api_settings' =>
 	[
-		'timezone' => ['string', ''],
+		'timezone' => ['string', '348'],
 		'update_url' => ['string', 'https://tacacsgui.com/updates/'],
 		'update_activated' => ['integer', '0'],
 		'update_signin' => ['integer', '1'],
+		'ntp_list' => ['string', ''],
 		'api_logging_max_entries' => ['integer', 500],
 		'update_key' => ['string', ''],
 	],

@@ -488,17 +488,33 @@ public function postDeviceGroupCsv($req,$res)
 		////LIST OF GROUPS////
 		$data['incomplete_results'] = false;
 		$data['totalCount'] = TACDeviceGrps::select(['id','name'])->count();
-		$tempData = TACDeviceGrps::select(['id','name','key','enable','default_flag'])->get()->toArray();
-		$data['items']=array();
+		$search = $req->getParam('search');
+		$take = 10 * $req->getParam('page');
+		$offset = 10 * ($req->getParam('page') - 1);
+		$data['take'] = $take;
+		$data['offset'] = $offset;
+		$tempData = TACDeviceGrps::select(['id','name AS text','key','enable','default_flag'])->
+			when( !empty($search), function($query) use ($search)
+			{
+				$query->where('name','LIKE', '%'.$search.'%');
+			})->
+			take($take)->
+			offset($offset);
+
+		$tempCounter = $tempData->count();
+
+		$tempData = $tempData->get()->toArray();
+		$data['results']=array();
+		$data['pagination'] = (!$tempData OR $tempCounter < 10) ? ['more' => false] : [ 'more' => true];
 		foreach($tempData as $group)
 		{
-			$group['text'] = $group['name'];
+			//$group['text'] = $group['name'];
 			//unset($group['name']);
 			$group['key'] = ($group['key'] != '') ? true : false;
 			$group['enable'] = ($group['enable'] != '') ? true : false;
 			$group['default_flag'] = ($group['default_flag'] == 1) ? true : false;
 			$group['selected'] = ($group['default_flag']) ? true : false;
-			array_push($data['items'],$group);
+			array_push($data['results'],$group);
 		}
 
 		return $res -> withStatus(200) -> write(json_encode($data));

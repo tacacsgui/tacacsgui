@@ -7,11 +7,13 @@ var tgui_apiSettings = {
       $('div.overlay').show();
     });
 
+    this.time.init();
+
     $('.nav-tabs.api_settings a').on('shown.bs.tab', function(event){
       console.log(event.target.dataset.section);
       switch (event.target.dataset.section) {
         case 'time':
-
+          self.time.init();
           break;
         case 'smtp':
           self.smtp.get();
@@ -194,6 +196,97 @@ var tgui_apiSettings = {
         }
         tgui_error.local.show({type:'success', message: "Policy Settings were saved"})
         self.get();
+      }).fail(function(err){
+        tgui_error.getStatus(err, ajaxProps)
+      })
+    }
+  },
+  time: {
+    init: function(){
+      this.timezones.init();
+      this.get();
+    },
+    timezones:{
+      init: function(){
+        this.timezoneSelect2 = new tgui_select2({
+          ajaxUrl : API_LINK+"settings/time/timezones/",
+          template: this.selectionTemplate,
+          add: '.select_timezone',
+          edit: '',
+        });
+
+        $('.select_timezone').select2( this.timezoneSelect2.select2Data() );
+      },
+      selectionTemplate: function( data ){
+        var output='<div class="selectAclOption">';
+      		output += '<text>'+data.text+'</text>';
+      		output += '</div>'
+      	return output;
+      }
+    },
+    getTime: function(){
+      tgui_status.time().then(function(resp){
+        $('time.current-time').text(resp.time);
+      }).fail(function(err){
+        tgui_error.getStatus(err, ajaxProps)
+      });
+    },
+    get: function() {
+      $('div.overlay').show();
+      var self = this;
+
+      var ajaxProps = {
+        url: API_LINK + "settings/time/",
+        type: "GET"
+      };//ajaxProps END
+
+      ajaxRequest.send(ajaxProps).then(function(resp) {
+        tgui_supplier.fulfillForm(resp.time, '#timeSettings');
+        self.timezones.timezoneSelect2.preSelection(resp.time.timezone, 'add');
+        $('#timeSettings' + ' input[name="timezone_native"]').val(resp.time.timezone);
+        self.getTime();
+        $('div.overlay').hide();
+      }).fail(function(err){
+        tgui_error.getStatus(err, ajaxProps)
+      })
+    },
+    save: function() {
+      $('div.overlay').show();
+      var self = this;
+
+      var formData = tgui_supplier.getFormData('#timeSettings', true);
+          if ($('.select_timezone').select2('data').length && ( parseInt($('.select_timezone').select2('data')[0].id) != parseInt($('#timeSettings' + ' [name="timezone_native"]').val() ) ) ) {formData.timezone = $('.select_timezone').select2('data')[0].id;}
+
+      var ajaxProps = {
+        url: API_LINK + "settings/time/",
+        data: formData
+      };//ajaxProps END
+
+      if ( Object.keys(ajaxProps.data).length == 0) {
+        tgui_error.local.show({type:'warning', message: "Changes did not found"});
+        $('div.overlay').hide();
+        return;
+      }
+
+      ajaxRequest.send(ajaxProps).then(function(resp) {
+        if (tgui_supplier.checkResponse(resp.error, '#timeSettings')){
+          return;
+        }
+        tgui_error.local.show({type:'success', message: "Settings saved"})
+        self.get();
+        $('div.overlay').hide();
+      }).fail(function(err){
+        tgui_error.getStatus(err, ajaxProps)
+      })
+    },
+    status: function() {
+      var ajaxProps = {
+        url: API_LINK + "settings/time/status/",
+        type: 'get'
+      };//ajaxProps END
+
+      ajaxRequest.send(ajaxProps).then(function(resp) {
+        $('pre.ntp-check').empty().append(resp.output);
       }).fail(function(err){
         tgui_error.getStatus(err, ajaxProps)
       })

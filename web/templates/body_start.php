@@ -13,9 +13,9 @@
   <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
   <link rel="shortcut icon" href="dist/img/favicon.ico">
 
-   <!-- Google Font -->
-  <link rel="stylesheet"
-        href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic">
+   <!-- Google Font-->
+  <link rel="stylesheet" href="dist/css/fonts/main.css">
+
 </head>
 <!-- !!!!BODY START HERE!!!! -->
 <body class="hold-transition <?php echo GUI_SKIN;?> sidebar-mini">
