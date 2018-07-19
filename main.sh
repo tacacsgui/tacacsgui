@@ -39,7 +39,7 @@ case $1 in
 		#find $ROOT_PATH/$3 -mmin +15 -exec rm -f {} \;
 		DIRECTORY=$2;
 		if [[ $DIRECTORY = "temp" ]]; then
-			find $ROOT_PATH/temp/ -mmin +15 -type f -exec rm -f {} \;
+			find $ROOT_PATH/temp/ ! -name '.gitkeep' -mmin +15 -type f -exec rm -f {} \;
 			echo -n 0;
 		else echo 'non ';
 		fi
@@ -63,7 +63,7 @@ case $1 in
 			fi
 			mv $ROOT_PATH/temp/ntp.conf /etc/ntp.conf
 			sleep 1;
-			systemctl restart ntp.service
+			sudo systemctl restart ntp.service
 			echo -n 1
 			exit 0
 		;;
