@@ -95,6 +95,9 @@ class TACDevicesCtrl extends Controller
 		}
 		//CHECK ACCESS TO THAT FUNCTION//END//
 		$policy = APIPWPolicy::select()->first(1);
+
+		$allParams = $req->getParams();
+
 		$validation = $this->validator->validate($req, [
 			'name' => v::noWhitespace()->notEmpty()->deviceNameAvailable(0),
 			'group' => v::noWhitespace()->notEmpty(),
@@ -107,14 +110,15 @@ class TACDevicesCtrl extends Controller
 				passwdPolicyNumbers($policy['tac_pw_numbers'])->
 				desRestriction($req->getParam('enable_flag'))->setName('Enable') ),
 			'enable_flag' => v::noWhitespace(),
-			'key' => v::noWhitespace()->notContainChars()->
+			'key' => v::when( v::tacacsKeyAvailable($allParams['group']), v::alwaysValid(),
+			 	v::noWhitespace()->notContainChars()->
 				length($policy['tac_pw_length'], 64)->
 				notEmpty()->
 				passwdPolicyUppercase($policy['tac_pw_uppercase'])->
 				passwdPolicyLowercase($policy['tac_pw_lowercase'])->
 				passwdPolicySpecial($policy['tac_pw_special'])->
 				passwdPolicyNumbers($policy['tac_pw_numbers'])->
-				tacacsKeyAvailable($req->getParam('group'))->setName('Tacacs Key'),
+				tacacsKeyAvailable($req->getParam('group'))->setName('Tacacs Key') ),
 			'ipaddr' => v::noWhitespace()->notEmpty()->ip(),
 			'prefix' => v::noWhitespace()->notEmpty(),
 		]);
@@ -124,8 +128,6 @@ class TACDevicesCtrl extends Controller
 			$data['error']['validation']=$validation->error_messages;
 			return $res -> withStatus(200) -> write(json_encode($data));
 		}
-
-		$allParams = $req->getParams();
 
 		if ( (!empty($allParams['enable']) AND (@$allParams['enable_encrypt'] == 1)) AND (intval( @$allParams['enable_flag'] ) !== 0) )
 		{
@@ -200,9 +202,14 @@ class TACDevicesCtrl extends Controller
 		}
 		//CHECK ACCESS TO THAT FUNCTION//END//
 		$policy = APIPWPolicy::select()->first(1);
+
+		$allParams = $req->getParams();
+
+		$group= (empty($allParams['group'])) ? TACDevices::where([['id','=',$allParams['id']]])->first()->group : $allParams['group'];
+
 		$validation = $this->validator->validate($req, [
 			'name' => v::noWhitespace()->when( v::nullType() , v::alwaysValid(), v::notEmpty()->deviceNameAvailable($req->getParam('id'))),
-			'group' => v::noWhitespace(),
+			'group' => v::when( v::nullType(), v::alwaysValid(), v::numeric() ),
 			'enable' => v::when( v::nullType() , v::alwaysValid(), v::noWhitespace()->notContainChars()->
 				length($policy['tac_pw_length'], 64)->
 				notEmpty()->
@@ -212,14 +219,13 @@ class TACDevicesCtrl extends Controller
 				passwdPolicyNumbers($policy['tac_pw_numbers'])->
 				desRestriction($req->getParam('enable_flag'))->setName('Enable') ),
 			'enable_flag' => v::noWhitespace()->when( v::nullType() , v::alwaysValid(), v::numeric()),
-			'key' => v::when( v::nullType() , v::alwaysValid(),  v::noWhitespace()->notContainChars()->
+			'key' => v::when( v::tacacsKeyAvailable($group) , v::alwaysValid(), v::noWhitespace()->notContainChars()->
 				length($policy['tac_pw_length'], 64)->
 				notEmpty()->
 				passwdPolicyUppercase($policy['tac_pw_uppercase'])->
 				passwdPolicyLowercase($policy['tac_pw_lowercase'])->
 				passwdPolicySpecial($policy['tac_pw_special'])->
-				passwdPolicyNumbers($policy['tac_pw_numbers'])->
-				tacacsKeyAvailable($req->getParam('group'))->setName('Tacacs Key') ),
+				passwdPolicyNumbers($policy['tac_pw_numbers'])->setName('Tacacs Key') ),
 			'ipaddr' => v::noWhitespace()->when( v::nullType() , v::alwaysValid(), v::ip()),
 			'prefix' => v::noWhitespace()
 		]);
@@ -231,7 +237,6 @@ class TACDevicesCtrl extends Controller
 		}
 
 		$allParams = $req->getParams();
-		//var_dump((!empty($allParams['enable']) AND (@$allParams['enable_encrypt'] == 1)));die();
 
 		if ( (!empty($allParams['enable']) AND (@$allParams['enable_encrypt'] == 1)) AND (intval( @$allParams['enable_flag'] ) !== 0) )
 		{
