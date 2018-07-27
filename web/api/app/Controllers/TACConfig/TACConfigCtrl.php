@@ -1008,36 +1008,33 @@ class TACConfigCtrl extends Controller
 
 		if (!fclose($confFile)) return array('error' => true, 'message' => 'Unable to close '.TAC_PLUS_CFG.' file! Verify file availability and rights to it', 'errorLine' => 0);
 
-		$someOutput = shell_exec('sudo '.TAC_DEAMON.' status');
+		$someOutput = shell_exec('sudo '. TAC_ROOT_PATH .'/main.sh tac_plus status brief');
 
 		if ($someOutput == null)
 		{
 			return array('error' => true, 'message' => 'Error while get tac status. Did you set sudo rights?', 'errorLine' => 0);
 		}
 
-		if(preg_match('/.+(not running|not exist).+/',$someOutput))
+		if(preg_match('/.+(inactive\s+.+dead).+/',$someOutput))
 		{
-			if (preg_match('/.+(not running).+/',$someOutput))
+			$tryToStart=shell_exec('sudo '. TAC_ROOT_PATH .'/main.sh tac_plus start');
+			$someOutput = shell_exec('sudo '. TAC_ROOT_PATH .'/main.sh tac_plus status brief');
+			if(preg_match('/.+(active\s+.+running).+/',$someOutput))
 			{
-				$tryToStart=shell_exec('sudo '.TAC_DEAMON.' start');
-				if (preg_match('/.+(done).+/',$tryToStart))
-				{
-					return array('error' => false, 'message' => 'Deamon was disabled. Success. '.$tryToStart, 'errorLine' => 0);
-				}
-				return array('error' => true, 'message' => 'Some inside error. '.$tryToStart, 'errorLine' => 0);
+				return array('error' => false, 'message' => 'Deamon was disabled. Success. '.$someOutput, 'errorLine' => 0);
 			}
-
 			return array('error' => true, 'message' => 'Some inside error. '.$someOutput, 'errorLine' => 0);
 		}
 
-		if(preg_match('/.+(is running).+/',$someOutput))
+		if(preg_match('/.+(active\s+.+running).+/',$someOutput))
 		{
-			$tryToReload=shell_exec('sudo '.TAC_DEAMON.' reload');
-			return array('error' => false, 'message' => 'Deamon was Reloaded. Success. '.$tryToReload, 'errorLine' => 0);
+			$tryToReload=shell_exec('sudo '. TAC_ROOT_PATH .'/main.sh tac_plus restart');
+			$someOutput = shell_exec('sudo '. TAC_ROOT_PATH .'/main.sh tac_plus status brief');
+			return array('error' => false, 'message' => 'Deamon was Reloaded. Success. '."\n".$someOutput, 'errorLine' => 0);
 		}
 
 
-		return array('error' => true, 'message' => 'Something goes wrong', 'errorLine' => 0);
+		return array('error' => true, 'message' => $someOutput, 'errorLine' => 0);
 	}
 	////////////APPLY CONFIGURATION////END//
 	////////////////////////////////////////////////
@@ -1420,7 +1417,7 @@ class TACConfigCtrl extends Controller
 			return $res -> withStatus(401) -> write(json_encode($data));
 		}
 		//INITIAL CODE////END//
-		$data['tacacsStatusMessage'] = trim(shell_exec('sudo '.TAC_DEAMON.' status'));
+		$data['tacacsStatusMessage'] = trim(shell_exec('sudo '. TAC_ROOT_PATH .'/main.sh tac_plus status brief'));
 		//CHECK ACCESS TO THAT FUNCTION//START//
 		if(!$this->checkAccess(6))
 		{
@@ -1433,24 +1430,21 @@ class TACConfigCtrl extends Controller
 		switch ($action) {
 			case ('start'):
 				$data['action'] = 'start';
-				$data['tacacsStatusMessage'] = trim(shell_exec('sudo '.TAC_DEAMON.' start'));
-				$data['tacacsStatusMessage'] .= '; ';
+				$data['tacacsStatusMessage'] = trim(shell_exec('sudo '. TAC_ROOT_PATH .'/main.sh tac_plus start'));
 				sleep(2);
-				$data['tacacsStatusMessage'] .= trim(shell_exec('sudo '.TAC_DEAMON.' status'));
+				$data['tacacsStatusMessage'] .= trim(shell_exec('sudo '. TAC_ROOT_PATH .'/main.sh tac_plus status brief'));
 				break;
 			case ('stop'):
 				$data['action'] = 'stop';
-				$data['tacacsStatusMessage'] = trim(shell_exec('sudo '.TAC_DEAMON.' stop'));
-				$data['tacacsStatusMessage'] .= '; ';
+				$data['tacacsStatusMessage'] = trim(shell_exec('sudo '. TAC_ROOT_PATH .'/main.sh tac_plus stop'));
 				sleep(2);
-				$data['tacacsStatusMessage'] .= trim(shell_exec('sudo '.TAC_DEAMON.' status'));
+				$data['tacacsStatusMessage'] .= trim(shell_exec('sudo '. TAC_ROOT_PATH .'/main.sh tac_plus status brief'));
 				break;
 			case ('reload'):
 				$data['action'] = 'reload';
-				$data['tacacsStatusMessage'] = trim(shell_exec('sudo '.TAC_DEAMON.' reload'));
-				$data['tacacsStatusMessage'] .= '; ';
+				$data['tacacsStatusMessage'] = trim( shell_exec('sudo '. TAC_ROOT_PATH .'/main.sh tac_plus restart') );
 				sleep(2);
-				$data['tacacsStatusMessage'] .= trim(shell_exec('sudo '.TAC_DEAMON.' status'));
+				$data['tacacsStatusMessage'] .= trim(shell_exec('sudo '. TAC_ROOT_PATH .'/main.sh tac_plus status brief'));
 				break;
 		}
 

@@ -2,13 +2,19 @@
 #
 # Start-stop script for tac_plus
 #
-# (C)2001-2010 by Marc Huber <Marc.Huber@web.de>
+### BEGIN INIT INFO
+# Provides:          tac_plus
+# Required-Start:    $remote_fs $syslog $time
+# Required-Stop:     $remote_fs $syslog $time
+# Should-Start:      $network
+# Should-Stop:       $network
+# Default-Start:     2 3 4 5
+# Default-Stop:
+# Short-Description: Starts and stops the tac_plus server process.
+# Description:       Starts and stops the tac_plus server process.
+### END INIT INFO
 # $Id: etc_init.d_tac_plus,v 1.1 2011/07/22 17:04:03 marc Exp $
-#
-# chkconfig: 2345 99 99
-# description: Starts and stops the tac_plus server process.
-#
-
+# (C)2001-2010 by Marc Huber <Marc.Huber@web.de>
 PATH=/bin:/usr/bin:/sbin:/usr/sbin
 export PATH
 

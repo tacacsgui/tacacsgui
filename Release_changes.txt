@@ -1,4 +1,11 @@
 ##############################
+Version_0.9.30 20180727
+	* Network interfaces configuration (also via terminal ./interfaces.sh)
+	* tac_plus now works as service (autorun enabled by default)
+	* Now log will be stored inside of /var/log/tacacsgui/
+	* Fixed some bugs
+	* Soon will be big update and it will require re-installation, sorry
+##############################
 Version_0.9.29 20180720
 	* Fix with Tacacs Key issue
 ##############################

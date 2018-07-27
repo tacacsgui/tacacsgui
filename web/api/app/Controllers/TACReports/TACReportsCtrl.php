@@ -464,7 +464,7 @@ class TACReportsCtrl extends Controller
 		}
 		//INITIAL CODE////END//
 		$allParams = $req->getParams();
-		$root = TAC_ROOT_PATH . '/log/tacacs';
+		$root = '/var/log/tacacsgui';
 		if( !$root ) exit("ERROR: Root filesystem directory not set in jqueryFileTree.php");
 		$postDir = rawurldecode($root.(isset($allParams['dir']) ? $allParams['dir'] : null ));
 		// set checkbox if multiSelect set to true

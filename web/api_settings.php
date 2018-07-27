@@ -56,6 +56,7 @@ require __DIR__ . '/templates/body_start.php';
 							<li class="active"><a href="#time_settings" data-toggle="tab" data-section="time">Time settings</a></li>
 							<li><a href="#smtp" data-toggle="tab" data-section="smtp">SMTP Server</a></li>
               <li><a href="#passwd_policy" data-toggle="tab" data-section="passwords">Password Policy</a></li>
+              <li><a href="#network" data-toggle="tab" data-section="network">Network</a></li>
               <li><a href="#logging" data-toggle="tab" data-section="logging">Logging</a></li>
             </ul>
             <div class="tab-content">
@@ -69,6 +70,10 @@ require __DIR__ . '/templates/body_start.php';
               <!-- /.tab-pane -->
               <div class="tab-pane" id="passwd_policy">
                 <?php include __DIR__ . '/templates/pages/api_settings/tab_passwd_policy.php';?>
+              </div>
+              <!-- /.tab-pane -->
+              <div class="tab-pane" id="network">
+                <?php include __DIR__ . '/templates/pages/api_settings/tab_network.php';?>
               </div>
               <!-- /.tab-pane -->
               <div class="tab-pane" id="logging">

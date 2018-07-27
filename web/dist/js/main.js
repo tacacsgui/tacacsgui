@@ -47,6 +47,9 @@ var tgui_error = {
         if (signin) return true;
         switch(this.status)
       	{
+          case 400:
+            this.local.show({type:"error", message: "Bad Request!"})
+      			break;
       		case 401:
             this.local.show({type:"error", message: "You are not authorised!"})
       			window.location.replace('/')

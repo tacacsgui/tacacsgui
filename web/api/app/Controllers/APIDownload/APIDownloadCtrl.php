@@ -70,7 +70,7 @@ class APIDownloadCtrl extends Controller
       echo '<h1>Error. File Parameter Inavailable</h1>';
       return $res -> withStatus(404) -> withHeader('Content-type', 'text/html');
     }
-    $path = TAC_ROOT_PATH . '/log/tacacs';
+    $path = '/var/log/tacacsgui';
     //$path = '/backups/database/';
 
     if ( !file_exists($path.$file) ) {

@@ -24,6 +24,9 @@ var tgui_apiSettings = {
         case 'logging':
           self.loogging();
           break;
+        case 'network':
+          self.network.init();
+          break;
         default:
         tgui_error.local.show({type:'error', message: 'Server Error'});
       }
@@ -291,5 +294,89 @@ var tgui_apiSettings = {
         tgui_error.getStatus(err, ajaxProps)
       })
     }
+  },
+  network: {
+    init: function() {
+      var self = this;
+
+      Promise.resolve(this.list()).then(function(resp) {
+        self.get();
+        console.log(resp);
+      });
+
+
+    },
+    list: function() {
+      var self = this;
+      $('[name="network_interface"]').empty();
+      var ajaxProps = {
+        url: API_LINK + "settings/network/interface/list/",
+        type: "GET"
+      };//ajaxProps END
+      return new Promise(
+        function (resolve, reject) {
+          ajaxRequest.send(ajaxProps).then(function(resp) {
+            $.each(resp.list, function(key, value) {
+              $('[name="network_interface"]').append($("<option></option>").attr("value",value).text(value));
+            });
+            resolve(true);
+          }).fail(function(err){
+            tgui_error.getStatus(err, ajaxProps);
+            resolve(true);
+          }
+        );
+      })
+    },
+    get: function(){
+      $('div.overlay').show();
+      this.clearForm();
+      var ajaxProps = {
+        url: API_LINK + "settings/network/interface/",
+        type: "GET",
+        data: { interface: $('[name="network_interface"]').val() }
+      };//ajaxProps END
+        ajaxRequest.send(ajaxProps).then(function(resp) {
+          console.log(resp);
+          tgui_supplier.fulfillForm(resp.interface, '#networkForm');
+          $('div.overlay').hide();
+        }).fail(function(err){
+          tgui_error.getStatus(err, ajaxProps)
+        });
+    },
+    save: function(){
+      $('div.overlay').show();
+      var self = this;
+
+      var formData = tgui_supplier.getFormData('#networkForm', true);
+
+      delete formData.network_interface;
+
+      if ( Object.keys(formData).length == 0) {
+        tgui_error.local.show({type:'warning', message: "Changes did not found"});
+        $('div.overlay').hide();
+        return;
+      }
+
+      var ajaxProps = {
+        url: API_LINK + "settings/network/interface/",
+        data: tgui_supplier.getFormData('#networkForm', false)
+      };//ajaxProps END
+
+      ajaxRequest.send(ajaxProps).then(function(resp) {
+        if (tgui_supplier.checkResponse(resp.error, '#timeSettings')){
+          $('div.overlay').hide();
+          return;
+        }
+        tgui_error.local.show({type:'success', message: "Settings saved"})
+        self.get();
+        $('div.overlay').hide();
+      }).fail(function(err){
+        tgui_error.getStatus(err, ajaxProps)
+      })
+    },
+    clearForm: function() {
+      tgui_supplier.clearForm();
+      /*---*/
+    },
   }
 }

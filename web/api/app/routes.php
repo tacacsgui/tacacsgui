@@ -40,6 +40,9 @@ $app->get('/settings/time/timezones/', 'APISettingsCtrl:getTimeTimezones');
 $app->post('/settings/time/', 'APISettingsCtrl:postTimeSettings');
 $app->get('/settings/time/', 'APISettingsCtrl:getTimeSettings');
 $app->get('/settings/time/status/', 'APISettingsCtrl:getTimeStatus');
+$app->get('/settings/network/interface/list/', 'APISettingsCtrl:getInterfaceList');
+$app->get('/settings/network/interface/', 'APISettingsCtrl:getInterfaceSettings');
+$app->post('/settings/network/interface/', 'APISettingsCtrl:postInterfaceSettings');
 #####################################################
 ###Tacacs Devices Routes#######################################
 $app->post('/tacacs/device/datatables/', 'TACDevicesCtrl:postDeviceDatatables');

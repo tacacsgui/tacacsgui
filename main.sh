@@ -44,6 +44,41 @@ case $1 in
 		else echo 'non ';
 		fi
 	;;
+	network)
+		if [[ ! -z $2 ]] && [[ $2 -eq 'save' ]]; then
+			#ls -l  $ROOT_PATH/temp/$3.cfg
+			if [[ ! -z $3 ]] && [ -f $ROOT_PATH/temp/$3.cfg ]; then
+					cp $ROOT_PATH/temp/$3.cfg /etc/network/interfaces.d/$3.cfg
+					sudo $ROOT_PATH/interfaces.sh restart $3
+					echo -n 1;
+					exit 0;
+			fi
+		fi
+	;;
+	tac_plus)
+		if [[ ! -z $2 ]] || [[ $2 -eq 'start' ]] || [[ $2 -eq 'stop' ]] || [[ $2 -eq 'restart' ]] || [[ $2 -eq 'status' ]]; then
+			if [[ ! -f /etc/init/tac_plus.conf ]]; then
+touch /etc/init/tac_plus.conf
+echo '#tac_plus daemon
+description "tac_plus daemon"
+author "Marc Huber"
+start on runlevel [2345]
+stop on runlevel [!2345]
+respawn
+# Specify working directory
+chdir /opt/tacacsgui
+exec tac_plus.sh' > /etc/init/tac_plus.conf;
+cp $ROOT_PATH/tac_plus.sh /etc/init.d/tac_plus
+	sudo systemctl enable tac_plus
+			fi
+
+			if [[ ! -z $3 ]] && [[ $3 -eq 'brief' ]]; then
+				service tac_plus $2 | grep 'Active:';
+			else
+				service tac_plus $2
+			fi
+		fi
+	;;
 	ntp)
 		#sudo systemctl restart ntp.service
 		#sudo vim /etc/ntp.conf
@@ -52,6 +87,7 @@ case $1 in
 		case $2 in
 		timezone)
 			timedatectl set-timezone $3
+			timedatectl set-ntp 0
 		;;
 		get-config)
 			if [[ ! -f $ROOT_PATH/temp/ntp.conf ]]; then

@@ -338,6 +338,9 @@ public function postTimeSettings($req,$res)
 "restrict ::1\n".
 "# Needed for adding pool entries\n".
 "restrict source notrap nomodify noquery\n";
+// "restrict lo\n".
+// "interface ignore wildcard\n".
+// "interface listen lo\n";
 
     $ntp_list = explode(";", $allParams['ntp_list']);
     for ($i=0; $i < count($ntp_list); $i++) {
@@ -386,4 +389,163 @@ public function getTimeStatus($req,$res)
   return $res -> withStatus(200) -> write(json_encode($data));
 }
 ####TIME SETTINGS######End
+#########################
+####NETWORK SETTINGS######
+public function getInterfaceSettings($req,$res)
+{
+  //INITIAL CODE////START//
+  $data=array();
+  $data=$this->initialData([
+    'type' => 'get',
+    'object' => 'interface',
+    'action' => 'info',
+  ]);
+  #check error#
+  if ($_SESSION['error']['status']){
+    $data['error']=$_SESSION['error'];
+    return $res -> withStatus(401) -> write(json_encode($data));
+  }
+  //INITIAL CODE////END//
+  //CHECK ACCESS TO THAT FUNCTION//START//
+  if(!$this->checkAccess(1, true))
+  {
+    return $res -> withStatus(403) -> write(json_encode($data));
+  }
+  //CHECK ACCESS TO THAT FUNCTION//END//
+
+  $allParams = $req->getParams();
+
+  if ( empty($allParams['interface']) ){
+    return $res -> withStatus(400) -> write(json_encode($data));
+  }
+
+  $interfaceSettings = trim( shell_exec(TAC_ROOT_PATH . '/interfaces.sh get '.$allParams['interface'].' skip 3') );
+
+  $settingsLine=explode(PHP_EOL, $interfaceSettings);
+
+  $data['interface'] = [
+    'network_address' => '',
+    'network_mask' => '',
+    'network_gateway' => '',
+    'network_dns1' => '',
+    'network_dns2' => '',
+    'network_more' => ''
+  ];
+
+  for ($i=0; $i < count($settingsLine); $i++) {
+    $parameters = preg_split('/\s+/', $settingsLine[$i]);
+    switch ($parameters[0]) {
+      case 'address':
+        $data['interface']['network_address'] = $parameters[1];
+        break;
+      case 'netmask':
+        $data['interface']['network_mask'] = $parameters[1];
+        break;
+      case 'gateway':
+        $data['interface']['network_gateway'] = $parameters[1];
+        break;
+      case 'dns-nameservers':
+        $data['interface']['network_dns1'] = $parameters[1];
+        if (!empty($parameters[2])) $data['interface']['network_dns2'] = $parameters[2];
+        break;
+      default:
+        $data['interface']['network_more'] .= (!empty($parameters[0])) ? $settingsLine[$i]."\n" : '';
+        break;
+    }
+  }
+
+  return $res -> withStatus(200) -> write(json_encode($data));
+}
+
+public function postInterfaceSettings($req,$res)
+{
+  //INITIAL CODE////START//
+  $data=array();
+  $data=$this->initialData([
+    'type' => 'post',
+    'object' => 'interface',
+    'action' => 'save',
+  ]);
+  #check error#
+  if ($_SESSION['error']['status']){
+    $data['error']=$_SESSION['error'];
+    return $res -> withStatus(401) -> write(json_encode($data));
+  }
+  //INITIAL CODE////END//
+  //CHECK ACCESS TO THAT FUNCTION//START//
+  if(!$this->checkAccess(1))
+  {
+    return $res -> withStatus(403) -> write(json_encode($data));
+  }
+  //CHECK ACCESS TO THAT FUNCTION//END//
+
+  $validation = $this->validator->validate($req, [
+    'network_address' => v::when( v::alwaysValid(), v::ip()->notEmpty()->setName('IP Address') ),
+    'network_mask' => v::when( v::alwaysValid(), v::ip()->notEmpty()->setName('Mask') ),
+    'network_gateway' => v::when( v::nullType() , v::alwaysValid(), v::ip()->notEmpty()->setName('Gateway')),
+    'network_dns1' => v::when( v::nullType() , v::alwaysValid(), v::ip()->notEmpty()->setName('Primary DNS')),
+    'network_dns2' => v::when( v::nullType() , v::alwaysValid(), v::ip()->notEmpty()->setName('Secondary DNS')),
+  ]);
+
+  if ($validation->failed()){
+    $data['error']['status']=true;
+    $data['error']['validation']=$validation->error_messages;
+    return $res -> withStatus(200) -> write(json_encode($data));
+  }
+
+  $allParams = $req->getParams();
+
+  $interface = preg_replace( '/[^a-zA-Z0-9]/', '', $allParams['network_interface'] );
+
+  if ( !empty($interface) ){
+
+    $cfgFile = fopen(TAC_ROOT_PATH ."/temp/".$interface.".cfg", "w");
+
+    $txt = "auto ".$interface."\n".
+            "iface ".$interface." inet static\n";
+    $txt .= "address " . $allParams['network_address'] . "\n";
+    $txt .= "netmask " . $allParams['network_mask'] . "\n";
+    $txt .= ( !empty($allParams['network_gateway']) ) ? "gateway " . $allParams['network_gateway'] . "\n" : '';
+    $txt .= ( !empty($allParams['network_dns1']) ) ? "dns-nameservers " . $allParams['network_dns1'] : '';
+    $txt .= ( !empty($allParams['network_dns2']) ) ? " " . $allParams['network_dns2'] . "\n" : "\n";
+    $txt .= ( !empty($allParams['network_more']) ) ? $allParams['network_more'] . "\n" : '';
+
+    fwrite($cfgFile, $txt);
+    fclose($cfgFile);
+  }
+
+  $data['result'] = trim( shell_exec('sudo ' . TAC_ROOT_PATH . '/main.sh network save '. $interface) );
+
+  return $res -> withStatus(200) -> write(json_encode($data));
+}
+
+public function getInterfaceList($req,$res)
+{
+  //INITIAL CODE////START//
+  $data=array();
+  $data=$this->initialData([
+    'type' => 'get',
+    'object' => 'interface',
+    'action' => 'list',
+  ]);
+  #check error#
+  if ($_SESSION['error']['status']){
+    $data['error']=$_SESSION['error'];
+    return $res -> withStatus(401) -> write(json_encode($data));
+  }
+  //INITIAL CODE////END//
+  //CHECK ACCESS TO THAT FUNCTION//START//
+  if(!$this->checkAccess(1, true))
+  {
+    return $res -> withStatus(403) -> write(json_encode($data));
+  }
+  //CHECK ACCESS TO THAT FUNCTION//END//
+  $output = trim( shell_exec(TAC_ROOT_PATH . '/interfaces.sh list') );
+  $data['list'] = explode(PHP_EOL, $output);
+  $key = array_search('lo', $data['list']);
+  if (!$key) unset($data['list'][$key]);
+  return $res -> withStatus(200) -> write(json_encode($data));
+}
+####NETWORK SETTINGS######End
+#########################
 }
