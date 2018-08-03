@@ -480,8 +480,8 @@ protected $tablesArr = array(
 		$updateFlag = (@$req->getParam('update')) ? 1 : 0;
 		//var_dump($req->getParam('update'));die();
 		$data['messages'] = array( );
-		foreach ($this->databases as $databases) {
-			switch ($databases) {
+		foreach ($this->databases as $database) {
+			switch ($database) {
 				case 'logging':
 					$tablesArr = $this->tablesArr_log;
 					break;
@@ -497,9 +497,9 @@ protected $tablesArr = array(
 					if ($updateFlag) {
 						$this->databaseFix();
 						//CREATE TABLE//
-						$this->createTable($tableName,$tableColumns);
+						$this->createTable($database, $tableName,$tableColumns);
 						////////////DEFAULT VALUES/////////
-						$this->setDefaultValues($tableName);
+						$this->setDefaultValues($database, $tableName);
 						///////////////////////////////////
 						sleep(1); return $res -> withStatus(200) -> write(json_encode($data));
 					}
