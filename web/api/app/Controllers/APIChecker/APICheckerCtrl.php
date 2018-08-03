@@ -291,7 +291,7 @@ protected $tablesArr = array(
 	{
 		$this->createTable('default', 'api_users', $this->tablesArr['api_users']);
 		$this->createTable('default', 'api_user_groups', $this->tablesArr['api_user_groups']);
-		$this->createTable('logging', 'api_logging', $this->tablesArr['api_logging']);
+		$this->createTable('logging', 'api_logging', $this->$tablesArr_log['api_logging']);
 		$this->setDefaultValues('default', 'api_users');
 		$this->setDefaultValues('default', 'api_user_groups');
 		$this->setDefaultValues('logging', 'api_logging');
