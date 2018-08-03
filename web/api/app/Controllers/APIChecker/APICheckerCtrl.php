@@ -340,7 +340,7 @@ protected $tablesArr = array(
 	{
 		switch ($tableName) {
 			case 'api_users':
-				$this->db::connection($database)->getSchemaBuilder()->table($tableName)->insert([
+				$this->db::connection($database)->table($tableName)->insert([
 					'username' => strtolower('tacgui'),
 					'password' => '$2y$10$zZPJVM/qGizgWqq1Mbs0T.E6uCG.fz09pWYxsYj2oieAhm2BZtUPe', //tacgui//
 					'email' => '',
@@ -353,7 +353,7 @@ protected $tablesArr = array(
 				]);
 				break;
 			case 'api_user_groups':
-				$this->db::connection($database)->getSchemaBuilder()->table($tableName)->insert([
+				$this->db::connection($database)->table($tableName)->insert([
 					'name' => 'Administrator',
 					'rights' => 2 ,
 					'default_flag' => 1 ,
@@ -362,32 +362,32 @@ protected $tablesArr = array(
 				]);
 				break;
 			case 'api_settings':
-				$this->db::connection($database)->getSchemaBuilder()->table($tableName)->insert([
+				$this->db::connection($database)->table($tableName)->insert([
 					'update_key' => $this->generateRandomString(),
 					'created_at' => date('Y-m-d H:i:s', time()),
 					'updated_at' => date('Y-m-d H:i:s', time())
 				]);
 				break;
 			case 'api_password_policy':
-				$this->db::connection($database)->getSchemaBuilder()->table($tableName)->insert([
+				$this->db::connection($database)->table($tableName)->insert([
 					'created_at' => date('Y-m-d H:i:s', time()),
 					'updated_at' => date('Y-m-d H:i:s', time())
 				]);
 				break;
 			case 'api_smtp':
-				$this->db::connection($database)->getSchemaBuilder()->table($tableName)->insert([
+				$this->db::connection($database)->table($tableName)->insert([
 					'created_at' => date('Y-m-d H:i:s', time()),
 					'updated_at' => date('Y-m-d H:i:s', time())
 				]);
 				break;
 			case 'api_backup':
-				$this->db::connection($database)->getSchemaBuilder()->table($tableName)->insert([
+				$this->db::connection($database)->table($tableName)->insert([
 					'created_at' => date('Y-m-d H:i:s', time()),
 					'updated_at' => date('Y-m-d H:i:s', time())
 				]);
 				break;
 			case 'tac_global_settings':
-				$this->db::connection($database)->getSchemaBuilder()->table($tableName)->insert([
+				$this->db::connection($database)->table($tableName)->insert([
 					'manual' => "log = accounting_log {\n".
 					"	destination =  \"| ".TAC_ROOT_PATH."/parser/tacacs_parser.sh accounting\" \n".
 					"	log separator = \"|!|\"} \n".
@@ -403,7 +403,7 @@ protected $tablesArr = array(
 				]);
 				break;
 			case 'tac_users':
-				$this->db::connection($database)->getSchemaBuilder()->table($tableName)->insert([
+				$this->db::connection($database)->table($tableName)->insert([
 					'username' => strtolower('admin'),
 					'login' => 'test',
 					'created_at' => date('Y-m-d H:i:s', time()),
@@ -411,7 +411,7 @@ protected $tablesArr = array(
 				]);
 				break;
 			case 'tac_devices':
-				/*$this->db::connection($database)->getSchemaBuilder()->table($tableName)->insert([
+				/*$this->db::connection($database)->table($tableName)->insert([
 					'name' => 'deviceExample',
 					'ipaddr' => '10.1.1.1',
 					'created_at' => date('Y-m-d H:i:s', time()),
@@ -419,14 +419,14 @@ protected $tablesArr = array(
 				]); */
 				break;
 			case 'tac_user_groups':
-				$this->db::connection($database)->getSchemaBuilder()->table($tableName)->insert([
+				$this->db::connection($database)->table($tableName)->insert([
 					'name' => 'defaultUserGroup',
 					'created_at' => date('Y-m-d H:i:s', time()),
 					'updated_at' => date('Y-m-d H:i:s', time())
 				]);
 				break;
 			case 'tac_device_groups':
-				/*$this->db::connection($database)->getSchemaBuilder()->table($tableName)->insert([
+				/*$this->db::connection($database)->table($tableName)->insert([
 					'name' => 'defaultGroup',
 					'enable' => 'cisco123',
 					'key' => 'tguiKey',
@@ -440,19 +440,19 @@ protected $tablesArr = array(
 				]);*/
 				break;
 			case 'mavis_ldap':
-				$this->db::connection($database)->getSchemaBuilder()->table($tableName)->insert([
+				$this->db::connection($database)->table($tableName)->insert([
 					'created_at' => date('Y-m-d H:i:s', time()),
 					'updated_at' => date('Y-m-d H:i:s', time())
 				]);
 				break;
 			case 'mavis_otp':
-				$this->db::connection($database)->getSchemaBuilder()->table($tableName)->insert([
+				$this->db::connection($database)->table($tableName)->insert([
 					'created_at' => date('Y-m-d H:i:s', time()),
 					'updated_at' => date('Y-m-d H:i:s', time())
 				]);
 				break;
 			case 'mavis_sms':
-				$this->db::connection($database)->getSchemaBuilder()->table($tableName)->insert([
+				$this->db::connection($database)->table($tableName)->insert([
 					'created_at' => date('Y-m-d H:i:s', time()),
 					'updated_at' => date('Y-m-d H:i:s', time())
 				]);
