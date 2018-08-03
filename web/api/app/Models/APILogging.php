@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class APILogging extends Model
 {
+	protected $connection = 'logging';
+
 	protected $table = 'api_logging';
 
 	protected $fillable = [

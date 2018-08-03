@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Accounting extends Model
 {
+	protected $connection = 'logging';
+
 	protected $table = 'tac_log_accounting';
 
 	protected $fillable = [

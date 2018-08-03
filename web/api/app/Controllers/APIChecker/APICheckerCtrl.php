@@ -69,17 +69,6 @@ protected $tablesArr = array(
 		'tcfgSet' => ['integer', '1'],
 		'apicfgSet' => ['integer', '1'],
 	],
-	'api_logging' =>
-	[
-		'username' => ['string',''],
-		'uid' => ['string',''],
-		'user_ip' => ['string',''],
-		'obj_name' => ['string', ''],
-		'obj_id' => ['string', ''],
-		'action' => ['string', ''],
-		'section' => ['string', ''],
-		'message' => ['text', '_'],
-	],
 	'tac_global_settings' =>
 	[
 		'port' => ['integer', 49],
@@ -189,48 +178,6 @@ protected $tablesArr = array(
 		'manual' => ['text', '_'],
 		'manual_conf_only' => ['integer', '0'],
 	],
-	'tac_log_accounting' =>
-	[
-		'date' => ['timestamp', '_'],
-		'nas' => ['string', '_'],
-		'username' => ['string', '_'],
-		'line' => ['string', '_'],
-		'nac' => ['string', '_'],
-		'action' => ['string', '_'],
-		'task_id' => ['string', '_'],
-		'timezone' => ['string', '_'],
-		'service' => ['string', '_'],
-		'priv-lvl' => ['string', '_'],
-		'cmd' => ['string', '_'],
-		'disc-cause' => ['string', '_'],
-		'disc-cause-ext' => ['string', '_'],
-		'pre-session-time' => ['string', '_'],
-		'elapsed_time' => ['string', '_'],
-		'stop_time' => ['string', '_'],
-		'nas-rx-speed' => ['string', '_'],
-		'nas-tx-speed' => ['string', '_'],
-		'unknown' => ['string', '_'],
-	],
-	'tac_log_authentication' =>
-	[
-		'date' => ['timestamp', '_'],
-		'nas' => ['string', '_'],
-		'username' => ['string', '_'],
-		'line' => ['string', '_'],
-		'nac' => ['string', '_'],
-		'action' => ['string', '_'],
-		'unknown' => ['string', '_'],
-	],
-	'tac_log_authorization' =>
-	[
-		'date' => ['timestamp', '_'],
-		'nas' => ['string', '_'],
-		'username' => ['string', '_'],
-		'line' => ['string', '_'],
-		'nac' => ['string', '_'],
-		'action' => ['string', '_'],
-		'cmd' => ['string', '_'],
-	],
 	'mavis_ldap' =>
 	[
 		'enabled' => ['integer', '0'],
@@ -277,6 +224,64 @@ protected $tablesArr = array(
 
 );
 
+	protected $tablesArr_log = array(
+		'api_logging' =>
+		[
+			'username' => ['string',''],
+			'uid' => ['string',''],
+			'user_ip' => ['string',''],
+			'obj_name' => ['string', ''],
+			'obj_id' => ['string', ''],
+			'action' => ['string', ''],
+			'section' => ['string', ''],
+			'message' => ['text', '_'],
+		],
+		'tac_log_accounting' =>
+		[
+			'date' => ['timestamp', '_'],
+			'nas' => ['string', '_'],
+			'username' => ['string', '_'],
+			'line' => ['string', '_'],
+			'nac' => ['string', '_'],
+			'action' => ['string', '_'],
+			'task_id' => ['string', '_'],
+			'timezone' => ['string', '_'],
+			'service' => ['string', '_'],
+			'priv-lvl' => ['string', '_'],
+			'cmd' => ['string', '_'],
+			'disc-cause' => ['string', '_'],
+			'disc-cause-ext' => ['string', '_'],
+			'pre-session-time' => ['string', '_'],
+			'elapsed_time' => ['string', '_'],
+			'stop_time' => ['string', '_'],
+			'nas-rx-speed' => ['string', '_'],
+			'nas-tx-speed' => ['string', '_'],
+			'unknown' => ['string', '_'],
+		],
+		'tac_log_authentication' =>
+		[
+			'date' => ['timestamp', '_'],
+			'nas' => ['string', '_'],
+			'username' => ['string', '_'],
+			'line' => ['string', '_'],
+			'nac' => ['string', '_'],
+			'action' => ['string', '_'],
+			'unknown' => ['string', '_'],
+		],
+		'tac_log_authorization' =>
+		[
+			'date' => ['timestamp', '_'],
+			'nas' => ['string', '_'],
+			'username' => ['string', '_'],
+			'line' => ['string', '_'],
+			'nac' => ['string', '_'],
+			'action' => ['string', '_'],
+			'cmd' => ['string', '_'],
+		]
+	);
+
+	protected $databases = ['default', 'logging'];
+
 	public function getTableTitles($table = '')
 	{
 		return ($table) ? array_keys( $this->tablesArr[$table] ) : [];
@@ -284,17 +289,17 @@ protected $tablesArr = array(
 
 	public function myFirstTable()
 	{
-		$this->createTable('api_users', $this->tablesArr['api_users']);
-		$this->createTable('api_user_groups', $this->tablesArr['api_user_groups']);
-		$this->createTable('api_logging', $this->tablesArr['api_logging']);
-		$this->setDefaultValues('api_users');
-		$this->setDefaultValues('api_user_groups');
-		$this->setDefaultValues('api_logging');
+		$this->createTable('default', 'api_users', $this->tablesArr['api_users']);
+		$this->createTable('default', 'api_user_groups', $this->tablesArr['api_user_groups']);
+		$this->createTable('logging', 'api_logging', $this->tablesArr['api_logging']);
+		$this->setDefaultValues('default', 'api_users');
+		$this->setDefaultValues('default', 'api_user_groups');
+		$this->setDefaultValues('logging', 'api_logging');
 	}
 
-	private function createTable($tableName,$tableColumns)
+	private function createTable($database = 'default', $tableName, $tableColumns)
 	{
-		$this->db::schema()->create($tableName, function($table) use ($tableColumns){
+		$this->db::connection($database)->getSchemaBuilder()->create($tableName, function($table) use ($tableColumns){
 			$table->increments('id');
 			foreach($tableColumns as $columnName => $columnAttr){
 				switch ($columnAttr[0]) {
@@ -331,11 +336,11 @@ protected $tablesArr = array(
 		});
 	}
 
-	private function setDefaultValues($tableName)
+	private function setDefaultValues($database = 'default', $tableName)
 	{
 		switch ($tableName) {
 			case 'api_users':
-				$this->db::table($tableName)->insert([
+				$this->db::connection($database)->getSchemaBuilder()->table($tableName)->insert([
 					'username' => strtolower('tacgui'),
 					'password' => '$2y$10$zZPJVM/qGizgWqq1Mbs0T.E6uCG.fz09pWYxsYj2oieAhm2BZtUPe', //tacgui//
 					'email' => '',
@@ -348,7 +353,7 @@ protected $tablesArr = array(
 				]);
 				break;
 			case 'api_user_groups':
-				$this->db::table($tableName)->insert([
+				$this->db::connection($database)->getSchemaBuilder()->table($tableName)->insert([
 					'name' => 'Administrator',
 					'rights' => 2 ,
 					'default_flag' => 1 ,
@@ -357,32 +362,32 @@ protected $tablesArr = array(
 				]);
 				break;
 			case 'api_settings':
-				$this->db::table($tableName)->insert([
+				$this->db::connection($database)->getSchemaBuilder()->table($tableName)->insert([
 					'update_key' => $this->generateRandomString(),
 					'created_at' => date('Y-m-d H:i:s', time()),
 					'updated_at' => date('Y-m-d H:i:s', time())
 				]);
 				break;
 			case 'api_password_policy':
-				$this->db::table($tableName)->insert([
+				$this->db::connection($database)->getSchemaBuilder()->table($tableName)->insert([
 					'created_at' => date('Y-m-d H:i:s', time()),
 					'updated_at' => date('Y-m-d H:i:s', time())
 				]);
 				break;
 			case 'api_smtp':
-				$this->db::table($tableName)->insert([
+				$this->db::connection($database)->getSchemaBuilder()->table($tableName)->insert([
 					'created_at' => date('Y-m-d H:i:s', time()),
 					'updated_at' => date('Y-m-d H:i:s', time())
 				]);
 				break;
 			case 'api_backup':
-				$this->db::table($tableName)->insert([
+				$this->db::connection($database)->getSchemaBuilder()->table($tableName)->insert([
 					'created_at' => date('Y-m-d H:i:s', time()),
 					'updated_at' => date('Y-m-d H:i:s', time())
 				]);
 				break;
 			case 'tac_global_settings':
-				$this->db::table($tableName)->insert([
+				$this->db::connection($database)->getSchemaBuilder()->table($tableName)->insert([
 					'manual' => "log = accounting_log {\n".
 					"	destination =  \"| ".TAC_ROOT_PATH."/parser/tacacs_parser.sh accounting\" \n".
 					"	log separator = \"|!|\"} \n".
@@ -398,7 +403,7 @@ protected $tablesArr = array(
 				]);
 				break;
 			case 'tac_users':
-				$this->db::table($tableName)->insert([
+				$this->db::connection($database)->getSchemaBuilder()->table($tableName)->insert([
 					'username' => strtolower('admin'),
 					'login' => 'test',
 					'created_at' => date('Y-m-d H:i:s', time()),
@@ -406,7 +411,7 @@ protected $tablesArr = array(
 				]);
 				break;
 			case 'tac_devices':
-				/*$this->db::table($tableName)->insert([
+				/*$this->db::connection($database)->getSchemaBuilder()->table($tableName)->insert([
 					'name' => 'deviceExample',
 					'ipaddr' => '10.1.1.1',
 					'created_at' => date('Y-m-d H:i:s', time()),
@@ -414,14 +419,14 @@ protected $tablesArr = array(
 				]); */
 				break;
 			case 'tac_user_groups':
-				$this->db::table($tableName)->insert([
+				$this->db::connection($database)->getSchemaBuilder()->table($tableName)->insert([
 					'name' => 'defaultUserGroup',
 					'created_at' => date('Y-m-d H:i:s', time()),
 					'updated_at' => date('Y-m-d H:i:s', time())
 				]);
 				break;
 			case 'tac_device_groups':
-				/*$this->db::table($tableName)->insert([
+				/*$this->db::connection($database)->getSchemaBuilder()->table($tableName)->insert([
 					'name' => 'defaultGroup',
 					'enable' => 'cisco123',
 					'key' => 'tguiKey',
@@ -435,19 +440,19 @@ protected $tablesArr = array(
 				]);*/
 				break;
 			case 'mavis_ldap':
-				$this->db::table($tableName)->insert([
+				$this->db::connection($database)->getSchemaBuilder()->table($tableName)->insert([
 					'created_at' => date('Y-m-d H:i:s', time()),
 					'updated_at' => date('Y-m-d H:i:s', time())
 				]);
 				break;
 			case 'mavis_otp':
-				$this->db::table($tableName)->insert([
+				$this->db::connection($database)->getSchemaBuilder()->table($tableName)->insert([
 					'created_at' => date('Y-m-d H:i:s', time()),
 					'updated_at' => date('Y-m-d H:i:s', time())
 				]);
 				break;
 			case 'mavis_sms':
-				$this->db::table($tableName)->insert([
+				$this->db::connection($database)->getSchemaBuilder()->table($tableName)->insert([
 					'created_at' => date('Y-m-d H:i:s', time()),
 					'updated_at' => date('Y-m-d H:i:s', time())
 				]);
@@ -475,76 +480,87 @@ protected $tablesArr = array(
 		$updateFlag = (@$req->getParam('update')) ? 1 : 0;
 		//var_dump($req->getParam('update'));die();
 		$data['messages'] = array( );
-		foreach($this->tablesArr as $tableName => $tableColumns){
-			if(!$this->db::schema()->hasTable($tableName))
-			{
-				$data["messages"][count($data["messages"])] = "Table ".$tableName." created";
-				if ($updateFlag) {
-					$this->databaseFix();
-					//CREATE TABLE//
-					$this->createTable($tableName,$tableColumns);
-					////////////DEFAULT VALUES/////////
-					$this->setDefaultValues($tableName);
-					///////////////////////////////////
-					sleep(1); return $res -> withStatus(200) -> write(json_encode($data));
-				}
-			}
-			//IF TABLE ALREADY EXIST CHECK COLUMNS//
-			else if(!$this->db::schema()->hasColumns($tableName,array_keys($tableColumns)))
-			{
-				$preColumnName='id';//IN EVERY TABLE THE FIRST COLUMN IS id//
-				//ADD COLUMNS CHECK//
-				foreach($tableColumns as $columnName => $columnType)
-				{
-					if(!$this->db::schema()->hasColumn($tableName,$columnName))
-					{
-						$data["messages"][count($data["messages"])]="Column ".$columnName." in the table ".$tableName." created";
-						if ($updateFlag) {
-							$databaseFix = $this->databaseFix();
-							if ($databaseFix['status']){
-								$data["messages"][0]=$databaseFix['message'];
-								$data['test1'] = $this->db::schema()->getColumnListing('api_logging');
-								sleep(1); return $res -> withStatus(200) -> write(json_encode($data));
-							}
-							//ADD COLUMN//
-							$this->db::schema()->table($tableName, function(Blueprint $table) use ($columnName,$preColumnName,$tableColumns)
-							{
-								switch ($tableColumns[$columnName][0]) {
-									case 'string':
-										$columnObj = $table->string($columnName);
-										break;
-									case 'integer':
-										$columnObj = $table->integer($columnName);
-										break;
-									case 'text':
-										$columnObj = $table->text($columnName);
-										break;
-									case 'timestamp':
-										$columnObj = $table->timestamp($columnName);
-									break;
-								}
+		foreach ($this->databases as $databases) {
+			switch ($databases) {
+				case 'logging':
+					$tablesArr = $this->tablesArr_log;
+					break;
 
-								$columnObj -> after($preColumnName);
-								if(isset($tableColumns[$columnName][1])
-									AND
-									($tableColumns[$columnName][0]=='integer' AND $tableColumns[$columnName][1]!= '_' )
-									OR
-									($tableColumns[$columnName][1]!='_' AND $tableColumns[$columnName][0]=='string')
-									OR
-									($tableColumns[$columnName][1]!='_' AND $tableColumns[$columnName][0]=='text')
-								)//end if
-								{
-									$columnObj -> default($tableColumns[$columnName][1]);//ADD DEFAULT VALUE IF SET////
-								}
-								else
-								{
-									$columnObj -> nullable();
-								}
-							});
-							sleep(1); return $res -> withStatus(200) -> write(json_encode($data));
-						}//if $updateFlag end
+				default:
+					$tablesArr = $this->tablesArr;
+					break;
+			}
+			foreach($tablesArr as $tableName => $tableColumns){
+				if(!$this->db::connection($database)->getSchemaBuilder()->hasTable($tableName))
+				{
+					$data["messages"][count($data["messages"])] = "Table ".$tableName." created";
+					if ($updateFlag) {
+						$this->databaseFix();
+						//CREATE TABLE//
+						$this->createTable($tableName,$tableColumns);
+						////////////DEFAULT VALUES/////////
+						$this->setDefaultValues($tableName);
+						///////////////////////////////////
+						sleep(1); return $res -> withStatus(200) -> write(json_encode($data));
 					}
-					$preColumnName=$columnName;
+				}
+				//IF TABLE ALREADY EXIST CHECK COLUMNS//
+				else if(!$this->db::connection($database)->getSchemaBuilder()->hasColumns($tableName,array_keys($tableColumns)))
+				{
+					$preColumnName='id';//IN EVERY TABLE THE FIRST COLUMN IS id//
+					//ADD COLUMNS CHECK//
+					foreach($tableColumns as $columnName => $columnType)
+					{
+						if(!$this->db::connection($database)->getSchemaBuilder()->hasColumn($tableName,$columnName))
+						{
+							$data["messages"][count($data["messages"])]="Column ".$columnName." in the table ".$tableName." created";
+							if ($updateFlag) {
+								$databaseFix = $this->databaseFix();
+								if ($databaseFix['status']){
+									$data["messages"][0]=$databaseFix['message'];
+									$data['test1'] = $this->db::connection($database)->getSchemaBuilder()->getColumnListing('api_logging');
+									sleep(1); return $res -> withStatus(200) -> write(json_encode($data));
+								}
+								//ADD COLUMN//
+								$this->db::connection($database)->getSchemaBuilder()->table($tableName, function(Blueprint $table) use ($columnName,$preColumnName,$tableColumns)
+								{
+									switch ($tableColumns[$columnName][0]) {
+										case 'string':
+											$columnObj = $table->string($columnName);
+											break;
+										case 'integer':
+											$columnObj = $table->integer($columnName);
+											break;
+										case 'text':
+											$columnObj = $table->text($columnName);
+											break;
+										case 'timestamp':
+											$columnObj = $table->timestamp($columnName);
+										break;
+									}
+
+									$columnObj -> after($preColumnName);
+									if(isset($tableColumns[$columnName][1])
+										AND
+										($tableColumns[$columnName][0]=='integer' AND $tableColumns[$columnName][1]!= '_' )
+										OR
+										($tableColumns[$columnName][1]!='_' AND $tableColumns[$columnName][0]=='string')
+										OR
+										($tableColumns[$columnName][1]!='_' AND $tableColumns[$columnName][0]=='text')
+									)//end if
+									{
+										$columnObj -> default($tableColumns[$columnName][1]);//ADD DEFAULT VALUE IF SET////
+									}
+									else
+									{
+										$columnObj -> nullable();
+									}
+								});
+								sleep(1); return $res -> withStatus(200) -> write(json_encode($data));
+							}//if $updateFlag end
+						}
+						$preColumnName=$columnName;
+					}
 				}
 			}
 		}
@@ -599,10 +615,10 @@ protected $tablesArr = array(
 	{
 		$response = ['status' => false, 'message' => ''];
 
-		if ( array_search('userName', $this->db::schema()->getColumnListing('api_logging')) )
+		if ( array_search('userName', $this->db::connection('logging')->getSchemaBuilder()->getColumnListing('api_logging')) )
 		{
 			$response['status'] = true;
-			$this->db::schema()->table('api_logging', function(Blueprint $table) {
+			$this->db::connection('logging')->getSchemaBuilder()->table('api_logging', function(Blueprint $table) {
             $table->dropColumn('userName');
             $table->dropColumn('userId');
             $table->dropColumn('userIp');
@@ -610,21 +626,21 @@ protected $tablesArr = array(
             $table->dropColumn('objectId');
       });
 			$response['message'] = 'Table fix for api_logging';
-			//$this->db::table('api_logging')->renameColumn('userName', 'username');
+			//$this->db::connection('logging')->getSchemaBuilder()->table('api_logging')->renameColumn('userName', 'username');
 		}
 
-		if ( array_search('NAS', $this->db::schema()->getColumnListing('tac_log_authentication')) )
+		if ( array_search('NAS', $this->db::connection('logging')->getSchemaBuilder()->getColumnListing('tac_log_authentication')) )
 		{
 			$response['status'] = true;
-			$this->db::schema()->table('tac_log_authentication', function(Blueprint $table) {
+			$this->db::connection('logging')->getSchemaBuilder()->table('tac_log_authentication', function(Blueprint $table) {
             $table->renameColumn('NAS', 'nas');
             $table->renameColumn('NAC', 'nac');
       });
-			$this->db::schema()->table('tac_log_authorization', function(Blueprint $table) {
+			$this->db::connection('logging')->getSchemaBuilder()->table('tac_log_authorization', function(Blueprint $table) {
             $table->renameColumn('NAS', 'nas');
 						$table->renameColumn('NAC', 'nac');
       });
-			$this->db::schema()->table('tac_log_accounting', function(Blueprint $table) {
+			$this->db::connection('logging')->getSchemaBuilder()->table('tac_log_accounting', function(Blueprint $table) {
             $table->renameColumn('NAS', 'nas');
 						$table->renameColumn('NAC', 'nac');
       });

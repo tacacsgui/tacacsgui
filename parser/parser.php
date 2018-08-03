@@ -5,9 +5,9 @@ $loader = require __DIR__ . '/../web/api/vendor/autoload.php';
 $loader->addPsr4('parser\\', __DIR__ . '/app');
 
 class Container {
-	
+
 	private $objects;
-	
+
 	public function __get($class)
 	{
 		if(isset($this->objects[$class]))
@@ -22,7 +22,7 @@ $settings = array(
 	'db' => [
 		'driver' => 'mysql',
 		'host'	=> DB_HOST,
-		'database' => DB_NAME,
+		'database' => DB_NAME_LOG,
 		'username' => DB_USER,
 		'password' => DB_PASSWORD,
 		'charset' => DB_CHARSET,
@@ -36,7 +36,7 @@ $settings = array(
 
 echo -e '2018-01-18 11:39:40 +0300|!|10.10.50.251|!|cisco123|!|tty1|!|10.10.50.200|!|stop|!|task_id=124|!|timezone=UTC|!|service=shell|!|priv-lvl=15|!|cmd=configure terminal <cr>\n2018-01-18 11:39:40 +0300|!|10.10.50.251|!|cisco123|!|tty1|!|10.10.50.200|!|stop|!|task_id=124|!|timezone=UTC|!|service=shell|!|priv-lvl=15|!|cmd=configure terminal <cr>\n2018-01-18 11:39:40 +0300|!|10.10.50.251|!|cisco123|!|tty1|!|10.10.50.200|!|stop|!|task_id=124|!|timezone=UTC|!|service=shell|!|priv-lvl=15|!|cmd=configure terminal <cr> | /opt/tgui/parser/tacacs_parser.sh accounting'
 */
-	
+
 $capsule = new \Illuminate\Database\Capsule\Manager;
 $capsule->addConnection($settings['db']);
 $capsule->setAsGlobal();
@@ -62,4 +62,3 @@ switch ($container->logType) {
 		$container->authentication->parser();
 		break;
 }
-

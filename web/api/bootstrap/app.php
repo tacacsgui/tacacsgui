@@ -2,7 +2,7 @@
 ini_set('memory_limit', '1024M'); // or you could use 1G
 #########################################
 ########TACACS GUI API###################
-		define('APIVER', '0.9.30');
+		define('APIVER', '0.9.31');
 		define('TACVER', '201710201114');
 #########################################
 #########################################
@@ -23,14 +23,26 @@ $app = new \Slim\App([
 	'settings' => [
 		'displayErrorDetails' => true,
 		'db' => [
-			'driver' => 'mysql',
-			'host'	=> DB_HOST,
-			'database' => DB_NAME,
-			'username' => DB_USER,
-			'password' => DB_PASSWORD,
-			'charset' => DB_CHARSET,
-			'collation' => DB_COLLATE,
-			'prefix' => ''
+			'default' => [
+					'driver' => 'mysql',
+					'host'	=> DB_HOST,
+					'database' => DB_NAME,
+					'username' => DB_USER,
+					'password' => DB_PASSWORD,
+					'charset' => DB_CHARSET,
+					'collation' => DB_COLLATE,
+					'prefix' => ''
+				],
+			'logging' => [
+				'driver' => 'mysql',
+				'host'	=> DB_HOST,
+				'database' => DB_NAME_LOG,
+				'username' => DB_USER,
+				'password' => DB_PASSWORD,
+				'charset' => DB_CHARSET,
+				'collation' => DB_COLLATE,
+				'prefix' => ''
+			]
 		]
 	],
 ]);
@@ -38,7 +50,8 @@ $app = new \Slim\App([
 $container = $app->getContainer();
 
 $capsule = new \Illuminate\Database\Capsule\Manager;
-$capsule->addConnection($container['settings']['db']);
+$capsule->addConnection($container['settings']['db']['default'], 'default');
+$capsule->addConnection($container['settings']['db']['logging'], 'logging');
 $capsule->setAsGlobal();
 $capsule->schema();
 $capsule->bootEloquent();

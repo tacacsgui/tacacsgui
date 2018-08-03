@@ -2,6 +2,7 @@
 
 /** The name of the database */
 define('DB_NAME', 'tgui');
+define('DB_NAME_LOG', 'tgui_log');
 
 /** MySQL database username */
 define('DB_USER', 'tgui_user');
