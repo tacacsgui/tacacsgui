@@ -1,19 +1,28 @@
 #!/bin/bash
+# TacacsGUI Main Script
+# Author: Aleksey Mochalin
 
-ROOT_PATH="/opt/tacacsgui"
+####  VARIABLES  ####
+####
+####  FUNCTIONS ####
+ROOT_PATH="/opt/tacacsgui";
+source "$ROOT_PATH/scripts/functions/map.sh";
+source "$FUN_GENERAL";
+####  FUNCTIONS ####  END
 
 if [ $# -eq 0 ]
 then
-
-echo '#######################################################################'
-echo '###########################Instruction#################################'
-echo '#######################################################################'
-echo '#######################################################################'$'\n'
-exit 0
+	echo "Error!";
+	exit 0;
+	#clear;
 
 fi
 
 case $1 in
+	ha)
+		#echo "${@:2}";
+		$HA_SCRIPT_PATH $(printf "%s\n" "${@:2}");
+	;;
 	check)
 		case $2 in
 		mavis)

@@ -8,6 +8,9 @@ use tgui\Models\APISMTP;
 use tgui\Models\APISettings;
 use tgui\Controllers\Controller;
 use Respect\Validation\Validator as v;
+use Webmozart\Json\JsonEncoder as jsone;
+use Webmozart\Json\JsonDecoder as jsond;
+use tgui\Controllers\APISettings\HA;
 
 class APISettingsCtrl extends Controller
 {
@@ -540,7 +543,9 @@ public function getInterfaceList($req,$res)
     return $res -> withStatus(403) -> write(json_encode($data));
   }
   //CHECK ACCESS TO THAT FUNCTION//END//
-  $output = trim( shell_exec(TAC_ROOT_PATH . '/interfaces.sh list') );
+  $ip = '';
+  if ( $req->getParam('ip') == 1 ) $ip = 'ip';
+  $output = trim( shell_exec(TAC_ROOT_PATH . '/interfaces.sh list '. $ip) );
   $data['list'] = explode(PHP_EOL, $output);
   $key = array_search('lo', $data['list']);
   if (!$key) unset($data['list'][$key]);
@@ -548,4 +553,64 @@ public function getInterfaceList($req,$res)
 }
 ####NETWORK SETTINGS######End
 #########################
+####High Availability SETTINGS######
+public function getHASettings($req,$res)
+{
+  //INITIAL CODE////START//
+  $data=array();
+  $data=$this->initialData([
+    'type' => 'get',
+    'object' => 'ha',
+    'action' => 'info',
+  ]);
+  #check error#
+  if ($_SESSION['error']['status']){
+    $data['error']=$_SESSION['error'];
+    return $res -> withStatus(401) -> write(json_encode($data));
+  }
+  //INITIAL CODE////END//
+  //CHECK ACCESS TO THAT FUNCTION//START//
+  if(!$this->checkAccess(1, true))
+  {
+    return $res -> withStatus(403) -> write(json_encode($data));
+  }
+  //CHECK ACCESS TO THAT FUNCTION//END//
+
+  $ha = new HA();
+
+  $data['result'] = $ha->test();
+
+  return $res -> withStatus(200) -> write(json_encode($data));
+}
+public function postHASettings($req,$res)
+{
+  //INITIAL CODE////START//
+  $data=array();
+  $data=$this->initialData([
+    'type' => 'get',
+    'object' => 'ha',
+    'action' => 'save',
+  ]);
+  #check error#
+  if ($_SESSION['error']['status']){
+    $data['error']=$_SESSION['error'];
+    return $res -> withStatus(401) -> write(json_encode($data));
+  }
+  //INITIAL CODE////END//
+  //CHECK ACCESS TO THAT FUNCTION//START//
+  if(!$this->checkAccess(1, true))
+  {
+    return $res -> withStatus(403) -> write(json_encode($data));
+  }
+  //CHECK ACCESS TO THAT FUNCTION//END//
+
+  $ha = new HA();
+
+  $allParams = $req->getParams();
+
+  $data['response'] = $ha->save( $allParams );
+
+  return $res -> withStatus(200) -> write(json_encode($data));
+}
+####High Availability SETTINGS######End
 }

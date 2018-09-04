@@ -47,7 +47,7 @@ class APILoggingCtrl extends Controller
 
 		$params=$req->getParams(); //Get ALL parameters form Datatables
 
-		$columns = $this->APICheckerCtrl->getTableTitles('api_logging'); //Array of all columnes that will used
+		$columns = $this->APICheckerCtrl->getTableTitles('api_logging', 'logging'); //Array of all columnes that will used
 		array_unshift( $columns, 'id' );
 
 		$data['columns'] = $columns;

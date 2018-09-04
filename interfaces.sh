@@ -6,6 +6,11 @@ TABSPACE='      ';
 function interface_list () {
   ip link | grep -Po '(?<=[0-9]: )[a-z0-9]+(?=:)' | sed "s/^/${TABSPACE}/";
 }
+function interface_list_ip () {
+  ip addr | awk '/^[0-9]+:/ { sub(/:/,"",$2); iface=$2 } /^[[:space:]]*inet / {
+    split($2, a, "/")
+    print iface"-"a[1] }'
+}
 
 function interface_existance () {
   if [ -z "$1" ]; then
@@ -227,6 +232,10 @@ fi
 
 case $1 in
   list )
+    if [[ ! -z $2 ]] && [[ $2 -eq 'ip' ]];then
+      interface_list_ip;
+      exit 0
+    fi
     interface_list | sed -e 's/^[[:space:]]*//';
     ;;
   restart )

@@ -229,7 +229,7 @@ var tguiInit = {
 -
 -
 */
-var tgui_supplier = {//Tacacs Supplier Object
+var tgui_supplier = { //Tacacs Supplier Object
   getFormData: function(form, reference) {
     reference = reference || false;
     form = form || '';
@@ -483,6 +483,16 @@ var tgui_supplier = {//Tacacs Supplier Object
     }).fail(function(err){
       tgui_error.getStatus(err, ajaxProps)
     })
+  },
+  random: function( len ){
+    len = len || 16;
+    var text = "";
+    var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+    for (var i = 0; i < len; i++)
+      text += possible.charAt(Math.floor(Math.random() * possible.length));
+
+    return text;
   }
 }//Tacacs Supplier Object//end
 

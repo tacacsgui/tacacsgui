@@ -282,9 +282,16 @@ protected $tablesArr = array(
 
 	protected $databases = ['default', 'logging'];
 
-	public function getTableTitles($table = '')
+	public function getTableTitles($table = '', $db = 'default')
 	{
-		return ($table) ? array_keys( $this->tablesArr[$table] ) : [];
+		switch ($db) {
+			case 'logging':
+				return ($table) ? array_keys( $this->tablesArr_log[$table] ) : [];
+				break;
+			default:
+				return ($table) ? array_keys( $this->tablesArr[$table] ) : [];
+				break;
+		}
 	}
 
 	public function myFirstTable()

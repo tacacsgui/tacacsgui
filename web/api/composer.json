@@ -10,7 +10,8 @@
         "php-smpp/php-smpp": "^1.2",
         "doctrine/dbal": "^2.7",
         "phpmailer/phpmailer": "^6.0",
-        "react/socket": "^1.0"
+        "guzzlehttp/guzzle": "^6.3",
+        "webmozart/json": "^1.2"
     },
 	"autoload": {
 		"psr-4": {

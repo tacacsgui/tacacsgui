@@ -27,6 +27,9 @@ var tgui_apiSettings = {
         case 'network':
           self.network.init();
           break;
+        case 'ha':
+          self.ha.init();
+          break;
         default:
         tgui_error.local.show({type:'error', message: 'Server Error'});
       }
@@ -47,8 +50,8 @@ var tgui_apiSettings = {
         tgui_supplier.fulfillForm(resp.smtp, '#smtpForm');
         $('div.overlay').hide();
       }).fail(function(err){
-        tgui_error.getStatus(err, ajaxProps)
-      })
+        tgui_error.getStatus(err, ajaxProps);
+      });
     },
     save: function(){
       var self = this;
@@ -59,11 +62,11 @@ var tgui_apiSettings = {
       };//ajaxProps END
       if ( Object.keys(ajaxProps.data).length <= 1) {
         if (Object.keys(ajaxProps.data)[0] == "id") {
-          tgui_error.local.show({type:'warning', message: "Changes did not found"})
+          tgui_error.local.show({type:'warning', message: "Changes did not found"});
           return;
         }
         if ( !Object.keys(ajaxProps.data).length ){
-          tgui_error.local.show({type:'warning', message: "Changes did not found"})
+          tgui_error.local.show({type:'warning', message: "Changes did not found"});
           return;
         }
       }
@@ -71,11 +74,11 @@ var tgui_apiSettings = {
         if (tgui_supplier.checkResponse(resp.error, '#smtpForm')){
           return;
         }
-        tgui_error.local.show({type:'success', message: "Policy Settings were saved"})
+        tgui_error.local.show({type:'success', message: "Policy Settings were saved"});
         self.get();
       }).fail(function(err){
-        tgui_error.getStatus(err, ajaxProps)
-      })
+        tgui_error.getStatus(err, ajaxProps);
+      });
     },
     test: function(){
       var self = this;
@@ -90,10 +93,10 @@ var tgui_apiSettings = {
         if (tgui_supplier.checkResponse(resp.error, '#testSmtpForm')){
           return;
         }
-        $('pre.smtp_test_output').empty().append(resp.result)
+        $('pre.smtp_test_output').empty().append(resp.result);
       }).fail(function(err){
-        tgui_error.getStatus(err, ajaxProps)
-      })
+        tgui_error.getStatus(err, ajaxProps);
+      });
     }
   },
   loogging: function(){
@@ -127,12 +130,12 @@ var tgui_apiSettings = {
         }
         tgui_error.local.show({type:'error', message: 'Server Error'});
       }).fail(function(err){
-        tgui_error.getStatus(err, ajaxProps)
-      })
+        tgui_error.getStatus(err, ajaxProps);
+      });
     },
     tac_log: function(target) {
       var self = this;
-      var target = target || '';
+      target = target || '';
       var period = $('select[name="tac_log_'+target+'"]').val();
       if (!confirm('Do you want to do that?')) return;
       if (!confirm('Really?')) return;
@@ -155,8 +158,8 @@ var tgui_apiSettings = {
         }
         tgui_error.local.show({type:'error', message: 'Server Error'});
       }).fail(function(err){
-        tgui_error.getStatus(err, ajaxProps)
-      })
+        tgui_error.getStatus(err, ajaxProps);
+      });
     }
   },
   passwordPolicy: {
@@ -173,8 +176,8 @@ var tgui_apiSettings = {
         tgui_supplier.fulfillForm(resp.policy, '#passwordPolicyForm');
         $('div.overlay').hide();
       }).fail(function(err){
-        tgui_error.getStatus(err, ajaxProps)
-      })
+        tgui_error.getStatus(err, ajaxProps);
+      });
     },
     save: function(){
       var self = this;
@@ -185,11 +188,11 @@ var tgui_apiSettings = {
       };//ajaxProps END
       if ( Object.keys(ajaxProps.data).length <= 1) {
         if (Object.keys(ajaxProps.data)[0] == "id") {
-          tgui_error.local.show({type:'warning', message: "Changes did not found"})
+          tgui_error.local.show({type:'warning', message: "Changes did not found"});
           return;
         }
         if ( !Object.keys(ajaxProps.data).length ){
-          tgui_error.local.show({type:'warning', message: "Changes did not found"})
+          tgui_error.local.show({type:'warning', message: "Changes did not found"});
           return;
         }
       }
@@ -197,11 +200,11 @@ var tgui_apiSettings = {
         if (tgui_supplier.checkResponse(resp.error, '#passwordPolicyForm')){
           return;
         }
-        tgui_error.local.show({type:'success', message: "Policy Settings were saved"})
+        tgui_error.local.show({type:'success', message: "Policy Settings were saved"});
         self.get();
       }).fail(function(err){
-        tgui_error.getStatus(err, ajaxProps)
-      })
+        tgui_error.getStatus(err, ajaxProps);
+      });
     }
   },
   time: {
@@ -231,7 +234,7 @@ var tgui_apiSettings = {
       tgui_status.time().then(function(resp){
         $('time.current-time').text(resp.time);
       }).fail(function(err){
-        tgui_error.getStatus(err, ajaxProps)
+        tgui_error.getStatus(err, ajaxProps);
       });
     },
     get: function() {
@@ -250,8 +253,8 @@ var tgui_apiSettings = {
         self.getTime();
         $('div.overlay').hide();
       }).fail(function(err){
-        tgui_error.getStatus(err, ajaxProps)
-      })
+        tgui_error.getStatus(err, ajaxProps);
+      });
     },
     save: function() {
       $('div.overlay').show();
@@ -275,12 +278,12 @@ var tgui_apiSettings = {
         if (tgui_supplier.checkResponse(resp.error, '#timeSettings')){
           return;
         }
-        tgui_error.local.show({type:'success', message: "Settings saved"})
+        tgui_error.local.show({type:'success', message: "Settings saved"});
         self.get();
         $('div.overlay').hide();
       }).fail(function(err){
-        tgui_error.getStatus(err, ajaxProps)
-      })
+        tgui_error.getStatus(err, ajaxProps);
+      });
     },
     status: function() {
       var ajaxProps = {
@@ -291,8 +294,8 @@ var tgui_apiSettings = {
       ajaxRequest.send(ajaxProps).then(function(resp) {
         $('pre.ntp-check').empty().append(resp.output);
       }).fail(function(err){
-        tgui_error.getStatus(err, ajaxProps)
-      })
+        tgui_error.getStatus(err, ajaxProps);
+      });
     }
   },
   network: {
@@ -301,31 +304,43 @@ var tgui_apiSettings = {
 
       Promise.resolve(this.list()).then(function(resp) {
         self.get();
-        console.log(resp);
       });
 
 
     },
-    list: function() {
+    list: function( o ) {
+      o = o || {};
+      o.ip = o.ip || 0;
+      o.section = o.section || 'default';
       var self = this;
       $('[name="network_interface"]').empty();
       var ajaxProps = {
         url: API_LINK + "settings/network/interface/list/",
-        type: "GET"
+        type: "GET",
+        data: { ip: o.ip }
       };//ajaxProps END
       return new Promise(
         function (resolve, reject) {
           ajaxRequest.send(ajaxProps).then(function(resp) {
-            $.each(resp.list, function(key, value) {
-              $('[name="network_interface"]').append($("<option></option>").attr("value",value).text(value));
-            });
+            switch (o.section) {
+              case 'ha':
+                $.each(resp.list, function(key, value) {
+                  var temp = value.split("-");
+                  $('[name="interf_ip"]').empty().append($("<option></option>").attr("value",value).attr("data-interf",temp[0]).text(value));
+                });
+                break;
+              default:
+                $.each(resp.list, function(key, value) {
+                  $('[name="network_interface"]').append($("<option></option>").attr("value",value).text(value));
+                });
+            }
             resolve(true);
           }).fail(function(err){
             tgui_error.getStatus(err, ajaxProps);
             resolve(true);
           }
         );
-      })
+      });
     },
     get: function(){
       $('div.overlay').show();
@@ -336,11 +351,10 @@ var tgui_apiSettings = {
         data: { interface: $('[name="network_interface"]').val() }
       };//ajaxProps END
         ajaxRequest.send(ajaxProps).then(function(resp) {
-          console.log(resp);
           tgui_supplier.fulfillForm(resp.interface, '#networkForm');
           $('div.overlay').hide();
         }).fail(function(err){
-          tgui_error.getStatus(err, ajaxProps)
+          tgui_error.getStatus(err, ajaxProps);
         });
     },
     save: function(){
@@ -367,16 +381,129 @@ var tgui_apiSettings = {
           $('div.overlay').hide();
           return;
         }
-        tgui_error.local.show({type:'success', message: "Settings saved"})
+        tgui_error.local.show({type:'success', message: "Settings saved"});
         self.get();
         $('div.overlay').hide();
       }).fail(function(err){
-        tgui_error.getStatus(err, ajaxProps)
-      })
+        tgui_error.getStatus(err, ajaxProps);
+      });
     },
     clearForm: function() {
       tgui_supplier.clearForm();
       /*---*/
     },
+  },
+  ha: {
+    init: function() {
+      var self = this;
+
+      Promise.resolve(tgui_apiSettings.network.list( {ip: 1, section:'ha'} )).then(function(resp) {
+        self.get();
+      });
+    },
+    get: function(){
+      var self = this;
+      $('div.overlay').show();
+      var ajaxProps = {
+        url: API_LINK + "settings/ha/",
+        type: "GET"
+      };//ajaxProps END
+        ajaxRequest.send(ajaxProps).then(function(resp) {
+          tgui_supplier.fulfillForm(resp.result.server, '#haForm');
+          self.fulfillha(resp.result.server_list);
+          $('.ha_conf').hide(); $('.ha_conf_' + resp.result.server.role).show();
+          $('div.overlay').hide();
+        }).fail(function(err){
+          tgui_error.getStatus(err, ajaxProps);
+        });
+    },
+    fulfillha: function(list) {
+      $('table[name="ha_list"] tr').remove();
+      $('table[name="ha_list"]').append('<tr><td>Role</td><td>Address</td><td>Location</td><td>Status</td><td>Last Check</td></tr>');
+      list = list || [];
+      if (list.master) {
+        $('table[name="ha_list"]').append('<tr><td>Master</td><td>' + list.master.ipaddr + '</td><td>' + list.master.location + '</td><td>' + list.master.status + '</td><td>' + list.master.lastchk + '</td></tr>');
+      }
+      if (list.slave[0]) {
+        list.slave.forEach(function(el) {
+          $('table[name="ha_list"]').append('<tr><td>Slave</td><td>' + el.ipaddr + '</td><td>' + el.location + '</td><td>' + el.status + '</td><td>' + el.lastchk + '</td></tr>');
+        });
+      }
+    },
+    rootpw: function( close ){
+      var self = this;
+      if( close ) {
+        $('#modal-rootpw').modal('hide');
+        return false;
+      }
+
+      $('#haForm [name="rootpw"]').val( $('#rootpwForm [name="rootpw"]').val() );
+      $('#modal-rootpw')
+        .one('hidden.bs.modal', function(e) {
+          self.save();
+        })
+        .modal('hide');
+      return false;
+    },
+    save: function(){
+      $('div.overlay').show();
+      var self = this;
+      $('pre.ha_save_log').empty();
+      var formData = tgui_supplier.getFormData('#haForm', true);
+
+      if ( Object.keys(formData).length == 0) {
+        tgui_error.local.show({type:'warning', message: "Changes did not found"});
+        $('div.overlay').hide();
+        return;
+      }
+      formData = tgui_supplier.getFormData('#haForm', false);
+      if (formData.interf_ip){
+        var temp = formData.interf_ip.split("-");
+        formData.interface = temp[0];
+        formData.ipaddr = temp[1];
+      }
+      var ajaxProps = {
+        url: API_LINK + "settings/ha/",
+        data: formData
+      };//ajaxProps END
+
+      ajaxRequest.send(ajaxProps).then(function(resp) {
+        if (tgui_supplier.checkResponse(resp.error, '#timeSettings')){
+          $('div.overlay').hide();
+          return;
+        }
+        if (resp.response.status == 'error'){
+          switch (resp.response.type) {
+            case 'rootpw':
+              $('#modal-rootpw').modal('show');
+              $('pre.ha_save_log').append('MySQL root password required');
+              break;
+            default:
+            tgui_error.local.show({type:'error', message: "Unrecognized error"});
+          }
+          $('div.overlay').hide();
+          return;
+        }
+
+        if (resp.response.role){
+          $('pre.ha_save_log').append('###  Role is ' + resp.response.role + ' ###'+"\n");
+        }
+        if (resp.response['my.cnf']){
+          $('pre.ha_save_log').append('###  my.cnf  ###'+"\n").append(resp.response['my.cnf']+"\n");
+        }
+        if (resp.response.replication){
+          $('pre.ha_save_log').append('###  replication user  ###'+"\n").append(resp.response.replication + "\n");
+        }
+        if (resp.response.ha_status){
+          $('pre.ha_save_log').append('###  HA Status  ###'+"\n").append(resp.response.ha_status +"\n");
+        }
+
+        tgui_error.local.show({type:'success', message: "Settings saved"});
+        self.get();
+        $('div.overlay').hide();
+      }).fail(function(err){
+        tgui_error.getStatus(err, ajaxProps);
+      });
+    },
   }
-}
+};

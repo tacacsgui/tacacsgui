@@ -5,10 +5,10 @@ namespace tgui\Controllers;
 class HomeController extends Controller
 {
 	public function getHome($req, $res)
-	{	
+	{
 		//INITIAL CODE////START//
 		$data=array();
-		
+
 		$data['info'] = array(
 			'general' => [
 				'type' => 'get',
@@ -40,13 +40,13 @@ class HomeController extends Controller
 			return 0;
 		}
 		//INITIAL CODE////END//
-		return $res -> getBody() -> write(json_encode($data));
+		return $res -> withStatus(200) -> write(json_encode($data));
 	}
-	
+
 	public function postHome($req, $res)
-	{	
+	{
 		$data['info']='unset';
-		
-		return $response -> getBody() -> write(json_encode($data));
+
+		return $res -> withStatus(200) -> write(json_encode($data));
 	}
 }

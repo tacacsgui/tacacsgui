@@ -165,7 +165,7 @@ class TACReportsCtrl extends Controller
 
 		$params=$req->getParams(); //Get ALL parameters form Datatables
 
-		$columns = $this->APICheckerCtrl->getTableTitles('tac_log_accounting'); //Array of all columnes that will used
+		$columns = $this->APICheckerCtrl->getTableTitles('tac_log_accounting', 'logging'); //Array of all columnes that will used
 		array_unshift( $columns, 'id' );
 
 		$data['columns'] = $columns;
@@ -267,7 +267,7 @@ class TACReportsCtrl extends Controller
 
 		$params=$req->getParams(); //Get ALL parameters form Datatables
 
-		$columns = $this->APICheckerCtrl->getTableTitles('tac_log_authentication'); //Array of all columnes that will used
+		$columns = $this->APICheckerCtrl->getTableTitles('tac_log_authentication', 'logging'); //Array of all columnes that will used
 		array_unshift( $columns, 'id' );
 
 		$data['columns'] = $columns;
@@ -368,7 +368,7 @@ class TACReportsCtrl extends Controller
 
 		$params=$req->getParams(); //Get ALL parameters form Datatables
 
-		$columns = $this->APICheckerCtrl->getTableTitles('tac_log_authorization'); //Array of all columnes that will used
+		$columns = $this->APICheckerCtrl->getTableTitles('tac_log_authorization', 'logging'); //Array of all columnes that will used
 		array_unshift( $columns, 'id' );
 
 		$data['columns'] = $columns;

@@ -43,6 +43,8 @@ $app->get('/settings/time/status/', 'APISettingsCtrl:getTimeStatus');
 $app->get('/settings/network/interface/list/', 'APISettingsCtrl:getInterfaceList');
 $app->get('/settings/network/interface/', 'APISettingsCtrl:getInterfaceSettings');
 $app->post('/settings/network/interface/', 'APISettingsCtrl:postInterfaceSettings');
+$app->get('/settings/ha/', 'APISettingsCtrl:getHASettings');
+$app->post('/settings/ha/', 'APISettingsCtrl:postHASettings');
 #####################################################
 ###Tacacs Devices Routes#######################################
 $app->post('/tacacs/device/datatables/', 'TACDevicesCtrl:postDeviceDatatables');
