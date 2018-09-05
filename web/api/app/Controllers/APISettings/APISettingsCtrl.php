@@ -578,7 +578,7 @@ public function getHASettings($req,$res)
 
   $ha = new HA();
 
-  $data['result'] = $ha->test();
+  $data['result'] = $ha->getFullData();
 
   return $res -> withStatus(200) -> write(json_encode($data));
 }

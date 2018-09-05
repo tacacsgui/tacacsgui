@@ -62,6 +62,15 @@
             </div>
           </div><!--.row-->
           <div class="row">
+            <div class="col-xs-12">
+              <div class="form-group slaves_ip">
+                <label for="slaves_ip">List of Slave's ip addresses</label>
+                <textarea type="text" class="form-control" name="slaves_ip" data-type="input" data-default="" data-pickup="true" placeholder="Slaves ip addresses" value=""></textarea>
+                <p class="help-block">e.g. 10.1.1.2,10.1.1.4</p>
+              </div>
+            </div>
+          </div><!--.row-->
+          <div class="row">
             <div class="col-sm-6">
               <div class="form-group bin_file">
                 <label for="bin_file">Bin File</label>

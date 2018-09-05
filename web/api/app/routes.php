@@ -182,3 +182,7 @@ $app->post('/logging/delete/', 'APILoggingCtrl:postLoggingDelete');
 $app->get('/download/csv/', 'APIDownloadCtrl:getDownloadCsv');
 $app->get('/download/log/', 'APIDownloadCtrl:getDownloadLog');
 #####################################################
+
+###API HA##################################################
+$app->post('/ha/sync/', 'APIHACtrl:postHASync');
+#####################################################

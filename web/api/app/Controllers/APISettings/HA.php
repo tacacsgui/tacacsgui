@@ -36,8 +36,6 @@ class HA
     $this->encoder = new jsone();
     $this->decoder = new jsond();
 
-
-
     if ( ! file_exists('/opt/tgui_data/ha/ha.cfg') ){
       $this->initial_file();
     }
@@ -48,9 +46,30 @@ class HA
     $this->ha_data = $this->decoder->decodeFile( '/opt/tgui_data/ha/ha.cfg' );
 
   }
-  public function test()
+  public function psk()
+  {
+    return $this->ha_data['server']['psk_master'];
+  }
+  public function isMaster()
+  {
+    return $this->ha_data['server']['role'] == 'master';
+  }
+  public function getServerList()
+	{
+    return $this->ha_data['server_list'];
+  }
+  public function getMysqlParams()
+	{
+    return [ $this->ha_data['server']['bin_file'], $this->ha_data['server']['position']];
+  }
+  public function getFullData()
 	{
     return $this->ha_data;
+  }
+  public function checkAccess($ip = '')
+	{
+    $testArray = explode( ',', $this->ha_data['server']['slaves_ip'] );
+    return in_array($ip, $testArray);
   }
 
   public function save($params)

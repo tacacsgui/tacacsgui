@@ -88,6 +88,10 @@ $container['APISettingsCtrl'] = function($container) {
 	return new \tgui\Controllers\APISettings\APISettingsCtrl($container);
 };
 
+$container['APIHACtrl'] = function($container) {
+	return new \tgui\Controllers\APIHA\APIHACtrl($container);
+};
+
 $container['TACDevicesCtrl'] = function($container) {
 	return new \tgui\Controllers\TACDevices\TACDevicesCtrl($container);
 };

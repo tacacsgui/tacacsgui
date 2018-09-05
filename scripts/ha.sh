@@ -194,6 +194,16 @@ case $1 in
 		echo 'Where is condition?';
 		exit 0;
 	;;
+	dump)
+		rm /opt/tacacsgui/temp/tgui_dump.sql
+		mysqldump -u $2 -p$3 tgui | grep -v "Using a password" > /opt/tacacsgui/temp/tgui_dump.sql 2>&1
+		if [ -f /opt/tacacsgui/temp/tgui_dump.sql ]; then
+			echo -n 1
+			exit 0
+		fi
+		echo 0
+		exit 0
+	;;
 	*)
 		echo 'Unexpected main argument. Exit.'
 		exit 0

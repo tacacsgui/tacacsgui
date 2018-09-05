@@ -408,14 +408,15 @@ var tgui_apiSettings = {
         url: API_LINK + "settings/ha/",
         type: "GET"
       };//ajaxProps END
-        ajaxRequest.send(ajaxProps).then(function(resp) {
-          tgui_supplier.fulfillForm(resp.result.server, '#haForm');
-          self.fulfillha(resp.result.server_list);
-          $('.ha_conf').hide(); $('.ha_conf_' + resp.result.server.role).show();
-          $('div.overlay').hide();
-        }).fail(function(err){
-          tgui_error.getStatus(err, ajaxProps);
-        });
+      ajaxRequest.send(ajaxProps).then(function(resp) {
+        if (resp.result.server) tgui_supplier.fulfillForm(resp.result.server, '#haForm');
+        if (resp.result.server_list) self.fulfillha(resp.result.server_list);
+        $('.ha_conf').hide();
+        if (resp.result.server) { $('.ha_conf_' + resp.result.server.role).show(); }
+        $('div.overlay').hide();
+      }).fail(function(err){
+        tgui_error.getStatus(err, ajaxProps);
+      });
     },
     fulfillha: function(list) {
       $('table[name="ha_list"] tr').remove();
