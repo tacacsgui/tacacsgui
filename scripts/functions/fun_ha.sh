@@ -42,6 +42,22 @@ binlog_do_db = tgui
 ###################" > /etc/mysql/my.cnf;
   return;
 }
+function make_slave_mycnf () {
+  echo "###     tacacsgui       config  ###
+### tgui slave ###
+###################
+[mysqld]
+server-id = $1
+relay-log = /var/log/mysql/mysql-relay-bin.log
+log_bin = /var/log/mysql/mysql-bin.log
+binlog_do_db = tgui
+###################" > /etc/mysql/my.cnf;
+  return;
+}
+function start_slave () {
+  echo $( echo "CHANGE MASTER TO MASTER_HOST='$2',MASTER_USER='tgui_replication', MASTER_PASSWORD='$3', MASTER_LOG_FILE='$4', MASTER_LOG_POS=$5; START SLAVE;" | mysql -uroot -p$1 2>/dev/null | wc -l );
+  return;
+}
 function check_mysql_replication_user () {
   echo $( echo "select User from mysql.user;" | mysql -uroot -p$1 2>/dev/null | grep tgui_replication | wc -l );
   return;
@@ -51,7 +67,7 @@ function replication_user_new_passwd() {
   return;
 }
 function replication_user_create() {
-  echo "GRANT REPLICATION SLAVE ON tgui.* TO 'tgui_replication'@'%' IDENTIFIED BY '$2'; FLUSH PRIVILEGES;" | mysql -uroot -p$1 2>/dev/null;
+  echo "GRANT REPLICATION SLAVE, REPLICATION CLIENT ON *.* TO 'tgui_replication'@'%' IDENTIFIED BY '$2'; FLUSH PRIVILEGES;" | mysql -uroot -p$1 2>/dev/null;
   return;
 }
 function master_status() {
@@ -59,10 +75,16 @@ function master_status() {
     echo "SHOW MASTER STATUS;" | mysql -uroot -p$1 2>/dev/null | awk '{print $1" " $2}' | grep -v File;
     return;
   fi
-  echo "SHOW MASTER STATUS;" | mysql -uroot -p$1 2>/dev/null;
+  echo "SHOW MASTER STATUS\G;" | mysql -uroot -p$1 2>/dev/null;
+  return;
+}
+function slave_restore() {
+  COMMAND="mysql -u tgui_user --password='$1' tgui < /opt/tacacsgui/temp/dumpForSlave.sql"
+  echo $COMMAND;
+  mysql -u tgui_user --password=\'$1\' tgui < /opt/tacacsgui/temp/dumpForSlave.sql
   return;
 }
 function slave_status() {
-  echo 'SlaVe';
+  echo "SHOW SLAVE STATUS\G;" | mysql -uroot -p$1 2>/dev/null;
   return;
 }

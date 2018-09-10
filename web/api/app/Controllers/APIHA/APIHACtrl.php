@@ -17,7 +17,7 @@ class APIHACtrl extends Controller
       'access' => false);
     $ha = new HA();
     $allParams = $req->getParams();
-    if (! $ha->isMaster() OR ! $ha->checkAccess( $_SERVER['REMOTE_ADDR'] ) ) return $res -> withStatus(403) -> write('Access Restricted!');
+    if (! $ha->isMaster() OR ! $ha->checkAccessPolicy( $_SERVER['REMOTE_ADDR'] ) ) return $res -> withStatus(403) -> write('Access Restricted!');
 
     $sha1 = sha1( $allParams['time'] . '&'. $allParams['masterip']. '&' . $ha->psk() . '&'. $allParams['action'] );
     //$data['sha1'] = $sha1;

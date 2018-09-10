@@ -3,14 +3,22 @@
 namespace tgui\Controllers;
 
 use tgui\Models\TACGlobalConf;
+use tgui\Controllers\APIChecker\APIDatabase;
 
 class Controller
 {
 	protected $container;
+	public $databases;
+	public $tablesArr;
+	public $tablesArr_log;
 
 	public function __construct($container)
 	{
 		$this->container = $container;
+		$apiDatabase = new APIDatabase;
+		$this->databases = $apiDatabase->databases;
+		$this->tablesArr = $apiDatabase->tablesArr;
+		$this->tablesArr_log = $apiDatabase->tablesArr_log;
 	}
 
 	public function __get($property)

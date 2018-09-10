@@ -447,6 +447,7 @@ var tgui_apiSettings = {
       return false;
     },
     save: function(){
+      //if ( $('#haForm select[name="role"]').val() == 'slave' ) if ( ! confirm('All current data will be removed. Do you want to continue?') ) return;
       $('div.overlay').show();
       var self = this;
       $('pre.ha_save_log').empty();
@@ -478,12 +479,18 @@ var tgui_apiSettings = {
             case 'rootpw':
               $('#modal-rootpw').modal('show');
               $('pre.ha_save_log').append('MySQL root password required');
+              tgui_error.local.show({type:'error', message: "Incorrect password"});
               break;
+            case 'message':
+              $('pre.ha_save_log').append(resp.response.message);
+              tgui_error.local.show({type:'error', message: resp.response.message});
+              $('div.overlay').hide();
+              throw new Error('skipme');
             default:
             tgui_error.local.show({type:'error', message: "Unrecognized error"});
           }
           $('div.overlay').hide();
-          return;
+          return false;
         }
 
         if (resp.response.role){
@@ -503,8 +510,9 @@ var tgui_apiSettings = {
         self.get();
         $('div.overlay').hide();
       }).fail(function(err){
+        if (err.message == 'skipme') return;
         tgui_error.getStatus(err, ajaxProps);
-      });
+      }).then(function(){console.log(123);});
     },
   }
 };

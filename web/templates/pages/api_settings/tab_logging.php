@@ -24,7 +24,7 @@
     <hr>
     <div class="row">
       <div class="col-md-6">
-        <h4>Tacacs Authintication Logging</h4>
+        <h4>Tacacs Authentication Logging</h4>
         <div class="form-group">
           <label>Delete Logging</label>
           <div class="input-group">
