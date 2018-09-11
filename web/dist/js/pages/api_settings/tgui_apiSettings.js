@@ -447,7 +447,6 @@ var tgui_apiSettings = {
       return false;
     },
     save: function(){
-      //if ( $('#haForm select[name="role"]').val() == 'slave' ) if ( ! confirm('All current data will be removed. Do you want to continue?') ) return;
       $('div.overlay').show();
       var self = this;
       $('pre.ha_save_log').empty();
@@ -464,17 +463,35 @@ var tgui_apiSettings = {
         formData.interface = temp[0];
         formData.ipaddr = temp[1];
       }
+      formData.step = 0;
       var ajaxProps = {
         url: API_LINK + "settings/ha/",
         data: formData
       };//ajaxProps END
 
-      ajaxRequest.send(ajaxProps).then(function(resp) {
-        if (tgui_supplier.checkResponse(resp.error, '#timeSettings')){
+      var parser = function(ajaxProps){
+        console.log(ajaxProps);
+        ajaxProps.data.step += 1;
+        Promise.resolve( self.saveRequest(ajaxProps) ).then(function(resp){
+          switch (ajaxProps.data.role) {
+            case 'slave':
+              self.slave_step_parser(resp.response);
+              break;
+            case 'master':
+              self.master_step_parser(resp.response);
+              break;
+            case 'disabled':
+
+              break;
+            default:
+
+          }
+          if (! resp.response.stop ) { parser(ajaxProps); return; }
+          tgui_error.local.show({type:'success', message: "Settings saved"});
+          self.get();
           $('div.overlay').hide();
-          return;
-        }
-        if (resp.response.status == 'error'){
+        }).catch(function(resp) {
+          console.log(resp, 'Error');
           switch (resp.response.type) {
             case 'rootpw':
               $('#modal-rootpw').modal('show');
@@ -490,29 +507,80 @@ var tgui_apiSettings = {
             tgui_error.local.show({type:'error', message: "Unrecognized error"});
           }
           $('div.overlay').hide();
-          return false;
-        }
-
-        if (resp.response.role){
-          $('pre.ha_save_log').append('###  Role is ' + resp.response.role + ' ###'+"\n");
-        }
-        if (resp.response['my.cnf']){
-          $('pre.ha_save_log').append('###  my.cnf  ###'+"\n").append(resp.response['my.cnf']+"\n");
-        }
-        if (resp.response.replication){
-          $('pre.ha_save_log').append('###  replication user  ###'+"\n").append(resp.response.replication + "\n");
-        }
-        if (resp.response.ha_status){
-          $('pre.ha_save_log').append('###  HA Status  ###'+"\n").append(resp.response.ha_status +"\n");
-        }
-
-        tgui_error.local.show({type:'success', message: "Settings saved"});
-        self.get();
-        $('div.overlay').hide();
-      }).fail(function(err){
-        if (err.message == 'skipme') return;
-        tgui_error.getStatus(err, ajaxProps);
-      }).then(function(){console.log(123);});
+        });
+      };
+      parser(ajaxProps);
     },
-  }
+    saveRequest: function(ajaxProps) {
+
+      return new Promise(
+        function (resolve, reject) {
+          ajaxRequest.send(ajaxProps).then(function(resp) {
+            if (tgui_supplier.checkResponse(resp.error, '#timeSettings')){
+              $('div.overlay').hide();
+              return;
+            }
+            if (resp.response.status == 'error'){
+              reject(resp);
+              return false;
+            }
+            resolve(resp);
+            return true;
+          }).fail(function(err){
+            tgui_error.getStatus(err, ajaxProps);
+          });
+        });
+    },
+    slave_step_parser: function(resp) {
+      switch (resp.step) {
+        case '1':
+          if (resp.role){
+            $('pre.ha_save_log').append('###  Role is ' + resp.role + ' ###'+"\n"+
+             "Master Available"+"\n"+
+             "Downloading dump from master..."+"\n");
+          }
+          break;
+        case '2':
+          //console.log(resp);
+          if (resp.dump) {
+            $('pre.ha_save_log').append('Dump file Uploaded'+"\n");
+          }
+          break;
+        case '3':
+          if (resp['my.cnf']){
+            $('pre.ha_save_log').append('###  my.cnf  ###'+"\n").append(resp['my.cnf']+"\n");
+          }
+          if (resp.slave_start) {
+            $('pre.ha_save_log').append(resp.slave_start+"\n");
+          }
+          console.log(resp);
+          break;
+        default:
+          if (resp.ha_status){
+            $('pre.ha_save_log').append('###  HA Status  ###'+"\n").append(resp.ha_status +"\n");
+          }
+      }
+    },
+    master_step_parser: function(resp) {
+      switch (resp.step) {
+        case '1':
+          if (resp.role){
+            $('pre.ha_save_log').append('###  Role is ' + resp.role + ' ###'+"\n");
+          }
+          if (resp['my.cnf']){
+            $('pre.ha_save_log').append('###  my.cnf  ###'+"\n").append(resp['my.cnf']+"\n");
+          }
+          break;
+        case '2':
+          if (resp.replication){
+            $('pre.ha_save_log').append('###  replication user  ###'+"\n").append(resp.replication + "\n");
+          }
+          break;
+        default:
+          if (resp.ha_status){
+            $('pre.ha_save_log').append('###  HA Status  ###'+"\n").append(resp.ha_status +"\n");
+          }
+      }
+    }
+  },
 };

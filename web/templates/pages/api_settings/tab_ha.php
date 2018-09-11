@@ -70,22 +70,6 @@
               </div>
             </div>
           </div><!--.row-->
-          <div class="row">
-            <div class="col-sm-6">
-              <div class="form-group bin_file">
-                <label for="bin_file">Bin File</label>
-                <input type="text" class="form-control" name="bin_file" data-type="input" data-default="" data-pickup="true" placeholder="Bin File" value="" disabled>
-                <p class="help-block">parameter required for slave configuration</p>
-              </div>
-            </div>
-            <div class="col-sm-6">
-              <div class="form-group position">
-                <label for="position">Position</label>
-                  <input type="text" class="form-control" name="position" data-type="input" data-default="" data-pickup="true" placeholder="Position" value="" disabled>
-                  <p class="help-block">parameter required for slave configuration</p>
-              </div>
-            </div>
-          </div><!--.row-->
         </div>
       </div>
       <div class="ha_conf ha_conf_slave" style="display:none;">
@@ -110,22 +94,6 @@
               </div>
             </div>
           </div>
-          <div class="row">
-            <div class="col-sm-6">
-              <div class="form-group bin_file">
-                <label for="bin_file">Bin File</label>
-                <input type="text" class="form-control" name="bin_file" data-type="input" data-default="" data-pickup="true" placeholder="Bin File" value="" disabled>
-                <p class="help-block">parameter filled automatically</p>
-              </div>
-            </div>
-            <div class="col-sm-6">
-              <div class="form-group position">
-                <label for="position">Position</label>
-                  <input type="text" class="form-control" name="position" data-type="input" data-default="" data-pickup="true" placeholder="Position" value="" disabled>
-                  <p class="help-block">parameter filled automatically</p>
-              </div>
-            </div>
-          </div><!--.row-->
         </div>
       </div>
     </div>

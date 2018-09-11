@@ -54,8 +54,7 @@ class APICheckerCtrl extends Controller
 						$columnObj = $table->timestamp($columnName);
 						break;
 				}
-				if( (isset($columnAttr[1]) OR $columnAttr[1] == 0)
-					AND
+				if( //(isset($columnAttr[1]) )//OR $columnAttr[1] == 0)  AND
 					($columnAttr[0]=='integer' AND $columnAttr[1] != '_')
 					OR
 					($columnAttr[1]!='_' AND $columnAttr[0]=='string')

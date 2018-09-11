@@ -4,6 +4,7 @@ namespace tgui\Controllers;
 
 use tgui\Models\TACGlobalConf;
 use tgui\Controllers\APIChecker\APIDatabase;
+use tgui\Controllers\APISettings\HA;
 
 class Controller
 {
@@ -60,7 +61,8 @@ class Controller
 		if ($data['info']['user']['changePasswd'] == 1){
 			$_SESSION['error']['status']=true;
 		}
-
+		$data['ha_role'] = ( $data['authorised'] ) ? HA::getServerRole() : 'empty';
+		//$data['ha_slave'] = $data['ha_role'] == 'slave';
 		return $data;
 	}
 	////INITIAL DATA FUNCTION////END//
@@ -78,6 +80,14 @@ class Controller
 	}
 	////CHANGE CONFIGURATION STATUS////END//
 	////////////////////////////////////////
+	////CHECK SLAVE HA////END//
+	public function isSlaveHA($message = false)
+	{
+		if ($message) return 'Server in Slave mode!';
+		return HA::getServerRole() == 'slave';
+	}
+	////CHECK SLAVE HA////END//
+	////////////////////////////////////////
 	////CHECK ACCESS FOR USER////START//
 	public static function checkAccess($value = 0, $demo = false)
 	{
@@ -85,6 +95,7 @@ class Controller
 		//Clear DEMO//
 		if (count($rightsArray) !== 1 AND $rightsArray[0] !== 1) $demo = false;
 		//DEMO//
+		//$value = ( HA::getServerRole() == 'slave' ) ? 0 : $value;
 		if ($value == 0 AND count($rightsArray) == 1 AND $rightsArray[0] == 1) return true;
 		//Administrator//
 		if ($rightsArray[1] == 1) return true;

@@ -139,6 +139,7 @@ case $1 in
 		fi
 	;;
 	mycnf)
+
 		if [[ $2 == 'slave' ]]; then
 			echo -n "Make backup my.cnf...";
 			if [[ $(check_old_mycnf_tgui) -eq 0 ]]; then
@@ -154,6 +155,8 @@ case $1 in
 			fi
 			echo -n "Write to my.cnf..."
 			make_slave_mycnf $3;
+			sudo rm /var/log/mysql/mysql-bin*
+			sudo rm /var/log/mysql/mysql-relay-bin*
 			echo "Done";
 			echo -n "Service restart..."
 			service mysql restart
@@ -183,13 +186,19 @@ case $1 in
 		service mysql restart
 		echo "Done";
 	;;
+	tgui_ro)
+		# $2 reserved
+		# start slave # rootpw, msterip, masterpasswd, log_file, position
+		tgui_read_only_user $2 $3;
+	;;
 	slave)
 		# $2 reserved
 		# start slave # rootpw, msterip, masterpasswd, log_file, position
-		echo $(start_slave $3 $4 $5 $6 $7);
-		return;
+		start_slave $3 $4 $5 $6 $7;
 	;;
 	replication) #$2 rootpw $3 psk $4 debug
+		# replication_user_create $2 $3;
+		# echo "Create Replication user"
 		if [[ $(check_mysql_replication_user $2) -eq 0 ]]; then
 			replication_user_create $2 $3;
 			echo "Create new Replication user"

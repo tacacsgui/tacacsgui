@@ -19,20 +19,22 @@ $_SESSION['error']['message']='Unknown Error';
 require __DIR__ . '/../config.php';
 require __DIR__ . '/../vendor/autoload.php';
 
+use tgui\Controllers\APISettings\HA;
+
 $app = new \Slim\App([
 	'settings' => [
 		'displayErrorDetails' => true,
 		'db' => [
 			'default' => [
-					'driver' => 'mysql',
-					'host'	=> DB_HOST,
-					'database' => DB_NAME,
-					'username' => DB_USER,
-					'password' => DB_PASSWORD,
-					'charset' => DB_CHARSET,
-					'collation' => DB_COLLATE,
-					'prefix' => ''
-				],
+				'driver' => 'mysql',
+				'host'	=> DB_HOST,
+				'database' => DB_NAME,
+				'username' => ( ! HA::isSlave() ) ? DB_USER : 'tgui_ro',
+				'password' => ( ! HA::isSlave() ) ? DB_PASSWORD : HA::slavePsk(),
+				'charset' => DB_CHARSET,
+				'collation' => DB_COLLATE,
+				'prefix' => ''
+			],
 			'logging' => [
 				'driver' => 'mysql',
 				'host'	=> DB_HOST,

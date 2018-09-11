@@ -55,7 +55,16 @@ binlog_do_db = tgui
   return;
 }
 function start_slave () {
-  echo $( echo "CHANGE MASTER TO MASTER_HOST='$2',MASTER_USER='tgui_replication', MASTER_PASSWORD='$3', MASTER_LOG_FILE='$4', MASTER_LOG_POS=$5; START SLAVE;" | mysql -uroot -p$1 2>/dev/null | wc -l );
+  echo "STOP SLAVE; RESET SLAVE; CHANGE MASTER TO MASTER_HOST='$2',MASTER_USER='tgui_replication', MASTER_PASSWORD='$3', MASTER_LOG_FILE='$4', MASTER_LOG_POS=$5; START SLAVE;";
+  echo $( echo "STOP SLAVE; RESET SLAVE; CHANGE MASTER TO MASTER_HOST='$2',MASTER_USER='tgui_replication', MASTER_PASSWORD='$3', MASTER_LOG_FILE='$4', MASTER_LOG_POS=$5; START SLAVE;" | mysql -uroot -p$1 2>/dev/null | wc -l );
+  return;
+}
+function stop_slave () {
+  echo $( echo "STOP SLAVE;" | mysql -uroot -p$1 2>/dev/null | wc -l );
+  return;
+}
+function tgui_read_only_user () {
+  echo "GRANT SELECT ON tgui.* TO 'tgui_ro'@'%' IDENTIFIED BY '$2'; FLUSH PRIVILEGES;" | mysql -uroot -p$1 2>/dev/null;
   return;
 }
 function check_mysql_replication_user () {
@@ -63,7 +72,8 @@ function check_mysql_replication_user () {
   return;
 }
 function replication_user_new_passwd() {
-  echo "use mysql; ALTER USER 'tgui_replication'@'%' IDENTIFIED BY '$2'; FLUSH PRIVILEGES;" | mysql -uroot -p$1 2>/dev/null;
+  #echo "use mysql; ALTER USER 'tgui_replication'@'%' IDENTIFIED BY '$2'; FLUSH PRIVILEGES;" | mysql -uroot -p$1 2>/dev/null;
+  echo "GRANT REPLICATION SLAVE, REPLICATION CLIENT ON *.* TO 'tgui_replication'@'%' IDENTIFIED BY '$2'; FLUSH PRIVILEGES;" | mysql -uroot -p$1 2>/dev/null;
   return;
 }
 function replication_user_create() {
@@ -72,10 +82,10 @@ function replication_user_create() {
 }
 function master_status() {
   if [[ -z $2 ]]; then
-    echo "SHOW MASTER STATUS;" | mysql -uroot -p$1 2>/dev/null | awk '{print $1" " $2}' | grep -v File;
+    echo "SHOW MASTER STATUS;" | mysql -utgui_replication -p$1 2>/dev/null | awk '{print $1" " $2}' | grep -v File;
     return;
   fi
-  echo "SHOW MASTER STATUS\G;" | mysql -uroot -p$1 2>/dev/null;
+  echo "SHOW MASTER STATUS\G;" | mysql -utgui_replication -p$1 2>/dev/null;
   return;
 }
 function slave_restore() {

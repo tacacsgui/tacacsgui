@@ -41,13 +41,18 @@ var tgui_error = {
       },//local error message//end
       getStatus:function(err, extra, signin){
         signin = signin || false;
-        err = err || {}
+        err = err || {};
+        console.log(err);
         this.status = err.status || this.status;
         if (window.location.hash.substr(1) == 'debug') console.log(err)
         if (signin) return true;
         switch(this.status)
       	{
           case 400:
+            if (err.responseJSON && err.responseJSON.message){
+              this.local.show({type:"error", message: err.responseJSON.message});
+              break;
+            }
             this.local.show({type:"error", message: "Bad Request!"})
       			break;
       		case 401:

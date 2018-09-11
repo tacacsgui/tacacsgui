@@ -50,6 +50,13 @@ class TACUsersCtrl extends Controller
 			return $res -> withStatus(401) -> write(json_encode($data));
 		}
 		//INITIAL CODE////END//
+		//CHECK SERVER ROLE SLAVE//START//
+		if( $this->isSlaveHA() )
+		{
+			$data['message'] = $this->isSlaveHA('message');
+			return $res -> withStatus(400) -> write(json_encode($data));
+		}
+		//CHECK SERVER ROLE SLAVE//END//
 		//CHECK ACCESS TO THAT FUNCTION//START//
 		if(!$this->checkAccess(4))
 		{
