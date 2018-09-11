@@ -1,5 +1,14 @@
 #!/bin/bash
 ####  FUNCTIONS ####
+function sinitize_passwd () {
+  echo $1 | sed -E 's/[\]+(&)/\1/g; s/&/\\&/g';
+  return;
+}
+function check_mysql_root () {
+  PASSWD=$(sinitize_passwd $1);
+  echo $( echo "SHOW DATABASES;" | mysql -uroot -p$PASSWD 2>/dev/null | grep base | wc -l );
+  return;
+}
 function check_old_mycnf_existance () {
   echo $( ls -l /etc/mysql/my.cnf_old 2>/dev/null | wc -l );
   return;
@@ -55,46 +64,55 @@ binlog_do_db = tgui
   return;
 }
 function start_slave () {
+  PASSWD=$(sinitize_passwd $1);
   echo "STOP SLAVE; RESET SLAVE; CHANGE MASTER TO MASTER_HOST='$2',MASTER_USER='tgui_replication', MASTER_PASSWORD='$3', MASTER_LOG_FILE='$4', MASTER_LOG_POS=$5; START SLAVE;";
-  echo $( echo "STOP SLAVE; RESET SLAVE; CHANGE MASTER TO MASTER_HOST='$2',MASTER_USER='tgui_replication', MASTER_PASSWORD='$3', MASTER_LOG_FILE='$4', MASTER_LOG_POS=$5; START SLAVE;" | mysql -uroot -p$1 2>/dev/null | wc -l );
+  echo $( echo "STOP SLAVE; RESET SLAVE; CHANGE MASTER TO MASTER_HOST='$2',MASTER_USER='tgui_replication', MASTER_PASSWORD='$3', MASTER_LOG_FILE='$4', MASTER_LOG_POS=$5; START SLAVE;" | mysql -uroot -p$PASSWD 2>/dev/null | wc -l );
   return;
 }
 function stop_slave () {
-  echo $( echo "STOP SLAVE;" | mysql -uroot -p$1 2>/dev/null | wc -l );
+  PASSWD=$(sinitize_passwd $1);
+  echo $( echo "STOP SLAVE;" | mysql -uroot -p$PASSWD 2>/dev/null | wc -l );
   return;
 }
 function tgui_read_only_user () {
-  echo "GRANT SELECT ON tgui.* TO 'tgui_ro'@'%' IDENTIFIED BY '$2'; FLUSH PRIVILEGES;" | mysql -uroot -p$1 2>/dev/null;
+  PASSWD=$(sinitize_passwd $1);
+  echo "GRANT SELECT ON tgui.* TO 'tgui_ro'@'%' IDENTIFIED BY '$2'; FLUSH PRIVILEGES;" | mysql -uroot -p$PASSWD 2>/dev/null;
   return;
 }
 function check_mysql_replication_user () {
-  echo $( echo "select User from mysql.user;" | mysql -uroot -p$1 2>/dev/null | grep tgui_replication | wc -l );
+  PASSWD=$(sinitize_passwd $1);
+  echo $( echo "select User from mysql.user;" | mysql -uroot -p$PASSWD 2>/dev/null | grep tgui_replication | wc -l );
   return;
 }
 function replication_user_new_passwd() {
+  PASSWD=$(sinitize_passwd $1);
   #echo "use mysql; ALTER USER 'tgui_replication'@'%' IDENTIFIED BY '$2'; FLUSH PRIVILEGES;" | mysql -uroot -p$1 2>/dev/null;
-  echo "GRANT REPLICATION SLAVE, REPLICATION CLIENT ON *.* TO 'tgui_replication'@'%' IDENTIFIED BY '$2'; FLUSH PRIVILEGES;" | mysql -uroot -p$1 2>/dev/null;
+  echo "GRANT REPLICATION SLAVE, REPLICATION CLIENT ON *.* TO 'tgui_replication'@'%' IDENTIFIED BY '$2'; FLUSH PRIVILEGES;" | mysql -uroot -p$PASSWD 2>/dev/null;
   return;
 }
 function replication_user_create() {
-  echo "GRANT REPLICATION SLAVE, REPLICATION CLIENT ON *.* TO 'tgui_replication'@'%' IDENTIFIED BY '$2'; FLUSH PRIVILEGES;" | mysql -uroot -p$1 2>/dev/null;
+  PASSWD=$(sinitize_passwd $1);
+  echo "GRANT REPLICATION SLAVE, REPLICATION CLIENT ON *.* TO 'tgui_replication'@'%' IDENTIFIED BY '$2'; FLUSH PRIVILEGES;" | mysql -uroot -p$PASSWD 2>/dev/null;
   return;
 }
 function master_status() {
+  PASSWD=$(sinitize_passwd $1);
   if [[ -z $2 ]]; then
-    echo "SHOW MASTER STATUS;" | mysql -utgui_replication -p$1 2>/dev/null | awk '{print $1" " $2}' | grep -v File;
+    echo "SHOW MASTER STATUS;" | mysql -utgui_replication -p$PASSWD 2>/dev/null | awk '{print $1" " $2}' | grep -v File;
     return;
   fi
-  echo "SHOW MASTER STATUS\G;" | mysql -utgui_replication -p$1 2>/dev/null;
+  echo "SHOW MASTER STATUS\G;" | mysql -utgui_replication -p$PASSWD 2>/dev/null;
   return;
 }
 function slave_restore() {
-  COMMAND="mysql -u tgui_user --password='$1' tgui < /opt/tacacsgui/temp/dumpForSlave.sql"
+  PASSWD=$(sinitize_passwd $1);
+  COMMAND="mysql -u tgui_user --password='$PASSWD' tgui < /opt/tacacsgui/temp/dumpForSlave.sql"
   echo $COMMAND;
   mysql -u tgui_user --password=\'$1\' tgui < /opt/tacacsgui/temp/dumpForSlave.sql
   return;
 }
 function slave_status() {
-  echo "SHOW SLAVE STATUS\G;" | mysql -uroot -p$1 2>/dev/null;
+  PASSWD=$(sinitize_passwd $1);
+  echo "SHOW SLAVE STATUS\G;" | mysql -uroot -p$PASSWD 2>/dev/null;
   return;
 }

@@ -16,7 +16,3 @@ function root_access() {
   fi
   echo -n 1; return;
 }
-function check_mysql_root () {
-  echo $( echo "SHOW DATABASES;" | mysql -uroot -p$1 2>/dev/null | grep base | wc -l );
-  return;
-}
