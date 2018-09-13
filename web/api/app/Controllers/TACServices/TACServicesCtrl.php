@@ -48,6 +48,13 @@ class TACServicesCtrl extends Controller
 			return $res -> withStatus(401) -> write(json_encode($data));
 		}
 		//INITIAL CODE////END//
+		//CHECK SHOULD I STOP THIS?//START//
+		if( $this->shouldIStopThis() )
+		{
+			$data['error'] = $this->shouldIStopThis();
+			return $res -> withStatus(400) -> write(json_encode($data));
+		}
+		//CHECK SHOULD I STOP THIS?//END//
 		//CHECK ACCESS TO THAT FUNCTION//START//
 		if(!$this->checkAccess(13))
 		{
@@ -131,6 +138,13 @@ class TACServicesCtrl extends Controller
 			return $res -> withStatus(401) -> write(json_encode($data));
 		}
 		//INITIAL CODE////END//
+		//CHECK SHOULD I STOP THIS?//START//
+		if( $this->shouldIStopThis() )
+		{
+			$data['error'] = $this->shouldIStopThis();
+			return $res -> withStatus(400) -> write(json_encode($data));
+		}
+		//CHECK SHOULD I STOP THIS?//END//
 		//CHECK ACCESS TO THAT FUNCTION//START//
 		if(!$this->checkAccess(13))
 		{
@@ -207,6 +221,13 @@ class TACServicesCtrl extends Controller
 			return $res -> withStatus(401) -> write(json_encode($data));
 		}
 		//INITIAL CODE////END//
+		//CHECK SHOULD I STOP THIS?//START//
+		if( $this->shouldIStopThis() )
+		{
+			$data['error'] = $this->shouldIStopThis();
+			return $res -> withStatus(400) -> write(json_encode($data));
+		}
+		//CHECK SHOULD I STOP THIS?//END//
 		//CHECK ACCESS TO THAT FUNCTION//START//
 		if(!$this->checkAccess(13))
 		{

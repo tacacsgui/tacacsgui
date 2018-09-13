@@ -240,9 +240,10 @@ case $1 in
 		exit 0;
 	;;
 	dump)
-		sudo rm /opt/tacacsgui/temp/tgui_dump.sql
+		rm /opt/tacacsgui/temp/tgui_dump.sql
 		PASSWD=$(sinitize_passwd $3);
-		mysqldump -u $2 -p$PASSWD tgui | grep -v "Using a password" > /opt/tacacsgui/temp/tgui_dump.sql 2>&1
+		mysqldump -u $2 -p$PASSWD tgui | grep -v "Using a password" > /opt/tacacsgui/temp/tgui_dump.sql
+		echo "mysqldump -u $2 -p$PASSWD tgui | grep -v 'Using a password' > /opt/tacacsgui/temp/tgui_dump.sql 2>&1";
 		if [ -f /opt/tacacsgui/temp/tgui_dump.sql ]; then
 			echo -n 1
 			exit 0

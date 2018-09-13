@@ -8,6 +8,7 @@ use Webmozart\Json\JsonValidator;
 use GuzzleHttp\Client as gclient;
 use GuzzleHttp\Exception\RequestException;
 use tgui\Controllers\APIChecker\APIDatabase;
+use tgui\Controllers\APISettings\APISettingsCtrl;
 
 
 class HA
@@ -18,6 +19,7 @@ class HA
       'role' => '',
       'ipaddr' => '',
       'ipaddr_master' => '',
+      'ipaddr_slave' => '',
       'interface' => '',
       'psk_slave' => '',
       'psk_master'  => ''
@@ -84,7 +86,7 @@ class HA
   }
   public function getMysqlParams()
 	{
-    return explode( ' ', trim( shell_exec( 'sudo /opt/tacacsgui/main.sh ha status master '.$this->ha_data['server']['psk_master'].' brief 2>&1' ) ) );
+    return explode( ' ', trim( shell_exec( "sudo /opt/tacacsgui/main.sh ha status master '".$this->ha_data['server']['psk_master']."'  brief 2>&1" ) ) );
   }
   public function getFullData()
 	{
@@ -131,17 +133,17 @@ class HA
       case 'slave':
         $output = $this->slave_settings( $output, $params );
         $output['role'] = $this->ha_data['server']['role'];
-
+        $ha_status = self::getStatus();
         $this->ha_data['server_list'] = [
           'master' => [
             'ipaddr' => $this->ha_data['server']['ipaddr_master'],
             'location' => 'remote',
-            'status' => 'Unknown',
-            'lastchk' => ''
+            'status' => ( strpos($ha_status['ha_status_brief'], 'Waiting for') !== false ) ? 'Available':'Unknown',
+            'lastchk' => trim( shell_exec(TAC_ROOT_PATH . "/main.sh ntp get-time") )
           ],
           'slave' => [
             [
-              'ipaddr' => '',
+              'ipaddr' => $this->ha_data['server']['ipaddr_slave'],
               'location' => 'localhost',
               'status' => 'Available',
               'lastchk' => ''
@@ -153,10 +155,10 @@ class HA
         $this->encoder->encodeFile( $this->ha_data, '/opt/tgui_data/ha/ha.cfg');
         break;
       case 'disabled':
-        $output['disabled'] = true;
         $this->ha_data = [];
         $this->encoder->setPrettyPrinting(true);
         $this->encoder->encodeFile( $this->ha_data, '/opt/tgui_data/ha/ha.cfg');
+        $output['disabled'] = true;
         break;
       default:
         $output['message'] = 'Internal Error';
@@ -187,11 +189,11 @@ class HA
       //   return $output;
     }
 
-    // $master_params = explode( ' ', trim( shell_exec( 'sudo /opt/tacacsgui/main.sh ha status master '.$rootpw.' brief 2>&1' ) ) );
+    // $master_params = explode( ' ', trim( shell_exec( "sudo /opt/tacacsgui/main.sh ha status master '".$rootpw."' brief 2>&1" ) ) );
     // $this->ha_data['server']['bin_file'] = $master_params[0];
     // $this->ha_data['server']['position'] = $master_params[1];
     $output['current_mysql'] = $this->getMysqlParams();
-    $output['ha_status'] = trim( shell_exec( 'sudo /opt/tacacsgui/main.sh ha status master '.$this->ha_data['server']['psk_master'].' 2>&1' ) );
+    $output['ha_status'] = trim( shell_exec( "sudo /opt/tacacsgui/main.sh ha status master '".$this->ha_data['server']['psk_master']."' 2>&1 ") );
 
     $output['status'] = '';
     $output['stop'] = true;
@@ -200,7 +202,7 @@ class HA
   public function setupMasterStep1( $output, $params )
   {
     //prepare my.cnf//
-    $output['my.cnf']=trim( shell_exec( 'sudo /opt/tacacsgui/main.sh ha mycnf '.$this->ha_data['server']['ipaddr'].' 2>&1' ) );
+    $output['my.cnf']=trim( shell_exec( "sudo /opt/tacacsgui/main.sh ha mycnf '".$this->ha_data['server']['ipaddr']."' 2>&1" ) );
     $output['status'] = '';
     $output['step'] = $params['step'];
     return $output;
@@ -210,7 +212,7 @@ class HA
     $rootpw = $params['rootpw'];
 
     //prepare replication user//
-    $output['replication']=trim( shell_exec( 'sudo /opt/tacacsgui/main.sh ha replication '.$rootpw.' '.$this->ha_data['server']['psk_master'].' 2>&1' ) );
+    $output['replication']=trim( shell_exec( "sudo /opt/tacacsgui/main.sh ha replication '".$rootpw."' '" .$this->ha_data['server']['psk_master']."' 2>&1" ) );
     $output['status'] = '';
     $output['step'] = $params['step'];
     return $output;
@@ -218,8 +220,8 @@ class HA
 
   private function slave_settings( $output = [], $params = [] )
   {
-    $rootpw = $params['rootpw'];
-    if ( ! $this->check_rootpw($rootpw) ){
+    //$rootpw = $params['rootpw'];
+    if ( ! $this->check_rootpw($params['rootpw']) ){
       $output['type'] = 'rootpw';
       return $output;
     }
@@ -235,6 +237,9 @@ class HA
       case 3:
         $output = $this->setupSlaveStep3($output, $params);
         return $output;
+      case 4:
+        $output = $this->setupSlaveStep4($output, $params);
+        return $output;
     }
     /*
     //slave
@@ -247,7 +252,7 @@ class HA
     }
 
 
-    $output['ha_status'] = trim( shell_exec( 'sudo /opt/tacacsgui/main.sh ha status slave '.$rootpw.' 2>&1' ) );
+    $output['ha_status'] = trim( shell_exec( "sudo /opt/tacacsgui/main.sh ha status slave '".$this->ha_data['server']['psk_slave']."' 2>&1" ) );
 
     $output['status'] = '';
     $output['stop'] = true;
@@ -290,6 +295,7 @@ class HA
     }
     $this->ha_data['server']['bin_file'] = $master_res['mysql'][0];
     $this->ha_data['server']['position'] = $master_res['mysql'][1];
+    $this->ha_data['server']['ipaddr_slave'] = $master_res['remoteip'];
     $makeIdVar=explode('.', $master_res['remoteip']);
     $this->ha_data['server']['slave_id'] = $makeIdVar[3] + 1;
 
@@ -331,13 +337,14 @@ class HA
   {
     $rootpw = $params['rootpw'];
     //prepare my.cnf//
-    $output['my.cnf']=trim( shell_exec( 'sudo /opt/tacacsgui/main.sh ha mycnf slave '.$this->ha_data['server']['slave_id'].' 2>&1' ) );
+    $output['my.cnf']=trim( shell_exec( "sudo /opt/tacacsgui/main.sh ha mycnf slave '".$this->ha_data['server']['slave_id']."' 2>&1" ) );
 
     //start slave//
-    $linuxCmdTemp = 'sudo /opt/tacacsgui/main.sh ha slave start '.$rootpw.' '.$this->ha_data['server']['ipaddr_master'].' '.$this->ha_data['server']['psk_slave'].' '.$this->ha_data['server']['bin_file'].' '.$this->ha_data['server']['position'].' 2>&1';
+    $linuxCmdTemp = "sudo /opt/tacacsgui/main.sh ha slave start '".$rootpw."' '".$this->ha_data['server']['ipaddr_master']."' '".$this->ha_data['server']['psk_slave']."' '".$this->ha_data['server']['bin_file']."' '".$this->ha_data['server']['position']."' 2>&1";
 
     $output['slave_start_cmd']=$linuxCmdTemp ;
-    $output['tgui_ro']=trim( shell_exec( 'sudo /opt/tacacsgui/main.sh ha tgui_ro '.$rootpw.' '. $this->ha_data['server']['psk_slave'] ) ) ;
+    $output['tgui_ro']=trim( shell_exec( "sudo /opt/tacacsgui/main.sh ha tgui_ro '".$rootpw."' '". $this->ha_data['server']['psk_slave']."'" ) ) ;
+    $output['replication']=trim( shell_exec( "sudo /opt/tacacsgui/main.sh ha replication '".$rootpw."' '" .$this->ha_data['server']['psk_slave']."' 2>&1" ) );
     $output['slave_start']=trim( shell_exec( $linuxCmdTemp ) ) ;
 
     $output['status'] = '';
@@ -345,14 +352,30 @@ class HA
     return $output;
   }
 
-  private function check_rootpw($rootpw = '')
+  public function setupSlaveStep4($output, $params)
+  {
+
+    $output['timezone_data'] = $this->capsule::table('api_settings')->select(['timezone', 'ntp_list'])->find(1);
+
+    $output['timezone_settings'] = APISettingsCtrl::applyTimeSettings([
+      'timezone' => $output['timezone_data']->timezone,
+      'ntp_list' => $output['timezone_data']->ntp_list
+    ]);
+    $output['result_ntp'] = ($output['timezone_settings']) ? trim( shell_exec( 'sudo '. TAC_ROOT_PATH . "/main.sh ntp get-config ") ) : false;
+
+    $output['status'] = '';
+    $output['step'] = $params['step'];
+    return $output;
+  }
+
+  private function check_rootpw( $rootpw = '' )
   {
     if ( ! empty($rootpw) ){
-      if (trim( shell_exec( 'sudo /opt/tacacsgui/main.sh ha rootpw '.$rootpw.' 2>&1' ) ) == 1) return true;
+      if (trim( shell_exec( "sudo /opt/tacacsgui/main.sh ha rootpw '".$rootpw."' 2>&1" ) ) == 1) return true;
     }
 
     $rootpw = trim( shell_exec( 'sudo /opt/tacacsgui/main.sh ha rootpw' ) );
-    if (trim( shell_exec( 'sudo /opt/tacacsgui/main.sh ha rootpw '.$rootpw.' 2>&1' ) ) == 1) return true;
+    if (trim( shell_exec( "sudo /opt/tacacsgui/main.sh ha rootpw '".$rootpw."' 2>&1" ) ) == 1) return true;
 
     return false;
   }
@@ -384,5 +407,29 @@ class HA
     $ha_data = $decoder->decodeFile( '/opt/tgui_data/ha/ha.cfg' );
     if ( ! is_array( $ha_data ) OR ! is_array($ha_data['server'] ) ) return false;
     return  $ha_data['server']['psk_slave'];
+  }
+  public static function getStatus()
+  {
+    $output=[];
+    $decoder = new jsond();
+    $decoder->setObjectDecoding(1);
+    $ha_data = $decoder->decodeFile( '/opt/tgui_data/ha/ha.cfg' );
+    $role = 'disabled';
+    if ( is_array( $ha_data ) AND is_array($ha_data['server'] ) AND isset($ha_data['server']['role']) ) $role = $ha_data['server']['role'];
+    switch ($role) {
+      case 'master':
+        $output['ha_status'] = trim( shell_exec( "sudo /opt/tacacsgui/main.sh ha status master '".$ha_data['server']['psk_master']."' 2>&1 ") );
+        break;
+      case 'slave':
+        $output['ha_status'] = trim( shell_exec( "sudo /opt/tacacsgui/main.sh ha status slave '".$ha_data['server']['psk_slave']."' 2>&1" ) );
+        $output['ha_status_brief'] = trim( shell_exec( "sudo /opt/tacacsgui/main.sh ha status slave '".$ha_data['server']['psk_slave']."' 2>&1 | grep Slave_IO_State" ) );
+        break;
+      default:
+        $output['ha_status'] = 'disabled';
+        break;
+    }
+    $output['role'] = $role;
+    $output['my_cnf'] = trim(shell_exec('cat /etc/mysql/my.cnf'));
+    return  $output;
   }
 }

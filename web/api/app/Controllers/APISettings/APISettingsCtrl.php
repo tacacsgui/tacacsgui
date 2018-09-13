@@ -57,6 +57,13 @@ class APISettingsCtrl extends Controller
 			return $res -> withStatus(401) -> write(json_encode($data));
 		}
 		//INITIAL CODE////END//
+    //CHECK SHOULD I STOP THIS?//START//
+    if( $this->shouldIStopThis() )
+    {
+      $data['error'] = $this->shouldIStopThis();
+      return $res -> withStatus(400) -> write(json_encode($data));
+    }
+    //CHECK SHOULD I STOP THIS?//END//
 		//CHECK ACCESS TO THAT FUNCTION//START//
 		if(!$this->checkAccess(1))
 		{
@@ -137,6 +144,13 @@ public function postSmtp($req,$res)
     return $res -> withStatus(401) -> write(json_encode($data));
   }
   //INITIAL CODE////END//
+  //CHECK SHOULD I STOP THIS?//START//
+  if( $this->shouldIStopThis() )
+  {
+    $data['error'] = $this->shouldIStopThis();
+    return $res -> withStatus(400) -> write(json_encode($data));
+  }
+  //CHECK SHOULD I STOP THIS?//END//
   //CHECK ACCESS TO THAT FUNCTION//START//
   if(!$this->checkAccess(1))
   {
@@ -207,6 +221,13 @@ public function postSmtpTest($req,$res)
 ####SMTP SETTINGS######End
 ############
 ####TIME####
+public static function getTimeTimezoneName($params = ['id' => 0])
+{
+  if($params['id'] == 0 ) return '0 unknown';
+  $id = preg_replace('/[^0-9]/', '', $params['id']);
+  return trim( shell_exec("timedatectl list-timezones | nl | sed '".$id."!d'" ) );
+}
+
 public function getTimeTimezones($req,$res)
 {
   //INITIAL CODE////START//
@@ -231,8 +252,7 @@ public function getTimeTimezones($req,$res)
   $byId = $req->getParam('byId');
 
   if ( !empty($byId) ){
-    $byId = preg_replace('/[^0-9]/', '', $byId);
-    $tempData = trim( shell_exec("timedatectl list-timezones | nl | sed '".$byId."!d'" ) );
+    $tempData = self::getTimeTimezoneName(['id'=>$byId]);
 
     $tempData = ( empty($tempData) ) ?  $byId . ' Error Appeared' : $tempData;
     $data['item'] = array();
@@ -278,6 +298,7 @@ public function getTimeSettings($req,$res)
     return $res -> withStatus(401) -> write(json_encode($data));
   }
   //INITIAL CODE////END//
+
   //CHECK ACCESS TO THAT FUNCTION//START//
   if(!$this->checkAccess(1, true))
   {
@@ -285,43 +306,16 @@ public function getTimeSettings($req,$res)
   }
   //CHECK ACCESS TO THAT FUNCTION//END//
   $data['time'] = APISettings::select(['timezone', 'ntp_list'])->find(1);
+  //$data['timezones'] = in_array('Europe/Moscow', timezone_identifiers_list());
+  //$data['timezones'] = in_array(trim( shell_exec(TAC_ROOT_PATH . "/main.sh ntp get-timezone")), timezone_identifiers_list());
+  $data['timezones'] = date_default_timezone_set(trim( shell_exec(TAC_ROOT_PATH . "/main.sh ntp get-timezone")));
+  //if ( in_array(trim( shell_exec(TAC_ROOT_PATH . "/main.sh ntp get-timezone")), timezone_identifiers_list()) ) date_default_timezone_set(trim( shell_exec(TAC_ROOT_PATH . "/main.sh ntp get-timezone")));
+  $data['timez'] = date("Y-m-d H:m:s");
 
   return $res -> withStatus(200) -> write(json_encode($data));
 }
-
-public function postTimeSettings($req,$res)
+public static function applyTimeSettings( $allParams = [] )
 {
-  //INITIAL CODE////START//
-  $data=array();
-  $data=$this->initialData([
-    'type' => 'post',
-    'object' => 'time',
-    'action' => 'settings',
-  ]);
-  #check error#
-  if ($_SESSION['error']['status']){
-    $data['error']=$_SESSION['error'];
-    return $res -> withStatus(401) -> write(json_encode($data));
-  }
-  //INITIAL CODE////END//
-  //CHECK ACCESS TO THAT FUNCTION//START//
-  if(!$this->checkAccess(1))
-  {
-    return $res -> withStatus(403) -> write(json_encode($data));
-  }
-  //CHECK ACCESS TO THAT FUNCTION//END//
-  $validation = $this->validator->validate($req, [
-    'timezone' => v::when( v::nullType(), v::alwaysValid(), v::numeric()->notEmpty()->setName('Timezone') ),
-  ]);
-
-  if ($validation->failed()){
-    $data['error']['status']=true;
-    $data['error']['validation']=$validation->error_messages;
-    return $res -> withStatus(200) -> write(json_encode($data));
-  }
-
-  $allParams = $req->getParams();
-
   if ( !empty($allParams['timezone']) ){
     $timezoneName = trim( shell_exec( "timedatectl list-timezones |  sed '".$allParams['timezone']."!d'" ) );
     $data['result_timezone'] = trim( shell_exec( 'sudo '. TAC_ROOT_PATH . "/main.sh ntp timezone ".$timezoneName ) );
@@ -352,12 +346,59 @@ public function postTimeSettings($req,$res)
     }
     fwrite($ntpfile, $txt);
     fclose($ntpfile);
-    $data['result_ntp'] = trim( shell_exec( 'sudo '. TAC_ROOT_PATH . "/main.sh ntp get-config ") );
+    return true;
   }
 
-  $data['result'] = APISettings::where('id', 1)->update($allParams);
-  sleep(1);
-  return $res -> withStatus(200) -> write(json_encode($data));
+  return false;
+}
+public function postTimeSettings($req,$res)
+{
+  //INITIAL CODE////START//
+  $data=array();
+  $data=$this->initialData([
+    'type' => 'post',
+    'object' => 'time',
+    'action' => 'settings',
+  ]);
+  #check error#
+  if ($_SESSION['error']['status']){
+    $data['error']=$_SESSION['error'];
+    return $res -> withStatus(401) -> write(json_encode($data));
+  }
+  //INITIAL CODE////END//
+  //CHECK SHOULD I STOP THIS?//START//
+  if( $this->shouldIStopThis() )
+  {
+    $data['error'] = $this->shouldIStopThis();
+    return $res -> withStatus(400) -> write(json_encode($data));
+  }
+  //CHECK SHOULD I STOP THIS?//END//
+  //CHECK ACCESS TO THAT FUNCTION//START//
+  if(!$this->checkAccess(1))
+  {
+    return $res -> withStatus(403) -> write(json_encode($data));
+  }
+  //CHECK ACCESS TO THAT FUNCTION//END//
+  $validation = $this->validator->validate($req, [
+    'timezone' => v::when( v::nullType(), v::alwaysValid(), v::numeric()->notEmpty()->setName('Timezone') ),
+  ]);
+
+  if ($validation->failed()){
+    $data['error']['status']=true;
+    $data['error']['validation']=$validation->error_messages;
+    return $res -> withStatus(200) -> write(json_encode($data));
+  }
+
+  $allParams = $req->getParams();
+
+  if (self::applyTimeSettings($allParams)) {
+    $data['result_ntp'] = trim( shell_exec( 'sudo '. TAC_ROOT_PATH . "/main.sh ntp get-config ") );
+    $data['result'] = APISettings::where('id', 1)->update($allParams);
+    sleep(1);
+    return $res -> withStatus(200) -> write(json_encode($data));
+  }
+
+  return $res -> withStatus(400) -> write(json_encode($data));
 }
 
 public function getTimeStatus($req,$res)
@@ -475,6 +516,13 @@ public function postInterfaceSettings($req,$res)
     return $res -> withStatus(401) -> write(json_encode($data));
   }
   //INITIAL CODE////END//
+  //CHECK SHOULD I STOP THIS?//START//
+  if( $this->shouldIStopThis() )
+  {
+    $data['error'] = $this->shouldIStopThis();
+    return $res -> withStatus(400) -> write(json_encode($data));
+  }
+  //CHECK SHOULD I STOP THIS?//END//
   //CHECK ACCESS TO THAT FUNCTION//START//
   if(!$this->checkAccess(1))
   {
@@ -600,7 +648,7 @@ public function postHASettings($req,$res)
   }
   //INITIAL CODE////END//
   //CHECK ACCESS TO THAT FUNCTION//START//
-  if(!$this->checkAccess(1, true))
+  if( !$this->checkAccess(1) )
   {
     return $res -> withStatus(403) -> write(json_encode($data));
   }
@@ -624,6 +672,30 @@ public function postHASettings($req,$res)
 
   $data['response'] = $ha->save( $allParams );
 
+  return $res -> withStatus(200) -> write(json_encode($data));
+}
+public function postHAStatus($req,$res)
+{
+  //INITIAL CODE////START//
+  $data=array();
+  $data=$this->initialData([
+    'type' => 'get',
+    'object' => 'ha',
+    'action' => 'save',
+  ]);
+  #check error#
+  if ($_SESSION['error']['status']){
+    $data['error']=$_SESSION['error'];
+    return $res -> withStatus(401) -> write(json_encode($data));
+  }
+  //INITIAL CODE////END//
+  //CHECK ACCESS TO THAT FUNCTION//START//
+  if(!$this->checkAccess(1, true))
+  {
+    return $res -> withStatus(403) -> write(json_encode($data));
+  }
+  //CHECK ACCESS TO THAT FUNCTION//END//
+  $data['status'] = HA::getStatus();
   return $res -> withStatus(200) -> write(json_encode($data));
 }
 ####High Availability SETTINGS######End

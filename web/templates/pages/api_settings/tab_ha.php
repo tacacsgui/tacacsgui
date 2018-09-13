@@ -100,7 +100,8 @@
     </form>
     <div class="row ha_save_log_div">
       <div class="col-xs-12">
-        <button class="btn btn-flat btn-success" onclick="tgui_apiSettings.ha.save()">Save Settings</button>
+        <button class="btn btn-flat btn-warning" onclick="tgui_apiHA.status()">Status</button>
+        <button class="btn btn-flat btn-success" onclick="tgui_apiHA.save()">Save Settings</button>
       </div>
     </div>
     <div class="row">
@@ -140,7 +141,7 @@
         <h4 class="modal-title"><i class="fa fa-fw fa-exclamation-triangle"></i> MySQL root Password required!</h4>
       </div>
       <div class="modal-body">
-        <form id="rootpwForm" onsubmit="return tgui_apiSettings.ha.rootpw()">
+        <form id="rootpwForm" onsubmit="return tgui_apiHA.rootpw()">
         <div class="row">
           <div class="col-sm-6 col-sm-offset-3">
             <div class="form-group rootpw has-error">
@@ -153,8 +154,8 @@
       </form>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-outline pull-left" onclick="tgui_apiSettings.ha.rootpw(true)">Close</button>
-        <button type="button" class="btn btn-outline" onclick="tgui_apiSettings.ha.rootpw()">Send</button>
+        <button type="button" class="btn btn-outline pull-left" onclick="tgui_apiHA.rootpw(true)">Close</button>
+        <button type="button" class="btn btn-outline" onclick="tgui_apiHA.rootpw()">Send</button>
       </div>
     </div>
     <!-- /.modal-content -->

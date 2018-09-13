@@ -522,8 +522,6 @@ class TACReportsCtrl extends Controller
 		//CHECK ACCESS TO THAT FUNCTION//END//
 
 		$allParams = $req->getParams();
-
-		$allParams = $req->getParams();
 		$period = '';
 		if (!preg_match('/^[0-9]\s(year[s]{0,1}|month[s]{0,1})', $allParams['period']))
 		{
@@ -540,15 +538,15 @@ class TACReportsCtrl extends Controller
 		$data['period'] = $period;
 		switch ($allParams['target']) {
 			case 'accounting':
-				$data['result'] = ($period == 'all') ?  Accounting::delete() : Accounting::where('date','<=',$period)->delete();
+				$data['result'] = ($period == 'all') ?  Accounting::query()->delete() : Accounting::where('date','<=',$period)->delete();
 				break;
 
 			case 'authentication':
-				$data['result'] = ($period == 'all') ?  Authentication::delete() : Authentication::where('date','<=',$period)->delete();
+				$data['result'] = ($period == 'all') ?  Authentication::query()->delete() : Authentication::where('date','<=',$period)->delete();
 				break;
 
 			case 'authorization':
-				$data['result'] = ($period == 'all') ?  Authorization::delete() : Authorization::where('date','<=',$period)->delete();
+				$data['result'] = ($period == 'all') ?  Authorization::query()->delete() : Authorization::where('date','<=',$period)->delete();
 				break;
 
 			default:

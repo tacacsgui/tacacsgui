@@ -44,41 +44,41 @@ var tgui_error = {
         err = err || {};
         console.log(err);
         this.status = err.status || this.status;
-        if (window.location.hash.substr(1) == 'debug') console.log(err)
+        if (window.location.hash.substr(1) == 'debug') console.log(err);
         if (signin) return true;
         switch(this.status)
       	{
           case 400:
-            if (err.responseJSON && err.responseJSON.message){
-              this.local.show({type:"error", message: err.responseJSON.message});
+            if (err.responseJSON && err.responseJSON.error && err.responseJSON.error.message){
+              this.local.show({type:"error", message: err.responseJSON.error.message});
               break;
             }
-            this.local.show({type:"error", message: "Bad Request!"})
+            this.local.show({type:"error", message: "Bad Request!"});
       			break;
       		case 401:
-            this.local.show({type:"error", message: "You are not authorised!"})
+            this.local.show({type:"error", message: "You are not authorised!"});
       			window.location.replace('/')
       			break;
       		case 403:
-            this.local.show({type:"warning", message: "You do not have enough rights to do that!"})
+            this.local.show({type:"warning", message: "You do not have enough rights to do that!"});
       			break;
       		default:
-      			toastr["error"]("Oops! Unknown error appeared, try to move to home page. :(");
+      			toastr['error']('Oops! Unknown error appeared, try to move to home page. :(');
             var message = '<p>Type: '+ ((err.name) ? err.name : '_undefined_') +': '+ ((err.stack) ? err.stack : '_undefined_') +'</p>';
                 message += '<p>Status: '+ this.status +'</p>';
                 message += '<p>Status Text: '+ ( (err.statusText)? err.statusText : 'Undefined') +'</p>';
                 message += '<p>Response Text: '+ ( (err.responseText)? err.responseText.replace(/\t+/g, "\t").replace(/\r+/g, "\r").replace(/\s+/g, " ").replace(/<style.*style>/g, '').replace(/<.*?>/g, '').replace(/<\/.*>/g, '') : 'Undefined') +'</p>';
             if (err.responseJSON) for (var objProp in err.responseJSON) {
               if (err.responseJSON.hasOwnProperty(objProp)) {
-                message += '<p>' + objProp + ': ' + print_r(err.responseJSON[objProp])+ '</p>'
+                message += '<p>' + objProp + ': ' + print_r(err.responseJSON[objProp])+ '</p>';
               }
             }
             if (extra) for (var objProp in extra) {
               if (extra.hasOwnProperty(objProp)) {
-                message += '<p>' + objProp + ': ' + print_r(extra[objProp])+ '</p>'
+                message += '<p>' + objProp + ': ' + print_r(extra[objProp])+ '</p>';
               }
             }
-            this.global.show(message)
+            this.global.show(message);
             return this;
       			//window.location.replace('/')
       	}
@@ -91,7 +91,7 @@ var tgui_error = {
           console.log(arguments[i]);
         }
       }
-}//Tacgui Error Object//end
+};//Tacgui Error Object//end
 /*---*/
 //Tacgui User Object//
 var tgui_apiUser = {
@@ -104,20 +104,24 @@ var tgui_apiUser = {
     type: "GET"
   },
   getInfo: function(props){
-    props = props || {}
+    props = props || {};
     for (var prop in props) {
       if (props.hasOwnProperty(prop)) {
         this.ajaxProps[prop] = props[prop];
       }
     }
-    var info = ajaxRequest.send(this.ajaxProps)
-    return info
+    var info = ajaxRequest.send(this.ajaxProps);
+    return info;
   },
   fulfill: function(resp) {
     $('firstname_info').text(resp.user.firstname + ' ');
     $('surname_info').text(resp.user.surname);
     $('position_info').text(resp.user.position);
     $('li.user span.username').text(resp.info.user.username);
+    if (resp && resp.ha_role == 'slave') {
+      tgui_status.ha();
+      $('div#ha-attention').modal('show');
+    }
     console.log(resp.info.user.groupRights.toString(2).split("").reverse());
     return this;
   },
@@ -127,12 +131,12 @@ var tgui_apiUser = {
       if (!resp.authorised) window.location.replace('/');
       else throw {name: "Signout", stack:"Something goes wrong!"};
     }).fail( function(err){
-      tgui_error.getStatus(err, props)
-    })
+      tgui_error.getStatus(err, props);
+    });
     return true;
   },
 
-}//Tacgui User Object//end
+};//Tacgui User Object//end
 /*---*/
 //Tacgui Status Object//
 var tgui_status = {
@@ -148,14 +152,15 @@ var tgui_status = {
   getStatus: function(props, idle) {
     idle = idle || true;
     if (idle != 'signin') tguiInit.idle();
-    props = props || {}
+    props = props || {};
     for (var prop in props) {
       if (props.hasOwnProperty(prop)) {
         this.ajaxProps[prop] = props[prop];
       }
     }
-    var info = ajaxRequest.send(this.ajaxProps)
-    return info
+    var info = ajaxRequest.send(this.ajaxProps);
+
+    return info;
   },
   fulfill: function(resp) {
     this.api_version = resp.info.version.APIVER;
@@ -163,7 +168,7 @@ var tgui_status = {
     $('apiversion').text(resp.info.version.APIVER);
     $('guiversion').text(GUIVER);
     $('li.user span.username').text(resp.info.user.username);
-    this.changeStatus(resp.configuration.changeFlag)
+    this.changeStatus(resp.configuration.changeFlag);
     return this;
   },
   changeStatus: function(status) {
@@ -184,15 +189,27 @@ var tgui_status = {
       type: "GET"
     };
 
-    return ajaxRequest.send(ajaxProps)
+    return ajaxRequest.send(ajaxProps);
+  },
+  ha: function() {
+    var ajaxProps = {
+      url:API_LINK+"settings/ha/status/",
+    };
+
+    ajaxRequest.send(ajaxProps).then(function(resp) {
+      $('.ha_status_mysql').text(resp.status.ha_status_brief);
+      $('.ha_status').text( (resp.status.ha_status_brief.includes('Waiting for')) ? 'Active' : 'Error');
+    }).fail(function(err){
+      tgui_error.getStatus(err, ajaxProps);
+    });
   }
-}//Tacgui Status Object//end
+};//Tacgui Status Object//end
 /*---*/
 //Tacacs Initiator Object
 var tguiInit = {
   tooltips: function(selector){
     selector = selector || '[data-toggle="tooltip"]';
-    $(selector).tooltip()
+    $(selector).tooltip();
     return this;
   },
   popover: function(selector){

@@ -24,7 +24,7 @@ class APIHACtrl extends Controller
     if ( $sha1 !== $allParams['sha1']) return $res -> withStatus(403) -> write('Access Restricted!'.$sha1);
     switch ($allParams['action']) {
       case 'sync-init':
-        $data['dump'] = trim( shell_exec( TAC_ROOT_PATH.'/main.sh ha dump '. DB_USER . ' ' . DB_PASSWORD) );
+        $data['dump'] = trim( shell_exec( TAC_ROOT_PATH . "/main.sh ha dump '". DB_USER ."' '". DB_PASSWORD."'") );
         $data['mysql'] = $ha->getMysqlParams();
         break;
       case 'dump':

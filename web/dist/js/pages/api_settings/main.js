@@ -11,7 +11,7 @@ $('document').ready(function(){
 			$('div.loading').hide();/*---*/
     }).catch(function(err){
 			tgui_error.getStatus(err, tgui_status.ajaxProps)
-    })//Get System Info//end
+    }); //Get System Info//end
 	}).catch(function(err){
 	  tgui_error.getStatus(err, tgui_apiUser.ajaxProps)
 	})

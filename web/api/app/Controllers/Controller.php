@@ -81,10 +81,10 @@ class Controller
 	////CHANGE CONFIGURATION STATUS////END//
 	////////////////////////////////////////
 	////CHECK SLAVE HA////END//
-	public function isSlaveHA($message = false)
+	public function shouldIStopThis()
 	{
-		if ($message) return 'Server in Slave mode!';
-		return HA::getServerRole() == 'slave';
+		if (HA::getServerRole() == 'slave') return [ 'message' => 'Server in Slave mode! Changes Forbidden!'];
+		return false;
 	}
 	////CHECK SLAVE HA////END//
 	////////////////////////////////////////

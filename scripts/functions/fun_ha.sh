@@ -1,7 +1,8 @@
 #!/bin/bash
 ####  FUNCTIONS ####
 function sinitize_passwd () {
-  echo $1 | sed -E 's/[\]+(&)/\1/g; s/&/\\&/g';
+  #echo $(echo "'"$1"'");
+  echo $1;
   return;
 }
 function check_mysql_root () {
@@ -113,6 +114,6 @@ function slave_restore() {
 }
 function slave_status() {
   PASSWD=$(sinitize_passwd $1);
-  echo "SHOW SLAVE STATUS\G;" | mysql -uroot -p$PASSWD 2>/dev/null;
+  echo "SHOW SLAVE STATUS\G;" | mysql -utgui_replication -p$PASSWD 2>/dev/null;
   return;
 }

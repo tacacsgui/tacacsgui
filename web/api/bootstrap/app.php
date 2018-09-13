@@ -1,5 +1,6 @@
 <?php
 ini_set('memory_limit', '1024M'); // or you could use 1G
+
 #########################################
 ########TACACS GUI API###################
 		define('APIVER', '0.9.31');

@@ -94,6 +94,12 @@ cp $ROOT_PATH/tac_plus.sh /etc/init.d/tac_plus
 		#timedatectl list-timezones
 		#ntpq -p
 		case $2 in
+		get-time)
+			date "+%F %T";
+		;;
+		get-timezone)
+			timedatectl | grep -o -P '(?<=Time zone: ).*(?= \(.*\))';
+		;;
 		timezone)
 			timedatectl set-timezone $3
 			timedatectl set-ntp 0
