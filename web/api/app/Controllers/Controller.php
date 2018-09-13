@@ -128,7 +128,7 @@ class Controller
 	}
 	////CHECK ACCESS FOR USER////END//
 	////////////////////////////////////////
-	protected function generateRandomString($length = 64) {
+	public static function generateRandomString($length = 64) {
 		$characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
 		$charactersLength = strlen($characters);
 		$randomString = '';

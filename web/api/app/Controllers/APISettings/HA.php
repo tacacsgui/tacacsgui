@@ -9,6 +9,7 @@ use GuzzleHttp\Client as gclient;
 use GuzzleHttp\Exception\RequestException;
 use tgui\Controllers\APIChecker\APIDatabase;
 use tgui\Controllers\APISettings\APISettingsCtrl;
+use tgui\Controllers\Controller;
 
 
 class HA
@@ -133,6 +134,7 @@ class HA
       case 'slave':
         $output = $this->slave_settings( $output, $params );
         $output['role'] = $this->ha_data['server']['role'];
+
         $ha_status = self::getStatus();
         $this->ha_data['server_list'] = [
           'master' => [
@@ -259,44 +261,84 @@ class HA
     return $output;
   }
 
-  public function setupSlaveStep1($output, $params)
+  public static function sendRequest($params = [])
   {
+    $current_time = time();
+
+    isset($params['masterip']) || $params['masterip'] = '10.6.20.10';
+    isset($params['path']) || $params['path'] = '/api/ha/sync/';
+    isset($params['port']) || $params['port'] = '4443';
+    isset($params['https']) || $params['https'] = true;
+
+    isset($params['guzzle_params']) || $params['guzzle_params'] = [];
+
+    isset($params['guzzle_params']['verify']) || $params['guzzle_params']['verify'] = false;
+    isset($params['guzzle_params']['http_errors']) || $params['guzzle_params']['http_errors'] = false;
+    isset($params['guzzle_params']['connect_timeout']) || $params['guzzle_params']['connect_timeout'] = 7;
+
+    isset($params['form_params']) || $params['form_params'] = [];
+    isset($params['form_params']['time']) || $params['form_params']['time'] = $current_time;
+    isset($params['form_params']['action']) || $params['form_params']['action'] = 'default';
+    isset($params['form_params']['psk']) || $params['form_params']['psk'] = 'default';
+    isset($params['form_params']['sha1_attrs']) || $params['form_params']['sha1_attrs'] = ['action'];
+
+    $sha1_hash = $current_time;
+    foreach ($params['form_params']['sha1_attrs'] as $value) {
+      $sha1_hash .= ( isset($params['form_params'][$value]) ) ? '&'.$params['form_params'][$value] : '';
+    }
+    $params['form_params']['sha1'] = sha1($sha1_hash);
+    unset($params['form_params']['psk']);
+    $params['guzzle_params']['form_params'] = $params['form_params'];
+
     try {
       $gclient = new gclient();
-      $current_time = time();
-      $res = $gclient->request('POST', 'https://'.$this->ha_data['server']['ipaddr_master'].':4443/api/ha/sync/',
-      [
-        'verify' => false,
-        'http_errors' => false,
-        'connect_timeout' => 5,
-        'form_params' =>
-        [
-          'time' => $current_time,
-          'masterip' => $this->ha_data['server']['ipaddr_master'],
-          'action' => 'sync-init',
-          'sha1' => sha1( $current_time . '&'. $this->ha_data['server']['ipaddr_master']. '&' . $this->ha_data['server']['psk_slave'] . '&'. 'sync-init' )
-        ]
-      ]);
+      $res = $gclient->request('POST', 'https://'.$params['masterip'].':'.$params['port'].$params['path'], $params['guzzle_params']);
     } catch (RequestException $e) {
+      return false;
+    }
+    return [ $res->getBody()->getContents(), $res->getStatusCode() ];
+    //return [ $params['guzzle_params'], $res->getStatusCode() ];
+  }
+
+  public function setupSlaveStep1($output, $params)
+  {
+    $this->ha_data['server']['unique_id'] = Controller::generateRandomString(24);
+
+    $session_params =
+    [
+      'masterip' => $this->ha_data['server']['ipaddr_master'],
+      'path' => '/api/ha/sync/',
+      'guzzle_params' => [],
+	  'form_params' =>
+        [
+          'psk' => $this->ha_data['server']['psk_slave'],
+          'action' => 'sync-init',
+          'api_version' => APIVER,
+          'unique_id' => $this->ha_data['server']['unique_id'],
+          'sha1_attrs' => ['action', 'psk', 'api_version', 'unique_id']
+        ]
+    ];
+
+    $master_response = self::sendRequest($session_params);
+    if (! $master_response ) {
       $output['type'] = 'message';
       $output['message'] = 'Incorrect PSK or Master IP';
       $output['master_resp'] = [];
       return $output;
-        //echo 'Caught exception: ',  $e->getMessage(), "\n";
     }
 
-    $master_res = json_decode($res->getBody()->getContents(), true );
-    $output['master_resp'] = [ 'body' => $master_res , 'code' => $res->getStatusCode() ];
+    $master_response[0] = json_decode($master_response[0], true );
+    $output['master_resp'] = [ 'body' => $master_response[0], 'code' => $master_response[1] ];
     if ( $output['master_resp']['code'] !== 200 ){
       $output['type'] = 'message';
       $output['message'] = 'Incorrect PSK or Master IP';
       $output['master_resp'] = [];
       return $output;
     }
-    $this->ha_data['server']['bin_file'] = $master_res['mysql'][0];
-    $this->ha_data['server']['position'] = $master_res['mysql'][1];
-    $this->ha_data['server']['ipaddr_slave'] = $master_res['remoteip'];
-    $makeIdVar=explode('.', $master_res['remoteip']);
+    $this->ha_data['server']['bin_file'] = $master_response[0]['mysql'][0];
+    $this->ha_data['server']['position'] = $master_response[0]['mysql'][1];
+    $this->ha_data['server']['ipaddr_slave'] = $master_response[0]['remoteip'];
+    $makeIdVar=explode('.', $master_response[0]['remoteip']);
     $this->ha_data['server']['slave_id'] = $makeIdVar[3] + 1;
 
     $output['status'] = '';
@@ -305,21 +347,31 @@ class HA
   }
   public function setupSlaveStep2($output, $params)
   {
-    $current_time = time();
-    $gclient = new gclient();
-    $dump_res = $gclient->request('POST', 'https://'.$this->ha_data['server']['ipaddr_master'].':4443/api/ha/sync/',
+    $session_params =
     [
-      'verify' => false,
-      'http_errors' => false,
-      'form_params' =>
+      'masterip' => $this->ha_data['server']['ipaddr_master'],
+      'path' => '/api/ha/sync/',
+      'guzzle_params' => [],
+  	  'form_params' =>
       [
-        'time' => $current_time,
-        'masterip' => $this->ha_data['server']['ipaddr_master'],
+        'psk' => $this->ha_data['server']['psk_slave'],
         'action' => 'dump',
-        'sha1' => sha1( $current_time . '&'. $this->ha_data['server']['ipaddr_master']. '&' . $this->ha_data['server']['psk_slave'] . '&'. 'dump' )
+        'api_version' => APIVER,
+        'unique_id' => $this->ha_data['server']['unique_id'],
+        'sha1_attrs' => ['action', 'psk', 'api_version', 'unique_id']
       ]
-    ]);
-    file_put_contents('/opt/tacacsgui/temp/dumpForSlave.sql', $dump_res->getBody()->getContents(), LOCK_EX);
+    ];
+
+    $master_response = self::sendRequest($session_params);
+
+    if ( $master_response[1] !== 200 ){
+      $output['type'] = 'message';
+      $output['message'] = 'Incorrect PSK or Master IP';
+      $output['master_resp'] = [];
+      return $output;
+    }
+
+    file_put_contents('/opt/tacacsgui/temp/dumpForSlave.sql', $master_response[0], LOCK_EX);
 
     if ( !file_exists ( '/opt/tacacsgui/temp/dumpForSlave.sql' ) ) {
       $output['type'] = 'message';
@@ -362,6 +414,30 @@ class HA
       'ntp_list' => $output['timezone_data']->ntp_list
     ]);
     $output['result_ntp'] = ($output['timezone_settings']) ? trim( shell_exec( 'sudo '. TAC_ROOT_PATH . "/main.sh ntp get-config ") ) : false;
+
+    $session_params =
+    [
+      'masterip' => $this->ha_data['server']['ipaddr_master'],
+      'path' => '/api/ha/sync/',
+      'guzzle_params' => [],
+  	  'form_params' =>
+      [
+        'psk' => $this->ha_data['server']['psk_slave'],
+        'action' => 'final',
+        'api_version' => APIVER,
+        'unique_id' => $this->ha_data['server']['unique_id'],
+        'sha1_attrs' => ['action', 'psk', 'api_version', 'unique_id']
+      ]
+    ];
+
+    $master_response = self::sendRequest($session_params);
+
+    if ( $master_response[1] !== 200 ){
+      $output['type'] = 'message';
+      $output['message'] = 'Incorrect PSK or Master IP';
+      $output['master_resp'] = [];
+      return $output;
+    }
 
     $output['status'] = '';
     $output['step'] = $params['step'];

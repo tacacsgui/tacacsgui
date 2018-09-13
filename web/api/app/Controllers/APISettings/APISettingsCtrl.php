@@ -306,11 +306,6 @@ public function getTimeSettings($req,$res)
   }
   //CHECK ACCESS TO THAT FUNCTION//END//
   $data['time'] = APISettings::select(['timezone', 'ntp_list'])->find(1);
-  //$data['timezones'] = in_array('Europe/Moscow', timezone_identifiers_list());
-  //$data['timezones'] = in_array(trim( shell_exec(TAC_ROOT_PATH . "/main.sh ntp get-timezone")), timezone_identifiers_list());
-  $data['timezones'] = date_default_timezone_set(trim( shell_exec(TAC_ROOT_PATH . "/main.sh ntp get-timezone")));
-  //if ( in_array(trim( shell_exec(TAC_ROOT_PATH . "/main.sh ntp get-timezone")), timezone_identifiers_list()) ) date_default_timezone_set(trim( shell_exec(TAC_ROOT_PATH . "/main.sh ntp get-timezone")));
-  $data['timez'] = date("Y-m-d H:m:s");
 
   return $res -> withStatus(200) -> write(json_encode($data));
 }
