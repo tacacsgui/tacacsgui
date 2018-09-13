@@ -93,6 +93,35 @@ class HA
 	{
     return $this->ha_data;
   }
+  public function addNewSlave($params=[])
+	{
+    $slave = ['ipaddr' => $_SERVER['REMOTE_ADDR'], 'location' => 'remote', 'status' => 'Available', 'lastchk' => trim( shell_exec(TAC_ROOT_PATH . "/main.sh ntp get-time") )];
+
+    $slave['api_version'] = isset($params['api_version']) ? $params['api_version'] : '0';
+    $slave['unique_id'] = isset($params['unique_id']) ? $params['unique_id'] : '0';
+
+    if ( ! isset($this->ha_data['server_list']) OR ! isset($this->ha_data['server_list']['slave']) OR count($this->ha_data['server_list']['slave']) == 0){
+      $this->ha_data['server_list']['slave'] = [];
+      $this->ha_data['server_list']['slave'][0] = $slave;
+      $this->encoder->setPrettyPrinting(true);
+      $this->encoder->encodeFile( $this->ha_data, '/opt/tgui_data/ha/ha.cfg');
+      return true;
+    }
+    count($this->ha_data['server_list']['slave']);
+    for ($i=0; $i < count($this->ha_data['server_list']['slave']); $i++) {
+      if ($this->ha_data['server_list']['slave'][$i]['ipaddr'] == $_SERVER['REMOTE_ADDR']) {
+        $this->ha_data['server_list']['slave'][$i] = $slave;
+        $this->encoder->setPrettyPrinting(true);
+        $this->encoder->encodeFile( $this->ha_data, '/opt/tgui_data/ha/ha.cfg');
+        return true;
+      }
+    }
+
+    $this->ha_data['server_list']['slave'][count($this->ha_data['server_list']['slave']) - 1] = $slave;
+    $this->encoder->setPrettyPrinting(true);
+    $this->encoder->encodeFile( $this->ha_data, '/opt/tgui_data/ha/ha.cfg');
+    return true;
+  }
   public function checkAccessPolicy($ip = '')
 	{
     $testArray = explode( ',', $this->ha_data['server']['slaves_ip'] );
