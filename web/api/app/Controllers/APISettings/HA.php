@@ -438,6 +438,9 @@ class HA
       $output['master_resp'] = [];
       return $output;
     }
+	
+	$master_response[0] = json_decode($master_response[0], true );
+    $output['master_resp'] = [ 'body' => $master_response[0], 'code' => $master_response[1] ];
 
     $output['status'] = '';
     $output['step'] = $params['step'];
