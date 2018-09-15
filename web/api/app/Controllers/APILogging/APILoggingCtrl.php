@@ -20,7 +20,7 @@ class APILoggingCtrl extends Controller
 			$attrArray['message']=$MESSAGES[$attrArray['message']];
 		}
 
-		$logEntry = APILogging::create( array_merge($attrArrayStatic,$attrArray) );
+		$logEntry = APILogging::create( array_merge($attrArrayStatic, $attrArray) );
 
 		return $logEntry;
 	}

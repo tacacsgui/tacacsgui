@@ -21,7 +21,7 @@ require __DIR__ . '/../config.php';
 require __DIR__ . '/../vendor/autoload.php';
 
 use tgui\Controllers\APISettings\HA;
-
+use Illuminate\Database\Capsule\Manager as Capsule;
 $app = new \Slim\App([
 	'settings' => [
 		'displayErrorDetails' => true,
@@ -52,7 +52,7 @@ $app = new \Slim\App([
 
 $container = $app->getContainer();
 
-$capsule = new \Illuminate\Database\Capsule\Manager;
+$capsule = new Capsule;
 $capsule->addConnection($container['settings']['db']['default'], 'default');
 $capsule->addConnection($container['settings']['db']['logging'], 'logging');
 $capsule->setAsGlobal();
