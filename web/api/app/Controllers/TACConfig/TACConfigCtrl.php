@@ -272,11 +272,11 @@ class TACConfigCtrl extends Controller
 			///LOGGING//end//
 
 			$newSlaveAvailable = HA::isThereNewSlaves();
-
+			$data['test01']= $newSlaveAvailable;
 			$doBackup=$req->getParam('doBackup');
-			if ( $doBackup == 'true' ) {//OR $newSlaveAvailable ) {
+			if ( $doBackup == 'true' OR $newSlaveAvailable ) {
 				$data['backup'] = $doBackup = $this->APIBackupCtrl->makeBackup(['make' => 'tcfg']);
-				if ( !$doBackup['status'] ) { //AND ! $newSlaveAvailable ) {
+				if ( !$doBackup['status'] AND ! $newSlaveAvailable ) {
 					$data['applyStatus'] = ['error' => true, 'message' => $doBackup['message'], 'errorLine' => 0];
 					return $res -> withStatus(200) -> withHeader('Content-type', $contentTypeOutput) -> write(json_encode($data));
 				}
@@ -287,7 +287,12 @@ class TACConfigCtrl extends Controller
 			if ( HA::isThereSlaves() ){
 				$ha = new HA(['capsule' => false ]);
 				$data['server_list'] = $ha->getServerList();
-				$data['server_list_response'] = $ha->sendConfigurationApply();
+				$data['checksum'] = [];
+				$tempArray = $this->db::select( 'CHECKSUM TABLE '. implode( ",", array_keys($this->tablesArr) ) );
+		    for ($i=0; $i < count($tempArray); $i++) {
+		      $data['checksum'][$tempArray[$i]->Table]=$tempArray[$i]->Checksum;
+		    }
+				$data['server_list_response'] = $ha->sendConfigurationApply([ 'checksum'=>$data['checksum']]);
 			}
 			$data['applyStatus']=$this->applyConfiguration($output);
 

@@ -234,6 +234,7 @@ class APIDatabase
   		],
   		'tac_log_accounting' =>
   		[
+  			'server' => ['string', '_'],
   			'date' => ['timestamp', '_'],
   			'nas' => ['string', '_'],
   			'username' => ['string', '_'],
@@ -256,6 +257,7 @@ class APIDatabase
   		],
   		'tac_log_authentication' =>
   		[
+  			'server' => ['string', '_'],
   			'date' => ['timestamp', '_'],
   			'nas' => ['string', '_'],
   			'username' => ['string', '_'],
@@ -266,6 +268,7 @@ class APIDatabase
   		],
   		'tac_log_authorization' =>
   		[
+  			'server' => ['string', '_'],
   			'date' => ['timestamp', '_'],
   			'nas' => ['string', '_'],
   			'username' => ['string', '_'],

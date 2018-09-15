@@ -7,8 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 class Accounting extends Model
 {
 	protected $table = 'tac_log_accounting';
-	
+
 	protected $fillable = [
+		'server',
 		'date',
 		'NAS',
 		'username',

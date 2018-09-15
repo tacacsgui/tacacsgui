@@ -181,10 +181,14 @@ var tgui_configEngine = {
     if (slaves.length)
     {
       console.log(slaves);
-      messageBody.append('<h4>Apply Configuration for Slave</h4><table class="table table-striped tableSlavesHa"><tr><td>Address</td><td>Status</td><td>Response</td><td>DB Check</td></tr></table>');
+      messageBody.append('<h4>Apply Configuration for Slave</h4><table class="table table-striped tableSlavesHa"><tr><td>Address</td><td>Status</td><td>API Check</td><td>DB Check</td><td>Apply Status</td></tr></table>');
       for (var i = 0, len = slaves.length; i < len; i++) {
-        console.log(slaves[i]);
-        $('table.tableSlavesHa').append('<tr><td>'+slaves[i].ip+'</td><td>'+slaves[i].response[1]+'</td><td>Response</td><td>DB Check</td></tr>');
+        $('table.tableSlavesHa').append(
+          '<tr><td>'+slaves[i].ip+'</td><td>'+
+          slaves[i].response[1]+'</td><td><b>'+
+          ((slaves[i].response[0].version_check) ? '<text class="text-success">Ok':'<text class="text-danger">Error')+'</text></b></td><td><b>'+
+          ((slaves[i].response[0].db_check) ? '<text class="text-success">Ok':'<text class="text-danger">Error')+'</text></b></td><td><b>'+
+          ((!slaves[i].response[0].applyStatus.error) ? '<text class="text-success">Ok':'<text class="text-danger">Error')+'</text></b></td></tr>');
       }
 
     }

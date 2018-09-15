@@ -69,6 +69,7 @@ class APIHACtrl extends Controller
     $allParams = $req->getParams();
     if ( ! $this->checkServerAccess( $allParams, 'slave' ) ) return $res -> withStatus(403);
     $data['access'] = true;
+    $data['checksum'] = [];
     $tempArray = $this->db::select( 'CHECKSUM TABLE '. implode( ",", array_keys($this->tablesArr) ) );
     for ($i=0; $i < count($tempArray); $i++) {
       $data['checksum'][$tempArray[$i]->Table]=$tempArray[$i]->Checksum;
@@ -83,16 +84,34 @@ class APIHACtrl extends Controller
   }
 
   ####HA Keepalive####
-  public function postHAKeepalive($req,$res)
+  public function postLoggingEvent($req,$res)
   {
-    //INITIAL CODE////START//
     $data=array(
       'remoteip' => $_SERVER['REMOTE_ADDR'],
       'serverip' => $_SERVER['SERVER_ADDR'],
       'time' => time(),
       'access' => false);
     $ha = new HA();
+    $allParams = $req->getParams();
+
+    //if ( ! $this->checkServerAccess( $allParams ) ) return $res -> withStatus(403);
+    //$event = '2018-09-18 11:39:40 +0300|!|10.10.50.251|!|cisco123|!|tty1|!|10.10.50.200|!|stop|!|task_id=124|!|timezone=UTC|!|service=shell|!|priv-lvl=15|!|cmd=configure terminal <cr>';
+    shell_exec('php '.TAC_ROOT_PATH."/parser/parser.php ".$allParams['log_type']." '".$allParams['log_entry']."' '".$_SERVER['REMOTE_ADDR']."'");
+
+    $data['access'] = true;
+
+    return $res -> withStatus(200) -> write(json_encode($data));
   }
+  // public function postHAKeepalive($req,$res)
+  // {
+  //   //INITIAL CODE////START//
+  //   $data=array(
+  //     'remoteip' => $_SERVER['REMOTE_ADDR'],
+  //     'serverip' => $_SERVER['SERVER_ADDR'],
+  //     'time' => time(),
+  //     'access' => false);
+  //   $ha = new HA();
+  // }
   ####HA Keepalive####End
   protected function checkServerAccess( $allParams = [], $role = 'master' )
   {

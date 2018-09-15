@@ -187,4 +187,5 @@ $app->get('/download/log/', 'APIDownloadCtrl:getDownloadLog');
 ###API HA##################################################
 $app->post('/ha/sync/', 'APIHACtrl:postHASync');
 $app->post('/ha/do/apply/', 'APIHACtrl:postHADoApplyConfig');
+$app->post('/ha/log/add/', 'APIHACtrl:postLoggingEvent');
 #####################################################

@@ -32,6 +32,7 @@ var initialData =
 	{
 		id: {title: "ID", data : "id", orderable: true, visible: false,},
 		date: {title: "Date", data : "date", visible: true, orderable: true},
+		server: {title: "Server", data : "server", visible: true, orderable: true},
 		nas: {title: "NAS IP", data : "nas", visible: true, orderable: true},
 		username: {title: "Username", data : "username", visible: true, orderable: true},
 		'priv-lvl': {title: "Privilege Lvl", data : "priv-lvl", visible: false, orderable: false},

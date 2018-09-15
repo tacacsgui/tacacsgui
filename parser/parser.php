@@ -45,6 +45,7 @@ $capsule->bootEloquent();
 $container = new Container;
 $container->logType = $argv[1];
 $container->logLine = $argv[2];
+$container->server_ip = ( isset($argv[3]) ) ? $argv[3] : 'localhost';
 $container->db = $capsule;
 
 $container->accounting = new \parser\Controllers\Accounting\AccountingController($container);
@@ -56,7 +57,7 @@ switch ($container->logType) {
 		$container->accounting->parser();
 		break;
 	case ('authorization'):
-		var_dump($container->authorization->parser());
+		$container->authorization->parser();
 		break;
 	case ('authentication'):
 		$container->authentication->parser();

@@ -86,8 +86,9 @@ class HA
 	{
     return $this->ha_data['server_list'];
   }
-  public function sendConfigurationApply()
+  public function sendConfigurationApply($params = [])
 	{
+    isset($params['checksum']) || $params['checksum'] = [];
     $output=[];
     if ( ! self::isThereSlaves() ) return $output;
 
@@ -108,9 +109,15 @@ class HA
       ];
       $response = self::sendRequest($session_params);
 
-      if ($response[1] == 200 ) $response[0] = json_decode($response[0], true );
+      if ($response[1] != 200 ) {
+        $output[count($output)] = ['ip'=> $value['ipaddr'], 'uid' => $value['unique_id'], 'response' => $response ];
+        continue;
+      }
+      $response[0] = json_decode($response[0], true );
+      $response[0]['db_check'] = ($params['checksum'] == $response[0]['checksum']);
+      if ($response[0]['db_check'] AND $response[0]['version_check'] AND !$response[0]['applyStatus']['error'] AND self::isThereNewSlaves($value['ipaddr'])) self::slaveInitiated($value['ipaddr']);
 
-      $output[count($output)] = ['ip'=> $value['ipaddr'], 'uid' => $value['unique_id'], 'response' => $response[0] ];
+      $output[count($output)] = ['ip'=> $value['ipaddr'], 'uid' => $value['unique_id'], 'response' => $response , 'test' => self::isThereNewSlaves($value['ipaddr'])];
     }
 
     return $output;
@@ -577,7 +584,7 @@ class HA
     $output['my_cnf'] = trim(shell_exec('cat /etc/mysql/my.cnf'));
     return  $output;
   }
-  public static function isThereNewSlaves()
+  public static function isThereNewSlaves($ip = '')
   {
     $decoder = new jsond();
     $decoder->setObjectDecoding(1);
@@ -585,7 +592,27 @@ class HA
 
     if ( isset($ha_data['server_list']) AND isset($ha_data['server_list']['slave']) AND count($ha_data['server_list']['slave'])){
       foreach ($ha_data['server_list']['slave'] as $value) {
-        if ( ! isset($ha_data['server_list']['slave']['initiated']) ) return true;
+        if ( ! isset($value['initiated']) AND $ip == '') return true;
+        if ( ! isset($value['initiated']) AND $ip == $value['ipaddr']) return true;
+      }
+    }
+
+    return false;
+  }
+  public static function slaveInitiated($ip = '0.0.0.0')
+  {
+    $decoder = new jsond();
+    $decoder->setObjectDecoding(1);
+    $ha_data = $decoder->decodeFile( '/opt/tgui_data/ha/ha.cfg' );
+
+    if ( isset($ha_data['server_list']) AND isset($ha_data['server_list']['slave']) AND count($ha_data['server_list']['slave'])){
+      for ($i=0; $i < count($ha_data['server_list']['slave']); $i++) {
+        if ( ! isset($ha_data['server_list']['slave'][0]['initiated']) ){
+          $ha_data['server_list']['slave'][0]['initiated'] = true;
+          $encoder = new jsone();
+          $encoder->setPrettyPrinting(true);
+          $encoder->encodeFile( $ha_data, '/opt/tgui_data/ha/ha.cfg');
+        }
       }
     }
 
