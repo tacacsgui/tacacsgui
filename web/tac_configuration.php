@@ -113,6 +113,7 @@ require __DIR__ . '/templates/body_start.php';
 								<i class="fa fa-times-circle text-red applyError" style="display:none"></i>
 							</h3>
 							<div class="timeline-body applyItemBody">
+
 								Output of the save process will appear here...
 							</div>
 						</div>

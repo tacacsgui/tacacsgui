@@ -168,6 +168,8 @@ var tgui_configEngine = {
     var successIcon = $('.applyConfigurationItem i.applySuccess')
     var errorIcon = $('.applyConfigurationItem i.applyError')
     var messageBody = $('.applyConfigurationItem div.applyItemBody')
+    var slaves = text.slaves || [];
+    text = text.text || text;
 
     mainIcon.removeClass('bg-green').removeClass('bg-red').addClass('bg-grey')
     endofTimelineIcon.removeClass('bg-green fa-check').addClass('bg-grey fa-clock-o')
@@ -175,12 +177,22 @@ var tgui_configEngine = {
     messageBody.empty().append('Output of the save process will appear here...');
 
     if (status == 'hide') return true;
+    messageBody.empty().append('<pre>'+text+'</pre>');
+    if (slaves.length)
+    {
+      console.log(slaves);
+      messageBody.append('<h4>Apply Configuration for Slave</h4><table class="table table-striped tableSlavesHa"><tr><td>Address</td><td>Status</td><td>Response</td><td>DB Check</td></tr></table>');
+      for (var i = 0, len = slaves.length; i < len; i++) {
+        console.log(slaves[i]);
+        $('table.tableSlavesHa').append('<tr><td>'+slaves[i].ip+'</td><td>'+slaves[i].response[1]+'</td><td>Response</td><td>DB Check</td></tr>');
+      }
 
+    }
     if (status == 'success')
     {
       mainIcon.addClass('bg-green').removeClass('bg-red').removeClass('bg-grey')
       successIcon.show();
-      messageBody.empty().append(text);
+      //messageBody.empty().append(text);
       endofTimelineIcon.removeClass('bg-grey fa-clock-o').addClass('bg-green fa-check')
       return true;
     }
@@ -188,10 +200,9 @@ var tgui_configEngine = {
     {
       mainIcon.removeClass('bg-green').addClass('bg-red').removeClass('bg-grey')
       errorIcon.show();
-      messageBody.empty().append('<pre>'+text+'</pre>');
+      //messageBody.empty().append('<pre>'+text+'</pre>');
       return false;
     }
-
     return false;
   },
   testConf: function(){
@@ -259,7 +270,11 @@ var tgui_configEngine = {
         return;
       }
 
-      self.applyConfMethod('success',resp.applyStatus.message)
+      var params = { text: resp.applyStatus.message };
+
+      if (resp.server_list_response) params.slaves = resp.server_list_response;
+      console.log(params);
+      self.applyConfMethod('success', params)
       tgui_status.changeStatus(0)
     }).fail(function(err){
       tgui_error.getStatus(err, ajaxProps)

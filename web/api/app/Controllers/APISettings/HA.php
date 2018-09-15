@@ -37,29 +37,30 @@ class HA
   private $decoder;
   private $encoder;
   private $tablesArr;
-  protected $capsule;
+  private $capsule;
 
-  public function __construct( $some_data = [] )
+  public function __construct( $params = ['capsule' => true ] )
   {
 
     $this->encoder = new jsone();
     $this->decoder = new jsond();
 
-    $this->capsule = new \Illuminate\Database\Capsule\Manager;
-    $this->capsule->addConnection([
-        'driver' => 'mysql',
-        'host'	=> DB_HOST,
-        'database' => DB_NAME,
-        'username' => DB_USER,
-        'password' => DB_PASSWORD,
-        'charset' => DB_CHARSET,
-        'collation' => DB_COLLATE,
-        'prefix' => ''
-      ]);
-    $this->capsule->setAsGlobal();
-    $this->capsule->schema();
-    $this->capsule->bootEloquent();
-
+    if ($params['capsule']){
+      $this->capsule = new \Illuminate\Database\Capsule\Manager;
+      $this->capsule->addConnection([
+          'driver' => 'mysql',
+          'host'	=> DB_HOST,
+          'database' => DB_NAME,
+          'username' => DB_USER,
+          'password' => DB_PASSWORD,
+          'charset' => DB_CHARSET,
+          'collation' => DB_COLLATE,
+          'prefix' => ''
+        ]);
+      $this->capsule->setAsGlobal();
+      $this->capsule->schema();
+      $this->capsule->bootEloquent();
+    }
     $apiChecker = new APIDatabase;
     $this->tablesArr = $apiChecker->tablesArr;
 
@@ -84,6 +85,35 @@ class HA
   public function getServerList()
 	{
     return $this->ha_data['server_list'];
+  }
+  public function sendConfigurationApply()
+	{
+    $output=[];
+    if ( ! self::isThereSlaves() ) return $output;
+
+    foreach ($this->ha_data['server_list']['slave'] as $value) {
+      $session_params =
+      [
+        'server_ip' => $value['ipaddr'],
+        'path' => '/api/ha/do/apply/',
+        'guzzle_params' => [],
+    	  'form_params' =>
+          [
+            'psk' => $this->ha_data['server']['psk_master'],
+            'action' => 'apply',
+            'api_version' => APIVER,
+            'unique_id' => $value['unique_id'],
+            'sha1_attrs' => ['action', 'psk', 'api_version', 'unique_id']
+          ]
+      ];
+      $response = self::sendRequest($session_params);
+
+      if ($response[1] == 200 ) $response[0] = json_decode($response[0], true );
+
+      $output[count($output)] = ['ip'=> $value['ipaddr'], 'uid' => $value['unique_id'], 'response' => self::sendRequest($session_params) ];
+    }
+
+    return $output;
   }
   public function getMysqlParams()
 	{
@@ -294,7 +324,7 @@ class HA
   {
     $current_time = time();
 
-    isset($params['masterip']) || $params['masterip'] = '10.6.20.10';
+    isset($params['server_ip']) || $params['server_ip'] = '10.6.20.10';
     isset($params['path']) || $params['path'] = '/api/ha/sync/';
     isset($params['port']) || $params['port'] = '4443';
     isset($params['https']) || $params['https'] = true;
@@ -321,7 +351,7 @@ class HA
 
     try {
       $gclient = new gclient();
-      $res = $gclient->request('POST', 'https://'.$params['masterip'].':'.$params['port'].$params['path'], $params['guzzle_params']);
+      $res = $gclient->request('POST', 'https://'.$params['server_ip'].':'.$params['port'].$params['path'], $params['guzzle_params']);
     } catch (RequestException $e) {
       return false;
     }
@@ -335,7 +365,7 @@ class HA
 
     $session_params =
     [
-      'masterip' => $this->ha_data['server']['ipaddr_master'],
+      'server_ip' => $this->ha_data['server']['ipaddr_master'],
       'path' => '/api/ha/sync/',
       'guzzle_params' => [],
 	  'form_params' =>
@@ -378,7 +408,7 @@ class HA
   {
     $session_params =
     [
-      'masterip' => $this->ha_data['server']['ipaddr_master'],
+      'server_ip' => $this->ha_data['server']['ipaddr_master'],
       'path' => '/api/ha/sync/',
       'guzzle_params' => [],
   	  'form_params' =>
@@ -446,7 +476,7 @@ class HA
 
     $session_params =
     [
-      'masterip' => $this->ha_data['server']['ipaddr_master'],
+      'server_ip' => $this->ha_data['server']['ipaddr_master'],
       'path' => '/api/ha/sync/',
       'guzzle_params' => [],
   	  'form_params' =>
@@ -539,5 +569,29 @@ class HA
     $output['role'] = $role;
     $output['my_cnf'] = trim(shell_exec('cat /etc/mysql/my.cnf'));
     return  $output;
+  }
+  public static function isThereNewSlaves()
+  {
+    $decoder = new jsond();
+    $decoder->setObjectDecoding(1);
+    $ha_data = $decoder->decodeFile( '/opt/tgui_data/ha/ha.cfg' );
+
+    if ( isset($ha_data['server_list']) AND isset($ha_data['server_list']['slave']) AND count($ha_data['server_list']['slave'])){
+      foreach ($ha_data['server_list']['slave'] as $value) {
+        if ( ! isset($ha_data['server_list']['slave']['initiated']) ) return true;
+      }
+    }
+
+    return false;
+  }
+  public static function isThereSlaves()
+  {
+    $decoder = new jsond();
+    $decoder->setObjectDecoding(1);
+    $ha_data = $decoder->decodeFile( '/opt/tgui_data/ha/ha.cfg' );
+
+    if ( isset($ha_data['server_list']) AND isset($ha_data['server_list']['slave']) AND count($ha_data['server_list']['slave'])) return true;
+
+    return false;
   }
 }
