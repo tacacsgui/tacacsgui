@@ -18,7 +18,7 @@ class APIHACtrl extends Controller
     $ha = new HA();
     $allParams = $req->getParams();
 
-    if ( ! $this->checkSlaveAccess( $allParams ) ) return $res -> withStatus(403);// -> write('Access Restricted!');
+    if ( ! $this->checkServerAccess( $allParams ) ) return $res -> withStatus(403);// -> write('Access Restricted!');
 
     switch ($allParams['action']) {
       case 'sync-init':
@@ -57,6 +57,31 @@ class APIHACtrl extends Controller
     return $res -> withStatus(200) -> write(json_encode($data));
   }
   ####HA Sync####End
+  public function postHADoApplyConfig($req,$res)
+  {
+    //INITIAL CODE////START//
+    $data=array(
+      'remoteip' => $_SERVER['REMOTE_ADDR'],
+      'serverip' => $_SERVER['SERVER_ADDR'],
+      'time' => time(),
+      'access' => false);
+    $ha = new HA();
+    $allParams = $req->getParams();
+    if ( ! $this->checkServerAccess( $allParams, 'slave' ) ) return $res -> withStatus(403);
+    $data['access'] = true;
+    $tempArray = $this->db::select( 'CHECKSUM TABLE '. implode( ",", array_keys($this->tablesArr) ) );
+    for ($i=0; $i < count($tempArray); $i++) {
+      $data['checksum'][$tempArray[$i]->Table]=$tempArray[$i]->Checksum;
+    }
+    $data['applyStatus'] = ['error' => true];
+    $data['testStatus'] = ['error' => true];
+    $data['version_check'] = (APIVER == $allParams['api_version']);
+    if (! $data['version_check'] ) return $res -> withStatus(200) -> write(json_encode($data));
+    $data['testStatus'] = $this->TACConfigCtrl->testConfiguration($this->TACConfigCtrl->createConfiguration());
+    if ( ! $data['testStatus']['error'] ) $data['applyStatus'] = $this->TACConfigCtrl->applyConfiguration($this->TACConfigCtrl->createConfiguration());
+    return $res -> withStatus(200) -> write(json_encode($data));
+  }
+
   ####HA Keepalive####
   public function postHAKeepalive($req,$res)
   {
@@ -69,14 +94,17 @@ class APIHACtrl extends Controller
     $ha = new HA();
   }
   ####HA Keepalive####End
-  protected function checkSlaveAccess( $allParams = [] )
+  protected function checkServerAccess( $allParams = [], $role = 'master' )
   {
     $ha = new HA();
-    if (! $ha->isMaster() OR ! $ha->checkAccessPolicy( $_SERVER['REMOTE_ADDR'] ) ) return false;
+    $accessPolicy = ( $role == 'master') ? $ha->checkAccessPolicy( $_SERVER['REMOTE_ADDR'] ) : $ha->checkAccessPolicy( $_SERVER['REMOTE_ADDR'], 'slave' );
+    $roleCheck = ( $role == 'master') ? $ha->isMaster() : HA::isSlave();
+
+    if (! $roleCheck OR ! $accessPolicy ) return false;
     if ( ! isset( $allParams['sha1_attrs'] ) OR ! is_array($allParams['sha1_attrs'])) return false;
     $sha1_hash = $allParams['time'];
     foreach ($allParams['sha1_attrs'] as $value) {
-      if ( $value == 'psk' ) $allParams[$value] = $ha->psk();
+      if ( $value == 'psk' ) $allParams[$value] = $ha->psk($role);
       if ( ! isset($allParams[$value]) ) return false;
       $sha1_hash .= ( isset($allParams[$value]) ) ? '&'.$allParams[$value] : '';
     }

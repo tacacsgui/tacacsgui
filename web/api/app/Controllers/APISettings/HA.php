@@ -74,9 +74,9 @@ class HA
     $this->ha_data = $this->decoder->decodeFile( '/opt/tgui_data/ha/ha.cfg' );
 
   }
-  public function psk()
+  public function psk( $role = 'master')
   {
-    return $this->ha_data['server']['psk_master'];
+    return $this->ha_data['server']['psk_'.$role];
   }
   public function isMaster()
   {
@@ -110,7 +110,7 @@ class HA
 
       if ($response[1] == 200 ) $response[0] = json_decode($response[0], true );
 
-      $output[count($output)] = ['ip'=> $value['ipaddr'], 'uid' => $value['unique_id'], 'response' => self::sendRequest($session_params) ];
+      $output[count($output)] = ['ip'=> $value['ipaddr'], 'uid' => $value['unique_id'], 'response' => $response[0] ];
     }
 
     return $output;
@@ -147,15 +147,22 @@ class HA
       }
     }
 
-    $this->ha_data['server_list']['slave'][count($this->ha_data['server_list']['slave']) - 1] = $slave;
+    $this->ha_data['server_list']['slave'][count($this->ha_data['server_list']['slave'])] = $slave;
     $this->encoder->setPrettyPrinting(true);
     $this->encoder->encodeFile( $this->ha_data, '/opt/tgui_data/ha/ha.cfg');
     return true;
   }
-  public function checkAccessPolicy($ip = '')
+  public function checkAccessPolicy($ip = '', $role = 'master')
 	{
-    $testArray = explode( ',', $this->ha_data['server']['slaves_ip'] );
-    return in_array($ip, $testArray);
+    if ( $role == 'master'){
+      $testArray = explode( ',', $this->ha_data['server']['slaves_ip'] );
+      return in_array($ip, $testArray);
+    }
+    if ( isset($this->ha_data['server_list']) AND  isset($this->ha_data['server_list']['slave']) AND count($this->ha_data['server_list']['slave']) )
+    foreach ($this->ha_data['server_list']['slave'] as $value) {
+      if ($value['ipaddr'] == $ip) return true;
+    }
+    return true;
   }
 
   public function save($params)
@@ -497,7 +504,7 @@ class HA
       $output['master_resp'] = [];
       return $output;
     }
-	
+
 	$master_response[0] = json_decode($master_response[0], true );
     $output['master_resp'] = [ 'body' => $master_response[0], 'code' => $master_response[1] ];
 

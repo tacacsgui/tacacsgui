@@ -114,7 +114,7 @@ class TACConfigCtrl extends Controller
 	}
 	////////////TEST CONFIGURATION////END//
 	////////////APPLY CONFIGURATION////START//
-	private function applyConfiguration($confText)
+	public function applyConfiguration($confText)
 	{
 		$errorFlag=false;
 		$confFile = fopen(TAC_PLUS_CFG, 'w') or $errorFlag=true;
@@ -155,7 +155,7 @@ class TACConfigCtrl extends Controller
 	////////////APPLY CONFIGURATION////END//
 	////////////////////////////////////////////////
 	//////////////CREATE CONFIGURATION////START//
-	public function createConfiguration($lineSeparator)
+	public function createConfiguration($lineSeparator = "\n ")
 	{
 		$tempMavisGeneralArray=ConfigPatterns::tacMavisGeneralGen(false);
 		$tempMavisOTPArray=ConfigPatterns::tacMavisOTPGen(false);
