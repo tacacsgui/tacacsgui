@@ -9,15 +9,15 @@ class AuthorizationController extends Controller
 {
 	public function parser()
 	{
-		
+
 		$logLineArray=explode('|!|',$this->logLine);
-		
+
 		$returnData=array();
-		
+
 		$arrayLength=count($logLineArray);
-		
+
 		for ($x = 0; $x < $arrayLength; $x++) {
-		
+
 			switch (true) {
 				case ($x==0 AND preg_match('/([\d]{4}-[\d]{2}-[\d]{2}\s+[\d]{2}:[\d]{2}:[\d]{2})/', $logLineArray[$x])):
 					preg_match('/([\d]{4}-[\d]{2}-[\d]{2}\s+[\d]{2}:[\d]{2}:[\d]{2})/', $logLineArray[$x], $matches);
@@ -46,19 +46,19 @@ class AuthorizationController extends Controller
 					break;
 			}//end switch
 		}//end for
-		
+
 		if (count($logLineArray) > 0)
 		{
 			$unknownElements='';
 			foreach($logLineArray as $wtf)
 			{
 				$unknownElements.=$wtf.' | ';
-			}	
+			}
 			$returnData['cmd']=$unknownElements;
 		}
-		
+		$returnData['server'] = $this->server_ip;
 		$authorization = Authorization::create($returnData);
-		
+
 		return $authorization;
 	}//end of parser function
 }

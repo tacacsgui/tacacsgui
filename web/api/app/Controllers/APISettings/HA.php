@@ -628,4 +628,32 @@ class HA
 
     return false;
   }
+  public static function sendLogEvent($params = [])
+  {
+    isset($params['log_type']) || $params['log_type'] = '';
+    isset($params['log_entry']) || $params['log_entry'] = '';
+    $decoder = new jsond();
+    $decoder->setObjectDecoding(1);
+    $ha_data = $decoder->decodeFile( '/opt/tgui_data/ha/ha.cfg' );
+
+    $session_params =
+    [
+      'server_ip' => $ha_data['server']['ipaddr_master'],
+      'path' => '/api/ha/log/add/',
+      'guzzle_params' => [],
+      'form_params' =>
+        [
+          'psk' => $ha_data['server']['psk_slave'],
+          'action' => 'logging',
+          'log_type' => $params['log_type'],
+          'log_entry' => $params['log_entry'],
+          //'api_version' => '',
+          'unique_id' => $ha_data['server']['unique_id'],
+          'sha1_attrs' => ['action', 'psk', 'unique_id', 'log_type']
+        ]
+    ];
+    $response = self::sendRequest($session_params);
+
+    return ($response[1] == 200);
+  }
 }

@@ -1,5 +1,5 @@
 <?php
-
+require '/opt/tacacsgui/web/api/app/Controllers/APISettings/HA.php';
 require __DIR__ . '/../web/api/config.php';
 $loader = require __DIR__ . '/../web/api/vendor/autoload.php';
 $loader->addPsr4('parser\\', __DIR__ . '/app');
@@ -62,4 +62,9 @@ switch ($container->logType) {
 	case ('authentication'):
 		$container->authentication->parser();
 		break;
+}
+
+use tgui\Controllers\APISettings\HA;
+if (HA::isSlave()){
+	HA::sendLogEvent(['log_type' => $container->logType, 'log_entry' => $container->logLine]);
 }
