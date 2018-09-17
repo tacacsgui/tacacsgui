@@ -31,17 +31,27 @@ var tgui_userApi = {
     	}
     })
 
-    self.devGrpSelect2 = new tgui_select2({
+    // self.userGrpSelect2 = new tgui_select2({
+    //   ajaxUrl : API_LINK+"user/group/list/",
+    //   template: this.selectionTemplate,
+    //   add: this.select_group_add,
+    //   edit: this.select_group_edit,
+    // });
+    //
+    // $(this.select_group_add).select2(self.userGrpSelect2.select2Data());
+    // $(this.select_group_edit).select2(self.userGrpSelect2.select2Data());
+    /*Select2 Group*/
+    this.userGrpSelect2 = new tgui_select2({
       ajaxUrl : API_LINK+"user/group/list/",
       template: this.selectionTemplate,
       add: this.select_group_add,
       edit: this.select_group_edit,
     });
-
-    $(this.select_group_add).select2(self.devGrpSelect2.select2Data());
-    $(this.select_group_edit).select2(self.devGrpSelect2.select2Data());
+    $(this.select_group_add).select2(this.userGrpSelect2.select2Data());
+    $(this.select_group_edit).select2(this.userGrpSelect2.select2Data());
+    /*Select2 Group*///END
     $('#addUser').on('show.bs.modal', function(){
-    	self.devGrpSelect2.preSelection(0, 'add');
+    	self.userGrpSelect2.preSelection(0, 'add');
     })
 
   },
@@ -82,7 +92,7 @@ var tgui_userApi = {
     ajaxRequest.send(ajaxProps).then(function(resp) {
       tgui_supplier.fulfillForm(resp.user, self.formSelector_edit);
 
-      self.devGrpSelect2.preSelection(resp.user.group, 'edit', 1);
+      self.userGrpSelect2.preSelection(resp.user.group, 'edit', 1);
 
       $(self.formSelector_edit + ' input[name="group_native"]').val(resp.user.group);
       $(self.formSelector_edit + ' input[name="username"]').prop('disabled', true);
@@ -153,6 +163,7 @@ var tgui_userApi = {
     /*---*/
   },
   selectionTemplate: function(data){
+    console.log(data);
     data.default_flag = (data.id != 0) ? data.default_flag : false;
     var default_flag_class = (data.default_flag) ? 'option_default_flag': ''
   	var output='<div class="selectGroupOption '+ default_flag_class +'">';

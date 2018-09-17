@@ -48,18 +48,6 @@
                 <input type="hidden" name="interf_ip_native" value="">
               </div>
             </div>
-            <div class="col-sm-4">
-              <div class="form-group aaa_master">
-                <label for="aaa_master">Store AAA on Master</label>
-                <div class="checkbox icheck">
-                  <label>
-                    <input type="checkbox" name="aaa_master" data-type="checkbox" data-default="checked" data-pickup="true"> Enable
-                  </label>
-                  <input type="hidden" name="aaa_master_native" value="">
-                  <p class="text-muted"></p>
-                </div>
-              </div>
-            </div>
           </div><!--.row-->
           <div class="row">
             <div class="col-xs-12">

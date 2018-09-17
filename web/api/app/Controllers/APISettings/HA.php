@@ -78,10 +78,6 @@ class HA
   {
     return $this->ha_data['server']['psk_'.$role];
   }
-  public function isMaster()
-  {
-    return $this->ha_data['server']['role'] == 'master';
-  }
   public function getServerList()
 	{
     return $this->ha_data['server_list'];
@@ -113,11 +109,12 @@ class HA
         $output[count($output)] = ['ip'=> $value['ipaddr'], 'uid' => $value['unique_id'], 'response' => $response ];
         continue;
       }
+      self::updateSlaveTime(['ipaddr' => $value['ipaddr'], 'unique_id'=> $value['unique_id']]);
       $response[0] = json_decode($response[0], true );
       $response[0]['db_check'] = ($params['checksum'] == $response[0]['checksum']);
-      if ($response[0]['db_check'] AND $response[0]['version_check'] AND !$response[0]['applyStatus']['error'] AND self::isThereNewSlaves($value['ipaddr'])) self::slaveInitiated($value['ipaddr']);
+      if ($response[0]['db_check'] AND $response[0]['version_check'] AND !$response[0]['applyStatus']['error'] AND self::unconfiguredSlaves($value['ipaddr'])) self::slaveConfigured($value['ipaddr'], $this->ha_data['server']['config_uid']);
 
-      $output[count($output)] = ['ip'=> $value['ipaddr'], 'uid' => $value['unique_id'], 'response' => $response , 'test' => self::isThereNewSlaves($value['ipaddr'])];
+      $output[count($output)] = ['ip'=> $value['ipaddr'], 'uid' => $value['unique_id'], 'response' => $response , 'configured' => self::unconfiguredSlaves($value['ipaddr'])];
     }
 
     return $output;
@@ -190,6 +187,7 @@ class HA
       case 'master':
         $output = $this->master_settings( $output, $params );
         $output['role'] = $this->ha_data['server']['role'];
+        $this->ha_data['server']['config_uid'] = Controller::generateRandomString(24);
 
         $this->ha_data['server_list'] = [
           'master' => [
@@ -536,36 +534,40 @@ class HA
   {
     $this->encoder->encodeFile( $this->initial_data, '/opt/tgui_data/ha/ha.cfg');
   }
-  public static function getServerRole()
+  public static function getFullConfiguration()
   {
     $decoder = new jsond();
     $decoder->setObjectDecoding(1);
-    $ha_data = $decoder->decodeFile( '/opt/tgui_data/ha/ha.cfg' );
+    return $decoder->decodeFile( '/opt/tgui_data/ha/ha.cfg' );
+  }
+  public static function getServerRole()
+  {
+    $ha_data = self::getFullConfiguration();
     if ( ! is_array( $ha_data ) OR ! is_array($ha_data['server'] ) ) return 'none';
     return  $ha_data['server']['role'];
   }
+  public static function isMaster()
+  {
+    $ha_data = self::getFullConfiguration();
+    if ( ! is_array( $ha_data ) OR ! is_array($ha_data['server'] ) ) return false;
+    return $ha_data['server']['role'] == 'master';
+  }
   public static function isSlave()
   {
-    $decoder = new jsond();
-    $decoder->setObjectDecoding(1);
-    $ha_data = $decoder->decodeFile( '/opt/tgui_data/ha/ha.cfg' );
+    $ha_data = self::getFullConfiguration();
     if ( ! is_array( $ha_data ) OR ! is_array($ha_data['server'] ) ) return false;
     return  $ha_data['server']['role'] == 'slave';
   }
   public static function slavePsk()
   {
-    $decoder = new jsond();
-    $decoder->setObjectDecoding(1);
-    $ha_data = $decoder->decodeFile( '/opt/tgui_data/ha/ha.cfg' );
+    $ha_data = self::getFullConfiguration();
     if ( ! is_array( $ha_data ) OR ! is_array($ha_data['server'] ) ) return false;
     return  $ha_data['server']['psk_slave'];
   }
   public static function getStatus()
   {
     $output=[];
-    $decoder = new jsond();
-    $decoder->setObjectDecoding(1);
-    $ha_data = $decoder->decodeFile( '/opt/tgui_data/ha/ha.cfg' );
+    $ha_data = self::getFullConfiguration();
     $role = 'disabled';
     if ( is_array( $ha_data ) AND is_array($ha_data['server'] ) AND isset($ha_data['server']['role']) ) $role = $ha_data['server']['role'];
     switch ($role) {
@@ -584,31 +586,41 @@ class HA
     $output['my_cnf'] = trim(shell_exec('cat /etc/mysql/my.cnf'));
     return  $output;
   }
-  public static function isThereNewSlaves($ip = '')
+  public static function unconfiguredSlaves($ip = '')
   {
-    $decoder = new jsond();
-    $decoder->setObjectDecoding(1);
-    $ha_data = $decoder->decodeFile( '/opt/tgui_data/ha/ha.cfg' );
-
+    $ha_data = self::getFullConfiguration();
     if ( isset($ha_data['server_list']) AND isset($ha_data['server_list']['slave']) AND count($ha_data['server_list']['slave'])){
       foreach ($ha_data['server_list']['slave'] as $value) {
-        if ( ! isset($value['initiated']) AND $ip == '') return true;
-        if ( ! isset($value['initiated']) AND $ip == $value['ipaddr']) return true;
+        if ( ! isset($value['config_uid']) AND $ip == '' OR $value['config_uid'] != $ha_data['server']['config_uid']) return true;
+        if ( ! isset($value['config_uid']) AND $ip == $value['ipaddr'] OR $value['config_uid'] != $ha_data['server']['config_uid']) return true;
       }
     }
 
     return false;
   }
-  public static function slaveInitiated($ip = '0.0.0.0')
+  public static function slaveConfigured($ip = '0.0.0.0', $config_uid = '')
   {
-    $decoder = new jsond();
-    $decoder->setObjectDecoding(1);
-    $ha_data = $decoder->decodeFile( '/opt/tgui_data/ha/ha.cfg' );
-
+    $ha_data = self::getFullConfiguration();
     if ( isset($ha_data['server_list']) AND isset($ha_data['server_list']['slave']) AND count($ha_data['server_list']['slave'])){
       for ($i=0; $i < count($ha_data['server_list']['slave']); $i++) {
-        if ( ! isset($ha_data['server_list']['slave'][0]['initiated']) ){
-          $ha_data['server_list']['slave'][0]['initiated'] = true;
+        if ( ! isset($ha_data['server_list']['slave'][$i]['config_uid']) ){
+          $ha_data['server_list']['slave'][$i]['config_uid'] = $config_uid;
+          $encoder = new jsone();
+          $encoder->setPrettyPrinting(true);
+          $encoder->encodeFile( $ha_data, '/opt/tgui_data/ha/ha.cfg');
+        }
+      }
+    }
+
+    return false;
+  }
+  public static function updateSlaveTime($params)
+  {
+    $ha_data = self::getFullConfiguration();
+    if ( isset($ha_data['server_list']) AND isset($ha_data['server_list']['slave']) AND count($ha_data['server_list']['slave'])){
+      for ($i=0; $i < count($ha_data['server_list']['slave']); $i++) {
+        if ( $ha_data['server_list']['slave'][$i]['ipaddr'] == $params['ipaddr'] AND  $ha_data['server_list']['slave'][$i]['unique_id'] == $params['unique_id']){
+          $ha_data['server_list']['slave'][$i]['lastchk'] = trim( shell_exec(TAC_ROOT_PATH . "/main.sh ntp get-time") );
           $encoder = new jsone();
           $encoder->setPrettyPrinting(true);
           $encoder->encodeFile( $ha_data, '/opt/tgui_data/ha/ha.cfg');
@@ -620,10 +632,7 @@ class HA
   }
   public static function isThereSlaves()
   {
-    $decoder = new jsond();
-    $decoder->setObjectDecoding(1);
-    $ha_data = $decoder->decodeFile( '/opt/tgui_data/ha/ha.cfg' );
-
+    $ha_data = self::getFullConfiguration();
     if ( isset($ha_data['server_list']) AND isset($ha_data['server_list']['slave']) AND count($ha_data['server_list']['slave'])) return true;
 
     return false;
@@ -632,10 +641,7 @@ class HA
   {
     isset($params['log_type']) || $params['log_type'] = '';
     isset($params['log_entry']) || $params['log_entry'] = '';
-    $decoder = new jsond();
-    $decoder->setObjectDecoding(1);
-    $ha_data = $decoder->decodeFile( '/opt/tgui_data/ha/ha.cfg' );
-
+    $ha_data = self::getFullConfiguration();
     $session_params =
     [
       'server_ip' => $ha_data['server']['ipaddr_master'],

@@ -47,6 +47,7 @@ class APIHACtrl extends Controller
         for ($i=0; $i < count($tempArray); $i++) {
           $data['checksum'][$tempArray[$i]->Table]=$tempArray[$i]->Checksum;
         }
+        $this->changeConfigurationFlag(['unset' => 0]);
         break;
       default:
         return $res -> withStatus(403);// -> write('Access Restricted!');

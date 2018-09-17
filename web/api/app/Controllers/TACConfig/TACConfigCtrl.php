@@ -271,17 +271,20 @@ class TACConfigCtrl extends Controller
 			$this->APILoggingCtrl->makeLogEntry($logEntry);
 			///LOGGING//end//
 
-			$newSlaveAvailable = HA::isThereNewSlaves();
-			$data['test01']= $newSlaveAvailable;
+			//$newSlaveAvailable = HA::isThereNewSlaves();
+			$data['unstoppable'] = $unstoppable = ( HA::isMAster() AND HA::unconfiguredSlaves() );
+			//$data['test01']= $newSlaveAvailable;
 			$doBackup=$req->getParam('doBackup');
-			if ( $doBackup == 'true' OR $newSlaveAvailable ) {
+			if ( $doBackup == 'true' OR $unstoppable ) {
 				$data['backup'] = $doBackup = $this->APIBackupCtrl->makeBackup(['make' => 'tcfg']);
-				if ( !$doBackup['status'] AND ! $newSlaveAvailable ) {
+				if ( !$doBackup['status'] AND ! $unstoppable ) {
 					$data['applyStatus'] = ['error' => true, 'message' => $doBackup['message'], 'errorLine' => 0];
 					return $res -> withStatus(200) -> withHeader('Content-type', $contentTypeOutput) -> write(json_encode($data));
 				}
 			}
 			///LOGGING//
+			$data['applyStatus']=$this->applyConfiguration($output);
+
 			$data['server_list'] = [];
 			$data['server_list_response'] = [];
 			if ( HA::isThereSlaves() ){
@@ -294,14 +297,13 @@ class TACConfigCtrl extends Controller
 		    }
 				$data['server_list_response'] = $ha->sendConfigurationApply([ 'checksum'=>$data['checksum']]);
 			}
-			$data['applyStatus']=$this->applyConfiguration($output);
 
 			///LOGGING//start//
 			$logEntry = [ 'action' => 'tacacs apply conf', 'obj_name' => 'tacacs configuration', 'section' => 'tacacs configuration', 'message' => (( !$data['applyStatus']['error'] ) ? 503 : 504)];
 
 			///LOGGING//end//
 
-			//$data['changeConfiguration']= (!$data['applyStatus']['error']) ? $this->changeConfigurationFlag(['unset' => 1]) : 0;
+			$data['changeConfiguration']= (!$data['applyStatus']['error'] AND !HA::unconfiguredSlaves() ) ? $this->changeConfigurationFlag(['unset' => 1]) : 0;
 
 			$this->APILoggingCtrl->makeLogEntry($logEntry);
 			return $res -> withStatus(200) -> withHeader('Content-type', $contentTypeOutput) -> write(json_encode($data));

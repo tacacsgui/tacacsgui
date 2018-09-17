@@ -154,6 +154,8 @@ var tgui_apiUserGrp = {
     return this;
   },
   clearForm: function() {
+    tgui_supplier.clearForm();
+    /*---*/
     $('select.selectedOptions').empty();
     $('select.availableOptions').empty();
   },

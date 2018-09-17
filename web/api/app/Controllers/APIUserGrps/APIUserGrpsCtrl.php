@@ -71,7 +71,7 @@ class APIUserGrpsCtrl extends Controller
 
 		$validation = $this->validator->validate($req, [
 			'name' => v::noWhitespace()->notEmpty()->apiUserGroupNameAvailable(0),
-			'rights' => v::not(v::nullType())->notEmpty()->arrayType()->adminRights(),
+			'rights' => v::not(v::nullType())->notEmpty()->arrayType(),//->adminRights(),
 		]);
 
 		if ($validation->failed()){
@@ -167,7 +167,7 @@ class APIUserGrpsCtrl extends Controller
 
 		$validation = $this->validator->validate($req, [
 			'name' => v::when( v::nullType() , v::alwaysValid(), v::noWhitespace()->notEmpty()->apiUserGroupNameAvailable($req->getParam('id'))),
-			'rights' => v::when( v::nullType() , v::alwaysValid(), v::not(v::nullType())->notEmpty()->arrayType()->adminRights()),
+			'rights' => v::when( v::nullType() , v::alwaysValid(), v::not(v::nullType())->notEmpty()->arrayType())//->adminRights()),
 		]);
 
 		if ($validation->failed()){
@@ -482,8 +482,8 @@ class APIUserGrpsCtrl extends Controller
 		$data['incomplete_results'] = false;
 		$data['totalCount'] = APIUserGrps::select(['id','name'])->count();
 		$tempData = APIUserGrps::select()->get()->toArray();
-		$data['items']=array();
-		array_push($data['items'],array('id' => 0, 'text' => 'None', 'default_flag' => false));
+		$data['results']=array();
+		array_push($data['results'],array('id' => 0, 'text' => 'None', 'default_flag' => false));
 		foreach($tempData as $group)
 		{
 			$group['text'] = $group['name'];
@@ -492,7 +492,7 @@ class APIUserGrpsCtrl extends Controller
 			//$group['enable'] = ($group['enable'] != '') ? true : false;
 			//$group['default_flag'] = ($group['default_flag'] == 1) ? true : false;
 			$group['selected'] = ($group['default_flag']) ? true : false;
-			array_push($data['items'],$group);
+			array_push($data['results'],$group);
 		}
 
 		return $res -> withStatus(200) -> write(json_encode($data));
