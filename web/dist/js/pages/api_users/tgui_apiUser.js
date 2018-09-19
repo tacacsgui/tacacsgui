@@ -31,15 +31,6 @@ var tgui_userApi = {
     	}
     })
 
-    // self.userGrpSelect2 = new tgui_select2({
-    //   ajaxUrl : API_LINK+"user/group/list/",
-    //   template: this.selectionTemplate,
-    //   add: this.select_group_add,
-    //   edit: this.select_group_edit,
-    // });
-    //
-    // $(this.select_group_add).select2(self.userGrpSelect2.select2Data());
-    // $(this.select_group_edit).select2(self.userGrpSelect2.select2Data());
     /*Select2 Group*/
     this.userGrpSelect2 = new tgui_select2({
       ajaxUrl : API_LINK+"user/group/list/",

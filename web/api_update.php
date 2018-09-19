@@ -67,14 +67,15 @@ require __DIR__ . '/templates/body_start.php';
 			</div>
 		</div>
 		<div class="form-group">
+			<p><label>System Activation Status:</label> <span class="activated"></span></p>
 			<label>Update Key</label>
-			<div class="input-group margin">
-				<span class="input-group-addon activated"></span>
-                <input type="text" class="form-control" name="update_key" data-type="input" data-default="" data-pickup="true" disabled>
-                    <span class="input-group-btn">
-                      <button type="button" class="btn btn-warning btn-flat" onclick="tgui_apiUpdate.newKey()">Generate New</button>
-                    </span>
-			</div>
+			<!-- <div class="input-group margin"> -->
+				<!-- <span class="input-group-addon activated"></span> -->
+        <textarea type="text" class="form-control" name="update_key" data-type="input" data-default="" data-pickup="true" disabled></textarea>
+        <!-- <span class="input-group-btn">
+          <button type="button" class="btn btn-warning btn-flat" onclick="tgui_apiUpdate.newKey()">Generate New</button>
+        </span> -->
+			<!-- </div> -->
 			<p class="help-block"> add that key to your <a href="https://tacacsgui.com/profile/" target="_blank">tacacsgui.com</a> profile</p>
 		</div>
 	</div>
@@ -111,7 +112,16 @@ require __DIR__ . '/templates/body_start.php';
 		<i class="fa fa-refresh fa-spin"></i>
     </div>
 </div>
+<div class="box box-solid">
+	<div class="box-body">
+		<h4>List of Slaves</h4>
+		<div class="table-responsive">
+			<table class="">
 
+			</table>
+		</div>
+	</div>
+</div>
 <div class="callout callout-warning">
   <h4>Important Info</h4>
 

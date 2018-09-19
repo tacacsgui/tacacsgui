@@ -4,6 +4,9 @@ namespace tgui\Controllers\APIUpdate;
 
 use tgui\Controllers\Controller;
 use tgui\Models\APISettings;
+use tgui\Controllers\APISettings\HA;
+use GuzzleHttp\Client as gclient;
+use GuzzleHttp\Exception\RequestException;
 
 class APIUpdateCtrl extends Controller
 {
@@ -26,7 +29,14 @@ class APIUpdateCtrl extends Controller
 		}
 		//INITIAL CODE////END//
 
-		$data['info']=APISettings::select('update_url', 'update_signin', 'update_key', 'update_activated')->first();
+		$data['info']=APISettings::select('update_url', 'update_signin')->first();
+		$data['info']['update_key']=$this->uuid_hash();
+		$data['info']['update_activated']=$this->activated();
+		$data['slaves'] = [];
+		if (HA::isMaster() AND HA::isThereSlaves()){
+			$ha_config=HA::getFullConfiguration();
+			$data['slaves'] = $ha_config['server_list']['slave'];
+		}
 
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
@@ -115,28 +125,53 @@ class APIUpdateCtrl extends Controller
 		}
 		//INITIAL CODE////END//
 
-		$update = APISettings::select('update_url', 'update_key', 'update_activated')->first();
-
-		$ch = curl_init();
-		curl_setopt($ch, CURLOPT_URL, $update->update_url);
-		curl_setopt($ch, CURLOPT_POST, 1);
-		curl_setopt($ch, CURLOPT_POSTFIELDS, "key=".$update->update_key."&version=".APIVER);
-
-		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
-
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-
-		$data['output'] = json_decode(curl_exec($ch));
-
-		curl_close($ch);
-
-		if ($data['output'] != null) if (!$update->update_activated) {
-			APISettings::where([['id','=',1]])->update([
-					'update_activated' => 1
-			]);
+		$update = APISettings::select('update_url')->first();
+		$requestParams=[
+			'url'=> $update->update_url,
+			'guzzle_params'=>[
+				'verify'=> false,
+				'http_errors'=> false,
+				'connect_timeout'=> 7,
+				'form_params'=>
+				[
+					'key'=> $this->uuid_hash(),
+					'version' => APIVER,
+				]
+			]
+		];
+		$gclient = self::sendRequest($requestParams);
+		switch (true) {
+			case !$gclient:
+				$data['output'] = ['error' => ['message'=>'Server Unreachable']];
+				break;
+			case $gclient[1]!=200:
+				$data['output'] = ['error' => ['message'=>'Main Server Error']];
+				break;
+			case $gclient[1]==200:
+				$data['output'] = json_decode($gclient[0], true);
+				if ($data['output'] AND $data['output']['error'] AND $data['output']['error']['type']){
+					if ($data['output']['error']['type'] == 'not match') file_put_contents(TAC_ROOT_PATH.'/../tgui_data/tgui.key', '');
+				}
+				if (!$data['output']['error'] AND !$this->activated()) {
+					file_put_contents(TAC_ROOT_PATH.'/../tgui_data/tgui.key', $this->uuid_hash());
+				}
+				break;
+			default:
+				$data['output'] = ['error' => ['message'=>'Something goes wrong... Is it developer mistake?']];
+				break;
 		}
 
 		return $res -> withStatus(200) -> write(json_encode($data));
+	}
+	public static function sendRequest($params=[])
+	{
+		try {
+      $gclient = new gclient();
+      $res = $gclient->request('POST', $params['url'], $params['guzzle_params']);
+    } catch (RequestException $e) {
+      return false;
+    }
+    return [ $res->getBody()->getContents(), $res->getStatusCode() ];
 	}
 	#########	POST Upgrade	#########
 	public function postUpgrade($req,$res)

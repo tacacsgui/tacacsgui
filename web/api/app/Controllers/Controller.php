@@ -138,6 +138,17 @@ class Controller
 		return $randomString;
 	}
 	////////////////////////////////////////
+	////////////////////////////////////////
+	public static function uuid_hash() {
+		return trim(shell_exec('sudo '. TAC_ROOT_PATH.'/main.sh uuid_hash'));
+	}
+	////////////////////////////////////////
+	////////////////////////////////////////
+	public static function activated() {
+		if (! file_exists(TAC_ROOT_PATH.'/../tgui_data/tgui.key') ) return false;
+		return file_get_contents(TAC_ROOT_PATH.'/../tgui_data/tgui.key') == self::uuid_hash();
+	}
+	////////////////////////////////////////
 	protected function encryption( $password = '', $type = 0 )
 	{
 		if ($type == 1)
