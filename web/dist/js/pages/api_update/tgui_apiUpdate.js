@@ -22,6 +22,14 @@ var tgui_apiUpdate = {
           $('[name="update_signin"]').on('ifChanged', function(){
             self.autoCheck()
           })
+          if(resp.slaves && resp.slaves.length){
+            console.log(resp.slaves);
+            for (var i = 0, len = resp.slaves.length; i < len; i++) {
+              var slave = resp.slaves[i]
+              $('table.ha_slave_table').append('<tr><td>'+slave.ipaddr+'</td><td>'+slave.api_version+'</td><td>'+slave.lastchk+'</td><td>'+slave.status+'</td><td><a class="btn btn-flat btn-info btn-sm">Get Info</a></td></tr><div>123123123</div>')
+            }
+            $('div.ha_slave_update').show();
+          }
         }).fail(function(err){
           tgui_error.getStatus(err, ajaxProps)
         })

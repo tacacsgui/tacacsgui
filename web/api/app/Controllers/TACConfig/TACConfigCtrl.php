@@ -480,7 +480,7 @@ class TACConfigCtrl extends Controller
 					$data['error']['message']='Bad Request';
 					return $res -> withStatus(200) -> write(json_encode($data));
 				}
-				$data['output'] = $this->tacDevicesPartGen(true, $allParams['id']);
+				$data['output'] = ConfigPatterns::tacDevicesPartGen(true, $allParams['id']);
 				break;
 			case 'deviceGrp':
 				//CHECK ACCESS TO THAT FUNCTION//START//
@@ -494,7 +494,7 @@ class TACConfigCtrl extends Controller
 					$data['error']['message']='Bad Request';
 					return $res -> withStatus(200) -> write(json_encode($data));
 				}
-				$data['output'] = $this->tacDeviceGroupsPartGen(true, $allParams['id']);
+				$data['output'] = ConfigPatterns::tacDeviceGroupsPartGen(true, $allParams['id']);
 				break;
 			case 'user':
 				//CHECK ACCESS TO THAT FUNCTION//START//
@@ -508,7 +508,7 @@ class TACConfigCtrl extends Controller
 					$data['error']['message']='Bad Request';
 					return $res -> withStatus(200) -> write(json_encode($data));
 				}
-				$data['output'] = $this->tacUsersPartGen(true, $allParams['id']);
+				$data['output'] = ConfigPatterns::tacUsersPartGen(true, $allParams['id']);
 				break;
 			case 'userGrp':
 				//CHECK ACCESS TO THAT FUNCTION//START//
@@ -522,7 +522,7 @@ class TACConfigCtrl extends Controller
 					$data['error']['message']='Bad Request';
 					return $res -> withStatus(200) -> write(json_encode($data));
 				}
-				$data['output'] = $this->tacUserGroupsPartGen(true, $allParams['id']);
+				$data['output'] = ConfigPatterns::tacUserGroupsPartGen(true, $allParams['id']);
 				break;
 			case 'acl':
 				//CHECK ACCESS TO THAT FUNCTION//START//
@@ -536,7 +536,7 @@ class TACConfigCtrl extends Controller
 					$data['error']['message']='Bad Request';
 					return $res -> withStatus(200) -> write(json_encode($data));
 				}
-				$data['output'] = $this->tacACLPartGen(true, $allParams['id']);
+				$data['output'] = ConfigPatterns::tacACLPartGen(true, $allParams['id']);
 				break;
 			default:
 				$data['error']['status']=true;

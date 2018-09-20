@@ -112,12 +112,18 @@ require __DIR__ . '/templates/body_start.php';
 		<i class="fa fa-refresh fa-spin"></i>
     </div>
 </div>
-<div class="box box-solid">
+<div class="box box-solid ha_slave_update" style="display:none;">
 	<div class="box-body">
 		<h4>List of Slaves</h4>
 		<div class="table-responsive">
-			<table class="">
-
+			<table class="table table-striped ha_slave_table">
+				<tr>
+					<td>IP Address</td>
+					<td>API Version</td>
+					<td>Last Check</td>
+					<td>Status</td>
+					<td>Action</td>
+				</tr>
 			</table>
 		</div>
 	</div>
