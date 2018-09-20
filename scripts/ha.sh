@@ -214,6 +214,11 @@ case $1 in
 			rootPasswd;
 		fi
 	;;
+	disable)
+		ha_disable_mycnf
+		service mysql restart
+		echo 'my.cnf erased';
+	;;
 	restore)
 		if [[ ! -f '/opt/tacacsgui/temp/dumpForSlave.sql' ]]; then
 			echo 'Where is dump file?';

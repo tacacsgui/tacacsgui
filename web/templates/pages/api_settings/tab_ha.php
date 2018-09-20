@@ -1,7 +1,3 @@
-<div class="alert alert-danger alert-dismissible">
-  <h4><i class="icon fa fa-ban"></i> Alert!</h4>
-  Does not work! Please do not do any changes.
-</div>
 <h4>High Availability Settings</h4>
 <div class="box box-solid">
   <div class="box-body">

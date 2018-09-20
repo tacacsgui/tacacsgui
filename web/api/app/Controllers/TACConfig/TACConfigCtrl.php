@@ -240,6 +240,13 @@ class TACConfigCtrl extends Controller
 			return $res -> withStatus(401) -> write(json_encode($data));
 		}
 		//INITIAL CODE////END//
+		//CHECK SHOULD I STOP THIS?//START//
+		if( $this->shouldIStopThis() )
+		{
+			$data['error'] = $this->shouldIStopThis();
+			return $res -> withStatus(400) -> write(json_encode($data));
+		}
+		//CHECK SHOULD I STOP THIS?//END//
 		//CHECK ACCESS TO THAT FUNCTION//START//
 		if(!$this->checkAccess(6))
 		{
@@ -366,7 +373,12 @@ class TACConfigCtrl extends Controller
 			return $res -> withStatus(401) -> write(json_encode($data));
 		}
 		//INITIAL CODE////END//
-
+		//CHECK ACCESS TO THAT FUNCTION//START//
+		if(!$this->checkAccess(1, true))
+		{
+			return $res -> withStatus(403) -> write(json_encode($data));
+		}
+		//CHECK ACCESS TO THAT FUNCTION//END//
 		$data['global_variables']=TACGlobalConf::select()->first();
 
 		return $res -> withStatus(200) -> write(json_encode($data));

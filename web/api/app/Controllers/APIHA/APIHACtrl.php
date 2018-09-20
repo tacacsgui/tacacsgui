@@ -3,6 +3,8 @@ namespace tgui\Controllers\APIHA;
 
 use tgui\Controllers\Controller;
 use tgui\Controllers\APISettings\HA;
+use tgui\Models\APISettings;
+use tgui\Controllers\APIUpdate\APIUpdateCtrl;
 
 class APIHACtrl extends Controller
 {
@@ -68,7 +70,7 @@ class APIHACtrl extends Controller
       'access' => false);
     $ha = new HA();
     $allParams = $req->getParams();
-    if ( ! $this->checkServerAccess( $allParams, 'slave' ) ) return $res -> withStatus(403);
+    if ( ! $this->checkServerAccess( $allParams, 'slave' ) ) return $res -> withStatus(403); //-> write(json_encode($allParams));
     $data['access'] = true;
     $data['checksum'] = [];
     $tempArray = $this->db::select( 'CHECKSUM TABLE '. implode( ",", array_keys($this->tablesArr) ) );
@@ -81,6 +83,71 @@ class APIHACtrl extends Controller
     if (! $data['version_check'] ) return $res -> withStatus(200) -> write(json_encode($data));
     $data['testStatus'] = $this->TACConfigCtrl->testConfiguration($this->TACConfigCtrl->createConfiguration());
     if ( ! $data['testStatus']['error'] ) $data['applyStatus'] = $this->TACConfigCtrl->applyConfiguration($this->TACConfigCtrl->createConfiguration());
+    return $res -> withStatus(200) -> write(json_encode($data));
+  }
+  public function postCheckUpdate($req,$res)
+  {
+    //INITIAL CODE////START//
+    $data=array(
+      'remoteip' => $_SERVER['REMOTE_ADDR'],
+      'serverip' => $_SERVER['SERVER_ADDR'],
+      'time' => time(),
+      'access' => false);
+    $ha = new HA();
+    $allParams = $req->getParams();
+    if ( ! $this->checkServerAccess( $allParams, 'slave' ) ) return $res -> withStatus(403) -> write(json_encode($allParams));
+    $update = APISettings::select('update_url')->first();
+    $requestParams=[
+      'url'=> $update->update_url,
+      'guzzle_params'=>[
+        'verify'=> false,
+        'http_errors'=> false,
+        'connect_timeout'=> 7,
+        'form_params'=>
+        [
+          'key'=> $this->uuid_hash(),
+          'version' => APIVER,
+        ]
+      ]
+    ];
+    $gclient = APIUpdateCtrl::sendRequest($requestParams);
+    switch (true) {
+      case !$gclient:
+        $data['output'] = ['error' => ['message'=>'Server Unreachable']];
+        break;
+      case $gclient[1]!=200:
+        $data['output'] = ['error' => ['message'=>'Main Server Error']];
+        break;
+      case $gclient[1]==200:
+        $data['output'] = json_decode($gclient[0], true);
+        if ($data['output'] AND $data['output']['error'] AND $data['output']['error']['type']){
+          if ($data['output']['error']['type'] == 'not match') file_put_contents(TAC_ROOT_PATH.'/../tgui_data/tgui.key', '');
+        }
+        if (!$data['output']['error'] AND !$this->activated()) {
+          file_put_contents(TAC_ROOT_PATH.'/../tgui_data/tgui.key', $this->uuid_hash());
+        }
+        break;
+      default:
+        $data['output'] = ['error' => ['message'=>'Something goes wrong... Is it developer mistake?']];
+        break;
+    }
+
+    return $res -> withStatus(200) -> write(json_encode($data));
+  }
+  public function postSetupUpdate($req,$res)
+  {
+    //INITIAL CODE////START//
+    $data=array(
+      'remoteip' => $_SERVER['REMOTE_ADDR'],
+      'serverip' => $_SERVER['SERVER_ADDR'],
+      'time' => time(),
+      'access' => false);
+    $ha = new HA();
+    $allParams = $req->getParams();
+    if ( ! $this->checkServerAccess( $allParams, 'slave' ) ) return $res -> withStatus(403);// -> write(json_encode($allParams));
+
+    $data['gitPull'] = APIUpdateCtrl::gitPull();
+
     return $res -> withStatus(200) -> write(json_encode($data));
   }
 

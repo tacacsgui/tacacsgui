@@ -651,8 +651,8 @@ public function postHASettings($req,$res)
 
   $validation = $this->validator->validate($req, [
     'slaves_ip' => v::when( v::haRole('master', $req->getParam('role') ), v::notEmpty()->setName('Slaves List'), v::alwaysValid() ),
-    'psk_master' => v::when( v::haRole('master', $req->getParam('role') ), v::notEmpty()->length(5, null)->setName('Pre-Shared Key'), v::alwaysValid() ),
-    'psk_slave' => v::when( v::haRole('slave', $req->getParam('role') ), v::notEmpty()->length(5, null)->setName('Pre-Shared Key'), v::alwaysValid() ),
+    'psk_master' => v::when( v::haRole('master', $req->getParam('role') ), v::notEmpty()->length(5, null)->alnum('% $ @ # * ^ ! ? {} [] () <> : ; - _')->noWhitespace()->setName('Pre-Shared Key'), v::alwaysValid() ),
+    'psk_slave' => v::when( v::haRole('slave', $req->getParam('role') ), v::notEmpty()->length(5, null)->alnum('% $ @ # * ^ ! ? {} [] () <> : ; - _')->noWhitespace()->setName('Pre-Shared Key'), v::alwaysValid() ),
     'ipaddr_master' => v::when( v::haRole('slave', $req->getParam('role') ) , v::notEmpty()->ip()->setName('Mater IP'), v::alwaysValid() ),
   ]);
 

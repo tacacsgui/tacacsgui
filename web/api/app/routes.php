@@ -188,4 +188,6 @@ $app->get('/download/log/', 'APIDownloadCtrl:getDownloadLog');
 $app->post('/ha/sync/', 'APIHACtrl:postHASync');
 $app->post('/ha/do/apply/', 'APIHACtrl:postHADoApplyConfig');
 $app->post('/ha/log/add/', 'APIHACtrl:postLoggingEvent');
+$app->post('/ha/update/check/', 'APIHACtrl:postCheckUpdate');
+$app->post('/ha/update/setup/', 'APIHACtrl:postSetupUpdate');
 #####################################################

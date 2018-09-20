@@ -64,6 +64,12 @@ binlog_do_db = tgui
 ###################" > /etc/mysql/my.cnf;
   return;
 }
+function ha_disable_mycnf () {
+  echo "###     tacacsgui       config  ###
+### tgui ha disable ###
+###################" > /etc/mysql/my.cnf;
+  return;
+}
 function start_slave () {
   PASSWD=$(sinitize_passwd $1);
   echo "STOP SLAVE; RESET SLAVE; CHANGE MASTER TO MASTER_HOST='$2',MASTER_USER='tgui_replication', MASTER_PASSWORD='$3', MASTER_LOG_FILE='$4', MASTER_LOG_POS=$5; START SLAVE;";

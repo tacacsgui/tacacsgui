@@ -67,9 +67,7 @@ class HA
     if ( ! file_exists('/opt/tgui_data/ha/ha.cfg') ){
       $this->initial_file();
     }
-    //var_dump($this->decoder->getObjectDecoding());die(); //return 0
     $this->decoder->setObjectDecoding(1);
-    //var_dump($this->decoder->getObjectDecoding());die(); //return 1
 
     $this->ha_data = $this->decoder->decodeFile( '/opt/tgui_data/ha/ha.cfg' );
 
@@ -203,35 +201,24 @@ class HA
         $this->encoder->encodeFile( $this->ha_data, '/opt/tgui_data/ha/ha.cfg');
         break;
       case 'slave':
-        $output = $this->slave_settings( $output, $params );
         $output['role'] = $this->ha_data['server']['role'];
-
-        $ha_status = self::getStatus();
-        $this->ha_data['server_list'] = [
-          'master' => [
-            'ipaddr' => $this->ha_data['server']['ipaddr_master'],
-            'location' => 'remote',
-            'status' => ( strpos($ha_status['ha_status_brief'], 'Waiting for') !== false ) ? 'Available':'Unknown',
-            'lastchk' => trim( shell_exec(TAC_ROOT_PATH . "/main.sh ntp get-time") )
-          ],
-          'slave' => [
-            [
-              'ipaddr' => $this->ha_data['server']['ipaddr_slave'],
-              'location' => 'localhost',
-              'status' => 'Available',
-              'lastchk' => ''
-            ]
-          ]
-        ];
+        if ($params['step'] < 5 ) $this->ha_data['server']['role'] = '';
+        $output = $this->slave_settings( $output, $params );
 
         $this->encoder->setPrettyPrinting(true);
         $this->encoder->encodeFile( $this->ha_data, '/opt/tgui_data/ha/ha.cfg');
+
+        if ($params['step'] >= 5 ) {
+          session_unset(); session_destroy();
+        }
         break;
       case 'disabled':
         $this->ha_data = [];
         $this->encoder->setPrettyPrinting(true);
         $this->encoder->encodeFile( $this->ha_data, '/opt/tgui_data/ha/ha.cfg');
-        $output['disabled'] = true;
+        $output['ha_status_disabled'] = trim( shell_exec( "sudo /opt/tacacsgui/main.sh ha disable 2>&1 ") );
+        $output['status'] = '';
+        $output['stop'] = true;
         break;
       default:
         $output['message'] = 'Internal Error';
@@ -257,14 +244,7 @@ class HA
       case 2:
         $output = $this->setupMasterStep2($output, $params);
         return $output;
-      // case 3:
-      //   $output = $this->setupMasterStep3($output, $params);
-      //   return $output;
     }
-
-    // $master_params = explode( ' ', trim( shell_exec( "sudo /opt/tacacsgui/main.sh ha status master '".$rootpw."' brief 2>&1" ) ) );
-    // $this->ha_data['server']['bin_file'] = $master_params[0];
-    // $this->ha_data['server']['position'] = $master_params[1];
     $output['current_mysql'] = $this->getMysqlParams();
     $output['ha_status'] = trim( shell_exec( "sudo /opt/tacacsgui/main.sh ha status master '".$this->ha_data['server']['psk_master']."' 2>&1 ") );
 
@@ -293,7 +273,13 @@ class HA
 
   private function slave_settings( $output = [], $params = [] )
   {
-    //$rootpw = $params['rootpw'];
+    if ( ! Controller::activated() ){
+      $output['type'] = 'message';
+      $output['message'] = 'Unregistered system. Register system to enable that feature.';
+      $output['master_resp'] = [];
+      return $output;
+    }
+
     if ( ! $this->check_rootpw($params['rootpw']) ){
       $output['type'] = 'rootpw';
       return $output;
@@ -312,6 +298,7 @@ class HA
         return $output;
       case 4:
         $output = $this->setupSlaveStep4($output, $params);
+        $this->ha_data['server']['role'] = 'slave';
         return $output;
     }
     /*
@@ -380,7 +367,7 @@ class HA
       'server_ip' => $this->ha_data['server']['ipaddr_master'],
       'path' => '/api/ha/sync/',
       'guzzle_params' => [],
-	  'form_params' =>
+  	  'form_params' =>
         [
           'psk' => $this->ha_data['server']['psk_slave'],
           'action' => 'sync-init',
@@ -444,7 +431,7 @@ class HA
 
     file_put_contents('/opt/tacacsgui/temp/dumpForSlave.sql', $master_response[0], LOCK_EX);
 
-    if ( !file_exists ( '/opt/tacacsgui/temp/dumpForSlave.sql' ) ) {
+    if ( ! file_exists ( '/opt/tacacsgui/temp/dumpForSlave.sql' ) ) {
       $output['type'] = 'message';
       $output['message'] = 'Where is dump file?';
       $output['step'] = $params['step'];
@@ -484,7 +471,7 @@ class HA
       'timezone' => $output['timezone_data']->timezone,
       'ntp_list' => $output['timezone_data']->ntp_list
     ]);
-    $output['result_ntp'] = ($output['timezone_settings']) ? trim( shell_exec( 'sudo '. TAC_ROOT_PATH . "/main.sh ntp get-config ") ) : false;
+    $output['result_ntp'] = (  $output['timezone_settings']) ? trim( shell_exec( 'sudo '. TAC_ROOT_PATH . "/main.sh ntp get-config ") ) : false;
 
     $session_params =
     [
@@ -510,9 +497,30 @@ class HA
       return $output;
     }
 
-	$master_response[0] = json_decode($master_response[0], true );
+	  $master_response[0] = json_decode($master_response[0], true );
     $output['master_resp'] = [ 'body' => $master_response[0], 'code' => $master_response[1] ];
 
+    $ha_status = self::getStatus();
+    $this->ha_data['server_list'] = [
+      'master' => [
+        'ipaddr' => $this->ha_data['server']['ipaddr_master'],
+        'location' => 'remote',
+        'status' => ( strpos($ha_status['ha_status_brief'], 'Waiting for') !== false ) ? 'Available':'Unknown',
+        'lastchk' => trim( shell_exec(TAC_ROOT_PATH . "/main.sh ntp get-time") )
+      ],
+      'slave' => [
+        [
+          'ipaddr' => $this->ha_data['server']['ipaddr_slave'],
+          'location' => 'localhost',
+          'status' => 'Available',
+          'lastchk' => ''
+        ]
+      ]
+    ];
+    $this->ha_data['server']['role'] = 'slave';
+    $this->encoder->setPrettyPrinting(true);
+    $this->encoder->encodeFile( $this->ha_data, '/opt/tgui_data/ha/ha.cfg');
+    $output['final'] = true;
     $output['status'] = '';
     $output['step'] = $params['step'];
     return $output;

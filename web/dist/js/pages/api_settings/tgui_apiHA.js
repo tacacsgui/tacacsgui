@@ -110,7 +110,7 @@ var tgui_apiHA = {
             self.master_step_parser(resp.response);
             break;
           case 'disabled':
-
+              $('pre.ha_save_log').empty().append('High Availability was Disabled');
             break;
           default:
 

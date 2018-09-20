@@ -124,7 +124,13 @@ class APIUpdateCtrl extends Controller
 			return $res -> withStatus(401) -> write(json_encode($data));
 		}
 		//INITIAL CODE////END//
-
+		//CHECK SHOULD I STOP THIS?//START//
+		if( $this->shouldIStopThis() )
+		{
+			$data['error'] = $this->shouldIStopThis();
+			return $res -> withStatus(400) -> write(json_encode($data));
+		}
+		//CHECK SHOULD I STOP THIS?//END//
 		$update = APISettings::select('update_url')->first();
 		$requestParams=[
 			'url'=> $update->update_url,
@@ -196,6 +202,13 @@ class APIUpdateCtrl extends Controller
 			return $res -> withStatus(400) -> write(json_encode($data));
 		}
 		//CHECK SHOULD I STOP THIS?//END//
+		//CHECK Registration//START//
+		if( ! $this->activated() )
+		{
+			$data['error'] = [ 'message' => 'Unregistered Server!'];
+			return $res -> withStatus(400) -> write(json_encode($data));
+		}
+		//CHECK Registration//END//
 		//CHECK ACCESS TO THAT FUNCTION//START//
 		if(!$this->checkAccess(10))
 		{
@@ -203,8 +216,12 @@ class APIUpdateCtrl extends Controller
 		}
 		//CHECK ACCESS TO THAT FUNCTION//END//
 
-		$data['upgrade'] = shell_exec('git -C '.TAC_ROOT_PATH.' pull origin master');
+		$data['upgrade'] = self::gitPull();
 
 		return $res -> withStatus(200) -> write(json_encode($data));
+	}
+	public static function gitPull()
+	{
+		return shell_exec('git -C '.TAC_ROOT_PATH.' pull origin master 2>&1');
 	}
 } //END OF CLASS
