@@ -42,6 +42,81 @@ class APIUpdateCtrl extends Controller
 	}
 
 	#########	GET Global Info	#########
+	public function postInfoSlave($req,$res)
+	{
+		//INITIAL CODE////START//
+		$data=array();
+		$data=$this->initialData([
+			'type' => 'get',
+			'object' => 'update',
+			'action' => 'slave info',
+		]);
+		#check error#
+		if ($_SESSION['error']['status']){
+			$data['error']=$_SESSION['error'];
+			return $res -> withStatus(401) -> write(json_encode($data));
+		}
+		//INITIAL CODE////END//
+		$allParams = $req->getParams();
+		$ha = new HA();
+		$session_params =
+    [
+      'server_ip' => $allParams['ipaddr'],
+      'path' => '/api/ha/update/check/',
+      'guzzle_params' => [],
+  	  'form_params' =>
+			[
+				'psk' => $ha->psk(),
+				'action' => 'update info',
+				'api_version' => APIVER,
+				'unique_id' => $allParams['unique_id'],
+				'sha1_attrs' => ['action', 'psk', 'api_version', 'unique_id']
+			]
+    ];
+		$data['gclient'] = false;
+    $master_response = HA::sendRequest($session_params);
+		if ($master_response[1] !== 200) return $res -> withStatus(200) -> write(json_encode($data));
+		$data['gclient'] = json_decode($master_response[0], true );
+		return $res -> withStatus(200) -> write(json_encode($data));
+	}
+
+	public function postUpgradeSlave($req,$res)
+	{
+		//INITIAL CODE////START//
+		$data=array();
+		$data=$this->initialData([
+			'type' => 'get',
+			'object' => 'update',
+			'action' => 'slave upgrade',
+		]);
+		#check error#
+		if ($_SESSION['error']['status']){
+			$data['error']=$_SESSION['error'];
+			return $res -> withStatus(401) -> write(json_encode($data));
+		}
+		//INITIAL CODE////END//
+		$allParams = $req->getParams();
+		$ha = new HA();
+		$session_params =
+    [
+      'server_ip' => $allParams['ipaddr'],
+      'path' => '/api/ha/update/setup/',
+      'guzzle_params' => [],
+  	  'form_params' =>
+			[
+				'psk' => $ha->psk(),
+				'action' => 'update info',
+				'api_version' => APIVER,
+				'unique_id' => $allParams['unique_id'],
+				'sha1_attrs' => ['action', 'psk', 'api_version', 'unique_id']
+			]
+    ];
+		$data['gclient'] = false;
+    $master_response = HA::sendRequest($session_params);
+		if ($master_response[1] !== 200) return $res -> withStatus(200) -> write(json_encode($data));
+		$data['gclient'] = json_decode($master_response[0], true );
+		return $res -> withStatus(200) -> write(json_encode($data));
+	}
 	// public function postInfo($req,$res)
 	// {
 	// 	//INITIAL CODE////START//
@@ -222,6 +297,6 @@ class APIUpdateCtrl extends Controller
 	}
 	public static function gitPull()
 	{
-		return shell_exec('git -C '.TAC_ROOT_PATH.' pull origin master 2>&1');
+		return shell_exec('git -C '.TAC_ROOT_PATH.'/ pull origin master 2>&1');
 	}
 } //END OF CLASS

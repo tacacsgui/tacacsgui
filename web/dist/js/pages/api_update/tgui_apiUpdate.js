@@ -25,8 +25,9 @@ var tgui_apiUpdate = {
           if(resp.slaves && resp.slaves.length){
             console.log(resp.slaves);
             for (var i = 0, len = resp.slaves.length; i < len; i++) {
-              var slave = resp.slaves[i]
-              $('table.ha_slave_table').append('<tr><td>'+slave.ipaddr+'</td><td>'+slave.api_version+'</td><td>'+slave.lastchk+'</td><td>'+slave.status+'</td><td><a class="btn btn-flat btn-info btn-sm">Get Info</a></td></tr><div>123123123</div>')
+              var slave = resp.slaves[i];
+              var slave_info = {id: i, ip: slave.ipaddr, unique_id:slave.unique_id };
+              $('table.ha_slave_table').append('<tr><td>'+slave.ipaddr+'</td><td>'+slave.api_version+'</td><td>'+slave.lastchk+'</td><td>'+slave.status+'</td><td><a class="btn btn-flat btn-info btn-sm" onclick="tgui_apiUpdate.getInfoSlave(this)" data-slave_id="'+i+'" data-ip="'+slave.ipaddr+'" data-unique_id="'+slave.unique_id+'">Get Info</a></td></tr>')
             }
             $('div.ha_slave_update').show();
           }
@@ -36,20 +37,42 @@ var tgui_apiUpdate = {
       }
     );
   },
-  newKey: function() {
+  getInfoSlave: function(row, slave) {
+    $('tr.slave_info').remove();
+    var data = {id: $(row).data('slave_id'), ipaddr: $(row).data('ip'), unique_id: $(row).data('unique_id')}
+    $(row).closest('tr').after('<tr class="slave_info"><td colspan="4"><pre class="slave_info">Loading...</pre></td><td><a class="btn btn-sm btn-flat btn-warning" data-slave_id="'+data.id+'" data-ipaddr="'+data.ipaddr+'" data-unique_id="'+data.unique_id+'" onclick="tgui_apiUpdate.upgradeSlave(this)">Update</a></td></tr>');
     var self = this;
-    if ( !confirm('Update the key? You will lost the previous one.') ) return;
     var ajaxProps = {
-      url: API_LINK+"update/change/",
-      data: {settings: 2 }
+      url: API_LINK+"update/info/slave/",
+      data: data
     };//ajaxProps END
 
     ajaxRequest.send(ajaxProps).then(function(resp) {
-      self.getInfo();
+      if (!resp.gclient){
+        $('pre.slave_info').empty().append('Error!'); return false;
+      }
+      $('pre.slave_info').empty().append('### Slave '+resp.gclient.serverip+' ###'+"\n"+
+      'Server API version: '+resp.gclient.output.client_version+"\n"+
+      'Last available API version: '+resp.gclient.output.last_version.version+"\n"
+      ).append( ((resp.gclient.output.last_version.reinstall)? '' : "Re-install required!"));
     }).fail(function(err){
       tgui_error.getStatus(err, ajaxProps)
     })
   },
+  // newKey: function() {
+  //   var self = this;
+  //   if ( !confirm('Update the key? You will lost the previous one.') ) return;
+  //   var ajaxProps = {
+  //     url: API_LINK+"update/change/",
+  //     data: {settings: 2 }
+  //   };//ajaxProps END
+  //
+  //   ajaxRequest.send(ajaxProps).then(function(resp) {
+  //     self.getInfo();
+  //   }).fail(function(err){
+  //     tgui_error.getStatus(err, ajaxProps)
+  //   })
+  // },
   autoCheck: function() {
     var self = this;
     console.log($('[name="update_signin"]').prop('checked'));
@@ -117,6 +140,22 @@ var tgui_apiUpdate = {
     ajaxRequest.send(ajaxProps).then(function(resp) {
       console.log(resp);
       tgui_apiUser.signout();
+    }).fail(function(err){
+      tgui_error.getStatus(err, ajaxProps)
+    })
+  },
+  upgradeSlave: function(row) {
+    var self = this;
+    var data = {id: $(row).data('slave_id'), ipaddr: $(row).data('ip'), unique_id: $(row).data('unique_id')}
+    $('pre.slave_info').empty().append('Loading...');
+    var ajaxProps = {
+      url: API_LINK+"update/upgrade/slave/",
+      data: data
+    };//ajaxProps END
+
+    ajaxRequest.send(ajaxProps).then(function(resp) {
+      console.log(resp);
+      $('pre.slave_info').empty().append(resp.gclient.gitPull);
     }).fail(function(err){
       tgui_error.getStatus(err, ajaxProps)
     })

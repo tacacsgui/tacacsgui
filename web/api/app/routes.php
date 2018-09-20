@@ -154,6 +154,8 @@ $app->post('/backup/settings/', 'APIBackupCtrl:postBackupSettings');
 ###Update Routes#######################################
 $app->get('/update/info/', 'APIUpdateCtrl:getInfo');
 $app->post('/update/info/', 'APIUpdateCtrl:postInfo');
+$app->post('/update/info/slave/', 'APIUpdateCtrl:postInfoSlave');
+$app->post('/update/upgrade/slave/', 'APIUpdateCtrl:postUpgradeSlave');
 $app->post('/update/change/', 'APIUpdateCtrl:postChange');
 $app->post('/update/', 'APIUpdateCtrl:postCheck');
 $app->post('/update/upgrade/', 'APIUpdateCtrl:postUpgrade');
