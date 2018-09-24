@@ -193,3 +193,7 @@ $app->post('/ha/log/add/', 'APIHACtrl:postLoggingEvent');
 $app->post('/ha/update/check/', 'APIHACtrl:postCheckUpdate');
 $app->post('/ha/update/setup/', 'APIHACtrl:postSetupUpdate');
 #####################################################
+
+###API Developer##################################################
+$app->get('/dev/inc/js/', 'APIDevCtrl:getDevJS');
+#####################################################

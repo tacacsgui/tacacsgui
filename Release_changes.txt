@@ -1,4 +1,8 @@
 ##############################
+Version_0.9.40 20180924
+	* Added High Availability feature (re-installation required)
+	* Many bugs fixed
+##############################
 Version_0.9.31 20180803
 	* Added separated database for logging
 ##############################

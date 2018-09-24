@@ -3,7 +3,7 @@ ini_set('memory_limit', '1024M'); // or you could use 1G
 
 #########################################
 ########TACACS GUI API###################
-		define('APIVER', '0.9.31');
+		define('APIVER', '0.9.40');
 		define('TACVER', '201710201114');
 #########################################
 #########################################
@@ -93,6 +93,10 @@ $container['APISettingsCtrl'] = function($container) {
 
 $container['APIHACtrl'] = function($container) {
 	return new \tgui\Controllers\APIHA\APIHACtrl($container);
+};
+
+$container['APIDevCtrl'] = function($container) {
+	return new \tgui\Controllers\APIDev\APIDevCtrl($container);
 };
 
 $container['TACDevicesCtrl'] = function($container) {
