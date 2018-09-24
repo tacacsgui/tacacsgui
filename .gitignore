@@ -11,10 +11,4 @@
 /ssl/*
 /temp/*
 
-!/backups/api/.gitkeep
-!/backups/database/.gitkeep
-!/backups/gui/.gitkeep
-!/log/apache2/.gitkeep
-!/log/tacacs/.gitkeep
-!/ssl/.gitkeep
 !/temp/.gitkeep

@@ -1,4 +1,8 @@
 ##############################
+Version_0.9.42 20180924
+	* HA Fix
+	* New key generator
+##############################
 Version_0.9.41 20180924
 	* Dashboard diagram fix
 	* Added some tools for developer

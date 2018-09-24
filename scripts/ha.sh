@@ -155,11 +155,13 @@ case $1 in
 			fi
 			echo -n "Write to my.cnf..."
 			make_slave_mycnf $3;
-			sudo rm /var/log/mysql/mysql-bin*
-			sudo rm /var/log/mysql/mysql-relay-bin*
+			#sudo rm /var/log/mysql/mysql-bin*
+			#sudo rm /var/log/mysql/mysql-relay-bin*
 			echo "Done";
 			echo -n "Service restart..."
-			service mysql restart
+			sudo service mysql stop;
+			sudo pkill -9 mysql;
+			sudo service mysql start;
 			echo "Done";
 			exit 0;
 		fi
@@ -183,7 +185,9 @@ case $1 in
 		make_master_mycnf $2;
 		echo "Done";
 		echo -n "Service restart..."
-		service mysql restart
+		sudo service mysql stop;
+		sudo pkill -9 mysql;
+		sudo service mysql start;
 		echo "Done";
 	;;
 	tgui_ro)
@@ -216,7 +220,8 @@ case $1 in
 	;;
 	disable)
 		ha_disable_mycnf
-		service mysql restart
+		service mysql stop;
+		service mysql start;
 		echo 'my.cnf erased';
 	;;
 	restore)

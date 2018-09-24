@@ -20,7 +20,7 @@ fi
 
 case $1 in
 	uuid_hash)
-		echo $(sudo dmidecode -s system-uuid)_$(cat /var/lib/dbus/machine-id) | sha256sum | head -c 64
+		echo $(sudo dmidecode -s system-uuid)_$(sudo dmidecode -s system-serial-number) | sha256sum | head -c 64
 	;;
 	ha)
 		#echo "${@:2}";
