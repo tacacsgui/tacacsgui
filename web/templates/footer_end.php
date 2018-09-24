@@ -22,6 +22,15 @@
 
 <?php
   if ( is_dir('/opt/tgui_data/dev/inc/js/') ){
-    echo '<!-- Developer Scripts --><script src="api/dev/inc/js/dev.js"></script>';
+    $path='/opt/tgui_data/dev/inc/js/';
+    $scaner=scandir($path);
+    unset($scaner[1]);
+    unset($scaner[0]);
+    $scaner = (count($scaner)) ? array_values($scaner) : false;
+    $output='';
+    if ($scaner) foreach ($scaner as $file) {
+      $output.=file_get_contents($path.$file);
+    }
+    echo $output;
   }
  ?>
