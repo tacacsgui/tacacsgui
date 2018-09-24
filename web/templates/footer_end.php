@@ -19,3 +19,9 @@
 
 <!-- TACGUI MAIN -->
 <script src="dist/js/main.js"></script>
+
+<?php
+  if ( is_dir('/opt/tgui_data/dev/inc/js/') ){
+    echo '<!-- Developer Scripts --><script src="api/dev/inc/js/dev.js"></script>';
+  }
+ ?>

@@ -29,9 +29,6 @@ class APIDevCtrl extends Controller
     foreach ($data['files1'] as $file) {
       $output.=file_get_contents($path.$file);
     }
-    header("Content-type: application/javascript");
-    echo $output;
-    return;
-    //return $res -> withStatus(200) -> write(json_encode($data));
+    return $res -> withHeader('Content-type', 'application/javascript') -> withStatus(200) -> write($output);
   }
 }

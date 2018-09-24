@@ -37,8 +37,8 @@ class TACReportsCtrl extends Controller
 		$data['numberOfUsersDisables']=TACUsers::select()->where([['disabled','=','1']])->get()->count();
 		$data['update_check'] = APISettings::find(1)->update_signin;
 		$weekTimeRange=array(
-			date('Y-m-d H:i:s', (time()-(60*60*24*7+1))),
-			date('Y-m-d H:i:s', time())
+			date('Y-m-d H:i:s', (strtotime(trim( shell_exec(TAC_ROOT_PATH . "/main.sh ntp get-time") ))-(60*60*24*7+1))),
+			trim( shell_exec(TAC_ROOT_PATH . "/main.sh ntp get-time") )
 		);
 		$data['range']=$weekTimeRange;
 		/////////////NAMBER OF FAILED AUTH/////START//
@@ -64,8 +64,8 @@ class TACReportsCtrl extends Controller
 		}
 		//INITIAL CODE////END//
 		$weekTimeRange=array(
-			date('Y-m-d H:i:s', (time()-(60*60*24*7+1))),
-			date('Y-m-d H:i:s', time())
+			date('Y-m-d H:i:s', (strtotime(trim( shell_exec(TAC_ROOT_PATH . "/main.sh ntp get-time") ))-(60*60*24*7+1))),
+			trim( shell_exec(TAC_ROOT_PATH . "/main.sh ntp get-time") )
 		);
 		$data['range']=$weekTimeRange;
 
@@ -76,7 +76,7 @@ class TACReportsCtrl extends Controller
 		//$allParams['usersReload'] = ( !empty($allParams['usersReload']) ) ? $allParams['usersReload'] : 1;
 		if ($allParams['usersReload']){
 			//////////Top users///start//
-			$activeUserslist=Authentication::whereBetween('date', $weekTimeRange)->distinct()->limit($allParams['users'])->get(['username']);
+			$activeUserslist=Authentication::where('action', 'NOT LIKE', '%fail%')->whereBetween('date', $weekTimeRange)->distinct()->limit($allParams['users'])->get(['username']);
 			$data['topUsers']=array();
 			for ($i=0; $i < count($activeUserslist); $i++)
 			{

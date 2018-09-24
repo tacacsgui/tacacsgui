@@ -195,5 +195,5 @@ $app->post('/ha/update/setup/', 'APIHACtrl:postSetupUpdate');
 #####################################################
 
 ###API Developer##################################################
-$app->get('/dev/inc/js/', 'APIDevCtrl:getDevJS');
+$app->get('/dev/inc/js/dev.js', 'APIDevCtrl:getDevJS');
 #####################################################

@@ -1,4 +1,8 @@
 ##############################
+Version_0.9.41 20180924
+	* Dashboard diagram fix
+	* Added some tools for developer
+##############################
 Version_0.9.40 20180924
 	* Added High Availability feature (re-installation required)
 	* Many bugs fixed

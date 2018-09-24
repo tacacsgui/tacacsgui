@@ -150,12 +150,6 @@ require __DIR__ . '/templates/footer_end.php';
 	<!-- main js Device MAIN Functions -->
   <script src="dist/js/pages/tac_devices/main.js"></script>
 <!-- ADDITIONAL JS FILES END-->
-<?php
-  if ( is_dir('/opt/tgui_data/dev/inc/js/') ){
-    if ( file_exists('/opt/tgui_data/dev/inc/js/ya_metrica.js') ){
-      echo '<!-- Developer Scripts --><script src="api/dev/inc/js/"></script>';
-    }
-  }
- ?>
+
 </body>
 </html>
