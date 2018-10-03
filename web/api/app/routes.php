@@ -132,6 +132,7 @@ $app->get('/tacacs/reports/daemon/status/', 'TACReportsCtrl:getDaemonStatus');
 $app->get('/tacacs/reports/top/access/', 'TACReportsCtrl:getTopAccess');
 $app->post('/tacacs/reports/tree/', 'TACReportsCtrl:postFileTree');
 $app->post('/tacacs/reports/delete/', 'TACReportsCtrl:postLogDelete');
+$app->get('/tacacs/widget/chart/auth/', 'TACReportsCtrl:getAuthChartData');
 #####################################################
 
 ###APIChecker Routes#######################################

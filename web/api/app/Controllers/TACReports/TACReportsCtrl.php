@@ -37,7 +37,7 @@ class TACReportsCtrl extends Controller
 		$data['numberOfUsersDisables']=TACUsers::select()->where([['disabled','=','1']])->get()->count();
 		$data['update_check'] = APISettings::find(1)->update_signin;
 		$weekTimeRange=array(
-			date('Y-m-d H:i:s', (strtotime(trim( shell_exec(TAC_ROOT_PATH . "/main.sh ntp get-time") ))-(60*60*24*7+1))),
+			date('Y-m-d H:i:s', strtotime( trim( shell_exec(TAC_ROOT_PATH . "/main.sh ntp get-time") ))-(60*60*24*7+1)),
 			trim( shell_exec(TAC_ROOT_PATH . "/main.sh ntp get-time") )
 		);
 		$data['range']=$weekTimeRange;
@@ -48,6 +48,77 @@ class TACReportsCtrl extends Controller
 	}
 	##########STATISTICS PLEASE#######END##
 	################################################
+	public function getAuthChartData($req,$res)
+	{
+		//INITIAL CODE////START//
+		$data=array();
+		$data=$this->initialData([
+			'type' => 'post',
+			'object' => 'general report',
+			'action' => 'get',
+		]);
+		#check error#
+		if ($_SESSION['error']['status']){
+			$data['error']=$_SESSION['error'];
+			return $res -> withStatus(401) -> write(json_encode($data));
+		}
+		$data['server_time'] = trim( shell_exec(TAC_ROOT_PATH . "/main.sh ntp get-time") );
+		$data['time_range'] = [];
+		$data['charts'] = [
+			'authorization' => [
+				'data' => [
+					'success' => [],
+					'fail' => []
+				]
+			],
+			'authentication' => [
+				'data' => [
+					'success' => [],
+					'fail' => []
+				]
+			],
+
+		];
+		// $first_period = date('Y-m-d H', strtotime( trim( shell_exec(TAC_ROOT_PATH . "/main.sh ntp get-time") ) ) );
+		// $first_period = date( 'Y-m-d H:i:s', strtotime($first_period.':00:00') );
+		// $second_period = date( 'Y-m-d H:i:s', strtotime($first_period) + 3600);
+		// $data['time_range'] = [];
+		// for ($i=0; $i < 24; $i++) {
+		// 	//$data['server_time_hour_'.$i] = $first_period;
+		// 	$data['time_range'][count($data['time_range'])] = date( 'H:i', strtotime( $first_period ) );
+		// 	$first_period = date( 'Y-m-d H:i:s', strtotime( $first_period ) - 3600 );
+		// }
+		//
+		// $data['server_time_hour'] = date('Y-m-d H', strtotime( trim( shell_exec(TAC_ROOT_PATH . "/main.sh ntp get-time") ) ) );
+		$now = date('Y-m-d', strtotime( trim( shell_exec(TAC_ROOT_PATH . "/main.sh ntp get-time") ) ) );
+		for ($i=0; $i < 7; $i++) {
+			$data['time_range'][count($data['time_range'])] = $now;
+			$tRange = [$now." 00:00:00", $now.' 23:59:59'];
+			$authentication = Authentication::select()->whereBetween('date', $tRange);
+			$authorization = Authorization::select()->whereBetween('date', $tRange);
+			$t = &$data['charts']['authentication']['data'];
+			$t['success'][count($t['success'])] = Authentication::select()->whereBetween('date', $tRange)->where('action','NOT LIKE','%fail%')->count();
+			$t['fail'][count($t['fail'])] = Authentication::select()->whereBetween('date', $tRange)->where('action','LIKE','%fail%')->count();
+			unset($t);
+			$t = &$data['charts']['authorization']['data'];
+			$t['success'][count($t['success'])] = Authorization::select()->whereBetween('date', $tRange)->where('action','=','permit')->get()->count();
+			$t['fail'][count($t['fail'])] = Authorization::select()->whereBetween('date', $tRange)->where('action','=','deny')->get()->count();
+			unset($t);
+			$now = date('Y-m-d', strtotime( $now . " 00:00:00" ) - 86399);
+		}
+
+		$data['time_range'] = array_reverse( $data['time_range'] );
+		$a1 = &$data['charts']['authentication']['data'];
+		$a2 = &$data['charts']['authorization']['data'];
+		$a1['success'] = array_reverse($a1['success']);
+		$a1['fail'] = array_reverse($a1['fail']);
+		$a2['success'] = array_reverse($a2['success']);
+		$a2['fail'] = array_reverse($a2['fail']);
+		unset($a1); unset($a2);
+
+		return $res -> withStatus(200) -> write(json_encode($data));
+	}
+
 	public function getTopAccess($req,$res)
 	{
 		//INITIAL CODE////START//

@@ -1,4 +1,8 @@
 ##############################
+Version_0.9.43 20180924
+	* New charts on dashboard
+	* Bug fixed
+##############################
 Version_0.9.42 20180924
 	* HA Fix
 	* New key generator

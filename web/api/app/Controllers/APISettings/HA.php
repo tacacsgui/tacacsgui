@@ -235,6 +235,7 @@ class HA
       $output['type'] = 'rootpw';
       return $output;
     }
+    if ( empty($params['rootpw']) ) $params['rootpw'] = trim( shell_exec( 'sudo /opt/tacacsgui/main.sh ha rootpw' ) );
     $output['rootpw'] = true;
 
     switch ($params['step']) {

@@ -42,3 +42,70 @@ var pieSettings = function(object){
     };
 
     //var colorNames = Object.keys(window.chartColors);
+
+var authChartSettings = function( o ){
+  o = o || {};
+  o.labels = o.labels || [];
+  o.datasets = o.datasets || {};
+  o.datasets.failLabel = o.datasets.failLabel || 'Fail Authentication';
+  o.datasets.faildata = o.datasets.faildata || [];
+  o.datasets.successLabel = o.datasets.successLabel || 'Success Authentication';
+  o.datasets.successdata = o.datasets.successdata || [];
+  o.options = o.options || {};
+  o.options.title = o.options.title || 'Authentication';
+  //o.options.scales.yAxes.name = o.options.scales.yAxes.name || 'Authentication';
+  return {
+    type: 'line',
+    data: {
+      labels: o.labels,
+      datasets: [{
+        label: o.datasets.failLabel,
+        backgroundColor: window.chartColors.red,
+        borderColor: window.chartColors.red,
+        data: o.datasets.faildata,
+        fill: false,
+      }, {
+        label: o.datasets.successLabel,
+        fill: false,
+        backgroundColor: window.chartColors.green,
+        borderColor: window.chartColors.green,
+        data: o.datasets.successdata,
+      }]
+    },
+    options: {
+      responsive: true,
+      title: {
+        display: true,
+        text: o.options.title = o.options.title
+      },
+      tooltips: {
+        mode: 'index',
+        intersect: false,
+      },
+      hover: {
+        mode: 'nearest',
+        intersect: true
+      },
+      scales: {
+        xAxes: [{
+          display: true,
+          scaleLabel: {
+            display: true,
+            labelString: 'Day'
+          }
+        }],
+        yAxes: [{
+          display: true,
+          scaleLabel: {
+            display: true,
+            labelString: o.options.title = o.options.title
+          },
+          ticks: {
+            beginAtZero: true,
+            stepSize: 10,
+          }
+        }]
+      }
+    }
+  };
+}

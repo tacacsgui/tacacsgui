@@ -98,7 +98,7 @@ require __DIR__ . '/templates/body_start.php';
 			<div class="inner">
 			<h3 class="numberOfAuthFails lds-dual-ring"></h3>
 
-			<p>Failed authentication (during the week)</p>
+			<p>Failed auth (during the week)</p>
 			</div>
 			<div class="icon">
 			<i class="fa fa-binoculars"></i>
@@ -113,7 +113,22 @@ require __DIR__ . '/templates/body_start.php';
       <!-- /.row -->
 
       <!-- =========================================================== -->
-
+<div class="box box-solid">
+	<div class="box-body">
+		<div class="row">
+			<div class="col-md-6">
+				<div class="">
+					<canvas id="authentication" width="200" height="100"></canvas>
+				</div>
+			</div>
+			<div class="col-md-6">
+				<div class="">
+					<canvas id="authorization" width="200" height="100"></canvas>
+				</div>
+			</div>
+		</div>
+	</div>
+</div><!-- /.box -->
 <!-- DONUT CHART -->
 	<div class="box box-success">
 		<div class="box-header with-border">
@@ -158,9 +173,7 @@ require __DIR__ . '/templates/body_start.php';
 			</div>
 		</div>
 		<!-- /.box-body -->
-	</div>
-<!-- /.box -->
-
+	</div><!-- /.box -->
 <!--MAIN CONTENT END-->
 <?php
 

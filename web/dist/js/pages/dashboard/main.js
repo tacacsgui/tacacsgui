@@ -7,7 +7,7 @@ $('document').ready(function(){
 	    //Get System Info//
 	    Promise.resolve(tgui_status.getStatus({url: API_LINK+"apicheck/status/"})).then(function(resp) {
 	      tgui_status.fulfill(resp);
-				tacacsWidgets.daemonStatus().getGeneral().topAccess();
+				tacacsWidgets.daemonStatus().getGeneral().topAccess().authChart();
 	      $('div.loading').hide();/*---*/
 	    }).catch(function(err){
 				tgui_error.getStatus(err, tgui_status.ajaxProps)
@@ -117,6 +117,50 @@ var tacacsWidgets = {
       tgui_error.getStatus(err, ajaxProps)
     })
     return this;
+	},
+	authChart: function() {
+		var self = this;
+		var ajaxProps = {
+      url: API_LINK + "tacacs/widget/chart/auth/",
+      		type: 'GET',
+      };//ajaxProps END
+			ajaxRequest.send(ajaxProps).then(function(resp) {
+				console.log(resp);
+				var configAutheChart = new authChartSettings({
+					labels: resp.time_range,
+					datasets: {
+						faildata: resp.charts.authentication.data.fail,
+						successdata: resp.charts.authentication.data.success,
+					}
+				});
+				var configAuthoChart = new authChartSettings({
+					labels: resp.time_range,
+					datasets: {
+						failLabel: 'Fail Authorization',
+						faildata: resp.charts.authorization.data.fail,
+						successLabel: 'Success Authorization',
+						successdata: resp.charts.authorization.data.success,
+					},
+					options: {
+						title: 'Authorization'
+					}
+				});
+				// config.data.labels = resp.time_range;
+				// config.data.datasets[0].data = resp.charts.authentication.data.fail;
+				// config.data.datasets[1].data = resp.charts.authentication.data.success;
+				var autheLineChart = $("#authentication");
+				var authoLineChart = $("#authorization");
+				var autheChart = new Chart(autheLineChart, configAutheChart);
+				// config.data.datasets[0].data = resp.charts.authorization.data.fail;
+				// config.data.datasets[0].label = "Fail Authorization";
+				// config.data.datasets[1].label = "Success Authorization";
+				// config.options.title.text = "Authorization";
+				// config.options.scales.yAxes[0].scaleLabel.labelString = "Authorization";
+				// config.data.datasets[1].data = resp.charts.authorization.data.success;
+				var authoChart = new Chart(authoLineChart, configAuthoChart);
+	    }).fail(function(err){
+	      tgui_error.getStatus(err, ajaxProps)
+	    })
 	},
 	updates: function(){
 		$('.updatesBtn').show();
