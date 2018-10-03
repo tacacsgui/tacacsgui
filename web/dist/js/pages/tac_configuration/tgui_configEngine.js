@@ -188,7 +188,7 @@ var tgui_configEngine = {
         if ( ! slaves[i].response[0].applyStatus ) slaves[i].response[0].applyStatus = { error: undefined };
         $('table.tableSlavesHa').append(
           '<tr><td>'+slaves[i].ip+'</td><td>'+
-          ((slaves[i].response[1]) ? slaves[i].response[1] : 'Unreachable!') +'</td><td><b>'+
+          ((slaves[i].response[1]) ? slaves[i].response[1] : 'Unreachable!!') +'</td><td><b>'+
           ((slaves[i].response[0].version_check) ? '<text class="text-success">Ok':'<text class="text-danger">Error')+'</text></b></td><td><b>'+
           ((slaves[i].response[0].db_check) ? '<text class="text-success">Ok':'<text class="text-danger">Error')+'</text></b></td><td><b>'+
           ((slaves[i].response[0].applyStatus.error!=undefined && !slaves[i].response[0].applyStatus.error) ? '<text class="text-success">Ok':'<text class="text-danger">Error')+'</text></b></td></tr>');
