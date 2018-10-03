@@ -124,8 +124,7 @@ class TACDevicesCtrl extends Controller
 				passwdPolicyUppercase($policy['tac_pw_uppercase'])->
 				passwdPolicyLowercase($policy['tac_pw_lowercase'])->
 				passwdPolicySpecial($policy['tac_pw_special'])->
-				passwdPolicyNumbers($policy['tac_pw_numbers'])->
-				tacacsKeyAvailable($req->getParam('group'))->setName('Tacacs Key') ),
+				passwdPolicyNumbers($policy['tac_pw_numbers'])->setName('Tacacs Key') ),
 			'ipaddr' => v::noWhitespace()->notEmpty()->ip(),
 			'prefix' => v::noWhitespace()->notEmpty(),
 		]);
