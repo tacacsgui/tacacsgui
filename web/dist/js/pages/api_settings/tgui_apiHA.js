@@ -93,6 +93,7 @@ var tgui_apiHA = {
       formData.ipaddr = temp[1];
     }
     formData.step = 0;
+    formData.debug = (window.location.hash.substr(1) == 'debug');
     var ajaxProps = {
       url: API_LINK + "settings/ha/",
       data: formData

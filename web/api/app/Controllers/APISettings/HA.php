@@ -208,7 +208,7 @@ class HA
         $this->encoder->setPrettyPrinting(true);
         $this->encoder->encodeFile( $this->ha_data, '/opt/tgui_data/ha/ha.cfg');
 
-        if ($params['step'] >= 5 ) {
+        if ($params['step'] >= 5 AND !$params['debug']) {
           session_unset(); session_destroy();
         }
         break;
@@ -430,9 +430,9 @@ class HA
       $output['master_resp'] = [];
       return $output;
     }
-
+    if ($params['debug']) $output['master_resp'] = $master_response[0];
     file_put_contents('/opt/tacacsgui/temp/dumpForSlave.sql', $master_response[0], LOCK_EX);
-
+    $output['file_exists'] = file_exists ( '/opt/tacacsgui/temp/dumpForSlave.sql' );
     if ( ! file_exists ( '/opt/tacacsgui/temp/dumpForSlave.sql' ) ) {
       $output['type'] = 'message';
       $output['message'] = 'Where is dump file?';
