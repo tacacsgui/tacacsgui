@@ -146,7 +146,7 @@ var tgui_apiUpdate = {
   },
   upgradeSlave: function(row) {
     var self = this;
-    var data = {id: $(row).data('slave_id'), ipaddr: $(row).data('ip'), unique_id: $(row).data('unique_id')}
+    var data = {id: $(row).data('slave_id'), ipaddr: $(row).data('ipaddr'), unique_id: $(row).data('unique_id')}
     $('pre.slave_info').empty().append('Loading...');
     var ajaxProps = {
       url: API_LINK+"update/upgrade/slave/",

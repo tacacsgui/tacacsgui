@@ -1,4 +1,7 @@
 ##############################
+Version_0.9.44 20181006
+	* Bug fixed
+##############################
 Version_0.9.43 20180924
 	* New charts on dashboard
 	* Bug fixed

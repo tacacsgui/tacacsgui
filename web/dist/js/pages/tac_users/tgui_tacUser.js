@@ -291,30 +291,11 @@ var tgui_tacUser = {
     })
     return this;
   },
-  csvDownload: function(idList) {
-    idList = idList || [];
-  if (! idList.length ) $('div.csv-link').empty().append(tgui_supplier.loadElement());
-  else { $('#exportLink').removeClass('m-progress').addClass('m-progress').attr('href', 'javascript: void(0)').show(); }
-  var ajaxProps = {
-    url: API_LINK+"tacacs/user/csv/",
-    data: {idList: idList}
-  };//ajaxProps END
-  ajaxRequest.send(ajaxProps).then(function(resp) {
-    if(!resp.filename) {
-      tgui_error.local.show( {type:'error', message: "Oops! Unknown error appeared :("} ); return;
-    }
-    if (! idList.length ) { $('div.csv-link').empty().append('<a href="/api/download/csv/?file=' + resp.filename + '" target="_blank">Download</a><p><small class="text-muted">Link will be valid within 15 minutes</small></p>') }
-    else {
-      $('#exportLink').removeClass('m-progress').attr('href', '/api/download/csv/?file=' + resp.filename);
-    }
-  }).fail(function(err){
-    tgui_error.getStatus(err, ajaxProps)
-  })
-  },
   csv: {
     columnsRequired: ['username','login'],
     fileInputId: '#csv-file',
     ajaxLink: 'tacacs/user/add/',
+    ajaxItem: 'user',
     outputId: '#csvParserOutput',
     ajaxHandler: function(resp,index){
       var item = 'user';

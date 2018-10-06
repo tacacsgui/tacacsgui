@@ -67,7 +67,7 @@ class APIUpdateCtrl extends Controller
   	  'form_params' =>
 			[
 				'psk' => $ha->psk(),
-				'action' => 'update info',
+				'action' => 'update_info',
 				'api_version' => APIVER,
 				'unique_id' => $allParams['unique_id'],
 				'sha1_attrs' => ['action', 'psk', 'api_version', 'unique_id']
@@ -105,7 +105,7 @@ class APIUpdateCtrl extends Controller
   	  'form_params' =>
 			[
 				'psk' => $ha->psk(),
-				'action' => 'update info',
+				'action' => 'update',
 				'api_version' => APIVER,
 				'unique_id' => $allParams['unique_id'],
 				'sha1_attrs' => ['action', 'psk', 'api_version', 'unique_id']
@@ -113,6 +113,9 @@ class APIUpdateCtrl extends Controller
     ];
 		$data['gclient'] = false;
     $master_response = HA::sendRequest($session_params);
+		$data['gclient_status'] = $master_response[1];
+		$data['gclient_params'] = $session_params;
+
 		if ($master_response[1] !== 200) return $res -> withStatus(200) -> write(json_encode($data));
 		$data['gclient'] = json_decode($master_response[0], true );
 		return $res -> withStatus(200) -> write(json_encode($data));

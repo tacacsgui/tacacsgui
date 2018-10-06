@@ -1,14 +1,8 @@
-/web/api/vendor
-/web/api/config.php
-/web/api/composer.lock
-/tac_plus.cfg*
-/tacTestOutput.txt
-/backups/api/*
-/backups/database/*
-/backups/gui/*
-/log/apache2/*
-/log/tacacs/*
-/ssl/*
-/temp/*
+web/api/vendor
+web/api/config.php
+web/api/composer.lock
+tac_plus.cfg*
+tacTestOutput.txt
+temp/*
 
-!/temp/.gitkeep
+!temp/.gitkeep
