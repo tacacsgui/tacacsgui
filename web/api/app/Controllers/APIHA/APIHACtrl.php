@@ -163,7 +163,7 @@ class APIHACtrl extends Controller
     $allParams = $req->getParams();
 
     if ( ! $this->checkServerAccess( $allParams ) ) return $res -> withStatus(403);
-    HA::slaveTimeUpdate($_SERVER['REMOTE_ADDR']);
+    HA::slaveTimeUpdate($_SERVER['REMOTE_ADDR'], $allParams);
     shell_exec('php '.TAC_ROOT_PATH."/parser/parser.php ".$allParams['log_type']." '".$allParams['log_entry']."' '".$_SERVER['REMOTE_ADDR']."'");
 
     $data['access'] = true;

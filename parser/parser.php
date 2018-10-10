@@ -1,6 +1,7 @@
 <?php
 require '/opt/tacacsgui/web/api/app/Controllers/APISettings/HA.php';
 require __DIR__ . '/../web/api/config.php';
+require __DIR__ . '/../web/api/constants.php';
 $loader = require __DIR__ . '/../web/api/vendor/autoload.php';
 $loader->addPsr4('parser\\', __DIR__ . '/app');
 

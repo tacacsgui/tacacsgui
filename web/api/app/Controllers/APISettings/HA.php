@@ -697,6 +697,7 @@ class HA
     $id = self::searchSlave($ipaddr, $ha_data['server_list']['slave']);
     if ( $id === null ) return false;
     $ha_data['server_list']['slave'][$id]['lastchk'] = Controller::serverTime();
+    if ( isset($params['api_version']) ) $ha_data['server_list']['slave'][$id]['api_version'] = $params['api_version'];
     $encoder = new jsone();
     $encoder->setPrettyPrinting(true);
     $encoder->encodeFile( $ha_data, '/opt/tgui_data/ha/ha.cfg');
