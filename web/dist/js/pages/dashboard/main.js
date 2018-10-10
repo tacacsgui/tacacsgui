@@ -131,6 +131,9 @@ var tacacsWidgets = {
 					datasets: {
 						faildata: resp.charts.authentication.data.fail,
 						successdata: resp.charts.authentication.data.success,
+					},
+					options:{
+						step: resp.step.authe || 10
 					}
 				});
 				var configAuthoChart = new authChartSettings({
@@ -142,21 +145,13 @@ var tacacsWidgets = {
 						successdata: resp.charts.authorization.data.success,
 					},
 					options: {
-						title: 'Authorization'
+						title: 'Authorization',
+						step: resp.step.autho || 10
 					}
 				});
-				// config.data.labels = resp.time_range;
-				// config.data.datasets[0].data = resp.charts.authentication.data.fail;
-				// config.data.datasets[1].data = resp.charts.authentication.data.success;
 				var autheLineChart = $("#authentication");
 				var authoLineChart = $("#authorization");
 				var autheChart = new Chart(autheLineChart, configAutheChart);
-				// config.data.datasets[0].data = resp.charts.authorization.data.fail;
-				// config.data.datasets[0].label = "Fail Authorization";
-				// config.data.datasets[1].label = "Success Authorization";
-				// config.options.title.text = "Authorization";
-				// config.options.scales.yAxes[0].scaleLabel.labelString = "Authorization";
-				// config.data.datasets[1].data = resp.charts.authorization.data.success;
 				var authoChart = new Chart(authoLineChart, configAuthoChart);
 	    }).fail(function(err){
 	      tgui_error.getStatus(err, ajaxProps)

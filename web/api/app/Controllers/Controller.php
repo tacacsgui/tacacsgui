@@ -139,6 +139,12 @@ class Controller
 	}
 	////////////////////////////////////////
 	////////////////////////////////////////
+  public function serverTime()
+  {
+  	return trim( shell_exec(TAC_ROOT_PATH . "/main.sh ntp get-time") );
+  }
+	////////////////////////////////////////
+	////////////////////////////////////////
 	public static function uuid_hash() {
 		return trim(shell_exec('sudo '. TAC_ROOT_PATH.'/main.sh uuid_hash'));
 	}

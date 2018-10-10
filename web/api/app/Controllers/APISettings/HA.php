@@ -550,6 +550,14 @@ class HA
     $decoder->setObjectDecoding(1);
     return $decoder->decodeFile( '/opt/tgui_data/ha/ha.cfg' );
   }
+  public function saveConfg($ha_data = [ 'bugaga' => true ])
+  {
+    if (isset($ha_data['bugaga'])) return false;
+    $encoder = new jsone();
+    $encoder->setPrettyPrinting(true);
+    $encoder->encodeFile( $ha_data, '/opt/tgui_data/ha/ha.cfg');
+    return true;
+  }
   public static function getServerRole()
   {
     $ha_data = self::getFullConfiguration();
@@ -663,7 +671,7 @@ class HA
           'action' => 'logging',
           'log_type' => $params['log_type'],
           'log_entry' => $params['log_entry'],
-          //'api_version' => '',
+          'api_version' => APIVER,
           'unique_id' => $ha_data['server']['unique_id'],
           'sha1_attrs' => ['action', 'psk', 'unique_id', 'log_type']
         ]
@@ -671,5 +679,26 @@ class HA
     $response = self::sendRequest($session_params);
 
     return ($response[1] == 200);
+  }
+  public static function searchSlave($ipaddr = '', $server_array = [])
+  {
+    foreach ($server_array as $arrId => $slave) {
+      if (!isset($slave['ipaddr'])) continue;
+      if ($slave['ipaddr'] == $ipaddr) {
+        return $arrId;
+      }
+    }
+    return null;
+  }
+  public static function slaveTimeUpdate($ipaddr = '', $params = [])
+  {
+    $ha_data = self::getFullConfiguration();
+    if ( !isset($ha_data['server_list']) OR !isset($ha_data['server_list']['slave']) OR !count($ha_data['server_list']['slave'])) return false;
+    $id = self::searchSlave($ipaddr, $ha_data['server_list']['slave']);
+    if ( $id === null ) return false;
+    $ha_data['server_list']['slave'][$id]['lastchk'] = Controller::serverTime();
+    $encoder = new jsone();
+    $encoder->setPrettyPrinting(true);
+    $encoder->encodeFile( $ha_data, '/opt/tgui_data/ha/ha.cfg');
   }
 }

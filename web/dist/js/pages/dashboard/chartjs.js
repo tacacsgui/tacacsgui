@@ -53,6 +53,7 @@ var authChartSettings = function( o ){
   o.datasets.successdata = o.datasets.successdata || [];
   o.options = o.options || {};
   o.options.title = o.options.title || 'Authentication';
+  o.options.step = o.options.step || 10;
   //o.options.scales.yAxes.name = o.options.scales.yAxes.name || 'Authentication';
   return {
     type: 'line',
@@ -102,7 +103,7 @@ var authChartSettings = function( o ){
           },
           ticks: {
             beginAtZero: true,
-            stepSize: 10,
+            stepSize: o.options.step,
           }
         }]
       }

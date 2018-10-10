@@ -162,8 +162,8 @@ class APIHACtrl extends Controller
     $ha = new HA();
     $allParams = $req->getParams();
 
-    //if ( ! $this->checkServerAccess( $allParams ) ) return $res -> withStatus(403);
-    //$event = '2018-09-18 11:39:40 +0300|!|10.10.50.251|!|cisco123|!|tty1|!|10.10.50.200|!|stop|!|task_id=124|!|timezone=UTC|!|service=shell|!|priv-lvl=15|!|cmd=configure terminal <cr>';
+    if ( ! $this->checkServerAccess( $allParams ) ) return $res -> withStatus(403);
+    HA::slaveTimeUpdate($_SERVER['REMOTE_ADDR']);
     shell_exec('php '.TAC_ROOT_PATH."/parser/parser.php ".$allParams['log_type']." '".$allParams['log_entry']."' '".$_SERVER['REMOTE_ADDR']."'");
 
     $data['access'] = true;

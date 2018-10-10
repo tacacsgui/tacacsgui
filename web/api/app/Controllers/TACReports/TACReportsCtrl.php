@@ -114,9 +114,21 @@ class TACReportsCtrl extends Controller
 		$a1['fail'] = array_reverse($a1['fail']);
 		$a2['success'] = array_reverse($a2['success']);
 		$a2['fail'] = array_reverse($a2['fail']);
+		$data['step'] = [
+			'authe' => 1,
+			'autho' => 1,
+		];
+		$data['step']['authe'] = self::chartStep(max($a1['success']), $data['step']['authe']);
+		$data['step']['authe'] = self::chartStep(max($a1['fail']), $data['step']['authe']);
+		$data['step']['autho'] = self::chartStep(max($a2['success']), $data['step']['autho']);
+		$data['step']['autho'] = self::chartStep(max($a2['fail']), $data['step']['autho']);
 		unset($a1); unset($a2);
 
 		return $res -> withStatus(200) -> write(json_encode($data));
+	}
+	public static function chartStep($max=1, $step=1)
+	{
+		return (round($max / 5) < $step ) ? $step : round($max / 5);
 	}
 
 	public function getTopAccess($req,$res)
