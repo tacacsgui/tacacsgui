@@ -27,7 +27,7 @@
         <button type="button" class="btn btn-default btn-flat dropdown-toggle" data-toggle="dropdown">
           More Columns <span class="caret"></span>
         </button>
-        <ul class="dropdown-menu dropdown-menu-right" id="columnsFilter">
+        <ul class="dropdown-menu dropdown-menu-right" id="<?php echo ( !empty($columnFilterBtn['filter_id']) ) ? $columnFilterBtn['filter_id'] :  'columnsFilter'; ?>">
 
         </ul>
       </div>

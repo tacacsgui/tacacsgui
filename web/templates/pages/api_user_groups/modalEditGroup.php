@@ -12,10 +12,15 @@
 			<div class="nav-tabs-custom">
 				<ul class="nav nav-tabs">
 					<li class="active"><a href="#general_info_edit" data-toggle="tab" aria-expanded="true">General</a></li>
+					<li><a href="#notifications_edit" data-toggle="tab" aria-expanded="true">Notifications</a></li>
 				</ul>
 				<div class="tab-content">
 					<div class="tab-pane active" id="general_info_edit">
 						<?php include __DIR__ . '/tabGeneralInfo.php';?>
+					</div>
+					<!-- /.tab-pane -->
+					<div class="tab-pane active" id="notifications_edit">
+						<?php include __DIR__ . '/tabNotifications.php';?>
 					</div>
 					<!-- /.tab-pane -->
 				</div>

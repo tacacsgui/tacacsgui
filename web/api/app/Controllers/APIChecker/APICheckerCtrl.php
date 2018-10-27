@@ -123,6 +123,12 @@ class APICheckerCtrl extends Controller
 					'updated_at' => date('Y-m-d H:i:s', time())
 				]);
 				break;
+			case 'api_notification':
+				$this->db::connection($database)->table($tableName)->insert([
+					'created_at' => date('Y-m-d H:i:s', time()),
+					'updated_at' => date('Y-m-d H:i:s', time())
+				]);
+				break;
 			case 'tac_global_settings':
 				$this->db::connection($database)->table($tableName)->insert([
 					'manual' => "log = accounting_log {\n".
@@ -234,7 +240,7 @@ class APICheckerCtrl extends Controller
 					if ($updateFlag) {
 						$this->databaseFix();
 						//CREATE TABLE//
-						$this->createTable($database, $tableName,$tableColumns);
+						$this->createTable($database, $tableName, $tableColumns);
 						////////////DEFAULT VALUES/////////
 						$this->setDefaultValues($database, $tableName);
 						///////////////////////////////////
@@ -343,7 +349,7 @@ class APICheckerCtrl extends Controller
 		}
 		//INITIAL CODE////END//
 
-		$data['time']=trim(shell_exec('date +"%T %D"'));
+		$data['time']=$this->serverTime();
 
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}

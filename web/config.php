@@ -208,6 +208,17 @@ $TAC_REPORTS = array(
 			'submenuFlag' => 0,
 			'submenu' => [],//.submenu
 		],
+		'notification' => [
+			'id' => 940,
+			'name' => 'Notification',
+			'href' => 'api_notification.php',
+			'li-class' => 'text-aqua',
+			'icon' => 'fa fa-circle-o',
+			'icon-class' => 'text-aqua',
+			'type' => 0, //type 0 used for linked menu item, type 1 user for header in menu
+			'submenuFlag' => 0,
+			'submenu' => [],//.submenu
+		],
 	],//.submenu
 );
 

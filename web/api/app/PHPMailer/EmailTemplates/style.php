@@ -1,4 +1,17 @@
 <style>
+  .text-center {
+    text-align: center;
+  }
+  .alert-title {
+    background-color: #ff9f9f;
+  }
+  .title-info {
+    font-weight: bold;
+    text-align: center;
+  }
+  .border-bottom {
+    border-bottom: 1px solid #444;
+  }
   /* -------------------------------------
       GLOBAL RESETS
   ------------------------------------- */

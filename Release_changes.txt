@@ -1,4 +1,8 @@
 ##############################
+Version_0.9.45 20181027
+	* Added Notification for bad Authorization and Authentification
+	* Bug fixed
+##############################
 Version_0.9.44 20181006
 	* Bug fixed
 ##############################

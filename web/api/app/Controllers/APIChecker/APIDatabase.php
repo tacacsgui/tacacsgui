@@ -18,6 +18,8 @@ class APIDatabase
   		'surname' => ['string', ''],
   		'group' => ['integer', '0'],
   		'position' => ['string', ''],
+  		'bad_authentication_notice' => ['integer', '0'],
+  		'bad_authorization_notice' => ['integer', '0'],
   		'changePasswd' => ['integer', '1'],
   	],
   	'api_user_groups' =>
@@ -25,6 +27,19 @@ class APIDatabase
   		'name' => ['string',''],
   		'rights' => ['integer', '0'],
   		'default_flag' => ['integer', '0'],
+      'bad_authentication_notice' => ['integer', '0'],
+  		'bad_authorization_notice' => ['integer', '0'],
+  	],
+  	'api_notification' =>
+  	[
+  		'bad_authentication_enable' => ['integer', '0'],
+  		'bad_authentication_count' => ['integer', '0'],
+  		'bad_authentication_interval' => ['integer', '0'],
+  		'bad_authentication_email_list' => ['text', '_'],
+  		'bad_authorization_enable' => ['integer', '0'],
+  		'bad_authorization_count' => ['integer', '0'],
+  		'bad_authorization_interval' => ['integer', '0'],
+  		'bad_authorization_email_list' => ['text', '_'],
   	],
   	'api_settings' =>
   	[
@@ -276,6 +291,27 @@ class APIDatabase
   			'nac' => ['string', '_'],
   			'action' => ['string', '_'],
   			'cmd' => ['string', '_'],
+  		],
+  		'post_log' =>
+  		[
+  			'server' => ['string', '_'],
+  			'date' => ['timestamp', '_'],
+  			'type' => ['string', '_'],
+  			'username' => ['string', '_'],
+  			'user_ipaddr' => ['string', '_'],
+  			'device_ipaddr' => ['string', '_'],
+  			'receivers' => ['string', '_'],
+  			'status' => ['string', '_'],
+  		],
+  		'post_buffer' =>
+  		[
+  			'server' => ['string', '_'],
+  			'date' => ['timestamp', '_'],
+  			'type' => ['string', '_'],
+  			'username' => ['string', '_'],
+  			'user_ipaddr' => ['string', '_'],
+  			'device_ipaddr' => ['string', '_'],
+  			'count' => ['string', '_'],
   		]
   	);
 }

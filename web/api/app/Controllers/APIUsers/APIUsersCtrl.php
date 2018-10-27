@@ -65,7 +65,7 @@ class APIUsersCtrl extends Controller
 		$policy = APIPWPolicy::select()->first(1);
 
 		$validation = $this->validator->validate($req, [
-			'email' => v::noWhitespace(),//->email(),//->notEmpty()->emailAvailable(),
+			'email' => v::when( v::nullType() , v::alwaysValid(), v::noWhitespace()->email()->emailAvailable()->setName('Email')),
 			'username' => v::noWhitespace()->notEmpty()->usernameAvailable(),
 			'group' => v::adminRights(),
 			'password' => v::noWhitespace()->
@@ -175,7 +175,7 @@ class APIUsersCtrl extends Controller
 		$policy = APIPWPolicy::select()->first(1);
 
 		$validation = $this->validator->validate($req, [
-			'email' => v::when( v::nullType() , v::alwaysValid(), v::noWhitespace()->email()->notEmpty()->emailAvailable()->setName('Email')),
+			'email' => v::when( v::oneOf(v::nullType(), v::equals('')) , v::alwaysValid(), v::noWhitespace()->email()->notEmpty()->emailAvailable()->setName('Email')),
 			'password' => v::when( v::nullType() , v::alwaysValid(), v::noWhitespace()->
 					notContainChars()->
 					length($policy['api_pw_length'], 64)->

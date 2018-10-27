@@ -182,6 +182,13 @@ $app->post('/logging/datatables/', 'APILoggingCtrl:postLoggingDatatables');
 $app->post('/logging/delete/', 'APILoggingCtrl:postLoggingDelete');
 #####################################################
 
+###APIChecker Routes#######################################
+$app->get('/notification/settings/', 'APINotificationCtrl:getSettings');
+$app->post('/notification/settings/', 'APINotificationCtrl:postSettings');
+$app->post('/notification/post/logging/', 'APINotificationCtrl:postDatatables');
+$app->post('/notification/post/buffer/', 'APINotificationCtrl:postBufferDatatables');
+#####################################################
+
 ###API Dounload Manager Routes#######################################
 $app->get('/download/csv/', 'APIDownloadCtrl:getDownloadCsv');
 $app->get('/download/log/', 'APIDownloadCtrl:getDownloadLog');

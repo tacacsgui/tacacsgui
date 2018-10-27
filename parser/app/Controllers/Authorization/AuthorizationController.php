@@ -59,6 +59,13 @@ class AuthorizationController extends Controller
 		$returnData['server'] = $this->server_ip;
 		$authorization = Authorization::create($returnData);
 
+		if ($this->server_ip == 'localhost' AND strpos($returnData['action'], 'deny') !== false AND $this->postEngine->run(['type' => 'bad_authorization']) ){
+			$data = $returnData;
+			$data['type'] = 'bad_authorization';
+			$data['title'] = 'Bad Authorization!';
+			$this->postEngine->sendAlert($data);
+		}
+
 		return $authorization;
 	}//end of parser function
 }

@@ -342,6 +342,8 @@ public static function applyTimeSettings( $allParams = [] )
     fwrite($ntpfile, $txt);
     fclose($ntpfile);
     return true;
+  } else {
+    return true;
   }
 
   return false;

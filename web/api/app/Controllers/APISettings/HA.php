@@ -107,7 +107,7 @@ class HA
         $output[count($output)] = ['ip'=> $value['ipaddr'], 'uid' => $value['unique_id'], 'response' => $response ];
         continue;
       }
-      self::updateSlaveTime(['ipaddr' => $value['ipaddr'], 'unique_id'=> $value['unique_id']]);
+      self::slaveTimeUpdate($value['ipaddr']);
       $response[0] = json_decode($response[0], true );
       $response[0]['db_check'] = ($params['checksum'] == $response[0]['checksum']);
       if ($response[0]['db_check'] AND $response[0]['version_check'] AND !$response[0]['applyStatus']['error'] AND self::unconfiguredSlaves($value['ipaddr'])) self::slaveConfigured($value['ipaddr'], $this->ha_data['server']['config_uid']);
@@ -632,22 +632,24 @@ class HA
 
     return false;
   }
-  public static function updateSlaveTime($params)
-  {
-    $ha_data = self::getFullConfiguration();
-    if ( isset($ha_data['server_list']) AND isset($ha_data['server_list']['slave']) AND count($ha_data['server_list']['slave'])){
-      for ($i=0; $i < count($ha_data['server_list']['slave']); $i++) {
-        if ( $ha_data['server_list']['slave'][$i]['ipaddr'] == $params['ipaddr'] AND  $ha_data['server_list']['slave'][$i]['unique_id'] == $params['unique_id']){
-          $ha_data['server_list']['slave'][$i]['lastchk'] = trim( shell_exec(TAC_ROOT_PATH . "/main.sh ntp get-time") );
-          $encoder = new jsone();
-          $encoder->setPrettyPrinting(true);
-          $encoder->encodeFile( $ha_data, '/opt/tgui_data/ha/ha.cfg');
-        }
-      }
-    }
-
-    return false;
-  }
+  //SHOULD BE DEPRICATED//!!!
+  // public static function updateSlaveTime($params)
+  // {
+  //   $ha_data = self::getFullConfiguration();
+  //   if ( isset($ha_data['server_list']) AND isset($ha_data['server_list']['slave']) AND count($ha_data['server_list']['slave'])){
+  //     for ($i=0; $i < count($ha_data['server_list']['slave']); $i++) {
+  //       if ( $ha_data['server_list']['slave'][$i]['ipaddr'] == $params['ipaddr'] AND  $ha_data['server_list']['slave'][$i]['unique_id'] == $params['unique_id']){
+  //         $ha_data['server_list']['slave'][$i]['lastchk'] = trim( shell_exec(TAC_ROOT_PATH . "/main.sh ntp get-time") );
+  //         $encoder = new jsone();
+  //         $encoder->setPrettyPrinting(true);
+  //         $encoder->encodeFile( $ha_data, '/opt/tgui_data/ha/ha.cfg');
+  //       }
+  //     }
+  //   }
+  //
+  //   return false;
+  // }
+  /////////////////////////////////////
   public static function isThereSlaves()
   {
     $ha_data = self::getFullConfiguration();
@@ -698,8 +700,6 @@ class HA
     if ( $id === null ) return false;
     $ha_data['server_list']['slave'][$id]['lastchk'] = Controller::serverTime();
     if ( isset($params['api_version']) ) $ha_data['server_list']['slave'][$id]['api_version'] = $params['api_version'];
-    $encoder = new jsone();
-    $encoder->setPrettyPrinting(true);
-    $encoder->encodeFile( $ha_data, '/opt/tgui_data/ha/ha.cfg');
+    self::saveConfg($ha_data);
   }
 }

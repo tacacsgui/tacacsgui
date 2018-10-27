@@ -4,6 +4,7 @@ namespace parser\Controllers\Authentication;
 
 use parser\Models\Authentication;
 use parser\Controllers\Controller;
+use parser\Controllers\PostEngine\PostEngine;
 
 class AuthenticationController extends Controller
 {
@@ -58,6 +59,13 @@ class AuthenticationController extends Controller
 		}
 		$returnData['server'] = $this->server_ip;
 		$authentication = Authentication::create($returnData);
+
+		if ($this->server_ip == 'localhost' AND strpos($returnData['action'], 'fail') !== false AND $this->postEngine->run(['type' => 'bad_authentication']) ){
+			$data = $returnData;
+			$data['type'] = 'bad_authentication';
+			$data['title'] = 'Bad Authentication!';
+			$this->postEngine->sendAlert($data);
+		}
 
 		return $authentication;
 	}//end of parser function

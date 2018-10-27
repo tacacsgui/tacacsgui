@@ -129,7 +129,6 @@ class APIUserGrpsCtrl extends Controller
 		$data['group']=APIUserGrps::select()->
 			where([['id','=',$req->getParam('id')],['name','=',$req->getParam('name')]])->
 			first();
-		$data['test']=1;
 
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}

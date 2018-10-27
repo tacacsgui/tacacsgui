@@ -47,7 +47,7 @@ var tgui_datatables = function(data){
 		autoWidth: false,
 		orderCellsTop: true,
 		bProcessing: true,
-
+		initialData: data,
 		columns: columns,
 		 /* Select params*/
 		 select: (!data.column.select) ? false :
@@ -96,21 +96,27 @@ var tgui_datatables = function(data){
 			 }
 		 }, // json datasource
 
-		 columnsFilter: function() {
-	 		initialData = initialData || {};
+		 columnsFilter: function(o) {
+			o = o || {}
+			if ( window.dataTable == undefined ) window.dataTable = {};
+			var dataTable_o = window.dataTable;
+			if ( o.dataTable_f ) dataTable_o = o.dataTable_f;
+			o.colFilterBtnId = o.colFilterBtnId || 'columnsFilter';
+	 		this.initialData = this.initialData || {};
 	 		var i = (data.column.select && data.column.preview) ? 2 : 1;
 
-	 		for (var rowName in initialData.columns) {
-	 			if (initialData.columns.hasOwnProperty(rowName)) {
-	 				$('#columnsFilter').append('<li><a href="#" data-value="'+i+'"><i class="fa fa' + ( ( initialData.columns[rowName].visible ) ? '-check' : "" ) + '-square-o"></i>&nbsp;'+initialData.columns[rowName].title+'</a></li>');
+	 		for (var rowName in this.initialData.columns) {
+	 			if (this.initialData.columns.hasOwnProperty(rowName)) {
+	 				$('#'+o.colFilterBtnId).append('<li><a href="#" data-value="'+i+'"><i class="fa fa' + ( ( this.initialData.columns[rowName].visible ) ? '-check' : "" ) + '-square-o"></i>&nbsp;'+this.initialData.columns[rowName].title+'</a></li>');
 	 				i++;
 	 			}
 	 		}
 	 		var self = this;
-	 		$( '#columnsFilter a' ).on( 'click', function( event ) {
+	 		$( '#'+o.colFilterBtnId+' a' ).on( 'click', function( event ) {
 	 			var $target = $( event.currentTarget ),
 	 	        val = $target.attr( 'data-value' );
-	 					var column = dataTable.table.column( val );
+						console.log(dataTable_o);
+	 					var column = dataTable_o.table.column( val );
 	 					var icon = $($target.children('i'));
 	 					icon.removeClass('fa-check-square-o fa-square-o').addClass( ( column.visible() ) ? 'fa-square-o' : 'fa-check-square-o' );
 
@@ -121,7 +127,7 @@ var tgui_datatables = function(data){
 	 		$(document).on('keyup change', '#filterRequest', function(){
 	 			var v =$(this).val();  // getting search input value
 	 			if (!v) { $('#filterRequest').removeClass('filter-input-success filter-input-error'); return; }
-	 			dataTable.table.search(v).draw();
+	 			dataTable_o.table.search(v).draw();
 	 		} );
 	 	},
 	 	filter: function() {

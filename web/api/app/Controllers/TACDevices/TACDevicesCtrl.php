@@ -232,7 +232,7 @@ class TACDevicesCtrl extends Controller
 				passwdPolicyNumbers($policy['tac_pw_numbers'])->
 				desRestriction($req->getParam('enable_flag'))->setName('Enable') ),
 			'enable_flag' => v::noWhitespace()->when( v::nullType() , v::alwaysValid(), v::numeric()),
-			'key' => v::when( v::tacacsKeyAvailable($group) , v::alwaysValid(), v::noWhitespace()->notContainChars()->
+			'key' => v::when( v::oneOf(v::tacacsKeyAvailable($group), v::nullType()) , v::alwaysValid(), v::noWhitespace()->notContainChars()->
 				length($policy['tac_pw_length'], 64)->
 				notEmpty()->
 				passwdPolicyUppercase($policy['tac_pw_uppercase'])->

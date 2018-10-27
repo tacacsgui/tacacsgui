@@ -12,14 +12,19 @@
 			<div class="nav-tabs-custom">
 				<ul class="nav nav-tabs">
 					<li class="active"><a href="#general_info" data-toggle="tab" aria-expanded="true">General</a></li>
+					<li><a href="#notifications" data-toggle="tab" aria-expanded="true">Notifications</a></li>
 				</ul>
 				<div class="tab-content">
 					<div class="tab-pane active" id="general_info">
 						<?php include __DIR__ . '/tabGeneralInfo.php';?>
 					</div>
 					<!-- /.tab-pane -->
-				</div>
+					<div class="tab-pane" id="notifications">
+						<?php include __DIR__ . '/tabNotifications.php';?>
+					</div>
+					<!-- /.tab-pane -->
 				<!-- /.tab-content -->
+				</div>
 			</div>
 		</form>
 		</div>

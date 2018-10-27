@@ -90,6 +90,9 @@ $container['APIHACtrl'] = function($container) {
 	return new \tgui\Controllers\APIHA\APIHACtrl($container);
 };
 
+$container['APINotificationCtrl'] = function($container) {
+	return new \tgui\Controllers\APINotification\APINotificationCtrl($container);
+};
 $container['APIDevCtrl'] = function($container) {
 	return new \tgui\Controllers\APIDev\APIDevCtrl($container);
 };

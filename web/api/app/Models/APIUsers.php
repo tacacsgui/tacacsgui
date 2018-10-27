@@ -7,9 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 class APIUsers extends Model
 {
 	protected $table = 'api_users';
-	
+
 	protected $hidden = ['password'];
-	
+
 	protected $fillable = [
 		'email',
 		'username',
@@ -19,5 +19,7 @@ class APIUsers extends Model
 		'position',
 		'group',
 		'changePasswd',
+		'bad_authentication_notice',
+		'bad_authorization_notice',
 	];
 }
