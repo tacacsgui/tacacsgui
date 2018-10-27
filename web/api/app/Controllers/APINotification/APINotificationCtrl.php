@@ -49,6 +49,14 @@ class APINotificationCtrl extends Controller
 			return $res -> withStatus(401) -> write(json_encode($data));
 		}
 		//INITIAL CODE////END//
+
+    //CHECK ACCESS TO THAT FUNCTION//START//
+    if(!$this->checkAccess(1, true))
+    {
+      return $res -> withStatus(403) -> write(json_encode($data));
+    }
+    //CHECK ACCESS TO THAT FUNCTION//END//
+
     $allParams = $req->getParams();
 
     $validation = $this->validator->validate($req, [
