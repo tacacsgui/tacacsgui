@@ -51,7 +51,7 @@ class APINotificationCtrl extends Controller
 		//INITIAL CODE////END//
 
     //CHECK ACCESS TO THAT FUNCTION//START//
-    if(!$this->checkAccess(1, true))
+    if( ! $this->checkAccess(1) )
     {
       return $res -> withStatus(403) -> write(json_encode($data));
     }
