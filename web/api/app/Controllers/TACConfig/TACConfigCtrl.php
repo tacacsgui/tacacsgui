@@ -37,6 +37,7 @@ class TACConfigCtrl extends Controller
 		$html = (empty($req->getParam('html'))) ? false : true;
 
 		$data['mavisGeneralConfig']=array_values(ConfigPatterns::tacMavisGeneralGen($html));
+		$data['mavisLocalConfig']=array_values(ConfigPatterns::tacMavisLocal($html));
 		$data['mavisOTPConfig']=array_values(ConfigPatterns::tacMavisOTPGen($html));
 		$data['mavisSMSConfig']=array_values(ConfigPatterns::tacMavisSMSGen($html));
 		$data['mavisLdapConfig']=array_values(ConfigPatterns::tacMavisLdapGen($html));
@@ -158,6 +159,7 @@ class TACConfigCtrl extends Controller
 	public function createConfiguration($lineSeparator = "\n ")
 	{
 		$tempMavisGeneralArray=ConfigPatterns::tacMavisGeneralGen(false);
+		$tempMavisLocalArray=ConfigPatterns::tacMavisLocal(false);
 		$tempMavisOTPArray=ConfigPatterns::tacMavisOTPGen(false);
 		$tempMavisSMSArray=ConfigPatterns::tacMavisSMSGen(false);
 		$tempMavisLdapArray=ConfigPatterns::tacMavisLdapGen(false);
@@ -186,6 +188,10 @@ class TACConfigCtrl extends Controller
 		//MAVIS GENERAL CONFIGURATION//START//
 		$output.=$this->arrayParserToText($tempMavisGeneralArray,$lineSeparator);
 		//MAVIS GENERAL CONFIGURATION//END//
+		////////////////////////////////////
+		//MAVIS Local CONFIGURATION//START//
+		$output.=$this->arrayParserToText($tempMavisLocalArray,$lineSeparator);
+		//MAVIS Local CONFIGURATION//END//
 		////////////////////////////////////
 		//MAVIS OTP CONFIGURATION//START//
 		$output.=$this->arrayParserToText($tempMavisOTPArray,$lineSeparator);

@@ -23,21 +23,8 @@ var tgui_devGrp = {
     	self.clearForm();
     })/*cleare forms*///end
 
-    $(this.formSelector_add + ' select[name="enable_flag"]').change(function(){
-    	var en_encr = self.formSelector_add + ' div.enable_encrypt_section';
-    	if ($(this).val() == 1 || $(this).val() == 2){
-    		$(en_encr).show()
-    	} else {
-    		$(en_encr).hide()
-    	}
-    })
-    $(this.formSelector_edit + ' select[name="enable_flag"]').change(function(){
-      var en_encr = self.formSelector_edit + ' div.enable_encrypt_section';
-      if ($(this).val() == 1 || $(this).val() == 2){
-    		$(en_encr).show()
-    	} else {
-    		$(en_encr).hide()
-    	}
+    $('select[data-objtype="password"]').change(function(){
+      tgui_supplier.selector({select: this});
     })
 
     /*fix tab IDs for tabMessages template*/
@@ -59,7 +46,7 @@ var tgui_devGrp = {
       url: API_LINK+"tacacs/device/group/add/",
       data: formData
     };//ajaxProps END
-  
+
     ajaxRequest.send(ajaxProps).then(function(resp) {
       if (tgui_supplier.checkResponse(resp.error, self.formSelector_add)){
         return;
@@ -88,10 +75,7 @@ var tgui_devGrp = {
     ajaxRequest.send(ajaxProps).then(function(resp) {
       tgui_supplier.fulfillForm(resp.group, self.formSelector_edit);
 
-      var enable_encryption = (resp.group.enable_flag == 1 || resp.group.enable_flag == 2) ? 'uncheck' : 'check';
-      $(self.formSelector_edit + ' input[name="enable_encrypt"]').iCheck(enable_encryption)
-      if (enable_encryption == 'check') {$(self.formSelector_edit + ' div.enable_encrypt_section').hide()}
-      else ($(self.formSelector_edit + ' div.enable_encrypt_section').show())
+      tgui_supplier.selector( {select: self.formSelector_edit + ' select[name="enable_flag"]', flag: resp.group.enable_flag } )
 
       if (resp.group.default_flag == 1) $(self.formSelector_edit + ' input[name="default_flag"]').iCheck('disable');
 
@@ -117,6 +101,12 @@ var tgui_devGrp = {
         return;
       }
     }
+
+    if ( formData.enable ) {
+      formData.enable_flag = $(this.formSelector_edit+' select[name="enable_flag"]').val()
+      formData.enable_encrypt = ( $(this.formSelector_edit+' input[name="enable_encrypt"]').prop('checked') ) ? 1 : 0
+    }
+
     ajaxRequest.send(ajaxProps).then(function(resp) {
       if (tgui_supplier.checkResponse(resp.error, self.formSelector_edit)){
         return;

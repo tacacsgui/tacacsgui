@@ -69,11 +69,13 @@ class APIDatabase
   	'api_smtp' =>
   	[
   		'smtp_servers' => ['string', ''],
-  		'smtp_auth' => ['integer', '1'],
+  		'smtp_auth' => ['integer', '0'],
+  		'smtp_autotls' => ['integer', '0'],
+  		'smtp_from' => ['string', ''],
   		'smtp_username' => ['string', ''],
   		'smtp_password' => ['string', ''],
-  		'smtp_port' => ['integer', '465'],
-  		'smtp_secure' => ['string', 'ssl'],
+  		'smtp_port' => ['integer', '25'],
+  		'smtp_secure' => ['string', ''],
   	],
   	'api_backup' =>
   	[
@@ -99,8 +101,10 @@ class APIDatabase
   		'username' => ['string', ''],
   		'login' => ['string', ''],
   		'login_flag' => ['integer', '0'],
+  		'login_change' => ['integer', '1'],
   		'enable' => ['string', ''],
   		'enable_flag' => ['integer', '0'],
+  		'enable_change' => ['integer', '1'],
   		'group' => ['integer', '0'],
   		'disabled' => ['integer', '0'],
   		'message' => ['text', '_'],
@@ -223,6 +227,12 @@ class APIDatabase
   		'login' => ['string', ''],
   		'pass' => ['string', ''],
   		'srcname' => ['string', ''],
+  	],
+  	'mavis_local' =>
+  	[
+  		'enabled' => ['integer', '1'],
+  		'change_passwd_cli' => ['integer', '1'],
+  		'change_passwd_gui' => ['integer', '1'],
   	],
   	'mavis_otp_base' =>
   	[

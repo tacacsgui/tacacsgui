@@ -12,13 +12,14 @@ use tgui\Models\TACACL;
 use tgui\Models\MAVISOTP;
 use tgui\Models\MAVISSMS;
 use tgui\Models\MAVISLDAP;
+use tgui\Models\MAVISLocal;
 
 /**
  *
  */
 class ConfigPatterns
 {
-  public static $crypto_flag = array(0 => 'clear', 1 => 'crypt', 2 => 'crypt');
+  public static $crypto_flag = array(0 => 'clear', 1 => 'crypt', 2 => 'crypt', 3 => 'mavis', 4 => 'login');
 	public static $html_tags = array(
 		'comment' => [
 			0 => '<tac_comment>',
@@ -512,21 +513,22 @@ class ConfigPatterns
 			:
 			'user = '.$user['username'].' {');
 			///USER KEY///
-			$login = self::$crypto_flag[$user['login_flag']].' '.$user['login'];
+			$login = self::$crypto_flag[$user['login_flag']].' '. ( ($user['login_flag'] != 3 ) ? $user['login'] : '#local' );
 			if ($user['mavis_otp_enabled'] == 1 OR $user['mavis_sms_enabled'] == 1) $login = 'mavis';
 			array_push($outputUsers[$user['id']],
 			($html) ? '	'.self::$html_tags['param'][0] . "login" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . $login . self::$html_tags['val'][1]
 			:
 			'	login = '. $login);
 			///USER PAP///
-			if ($user['pap_clone'] == 1) array_push($outputUsers[$user['id']],
-			($html) ? '	'.self::$html_tags['param'][0] . "pap" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . $login . self::$html_tags['val'][1]
+			// if ($user['pap_clone'] == 1) array_push($outputUsers[$user['id']],
+			// ($html) ? '	'.self::$html_tags['param'][0] . "pap" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . $login . self::$html_tags['val'][1]
+			// :
+			// '	pap = '. $login);
+			if ( $user['pap_flag'] == 3 ) $user['pap'] = ' #local';
+			if ( $user['pap'] != '' OR $user['pap_flag'] == 3 OR $user['pap_flag'] == 4 ) array_push($outputUsers[$user['id']],
+			($html) ? '	'.self::$html_tags['param'][0] . "pap" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . self::$crypto_flag[$user['pap_flag']].' '. ( ( $user['pap_flag'] != 4 ) ? $user['pap'] : '' ) . self::$html_tags['val'][1]
 			:
-			'	pap = '. $login);
-			if ($user['pap_clone'] !== 1 AND !empty($user['pap'])) array_push($outputUsers[$user['id']],
-			($html) ? '	'.self::$html_tags['param'][0] . "pap" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . self::$crypto_flag[$user['pap_flag']].' '.$user['pap'] . self::$html_tags['val'][1]
-			:
-			'	pap = '. self::$crypto_flag[$user['pap_flag']].' '.$user['pap']);
+			'	pap = '. self::$crypto_flag[$user['pap_flag']].' '. ( ($user['pap_flag'] != 4 ) ? $user['pap'] : '' ) );
 			///USER CHAP///
 			if (!empty($user['chap'])) array_push($outputUsers[$user['id']],
 			($html) ? '	'.self::$html_tags['param'][0] . "chap" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . 'clear '.$user['chap'] . self::$html_tags['val'][1]
@@ -538,10 +540,11 @@ class ConfigPatterns
 			:
 			'	ms-chap = '. 'clear '.$user['ms-chap']);
 			///USER ENABLE///
-			if ($user['enable']!='')array_push($outputUsers[$user['id']],
-			($html) ? '	'.self::$html_tags['param'][0] . "enable" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . self::$crypto_flag[$user['enable_flag']].' '.$user['enable']. self::$html_tags['val'][1]
+			if ( $user['enable_flag'] == 3 ) $user['enable'] = ' #local';
+			if ($user['enable'] != '' OR $user['enable_flag'] == 4 ) array_push($outputUsers[$user['id']],
+			($html) ? '	'.self::$html_tags['param'][0] . "enable" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . self::$crypto_flag[$user['enable_flag']].' '. ( ($user['enable_flag'] != 4 ) ? $user['enable'] : '') . self::$html_tags['val'][1]
 			:
-			'	enable = '.self::$crypto_flag[$user['enable_flag']].' '.$user['enable']);
+			'	enable = '.self::$crypto_flag[$user['enable_flag']].' '. ( ($user['enable_flag'] != 4 ) ? $user['enable'] : '') );
 			///USER ACL///
 			if ($user['acl'] > 0)array_push($outputUsers[$user['id']],
 			($html) ? '	'.self::$html_tags['param'][0] . "acl" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . $allACL[$user['acl']] . self::$html_tags['val'][1]
@@ -790,8 +793,9 @@ class ConfigPatterns
 		$mavis_ldap_settings = MAVISLDAP::select()->first();
 		$mavis_otp_settings = MAVISOTP::select()->first();
 		$mavis_sms_settings = MAVISSMS::select()->first();
+		$mavis_local_settings = MAVISLocal::select()->first();
 
-		if ($mavis_ldap_settings->enabled == 0 AND $mavis_otp_settings->enabled == 0 AND $mavis_sms_settings->enabled == 0) return array('title_flag' => 0, 'name' =>"");
+		if ($mavis_ldap_settings->enabled == 0 AND $mavis_otp_settings->enabled == 0 AND $mavis_sms_settings->enabled == 0 AND $mavis_local_settings->enabled == 0) return array('title_flag' => 0, 'name' =>"");
 
 		$outputMavisGeneral[0][0]=array('title_flag' => 1, 'name' =>
 		($html) ? self::$html_tags['comment'][0] . "####MAVIS GENERAL SETTINGS####" . self::$html_tags['comment'][1]
@@ -807,9 +811,9 @@ class ConfigPatterns
 		:
 		'user backend = mavis');
 		array_push($outputMavisGeneral[1],
-		($html) ? self::$html_tags['attr'][0] . "login backend" . self::$html_tags['attr'][1] . ' = ' . self::$html_tags['object'][0] . 'mavis chalresp' . self::$html_tags['object'][1]
+		($html) ? self::$html_tags['attr'][0] . "login backend" . self::$html_tags['attr'][1] . ' = ' . self::$html_tags['object'][0] . 'mavis'. ( ($mavis_local_settings->enabled == 1 AND $mavis_local_settings->enabled == 1) ? ' chpass' : '' ) .' #chalresp' . self::$html_tags['object'][1]
 		:
-		'login backend = mavis chalresp');
+		'login backend = mavis'. ( ($mavis_local_settings->enabled == 1 AND $mavis_local_settings->enabled == 1) ? ' chpass' : '' ) .' #chalresp');
 		array_push($outputMavisGeneral[1],
 		($html) ? self::$html_tags['attr'][0] . "pap backend" . self::$html_tags['attr'][1] . ' = ' . self::$html_tags['object'][0] . 'mavis' . self::$html_tags['object'][1]
 		:
@@ -890,8 +894,43 @@ class ConfigPatterns
 		:
 		'} #END OF MAVIS SMS SETTINGS');
 
-
-
 	return $outputMavisSMS;
+	}
+
+	////MAVIS Local////
+	public static function tacMavisLocal($html)
+	{
+		$html = (empty($html)) ? false : true;
+
+		$mavis_local_settings = MAVISLocal::select('enabled')->first();
+
+		if ($mavis_local_settings->enabled == 0) return array('title_flag' => 0, 'name' =>"");
+
+		$outputMavisLocal[0][0]=array('title_flag' => 1, 'name' =>
+		($html) ? self::$html_tags['comment'][0] . "####MAVIS Local DB SETTINGS####" . self::$html_tags['comment'][1]
+		:
+		"####MAVIS Local DB SETTINGS####");
+		///EMPTY ARRAY///
+		$outputMavisLocal[1] = array();
+		///MAVIS Local TITLE///
+		$outputMavisLocal[1][0] = array('title_flag' => 0, 'name' =>"");
+		///MAVIS Local SETTINGS START///
+		array_push($outputMavisLocal[1],
+		($html) ? self::$html_tags['attr'][0] . "mavis module" . self::$html_tags['attr'][1] . ' = ' . self::$html_tags['object'][0] . 'external' . self::$html_tags['object'][1] . ' {'
+		:
+		'mavis module = external {');
+
+		///Local PATH///
+		array_push($outputMavisLocal[1],
+		($html) ? self::$html_tags['param'][0] . "	exec" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . TAC_ROOT_PATH . '/mavis-modules/local/module.php' . self::$html_tags['val'][1]
+		:
+		'	exec  = ' . TAC_ROOT_PATH . '/mavis-modules/local/module.php');
+
+		array_push($outputMavisLocal[1],
+		($html) ? '} ' . self::$html_tags['comment'][0] . '#END OF MAVIS Local DB SETTINGS' . self::$html_tags['comment'][1]
+		:
+		'} #END OF MAVIS Local DB SETTINGS');
+
+	return $outputMavisLocal;
 	}
 }

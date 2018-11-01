@@ -155,15 +155,19 @@ class Controller
 		return file_get_contents(TAC_ROOT_PATH.'/../tgui_data/tgui.key') == self::uuid_hash();
 	}
 	////////////////////////////////////////
-	protected function encryption( $password = '', $type = 0 )
+	protected function encryption( $password = '', $type = 0 , $encrypt = 0)
 	{
-		if ($type == 1)
+		if ($type == 1 AND $encrypt == 1 )
 		{
 			return trim(shell_exec('openssl passwd -1 \''.$password."'"));
-		} elseif ($type == 2)
+		} elseif ($type == 2 AND $encrypt == 1 )
 		{
 			return trim(shell_exec('openssl passwd -crypt \''.$password."'"));
+		} elseif ($type == 3)
+		{
+			return password_hash($password, PASSWORD_DEFAULT);
 		}
+		return $password;
 	}
 	////////////////////////////////////////
 	public function queriesMaker( $columns = [], $searchString = '' )

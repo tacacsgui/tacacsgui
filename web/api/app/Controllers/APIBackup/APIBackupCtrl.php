@@ -281,7 +281,7 @@ private $listOfTacacsReportsTables = '--tables tac_log_accounting tac_log_author
 			echo '<h1>Error. File Parameter Inavailable</h1>';
 			return;
 		}
-		$path = '/opt/tacacsgui/backups/database/';
+		$path = '/opt/tgui_data/backups/database/';
 		//$path = '/backups/database/';
 
 		if ( !file_exists($path.$file) ) {
@@ -320,7 +320,7 @@ private $listOfTacacsReportsTables = '--tables tac_log_accounting tac_log_author
 		}
 		//CHECK ACCESS TO THAT FUNCTION//END//
 
-		$uploaddir = '/opt/tacacsgui/backups/database/';
+		$uploaddir = '/opt/tgui_data/backups/database/';
 
 		$action = $req->getParam('action');
 		if ($action == 'check') {

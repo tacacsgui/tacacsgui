@@ -21,12 +21,13 @@ class EmailEngine
     $this->mail = new PHPMailer(true);
 
     $this->mail->Host = ( isset($params['smtp_servers']) ) ? $params['smtp_servers'] : 'smtp.example.com';
-    $this->mail->Username = ( isset($params['smtp_username']) ) ? $params['smtp_username'] : '';
-    $this->mail->Password = ( isset($params['smtp_password']) ) ? $params['smtp_password'] : '';
+    if ( isset($params['smtp_username']) ) $this->mail->Username = $params['smtp_username'];
+    if ( isset($params['smtp_password']) ) $this->mail->Password = $params['smtp_password'];
     $this->mail->Port = ( isset($params['smtp_port']) ) ? $params['smtp_port'] : 465;
-    $this->mail->SMTPSecure = ( isset($params['smtp_secure']) ) ? $params['smtp_secure'] : 'ssl';
-    $this->mail->SMTPAuth = ( isset($params['smtp_auth']) ) ? $params['smtp_auth'] : true;
-
+    if ( isset($params['smtp_secure']) ) $this->mail->SMTPSecure = $params['smtp_secure'];
+    if ( isset($params['smtp_auth']) ) $this->mail->SMTPAuth = $params['smtp_auth'];
+    $this->mail->setFrom($params['smtp_from'], 'TacacsGUI');
+    $this->mail->SMTPAutoTLS = ( isset($params['smtp_autotls']) ) ? $params['smtp_autotls'] : false;
     $this->mail->Subject = 'Hello From TacacsGUI';
     $this->mail->Body    = 'Something goes <b>wrong!</b>';
     $this->mail->AltBody = '';
@@ -61,7 +62,6 @@ class EmailEngine
         $this->mail->isSMTP();                                      // Set mailer to use SMTP
 
         //Recipients
-        $this->mail->setFrom($this->mail->Username, 'TacacsGUI');
         //$this->mail->addAddress('joe@example.net', 'Joe User');     // Add a recipient
 
 

@@ -116,6 +116,7 @@ require __DIR__ . '/templates/footer_end.php';
 
 	<!-- Select2 Object -->
 	<script src="dist/js/tgui_select2.js"></script>
+	<script src="dist/js/tgui_expander.js"></script>
 	<!-- main Object -->
   <script src="dist/js/pages/api_settings/tgui_apiSettings.js"></script>
   <script src="dist/js/pages/api_settings/tgui_apiHA.js"></script>

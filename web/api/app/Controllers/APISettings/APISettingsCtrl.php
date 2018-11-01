@@ -160,6 +160,7 @@ public function postSmtp($req,$res)
 
   $validation = $this->validator->validate($req, [
     'smtp_port' => v::when( v::nullType() , v::alwaysValid(), v::numeric()->between(1, 64000)->setName('SMTP Port')),
+    'smtp_from' => v::when( v::nullType() , v::alwaysValid(), v::email()->setName('From Address')),
   ]);
 
   if ($validation->failed()){

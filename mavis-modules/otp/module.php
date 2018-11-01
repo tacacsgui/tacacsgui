@@ -37,7 +37,7 @@ while($f = fgets(STDIN)){
 	if (trim($tempArray[0]) == 4) $username = trim($tempArray[1]);
 	if (trim($tempArray[0]) == 8) $otp_password = trim($tempArray[1]);
 }
-	
+
 	$user = $capsule->table('tac_users')->select('mavis_otp_secret','mavis_otp_period','mavis_otp_digits','mavis_otp_digest','group')->where([['username', '=', $username],['mavis_otp_enabled', '=', 1]])->first();
 
 
@@ -54,7 +54,7 @@ while($f = fgets(STDIN)){
 				$user->mavis_otp_secret,
 				$user->mavis_otp_period,     // The period (30 seconds)
 				$user->mavis_otp_digest, // The digest algorithm
-				$user->mavis_otp_digits     
+				$user->mavis_otp_digits
 		);
 		$verification = $otp->verify($otp_password);
 
@@ -89,7 +89,7 @@ while($f = fgets(STDIN)){
 				unset($input[3]);
 				$result = 1;
 				break;
-		}	
+		}
 	}
 
 ksort($input);

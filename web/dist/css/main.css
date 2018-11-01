@@ -1,8 +1,21 @@
+.tgui_expander .header i {
+  color: #999;
+}
+.tgui_expander .header:hover i {
+  color: #444;
+}
+.tgui_expander .header {
+  cursor: default;
+}
+.tgui_expander .body {
+  display: none;
+}
+
 html .filter-info-content {
   display: none;
 }
 .popover {
-  position: absolute;
+ position: absolute;
  top: 0;
  left: 0;
  z-index: 1010;

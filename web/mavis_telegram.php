@@ -10,21 +10,21 @@ $PAGE_TITLE = 'TacacsGUI';
 $PAGE_SUBTITLE = 'MAVIS Telegram Auth';
 $BREADCRUMB = array(
 	'Home' => [
-		'name' => 'MAVIS', 
-		'href' => '', 
-		'icon' => 'fa fa-cog', 
+		'name' => 'MAVIS',
+		'href' => '',
+		'icon' => 'fa fa-cog',
 		'class' => ''  //last item should have active class!!
-	], 
+	],
 	'Tacacs' => [
-		'name' => 'Telegram Auth', 
-		'href' => '', 
-		'icon' => 'fa fa-cog', 
+		'name' => 'Telegram Auth',
+		'href' => '',
+		'icon' => 'fa fa-cog',
 		'class' => 'active'  //last item should have active class!!
-	], 
+	],
 );
 ///!!!!!////
 $ACTIVE_MENU_ID=900;
-$ACTIVE_SUBMENU_ID=940;
+$ACTIVE_SUBMENU_ID=950;
 ///!!!!!////
 ///PAGE VARIABLES///END
 ?>
@@ -37,9 +37,9 @@ require __DIR__ . '/templates/header.php';
 
 <!--ADDITIONAL CSS FILES END-->
 
-<?php 
+<?php
 
-require __DIR__ . '/templates/body_start.php'; 
+require __DIR__ . '/templates/body_start.php';
 
 ?>
 <!--MAIN CONTENT START-->
@@ -47,9 +47,9 @@ require __DIR__ . '/templates/body_start.php';
 
 <!--MAIN CONTENT END-->
 
-<?php 
+<?php
 
-require __DIR__ . '/templates/body_end.php'; 
+require __DIR__ . '/templates/body_end.php';
 
 ?>
 

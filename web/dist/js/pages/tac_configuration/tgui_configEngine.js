@@ -50,6 +50,10 @@ var tgui_configEngine = {
     			self.confParser(resp['mavisGeneralConfig'])
     			//MAVIS GENERAL SETTINGS //END//
     			/////////////////////
+    			//MAVIS Local SETTINGS //START//
+    			self.confParser(resp['mavisLocalConfig'])
+    			//MAVIS Local SETTINGS //END//
+    			/////////////////////
     			//MAVIS OTP SETTINGS //START//
     			self.confParser(resp['mavisOTPConfig'])
     			//MAVIS OTP SETTINGS //END//

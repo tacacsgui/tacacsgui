@@ -200,6 +200,12 @@ class APICheckerCtrl extends Controller
 					'updated_at' => date('Y-m-d H:i:s', time())
 				]);
 				break;
+			case 'mavis_local':
+				$this->db::connection($database)->table($tableName)->insert([
+					'created_at' => date('Y-m-d H:i:s', time()),
+					'updated_at' => date('Y-m-d H:i:s', time())
+				]);
+				break;
 		}
 	}
 

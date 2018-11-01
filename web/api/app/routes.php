@@ -77,6 +77,7 @@ $app->get('/tacacs/user/edit/', 'TACUsersCtrl:getUserEdit');
 $app->post('/tacacs/user/edit/', 'TACUsersCtrl:postUserEdit');
 $app->get('/tacacs/user/delete/', 'TACUsersCtrl:getUserDelete');
 $app->post('/tacacs/user/delete/', 'TACUsersCtrl:postUserDelete');
+$app->post('/tacacs/user/change_passwd/change/', 'TACUsersCtrl:postUserPWChange');
 $app->post('/tacacs/user/csv/', 'TACUsersCtrl:postUserCsv');
 #####################################################
 ###Tacacs User Groups Routes#######################################
@@ -175,6 +176,9 @@ $app->get('/mavis/sms/', 'MAVISSMS:getSMSParams');
 $app->post('/mavis/sms/', 'MAVISSMS:postSMSParams');
 $app->post('/mavis/sms/send/', 'MAVISSMS:postSMSSend');
 $app->post('/mavis/sms/check/', 'MAVISSMS:postSMSCheck');
+$app->get('/mavis/local/', 'MAVISLocal:getParams');
+$app->post('/mavis/local/', 'MAVISLocal:postParams');
+$app->post('/mavis/local/check/', 'MAVISLocal:postCheck');
 #####################################################
 
 ###APIChecker Routes#######################################

@@ -141,6 +141,9 @@ $container['APIDownloadCtrl'] = function($container) {
 $container['MAVISLDAP'] = function($container) {
 	return new \tgui\Controllers\MAVISLDAP\MAVISLDAPCtrl($container);
 };
+$container['MAVISLocal'] = function($container) {
+	return new \tgui\Controllers\MAVISLocal\MAVISLocalCtrl($container);
+};
 $container['MAVISOTP'] = function($container) {
 	return new \tgui\Controllers\MAVISOTP\MAVISOTPCtrl($container);
 };

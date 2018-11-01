@@ -8,6 +8,10 @@ var tgui_apiSettings = {
 
     this.time.init();
 
+    $('div.icheck input[name="smtp_auth"]').on('ifChanged', function (event) {
+      ( $(event.target).prop('checked') ) ? $('div.auth_params').show() : $('div.auth_params').hide();
+    });
+
     $('.nav-tabs.api_settings a').on('shown.bs.tab', function(event){
       console.log(event.target.dataset.section);
       switch (event.target.dataset.section) {
@@ -46,6 +50,7 @@ var tgui_apiSettings = {
       };//ajaxProps END
 
       ajaxRequest.send(ajaxProps).then(function(resp) {
+        ( resp.smtp.smtp_auth ) ? $('div.auth_params').show() : $('div.auth_params').hide();
         tgui_supplier.fulfillForm(resp.smtp, '#smtpForm');
         $('div.overlay').hide();
       }).fail(function(err){

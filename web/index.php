@@ -97,6 +97,10 @@
         </div>
         <!-- /.col -->
       </div>
+      <hr>
+      <div class="text-center tac_change_passwd" style="display: none;">
+        <a href="tac_change_passwd.php">Change Tacacs User Password</a>
+      </div>
     </form>
 	<!-- CHANGE PASSWORD FORM-->
 	<form id="chngPaswdForm" onsubmit="return tgui_signin.chngPasswd()" style="display:none">
@@ -124,7 +128,7 @@
   <!-- /.login-box-body -->
 </div>
 <!-- /.login-box -->
-<div id="version_info" class="text-center hidden"><b>tacacs</b> ver.<b><tacversion></tacversion></b> | <b>API</b> ver.<b><apiversion>11</apiversion></b> | <b>GUI</b> ver.<b><guiversion>11</guiversion></b></div>
+<div id="version_info" class="text-center hidden"><b>tacacs</b> ver.<b><tacversion></tacversion></b> | <b>API</b> ver.<b><apiversion>0</apiversion></b></div>
 <div class="text-center">Your IP address is <b><?php echo $_SERVER['REMOTE_ADDR'];?></b></div>
 <!-- Link to API, you can set it in config.php -->
 <script>var API_LINK = '<?php echo API_LINK;?>'</script>

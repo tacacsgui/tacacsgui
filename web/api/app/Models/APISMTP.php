@@ -11,6 +11,8 @@ class APISMTP extends Model
 	protected $fillable = [
     'smtp_servers',
 		'smtp_auth',
+		'smtp_autotls',
+		'smtp_from',
 		'smtp_username',
 		'smtp_password',
 		'smtp_port',

@@ -108,7 +108,7 @@ class TACDevicesCtrl extends Controller
 		$validation = $this->validator->validate($req, [
 			'name' => v::noWhitespace()->notEmpty()->deviceNameAvailable(0),
 			'group' => v::noWhitespace()->notEmpty(),
-			'enable' => v::when( v::nullType() , v::alwaysValid(), v::noWhitespace()->notContainChars()->
+			'enable' => v::when( v::oneOf( v::nullType(), v::equals('') ) , v::alwaysValid(), v::noWhitespace()->notContainChars()->
 				length($policy['tac_pw_length'], 64)->
 				notEmpty()->
 				passwdPolicyUppercase($policy['tac_pw_uppercase'])->
@@ -135,9 +135,9 @@ class TACDevicesCtrl extends Controller
 			return $res -> withStatus(200) -> write(json_encode($data));
 		}
 
-		if ( (!empty($allParams['enable']) AND (@$allParams['enable_encrypt'] == 1)) AND (intval( @$allParams['enable_flag'] ) !== 0) )
+		if ( ! empty( $allParams['enable'] ) )
 		{
-			$allParams['enable'] = $this->encryption( $allParams['enable'], $allParams['enable_flag'] );
+			$allParams['enable'] = $this->encryption( $allParams['enable'], $allParams['enable_flag'],  $allParams['enable_encrypt']);
 		}
 
 		$device = TACDevices::create($allParams);
@@ -223,7 +223,7 @@ class TACDevicesCtrl extends Controller
 		$validation = $this->validator->validate($req, [
 			'name' => v::noWhitespace()->when( v::nullType() , v::alwaysValid(), v::notEmpty()->deviceNameAvailable($req->getParam('id'))),
 			'group' => v::when( v::nullType(), v::alwaysValid(), v::numeric() ),
-			'enable' => v::when( v::nullType() , v::alwaysValid(), v::noWhitespace()->notContainChars()->
+			'enable' => v::when( v::oneOf( v::nullType(), v::equals('') ) , v::alwaysValid(), v::noWhitespace()->notContainChars()->
 				length($policy['tac_pw_length'], 64)->
 				notEmpty()->
 				passwdPolicyUppercase($policy['tac_pw_uppercase'])->
@@ -251,9 +251,9 @@ class TACDevicesCtrl extends Controller
 
 		$allParams = $req->getParams();
 
-		if ( (!empty($allParams['enable']) AND (@$allParams['enable_encrypt'] == 1)) AND (intval( @$allParams['enable_flag'] ) !== 0) )
+		if ( ! empty( $allParams['enable'] ) )
 		{
-			$allParams['enable'] = $this->encryption( $allParams['enable'], $allParams['enable_flag'] );
+			$allParams['enable'] = $this->encryption( $allParams['enable'], $allParams['enable_flag'],  $allParams['enable_encrypt']);
 		}
 
 		$id = $allParams['id'];

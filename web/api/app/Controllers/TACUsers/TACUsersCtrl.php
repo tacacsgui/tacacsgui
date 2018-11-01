@@ -67,7 +67,7 @@ class TACUsersCtrl extends Controller
 		$validation = $this->validator->validate($req, [
 			'username' => v::noWhitespace()->notEmpty()->userTacAvailable(0),
 			'group' => v::noWhitespace(),
-			'enable' => v::when( v::nullType() , v::alwaysValid(), v::noWhitespace()->notContainChars()->
+			'enable' => v::when( v::oneOf( v::nullType(), v::equals('') ) , v::alwaysValid(), v::noWhitespace()->notContainChars()->
 				length($policy['tac_pw_length'], 64)->
 				notEmpty()->
 				passwdPolicyUppercase($policy['tac_pw_uppercase'])->
@@ -105,17 +105,17 @@ class TACUsersCtrl extends Controller
 
 		$allParams = $req->getParams();
 
-		if ( (!empty($allParams['enable']) AND (@$allParams['enable_encrypt'] == 1)) AND (intval( @$allParams['enable_flag'] ) !== 0) )
+		if ( ! empty( $allParams['enable'] ) )
 		{
-			$allParams['enable'] = $this->encryption( $allParams['enable'], $allParams['enable_flag'] );
+			$allParams['enable'] = $this->encryption( $allParams['enable'], $allParams['enable_flag'],  $allParams['enable_encrypt']);
 		}
-		if ( (!empty($allParams['login']) AND (@$allParams['login_encrypt'] == 1)) AND (intval( @$allParams['login_flag'] ) !== 0) )
+		if ( !empty($allParams['login']) )
 		{
-			$allParams['login'] = $this->encryption( $allParams['login'], $allParams['login_flag'] );
+			$allParams['login'] = $this->encryption( $allParams['login'], $allParams['login_flag'],  $allParams['login_encrypt'] );
 		}
-		if ( (!empty($allParams['pap']) AND (@$allParams['pap_encrypt'] == 1)) AND (intval( @$allParams['pap_flag'] ) !== 0) )
+		if ( !empty($allParams['pap']) )
 		{
-			$allParams['pap'] = $this->encryption( $allParams['pap'], $allParams['pap_flag'] );
+			$allParams['pap'] = $this->encryption( $allParams['pap'], $allParams['pap_flag'], $allParams['pap_encrypt'] );
 		}
 
 		$otp_default = MAVISOTP::select()->first();
@@ -168,6 +168,8 @@ class TACUsersCtrl extends Controller
 			first();
 		$data['otp_status']=$this->MAVISOTP->globalStatus();
 		$data['sms_status']=$this->MAVISSMS->globalStatus();
+		$data['user']->login = ( $data['user']->login_flag == 3 ) ? $this->generateRandomString(12) : $data['user']->login;
+		$data['user']->enable = ( $data['user']->enable_flag == 3 ) ? $this->generateRandomString(12) : $data['user']->enable;
 
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
@@ -205,7 +207,7 @@ class TACUsersCtrl extends Controller
 		$validation = $this->validator->validate($req, [
 			'username' => v::noWhitespace()->when( v::nullType() , v::alwaysValid(), v::notEmpty()->userTacAvailable($req->getParam('id'))),
 			'group' => v::noWhitespace()->when( v::nullType() , v::alwaysValid(), v::numeric()),
-			'enable' => v::when( v::nullType() , v::alwaysValid(), v::noWhitespace()->notContainChars()->
+			'enable' => v::when( v::oneOf( v::nullType(), v::equals('') ) , v::alwaysValid(), v::noWhitespace()->notContainChars()->
 				length($policy['tac_pw_length'], 64)->
 				notEmpty()->
 				passwdPolicyUppercase($policy['tac_pw_uppercase'])->
@@ -245,17 +247,17 @@ class TACUsersCtrl extends Controller
 
 		$allParams = $req->getParams();
 
-		if ( (!empty($allParams['enable']) AND (@$allParams['enable_encrypt'] == 1)) AND (intval( @$allParams['enable_flag'] ) !== 0) )
+		if ( ! empty( $allParams['enable'] ) )
 		{
-			$allParams['enable'] = $this->encryption( $allParams['enable'], $allParams['enable_flag'] );
+			$allParams['enable'] = $this->encryption( $allParams['enable'], $allParams['enable_flag'],  $allParams['enable_encrypt']);
 		}
-		if ( (!empty($allParams['login']) AND (@$allParams['login_encrypt'] == 1)) AND (intval( @$allParams['login_flag'] ) !== 0) )
+		if ( !empty($allParams['login']) )
 		{
-			$allParams['login'] = $this->encryption( $allParams['login'], $allParams['login_flag'] );
+			$allParams['login'] = $this->encryption( $allParams['login'], $allParams['login_flag'],  $allParams['login_encrypt'] );
 		}
-		if ( (!empty($allParams['pap']) AND (@$allParams['pap_encrypt'] == 1)) AND (intval( @$allParams['pap_flag'] ) !== 0) )
+		if ( !empty($allParams['pap']) )
 		{
-			$allParams['pap'] = $this->encryption( $allParams['pap'], $allParams['pap_flag'] );
+			$allParams['pap'] = $this->encryption( $allParams['pap'], $allParams['pap_flag'], $allParams['pap_encrypt'] );
 		}
 
 		$id = $allParams['id'];
@@ -518,5 +520,88 @@ class TACUsersCtrl extends Controller
 
 ########	User Datatables	###############END###########
 ################################################
+	public function postUserPWChange($req,$res)
+	{
+		if ( ! $this->MAVISLocal->change_passwd_gui() ) return $res -> withStatus(404) -> write('Access Resticted!');
+		//INITIAL CODE////START//
+		$data=array();
+		$data=$this->initialData([
+			'type' => 'post',
+			'object' => 'user',
+			'action' => 'change passwd login',
+		]);
+		#check error#
+		//INITIAL CODE////END//
+		$policy = APIPWPolicy::select()->first(1);
+		$validation = $this->validator->validate($req, [
+			'username' => v::noWhitespace()->notEmpty(),
+			'password' => v::when(v::equals('1'), v::alwaysValid(), v::notEmpty()->setName('Old Password')),
+			'new_password' => v::when(v::equals('1'), v::alwaysValid(), v::notEmpty()->checkPassword($req->getParam('new_password_repeat'))->setName('New Password')),
+			'new_password_repeat' => v::when(v::equals('1'), v::alwaysValid(), v::notEmpty()->checkPassword($req->getParam('new_password'))->setName('Repeat New Password')),
+			'object' => v::oneOf(v::equals('login'),v::equals('enable')),
+		]);
 
+		if ($validation->failed()){
+			$data['error']['status']=true;
+			$data['error']['validation']=$validation->error_messages;
+			return $res -> withStatus(200) -> write(json_encode($data));
+		}
+		$allParams = $req->getParams();
+		$user = TACUsers::select()->where([['username','=',$allParams['username']], ['login_flag','=',3]])->orWhere([['username','=',$allParams['username']], ['enable_flag','=',3]])->first();
+		$data['success'] = false;
+		// $data['test5'] = empty($user);
+		// $data['test1'] = ($allParams['object'] == 'login' AND !password_verify($allParams['password'], $user->login) );
+		// $data['test4'] = ($allParams['object'] == 'enable' AND !password_verify($allParams['password'], $user->enable) );
+		// $data['test2'] = ($allParams['object'] == 'login' AND (!$user->login_change OR $user->login_flag != 3 ));
+		// $data['test3'] = ($allParams['object'] == 'enable' AND (!$user->enable_change OR $user->enable_flag != 3 ) );
+		if (
+			empty($user) OR
+			($allParams['object'] == 'login' AND !password_verify($allParams['password'], $user->login) ) OR
+			($allParams['object'] == 'enable' AND !password_verify($allParams['password'], $user->enable) ) OR
+			($allParams['object'] == 'login' AND (!$user->login_change OR $user->login_flag != 3 ) )OR
+			($allParams['object'] == 'enable' AND (!$user->enable_change OR $user->enable_flag != 3 ) )
+		){
+			$_SESSION['error']['status']=true;
+			$_SESSION['error']['message']="Incorrect username or password </p> Do you have rights to change password?";
+			$data['error']=$_SESSION['error'];
+			return $res -> withStatus(200) -> write(json_encode($data));
+		}
+		$password = '';
+
+		switch ($allParams['object']) {
+			case 'login':
+				$password = $user->login;
+				break;
+			case 'enable':
+				$password = $user->enable;
+				break;
+		}
+
+		$validation = $this->validator->validate($req, [
+			'new_password' => v::when(v::equals('1'), v::alwaysValid(),
+					v::length($policy['tac_pw_length'], 64)->
+					notEmpty()->
+					passwdPolicyUppercase($policy['tac_pw_uppercase'])->
+					passwdPolicyLowercase($policy['tac_pw_lowercase'])->
+					passwdPolicySpecial($policy['tac_pw_special'])->
+					passwdPolicyNumbers($policy['tac_pw_numbers'])->
+					passwdPolicySame($policy['tac_pw_same'], $password, 'api')->
+					setName('New Password')
+			 ),
+			'new_password_repeat' => v::when(v::equals('1'), v::alwaysValid(), v::notEmpty()->setName('Repeat New Password')),
+			'object' => v::oneOf(v::equals('login'),v::equals('enable')),
+		]);
+
+		if ($validation->failed()){
+			$data['error']['status']=true;
+			$data['error']['validation']=$validation->error_messages;
+			return $res -> withStatus(200) -> write(json_encode($data));
+		}
+
+		$data['success'] = TACUsers::where('id',$user->id)->update([$allParams['object'] => password_hash($allParams['new_password'], PASSWORD_DEFAULT)]);
+
+
+
+		return $res -> withStatus(200) -> write(json_encode($data));
+	}
 }//END OF CLASS//

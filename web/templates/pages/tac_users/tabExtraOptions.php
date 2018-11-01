@@ -2,41 +2,34 @@
 	<div class="col-lg-6 col-md-6">
 		<div class="form-group pap">
 			<label for="pap">PAP Authentication</label>
-			<input type="text" class="form-control" name="pap" data-type="input" data-default="" data-pickup="true" placeholder="Write PAP Password" value="" autocomplete="off">
+			<input type="text" class="form-control" name="pap" data-type="input" data-default="#clone_login_password" data-pickup="true" placeholder="Write PAP Password" value="#clone_login_password" autocomplete="new-password" disabled>
 			<input type="hidden" name="pap_native" value="">
-      <p class="help-block">default empty, if empty that option will not appeared in configuration</p>
+      <p class="help-block">default login clone, if empty that option will not appeared in configuration</p>
 		</div>
 	</div>
 	<div class="col-lg-6 col-md-6">
 		<div class="form-group pap_flag">
-			<label for="pap_flag">Enable Encryption</label>
-			<select class="form-control" name="pap_flag" data-type="select" data-default="1" data-pickup="true">
+			<label for="pap_flag">Type of storing</label>
+			<select class="form-control" name="pap_flag" data-objtype="password" data-object="pap" data-type="select" data-default="4" data-pickup="true">
 				<option value="0">Clear Text</option>
-				<option value="1" selected>MD5</option>
-				<option value="2">DES</option>
-				<!--<option value="7">7 (from Cisco Device)</option>-->
+				<option value="1">MD5</option>
+				<!--<option value="2">DES (deprecated)</option>-->
+				<!-- <option value="3" selected >Local Database (MAVIS)</option> -->
+				<option value="4" selected >Clone Login password</option>
 			</select>
 			<input type="hidden" name="pap_flag_native" value="">
 		</div>
 	</div>
 </div>
-<div class="row">
-	<div class="col-md-6 pap_encrypt_section">
+<div class="row pap_encrypt_section" style="display: none;">
+	<div class="col-lg-12">
 		<div class="checkbox icheck">
 			<label>
-				<input type="checkbox" name="pap_encrypt" data-type="checkbox" data-default="checked" data-pickup="true" checked> Encrypt the pap password
+				<input type="checkbox" name="pap_encrypt" data-type="checkbox" data-default="checked" data-pickup="true" checked> Encrypt the pap password (hashing), uncheck it if you put hash
 			</label>
-			<p class="help-block">unchecked box will mean that you put encrypted password</p>
+			<p class="help-block">unchecked box will mean that you put encrypted (hashed) password</p>
+			<input type="hidden" name="pap_encrypt_native" value="1">
 		</div>
-	</div>
-  <div class="col-md-6">
-		<div class="checkbox icheck">
-			<label>
-				<input type="checkbox" name="pap_clone" data-type="checkbox" data-default="unchecked" data-pickup="true"> Clone the login password
-			</label>
-			<p class="help-block">checked box will mean that you will use login password (configured on General tab)</p>
-		</div>
-    <input type="hidden" name="pap_clone_native" value="">
 	</div>
 </div>
 <div class="row">

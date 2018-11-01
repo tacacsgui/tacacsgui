@@ -245,6 +245,9 @@ var tguiInit = {
     $(document).bind("idle.idleTimer", function(){
     	window.open( "./lockscreen.php","_self");
     });
+  },
+  tgui_expander: function() {
+    tgui_expander.init()
   }
 }//Tacacs Initiator Object//end
 /*-
@@ -392,6 +395,7 @@ var tgui_supplier = { //Tacacs Supplier Object
               tgui_error.debug({}, 'Fulfill. Checkbox: ', el, 'Value: '+obj[param]);
               el.iCheck( (obj[param] == 1) ? 'check' : 'uncheck');
               if (el_n.length) el_n.val(obj[param]);
+              console.log(el_n);
               break;
           }
         }
@@ -515,6 +519,71 @@ var tgui_supplier = { //Tacacs Supplier Object
       text += possible.charAt(Math.floor(Math.random() * possible.length));
 
     return text;
+  },
+  clone_login: '#clone_login_password',
+  selector: function(a){
+    a = a || {}
+    if ( ! a.select ) return false;
+
+    var form_id = '#' + $($(a.select).parents('form')[0]).attr('id');
+    var o = {
+      input: $(form_id + ' input[name="'+$(a.select).data('object')+'"]'),
+      input_native: $(form_id + ' input[name="'+$(a.select).data('object')+'_native"]'),
+      flag_native: $(form_id + ' input[name="'+$(a.select).data('object')+'_flag_native"]').val(),
+      hash: $(form_id + ' div.'+$(a.select).data('object')+'_encrypt_section'),
+      passwd_change: $(form_id + ' div.'+$(a.select).data('object')+'_change'),
+      flag: ( (a.flag != undefined) ? a.flag : $(a.select).val() ),
+      name: $(a.select).data('object'),
+    }
+    o.input.val( (o.flag == o.flag_native) ? o.input_native.val() : '' );
+    o.input.attr('onfocus', "").attr('onfocusout', "");
+    switch (o.flag.toString()) {
+      case '0':
+        //Clear text//
+        o.input.attr('type', 'text');
+        $(o.input).prop('disabled', false);
+        o.hash.hide();
+        o.passwd_change.hide();
+        break;
+      case '1':
+        //MD5 hash//
+        o.input.attr('type', 'text');
+        $(o.input).prop('disabled', false);
+        o.passwd_change.hide();
+        o.hash.show();
+        break;
+      case '2':
+        //DES deprecated//
+        break;
+      case '3':
+        //Local database//
+        o.input.attr('type', 'password');
+        o.input.attr('onfocus', "tgui_supplier.clearOnFocus(this)").attr('onfocusout', "tgui_supplier.clearOnFocus(this,'out')");
+        $(o.input).prop('disabled', false);
+        o.passwd_change.show();
+        o.hash.hide();
+        break;
+      case '4':
+        //Clone login//
+        $(o.input).prop('disabled', true);
+        o.input.attr('type', 'text');
+        $(o.input).val(tgui_supplier.clone_login);
+        o.passwd_change.hide();
+        o.hash.hide();
+        break;
+    }
+  },
+  clearOnFocus: function(o, type) {
+    type = type || 'in'
+    if (type == 'out' && $(o).val() == ''){
+      $(o).val( $(o).next('input').val() );
+      return true;
+    }
+    if (type == 'in' && $(o).val() == $(o).next('input').val() ){
+      $(o).val('');
+      return true;
+    }
+    return false;
   }
 }//Tacacs Supplier Object//end
 

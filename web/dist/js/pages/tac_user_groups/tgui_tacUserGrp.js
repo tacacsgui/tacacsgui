@@ -18,21 +18,8 @@ var tgui_tacUserGrp = {
     	self.clearForm();
     })/*cleare forms*///end
 
-    $(self.formSelector_add + ' select[name="enable_flag"]').change(function(){
-    	var en_encr = self.formSelector_add + ' div.enable_encrypt_section';
-    	if ($(this).val() == 1 || $(this).val() == 2){
-    		$(en_encr).show()
-    	} else {
-    		$(en_encr).hide()
-    	}
-    })
-    $(self.formSelector_edit + ' select[name="enable_flag"]').change(function(){
-      var en_encr = self.formSelector_edit + ' div.enable_encrypt_section';
-      if ($(this).val() == 1 || $(this).val() == 2){
-    		$(en_encr).show()
-    	} else {
-    		$(en_encr).hide()
-    	}
+    $('select[data-objtype="password"]').change(function(){
+      tgui_supplier.selector({select: this});
     })
 
     /*Select2 ACL*/
@@ -100,10 +87,7 @@ var tgui_tacUserGrp = {
     ajaxRequest.send(ajaxProps).then(function(resp) {
       tgui_supplier.fulfillForm(resp.group, self.formSelector_edit);
 
-      var enable_encryption = (resp.group.enable_flag == 1 || resp.group.enable_flag == 2) ? 'uncheck' : 'check';
-      $(self.formSelector_edit + ' input[name="enable_encrypt"]').iCheck(enable_encryption)
-      if (enable_encryption == 'check') {$(self.formSelector_edit + ' div.enable_encrypt_section').hide()}
-      else ($(self.formSelector_edit + ' div.enable_encrypt_section').show())
+      tgui_supplier.selector( {select: self.formSelector_edit + ' select[name="enable_flag"]', flag: resp.group.enable_flag } )
 
       self.aclSelect2.preSelection(resp.group.acl, 'edit');
       self.serviceSelect2.preSelection(resp.group.service, 'edit');
@@ -123,16 +107,6 @@ var tgui_tacUserGrp = {
     var self = this;
     var formData = tgui_supplier.getFormData(self.formSelector_edit, true);
 
-    if ($(this.select_acl_edit).select2('data').length && $(this.select_acl_edit).select2('data')[0].id != $(self.formSelector_edit + ' [name="acl_native"]').val()) { formData.acl = $(this.select_acl_edit).select2('data')[0].id;}
-
-    if ($(this.select_service_edit).select2('data').length && $(this.select_service_edit).select2('data')[0].id != $(self.formSelector_edit + ' [name="service_native"]').val()) { formData.service = $(this.select_service_edit).select2('data')[0].id; }
-
-    var enable_encrypt = formData.enable_encrypt;
-    delete formData.enable_encrypt;
-
-    if ( formData.enable ) { formData.enable_encrypt = enable_encrypt; formData.enable_flag = $(self.formSelector_edit + ' select[name="enable_flag"]').val(); }
-    if ( formData.enable_flag && formData.enable_flag > 0) { formData.enable_encrypt = enable_encrypt; formData.enable = $(self.formSelector_edit + ' input[name="enable"]').val();}
-
     var ajaxProps = {
       url: API_LINK+"tacacs/user/group/edit/",
       type: 'POST',
@@ -144,6 +118,12 @@ var tgui_tacUserGrp = {
         return;
       }
     }
+
+    if ( formData.enable ) {
+      formData.enable_flag = $(this.formSelector_edit+' select[name="enable_flag"]').val()
+      formData.enable_encrypt = ( $(this.formSelector_edit+' input[name="enable_encrypt"]').prop('checked') ) ? 1 : 0
+    }
+
     ajaxRequest.send(ajaxProps).then(function(resp) {
       if (tgui_supplier.checkResponse(resp.error, self.formSelector_edit)){
         return;

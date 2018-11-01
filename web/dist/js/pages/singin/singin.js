@@ -48,6 +48,7 @@ var tgui_signin = {
 			}
 			if (resp.authorised) window.location.replace('/dashboard.php');
     }).fail(function(err){
+			if ( err.responseJSON.tacacs ) $('div.tac_change_passwd').show()
 			$('tacversion').text(err.responseJSON.info.version.TACVER);
 			$('apiversion').text(err.responseJSON.info.version.APIVER);
 			$('guiversion').text(GUIVER);

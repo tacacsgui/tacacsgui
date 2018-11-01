@@ -22,6 +22,7 @@ class AuthController extends Controller
 			'action' => 'singin',
 		]);
 		#check error#
+		$data['tacacs'] = $this->MAVISLocal->change_passwd_gui();
 		if ($_SESSION['error']['status']){
 			$data['error']=$_SESSION['error'];
 			return $res -> withStatus(401) -> write(json_encode($data));

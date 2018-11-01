@@ -1,4 +1,4 @@
-var tgui_sms = {
+var tgui_local = {
   formSelector: '',
   init: function() {
     var self = this;
@@ -7,15 +7,15 @@ var tgui_sms = {
   fulfill: function() {
     var self = this;
     var ajaxProps = {
-      url: API_LINK+"mavis/sms/",
+      url: API_LINK+"mavis/local/",
       type: "GET"
     };//ajaxProps END
 
     return new Promise(
       function (resolve, reject) {
         ajaxRequest.send(ajaxProps).then(function(resp) {
-          tgui_supplier.fulfillForm(resp.SMS_Params, '');
-          (resp.SMS_Params.enabled) ? $('div.disabled_shield').hide() : $('div.disabled_shield').show()
+          tgui_supplier.fulfillForm(resp.params, '');
+          (resp.params.enabled) ? $('div.disabled_shield').hide() : $('div.disabled_shield').show()
           resolve(true);
         }).fail(function(err){
           tgui_error.getStatus(err, ajaxProps)
@@ -24,12 +24,11 @@ var tgui_sms = {
     );
   },
   save: function() {
-    console.log('Edit LDAP Settings');
     var self = this;
     var formData = tgui_supplier.getFormData(self.formSelector, true);
 
     var ajaxProps = {
-      url: API_LINK+"mavis/sms/",
+      url: API_LINK+"mavis/local/",
       type: 'POST',
       data: formData
     };//ajaxProps END
@@ -41,7 +40,7 @@ var tgui_sms = {
       if (tgui_supplier.checkResponse(resp.error, self.formSelector)){
         return;
       }
-      tgui_error.local.show({type:'success', message: "SMS settings was saved"})
+      tgui_error.local.show({type:'success', message: "Settings was saved"})
       tgui_status.changeStatus(resp.changeConfiguration)
       self.fulfill();
     }).fail(function(err){

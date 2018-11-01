@@ -303,8 +303,19 @@ $MAIN_MENU = array(
 				'submenuFlag' => 0,
 				'submenu' => [],//.submenu
 			],
-			'telegram' => [
+			'local' => [
 				'id' => 940,
+				'name' => 'Local DB',
+				'href' => 'mavis_local.php',
+				'li-class' => '',
+				'icon' => 'fa fa-circle-o',
+				'icon-class' => '',
+				'type' => 0, //type 0 used for linked menu item, type 1 user for header in menu
+				'submenuFlag' => 0,
+				'submenu' => [],//.submenu
+			],
+			'telegram' => [
+				'id' => 950,
 				'name' => 'Telegram Auth',
 				'href' => 'mavis_telegram.php',
 				'li-class' => '',

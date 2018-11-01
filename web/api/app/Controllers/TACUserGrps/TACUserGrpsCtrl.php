@@ -83,9 +83,9 @@ class TACUserGrpsCtrl extends Controller
 
 		$allParams = $req->getParams();
 
-		if ( (!empty($allParams['enable']) AND (@$allParams['enable_encrypt'] == 1)) AND (intval( @$allParams['enable_flag'] ) !== 0) )
+		if ( ! empty( $allParams['enable'] ) )
 		{
-			$allParams['enable'] = $this->encryption( $allParams['enable'], $allParams['enable_flag'] );
+			$allParams['enable'] = $this->encryption( $allParams['enable'], $allParams['enable_flag'],  $allParams['enable_encrypt']);
 		}
 
 		$group = TACUserGrps::create($allParams);
@@ -184,9 +184,9 @@ class TACUserGrpsCtrl extends Controller
 
 		$allParams = $req->getParams();
 
-		if ( (!empty($allParams['enable']) AND (@$allParams['enable_encrypt'] == 1)) AND (intval( @$allParams['enable_flag'] ) !== 0) )
+		if ( ! empty( $allParams['enable'] ) )
 		{
-			$allParams['enable'] = $this->encryption( $allParams['enable'], $allParams['enable_flag'] );
+			$allParams['enable'] = $this->encryption( $allParams['enable'], $allParams['enable_flag'],  $allParams['enable_encrypt']);
 		}
 
 		$id = $allParams['id'];
