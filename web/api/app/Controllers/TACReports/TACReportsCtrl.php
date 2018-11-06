@@ -87,7 +87,7 @@ class TACReportsCtrl extends Controller
 			$authentication = Authentication::select()->whereBetween('date', $tRange);
 			$authorization = Authorization::select()->whereBetween('date', $tRange);
 			$t = &$data['charts']['authentication']['data'];
-			$t['success'][count($t['success'])] = Authentication::select()->whereBetween('date', $tRange)->where('action','NOT LIKE','%succe%')->count();
+			$t['success'][count($t['success'])] = Authentication::select()->whereBetween('date', $tRange)->where('action','LIKE','%succe%')->count();
 			$t['fail'][count($t['fail'])] = Authentication::select()->whereBetween('date', $tRange)->where('action','LIKE','%fail%')->orWhere('action','LIKE','%denied%')->count();
 			unset($t);
 			$t = &$data['charts']['authorization']['data'];
