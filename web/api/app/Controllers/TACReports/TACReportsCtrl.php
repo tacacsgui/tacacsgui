@@ -87,14 +87,14 @@ class TACReportsCtrl extends Controller
 			$authentication = Authentication::select()->whereBetween('date', $tRange);
 			$authorization = Authorization::select()->whereBetween('date', $tRange);
 			$t = &$data['charts']['authentication']['data'];
-			$t['success'][count($t['success'])] = Authentication::select()->whereBetween('date', $tRange)->where('action','LIKE','%succe%')->count();
-			$t['fail'][count($t['fail'])] = Authentication::select()->whereBetween('date', $tRange)->
+			$t['success'][count($t['success'])] = Authentication::select()->where('action','LIKE','%succe%')->whereBetween('date', $tRange)->count();
+			$t['fail'][count($t['fail'])] = Authentication::select()->
 				where(function($query){
 				 $query->where('action','LIKE','%fail%')->orWhere('action','LIKE','%denied%');
-				})->count();
+				})->whereBetween('date', $tRange)->count();
 			unset($t);
 			$t = &$data['charts']['authorization']['data'];
-			$t['success'][count($t['success'])] = Authorization::select()->whereBetween('date', $tRange)->where('action','=','permit')->get()->count();
+			$t['success'][count($t['success'])] = Authorization::select()->where('action','=','permit')->whereBetween('date', $tRange)->get()->count();
 			$t['fail'][count($t['fail'])] = Authorization::select()->whereBetween('date', $tRange)->where('action','=','deny')->get()->count();
 			unset($t);
 			$now = date('Y-m-d', strtotime( $now . " 00:00:00" ) - 86399);
