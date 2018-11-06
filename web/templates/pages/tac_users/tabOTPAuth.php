@@ -1,6 +1,6 @@
 <input type="hidden" data-type="input" data-default="0" name="tab_event_status" value="0">
 <div class="row ">
-<div class="col-md-6">
+<div class="col-sm-6">
 <div class="form-group otp_enabled">
 	<div class="checkbox icheck">
 		<label>
@@ -11,7 +11,7 @@
 	</div>
 </div>
 </div>
-<div class="col-md-6">
+<div class="col-sm-6">
 <div class="form-group global_status">
 		<label>Global Settings</label>
 		<p>Status: <b>Loading...</b></p>
@@ -45,7 +45,7 @@
 </div>
 
 <div class="row">
-	<div class="col-md-4">
+	<div class="col-sm-4">
 		<div class="form-group mavis_otp_period">
 			<label>Period</label>
 			<input type="number" class="form-control period" name="mavis_otp_period" data-type="input" data-default="" data-pickup="true" onchange="tgui_tacUser.getOtpUrl()" placeholder="Period"/>
@@ -53,7 +53,7 @@
 			<p class="help-block">period of generating OTP. By default, the period for a TOTP is 30 seconds</p>
         </div>
 	</div>
-	<div class="col-md-4">
+	<div class="col-sm-4">
 		<div class="form-group mavis_otp_digits">
 			<label>Digits</label>
 			<input type="number" class="form-control digits" name="mavis_otp_digits" data-type="input" data-default="" data-pickup="true" onchange="tgui_tacUser.getOtpUrl()" placeholder="Digits"/>
@@ -61,7 +61,7 @@
 			<p class="help-block">by default the number of digits is 6, more than 10 may be difficult to use by the owner</p>
         </div>
 	</div>
-	<div class="col-md-4">
+	<div class="col-sm-4">
 		<div class="form-group mavis_otp_digest">
 			<label>Digest</label>
 			<select class="form-control digest" name="mavis_otp_digest" data-type="select" data-default="" data-pickup="true" onchange="tgui_tacUser.getOtpUrl()">

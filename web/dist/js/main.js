@@ -42,7 +42,7 @@ var tgui_error = {
       getStatus:function(err, extra, signin){
         signin = signin || false;
         err = err || {};
-        console.log(err);
+        //console.log(err);
         this.status = err.status || this.status;
         if (window.location.hash.substr(1) == 'debug') console.log(err);
         if (signin) return true;
@@ -122,7 +122,7 @@ var tgui_apiUser = {
       tgui_status.ha();
       $('div#ha-attention').modal('show');
     }
-    console.log(resp.info.user.groupRights.toString(2).split("").reverse());
+    //console.log(resp.info.user.groupRights.toString(2).split("").reverse());
     return this;
   },
   signout: function(){
@@ -247,7 +247,18 @@ var tguiInit = {
     });
   },
   tgui_expander: function() {
-    tgui_expander.init()
+    tgui_expander.init();
+    return this;
+  },
+  datetimepicker: function(){
+    moment.updateLocale('en', {
+        week: { dow: 1 } // Monday is the first day of the week
+    });
+    $('div.datetimepicker').datetimepicker({
+      calendarWeeks: false,
+      format: 'YYYY-MM-DD HH:mm',
+    });
+    return this;
   }
 }//Tacacs Initiator Object//end
 /*-
@@ -327,6 +338,17 @@ var tgui_supplier = { //Tacacs Supplier Object
 
     return obj;
   },
+  checkChanges: function(o, params){
+    o = o || {}
+    params = params || [];
+    var keys = Object.keys(o);
+    var new_keys = keys.filter(function( el ){
+      if ( params.includes(el) ) return false;
+      return true;
+    })
+    if (!new_keys.length) tgui_error.local.show({type:'warning', message: "No Changes Detected"})
+    return !!new_keys.length;
+  },
   checkResponse: function(error, form){
     $('.form-group.has-error').removeClass('has-error');
   	$('.form-group p.text-red').remove();
@@ -395,7 +417,7 @@ var tgui_supplier = { //Tacacs Supplier Object
               tgui_error.debug({}, 'Fulfill. Checkbox: ', el, 'Value: '+obj[param]);
               el.iCheck( (obj[param] == 1) ? 'check' : 'uncheck');
               if (el_n.length) el_n.val(obj[param]);
-              console.log(el_n);
+              //console.log(el_n);
               break;
           }
         }
@@ -461,7 +483,7 @@ var tgui_supplier = { //Tacacs Supplier Object
     address = address || false;
     if (address=='0.0.0.0/0') return true;
     if (/^([1-9]|[1-9][0-9]|[1-9][0-9][0-9])\.([0-9]|[1-9][0-9]|[1-9][0-9][0-9])\.([0-9]|[1-9][0-9]|[1-9][0-9][0-9])\.([0-9]|[1-9][0-9]|[1-9][0-9][0-9])\/([1-9]|[1-3][0-9])$/.test(address)) return true;
-    console.log(/^([1-9]|[1-9][0-9]|[1-9][0-9][0-9])\.([0-9]|[1-9][0-9]|[1-9][0-9][0-9])\.([0-9]|[1-9][0-9]|[1-9][0-9][0-9])\.([0-9]|[1-9][0-9]|[1-9][0-9][0-9])\/([1-9]|[1-3][0-9])$/.test(address))
+    //console.log(/^([1-9]|[1-9][0-9]|[1-9][0-9][0-9])\.([0-9]|[1-9][0-9]|[1-9][0-9][0-9])\.([0-9]|[1-9][0-9]|[1-9][0-9][0-9])\.([0-9]|[1-9][0-9]|[1-9][0-9][0-9])\/([1-9]|[1-3][0-9])$/.test(address))
     return false;
   },
   loadElement: function(param) {

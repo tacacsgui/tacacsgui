@@ -1,5 +1,5 @@
 <div class="row">
-  <div class="col-lg-6 col-md-6">
+  <div class="col-sm-6">
     <div class="form-group name">
       <label for="Name">User Group Name</label>
       <input type="text" class="form-control" name="name" data-type="input" data-default="" data-pickup="true" placeholder="Enter User Group Name" autocomplete="off">
@@ -8,7 +8,7 @@
       <input type="hidden"  data-type="input" data-default="" data-pickup="true" name="id">
     </div>
   </div>
-  <div class="col-lg-6 col-md-6">
+  <div class="col-sm-6">
     <label for="Name">Set as Default</label>
     <div class="checkbox icheck">
       <label>

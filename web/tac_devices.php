@@ -136,6 +136,8 @@ require __DIR__ . '/templates/footer_end.php';
 	<script src="bower_components/select2/dist/js/select2.full.min.js"></script>
 	<!-- jquery-csv -->
 	<script src="plugins/jquery-csv/jquery-csv.min.js"></script>
+	<!-- tgui_expander -->
+	<script src="dist/js/tgui_expander.js"></script>
 
 	<!-- Select2 Object -->
   <script src="dist/js/tgui_select2.js"></script>

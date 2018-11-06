@@ -1,5 +1,5 @@
 <div class="row">
-	<div class="col-lg-6 col-md-6">
+	<div class="col-sm-6">
 		<div class="form-group pap">
 			<label for="pap">PAP Authentication</label>
 			<input type="text" class="form-control" name="pap" data-type="input" data-default="#clone_login_password" data-pickup="true" placeholder="Write PAP Password" value="#clone_login_password" autocomplete="new-password" disabled>
@@ -7,7 +7,7 @@
       <p class="help-block">default login clone, if empty that option will not appeared in configuration</p>
 		</div>
 	</div>
-	<div class="col-lg-6 col-md-6">
+	<div class="col-sm-6">
 		<div class="form-group pap_flag">
 			<label for="pap_flag">Type of storing</label>
 			<select class="form-control" name="pap_flag" data-objtype="password" data-object="pap" data-type="select" data-default="4" data-pickup="true">
@@ -33,7 +33,7 @@
 	</div>
 </div>
 <div class="row">
-	<div class="col-lg-6 col-md-6">
+	<div class="col-sm-6">
 		<div class="form-group chap">
 			<label for="chap">CHAP Authentication</label>
 			<input type="text" class="form-control" name="chap" data-type="input" data-default="" data-pickup="true" placeholder="Write CHAP Password" value="" autocomplete="off">
@@ -43,7 +43,7 @@
 	</div>
 </div>
 <div class="row">
-	<div class="col-lg-6 col-md-6">
+	<div class="col-sm-6">
 		<div class="form-group ms-chap">
 			<label for="ms-chap">MS-CHAP Authentication</label>
 			<input type="text" class="form-control" name="ms-chap" data-type="input" data-default="" data-pickup="true" placeholder="Write MS-CHAP Password" value="" autocomplete="off">

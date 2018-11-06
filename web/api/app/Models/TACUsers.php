@@ -33,6 +33,10 @@ class TACUsers extends Model
 		'mavis_sms_enabled',
 		'mavis_sms_number',
 		'default_service',
+		'valid_from',
+		'valid_until',
+		'client_ip',
+		'server_ip',
 		'manual',
 	];
 }

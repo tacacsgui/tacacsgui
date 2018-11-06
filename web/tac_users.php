@@ -42,6 +42,9 @@ require __DIR__ . '/templates/header.php';
 	<link rel="stylesheet" href="/plugins/iCheck/square/blue.css">
 	<!-- Select2 -->
 	<link rel="stylesheet" href="bower_components/select2/dist/css/select2.min.css">
+	<!-- bootstrap-datetimepicker -->
+	<link rel="stylesheet" href="plugins/bootstrap-datetimepicker/css/bootstrap-datetimepicker.min.css">
+
 <!--ADDITIONAL CSS FILES END-->
 
 <?php
@@ -71,7 +74,7 @@ require __DIR__ . '/templates/body_start.php';
 				require __DIR__ . '/templates/parts/part_tableManager.php';
 
 				?>
-				
+
 				<div class="table-responsive">
 					<table id="usersDataTable" class="table-striped display table table-bordered" style="overflow: auto;">
 
@@ -126,6 +129,12 @@ require __DIR__ . '/templates/footer_end.php';
 	<script src="plugins/jquery-csv/jquery-csv.min.js"></script>
 	<!-- jquery-qrcode -->
 	<script src="plugins/qrcode/jquery.qrcode.min.js"></script>
+	<!-- moment -->
+	<script src="bower_components/moment/moment.js"></script>
+	<!-- bootstrap-datetimepicker -->
+	<script src="plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js"></script>
+	<!-- tgui_expander -->
+	<script src="dist/js/tgui_expander.js"></script>
 
 	<!-- Select2 Object -->
 	<script src="dist/js/tgui_select2.js"></script>

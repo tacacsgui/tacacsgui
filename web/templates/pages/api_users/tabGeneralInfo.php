@@ -1,5 +1,5 @@
 <div class="row">
-<div class="col-lg-6 col-md-6">
+<div class="col-sm-6">
   <div class="form-group username">
     <label for="Username">Username</label>
     <input type="text" class="form-control" name="username" data-type="input" data-default="" data-pickup="true" placeholder="Enter User Name" autocomplete="off">
@@ -8,7 +8,7 @@
     <input type="hidden"  data-type="input" data-default="" data-pickup="true" name="id">
   </div>
 </div>
-<div class="col-lg-6 col-md-6">
+<div class="col-sm-6">
   <div class="form-group group">
     <label>User Group</label>
     <select class="select_group form-control select2" style="width:100%"></select>
@@ -17,7 +17,7 @@
 </div>
 </div>
 <div class="row">
-<div class="col-lg-6 col-md-6">
+<div class="col-sm-6">
   <div class="form-group password">
     <label for="Password">Password</label>
     <div class="input-group">
@@ -30,7 +30,7 @@
     </div><!-- /btn-group -->
   </div>
 </div>
-<div class="col-lg-6 col-md-6">
+<div class="col-sm-6">
   <div class="form-group rep_password">
     <label for="rep_password">Repeat Password</label>
     <div class="input-group">
@@ -58,7 +58,7 @@
   </div>
 </div>
 <div class="row">
-<div class="col-lg-6 col-md-6">
+<div class="col-sm-6">
   <div class="form-group firstname">
     <label for="Firstname">Firstname</label>
     <input type="text" class="form-control" name="firstname" data-type="input" data-default="" data-pickup="true" placeholder="Write Firstname" value="" autocomplete="off">
@@ -66,7 +66,7 @@
     <input type="hidden" name="firstname_native" value="">
   </div>
 </div>
-<div class="col-lg-6 col-md-6">
+<div class="col-sm-6">
   <div class="form-group surname">
     <label for="Surname">Surname</label>
     <input type="text" class="form-control" name="surname" data-type="input" data-default="" data-pickup="true" placeholder="Write Surname" value="" autocomplete="off">
@@ -76,7 +76,7 @@
 </div>
 </div>
 <div class="row">
-<div class="col-lg-6 col-md-6">
+<div class="col-sm-6">
   <div class="form-group email">
     <label for="Email">Email</label>
     <input type="text" class="form-control" name="email" data-type="input" data-default="" data-pickup="true" placeholder="Write Email" value="" autocomplete="off">
@@ -84,7 +84,7 @@
     <input type="hidden" name="email_native" value="">
   </div>
 </div>
-<div class="col-lg-6 col-md-6">
+<div class="col-sm-6">
   <div class="form-group position">
     <label for="Position">Position</label>
     <input type="text" class="form-control" name="position" data-type="input" data-default="" data-pickup="true" placeholder="Write Position" value="" autocomplete="off">

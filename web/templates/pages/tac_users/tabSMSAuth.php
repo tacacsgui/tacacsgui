@@ -1,5 +1,5 @@
 <div class="row ">
-<div class="col-md-6">
+<div class="col-sm-6">
 <div class="form-group mavis_sms_enabled">
 	<div class="checkbox icheck">
 		<label>
@@ -10,7 +10,7 @@
 	</div>
 </div>
 </div>
-<div class="col-md-6">
+<div class="col-sm-6">
 <div class="form-group global_status_sms">
 		<label>Global Settings</label>
 		<p>Status: <b></b></p>
@@ -20,7 +20,7 @@
 </div>
 
 <div class="row">
-<div class="col-md-6">
+<div class="col-sm-6">
 <div class="form-group">
 	<label>Phone Number</label>
 	<input type="text" class="form-control" data-type="input" data-default="" data-pickup="true" name="mavis_sms_number">

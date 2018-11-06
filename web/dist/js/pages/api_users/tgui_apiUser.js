@@ -105,12 +105,8 @@ var tgui_userApi = {
       data: formData
     };//ajaxProps END
 
-    if ( Object.keys(ajaxProps.data).length <= 1) {
-      if (Object.keys(ajaxProps.data)[0] == "id") {
-        tgui_error.local.show({type:'warning', message: "Changes did not found"})
-        return;
-      }
-    }
+    if ( ! tgui_supplier.checkChanges(ajaxProps.data, ['id']) ) return false;
+    
     ajaxRequest.send(ajaxProps).then(function(resp) {
       if (tgui_supplier.checkResponse(resp.error, self.formSelector_edit)){
         return;

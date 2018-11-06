@@ -112,12 +112,8 @@ var tgui_tacUserGrp = {
       type: 'POST',
       data: formData
     };//ajaxProps END
-    if ( Object.keys(ajaxProps.data).length <= 1) {
-      if (Object.keys(ajaxProps.data)[0] == "id") {
-        tgui_error.local.show({type:'warning', message: "Changes did not found"})
-        return;
-      }
-    }
+
+    if ( ! tgui_supplier.checkChanges(ajaxProps.data, ['id']) ) return false;
 
     if ( formData.enable ) {
       formData.enable_flag = $(this.formSelector_edit+' select[name="enable_flag"]').val()

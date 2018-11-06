@@ -65,6 +65,10 @@ var tgui_configEngine = {
     			//MAVIS LDAP SETTINGS //START//
     			self.confParser(resp['mavisLdapConfig'])
     			//MAVIS LDAP SETTINGS //END//
+          /////////////////////
+    			//ACL LIST //START//
+    			self.confParser(resp['tacACL'])
+    			//ACL LIST //END//
     			/////////////////////
     			//DEVICE GROUP LIST //START//
     			self.confParser(resp['deviceGroupsConfig'])
@@ -73,10 +77,6 @@ var tgui_configEngine = {
     			//DEVICE LIST //START//
     			self.confParser(resp['devicesConfig'])
     			//DEVICE LIST //END//
-    			/////////////////////
-    			//ACL LIST //START//
-    			self.confParser(resp['tacACL'])
-    			//ACL LIST //END//
     			/////////////////////
     			//USER GROUP LIST //START//
     			self.confParser(resp['userGroupsConfig'])

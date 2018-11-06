@@ -23,6 +23,10 @@ var tgui_device = {
   formSelector_edit: 'form#editDeviceForm',
   select_group_add: '#addDeviceForm div.group .select_group.select2',
   select_group_edit: '#editDeviceForm div.group .select_group.select2',
+  select_user_group_add: '#addDeviceForm .select_user_group',
+  select_user_group_edit: '#editDeviceForm .select_user_group',
+  select_acl_add: '#addDeviceForm .select_acl',
+  select_acl_edit: '#editDeviceForm .select_acl',
   init: function() {
     var self = this;
 
@@ -52,8 +56,33 @@ var tgui_device = {
 
     $(this.select_group_add).select2(self.devGrpSelect2.select2Data());
     $(this.select_group_edit).select2(self.devGrpSelect2.select2Data());
+
+    /*Select2 Group*/
+    this.userGrpSelect2 = new tgui_select2({
+      ajaxUrl : API_LINK+"tacacs/user/group/list/",
+      template: this.selectionTemplate_grp,
+      add: this.select_user_group_add,
+      edit: this.select_user_group_edit,
+    });
+    $(this.select_user_group_add).select2(this.userGrpSelect2.select2Data());
+    $(this.select_user_group_edit).select2(this.userGrpSelect2.select2Data());
+    /*Select2 Group*///END
+    /*Select2 ACL*/
+    this.aclSelect2 = new tgui_select2({
+      ajaxUrl : API_LINK + "tacacs/acl/list/",
+      template: this.selectionTemplate_acl,
+      add: this.select_acl_add,
+      edit: this.select_acl_edit,
+    });
+
+    $(this.select_acl_add).select2(this.aclSelect2.select2Data());
+    $(this.select_acl_edit).select2(this.aclSelect2.select2Data());
+    /*Select2 ACL*///END
+
     $('#addDevice').on('show.bs.modal', function(){
     	self.devGrpSelect2.preSelection(0, 'add');
+    	self.userGrpSelect2.preSelection(0, 'add');
+    	self.aclSelect2.preSelection(0, 'add');
     })
 
     /*fix tab IDs for tabMessages template*/
@@ -109,6 +138,8 @@ var tgui_device = {
       tgui_supplier.selector( {select: self.formSelector_edit + ' select[name="enable_flag"]', flag: resp.device.enable_flag } )
 
       self.devGrpSelect2.preSelection(resp.device.group, 'edit');
+      self.userGrpSelect2.preSelection(resp.device.user_group, 'edit');
+      self.aclSelect2.preSelection(resp.device.acl, 'edit');
 
       $(self.formSelector_edit + ' input[name="group_native"]').val(resp.device.group);
       $(self.formSelector_edit + ' input[name="prefix_native"]').val(resp.device.prefix);
@@ -133,12 +164,7 @@ var tgui_device = {
       data: formData
     };//ajaxProps END
 
-    if ( Object.keys(ajaxProps.data).length <= 1) {
-      if (Object.keys(ajaxProps.data)[0] == "id") {
-        tgui_error.local.show({type:'warning', message: "Changes did not found"})
-        return;
-      }
-    }
+    if ( ! tgui_supplier.checkChanges(ajaxProps.data, ['id']) ) return false;
 
     if ( formData.enable ) {
       formData.enable_flag = $(this.formSelector_edit+' select[name="enable_flag"]').val()
@@ -267,6 +293,25 @@ var tgui_device = {
   		output += '</specialFlags>'
   	output += '</div>'
   	return output;
+  },
+  selectionTemplate_grp: function(data){
+    data.default_flag = (data.id != 0) ? data.default_flag : false;
+    var default_flag_class = (data.default_flag) ? 'option_default_flag': ''
+    var output='<div class="selectGroupOption '+ default_flag_class +'">';
+      output += '<text>'+data.text+'</text>';
+      output += '<specialFlags>';
+      output += (data.key) ? '<small class="label pull-right bg-green" style="margin:3px">k</small>' : '';
+      output += (data.enable) ? ' <small class="label pull-right bg-yellow" style="margin:3px">e</small>' : '';
+      output += (data.default_flag) ? ' <small class="label pull-right bg-gray" style="margin:3px">d</small>' : '';
+      output += '</specialFlags>'
+    output += '</div>'
+    return output;
+  },
+  selectionTemplate_acl: function(data){
+    var output='<div class="selectAclOption">';
+      output += '<text>'+data.text+'</text>';
+      output += '</div>'
+    return output;
   },
   ping: function(button){
     var allClasses = "btn-success btn-danger btn-gray m-progress";

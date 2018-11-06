@@ -11,6 +11,10 @@
 var tgui_devGrp = {
   formSelector_add: 'form#addDeviceGroupForm',
   formSelector_edit: 'form#editDeviceGroupForm',
+  select_user_group_add: '#addDeviceGroupForm .select_user_group',
+  select_user_group_edit: '#editDeviceGroupForm .select_user_group',
+  select_acl_add: '#addDeviceGroupForm .select_acl',
+  select_acl_edit: '#editDeviceGroupForm .select_acl',
   init:function() {
     var self = this;
 
@@ -25,6 +29,33 @@ var tgui_devGrp = {
 
     $('select[data-objtype="password"]').change(function(){
       tgui_supplier.selector({select: this});
+    })
+
+    /*Select2 Group*/
+    this.userGrpSelect2 = new tgui_select2({
+      ajaxUrl : API_LINK+"tacacs/user/group/list/",
+      template: this.selectionTemplate_grp,
+      add: this.select_user_group_add,
+      edit: this.select_user_group_edit,
+    });
+    $(this.select_user_group_add).select2(this.userGrpSelect2.select2Data());
+    $(this.select_user_group_edit).select2(this.userGrpSelect2.select2Data());
+    /*Select2 Group*///END
+    /*Select2 ACL*/
+    this.aclSelect2 = new tgui_select2({
+      ajaxUrl : API_LINK + "tacacs/acl/list/",
+      template: this.selectionTemplate_acl,
+      add: this.select_acl_add,
+      edit: this.select_acl_edit,
+    });
+
+    $(this.select_acl_add).select2(this.aclSelect2.select2Data());
+    $(this.select_acl_edit).select2(this.aclSelect2.select2Data());
+    /*Select2 ACL*///END
+
+    $('#addDeviceGroup').on('show.bs.modal', function(){
+    	self.userGrpSelect2.preSelection(0, 'add');
+    	self.aclSelect2.preSelection(0, 'add');
     })
 
     /*fix tab IDs for tabMessages template*/
@@ -75,6 +106,9 @@ var tgui_devGrp = {
     ajaxRequest.send(ajaxProps).then(function(resp) {
       tgui_supplier.fulfillForm(resp.group, self.formSelector_edit);
 
+      self.userGrpSelect2.preSelection(resp.group.user_group, 'edit');
+      self.aclSelect2.preSelection(resp.group.acl, 'edit');
+
       tgui_supplier.selector( {select: self.formSelector_edit + ' select[name="enable_flag"]', flag: resp.group.enable_flag } )
 
       if (resp.group.default_flag == 1) $(self.formSelector_edit + ' input[name="default_flag"]').iCheck('disable');
@@ -95,12 +129,7 @@ var tgui_devGrp = {
       data: formData
     };//ajaxProps END
 
-    if ( Object.keys(ajaxProps.data).length <= 1) {
-      if (Object.keys(ajaxProps.data)[0] == "id") {
-        tgui_error.local.show({type:'warning', message: "Changes did not found"})
-        return;
-      }
-    }
+    if ( ! tgui_supplier.checkChanges(ajaxProps.data, ['id']) ) return false;
 
     if ( formData.enable ) {
       formData.enable_flag = $(this.formSelector_edit+' select[name="enable_flag"]').val()
@@ -149,6 +178,25 @@ var tgui_devGrp = {
       tgui_error.getStatus(err, ajaxProps)
     })
     return this;
+  },
+  selectionTemplate_grp: function(data){
+    data.default_flag = (data.id != 0) ? data.default_flag : false;
+    var default_flag_class = (data.default_flag) ? 'option_default_flag': ''
+    var output='<div class="selectGroupOption '+ default_flag_class +'">';
+      output += '<text>'+data.text+'</text>';
+      output += '<specialFlags>';
+      output += (data.key) ? '<small class="label pull-right bg-green" style="margin:3px">k</small>' : '';
+      output += (data.enable) ? ' <small class="label pull-right bg-yellow" style="margin:3px">e</small>' : '';
+      output += (data.default_flag) ? ' <small class="label pull-right bg-gray" style="margin:3px">d</small>' : '';
+      output += '</specialFlags>'
+    output += '</div>'
+    return output;
+  },
+  selectionTemplate_acl: function(data){
+    var output='<div class="selectAclOption">';
+      output += '<text>'+data.text+'</text>';
+      output += '</div>'
+    return output;
   },
   csv: {
     columnsRequired: ['name'],

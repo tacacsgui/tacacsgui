@@ -1,5 +1,5 @@
 <div class="row">
-<div class="col-lg-6 col-md-6">
+<div class="col-sm-6">
   <div class="form-group name">
     <label for="Name">ACL Name</label>
     <input type="hidden"  data-type="input" data-default="" name="name_native">

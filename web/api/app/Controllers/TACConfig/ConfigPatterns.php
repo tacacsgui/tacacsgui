@@ -139,6 +139,19 @@ class ConfigPatterns
 
 	public static function tacDevicesPartGen($html = false, $id = 0)
 	{
+    $allACL_array = TACACL::select('id','name')->where([['line_number','=',0]])->get()->toArray();
+		$allUserGroups_array = TACUserGrps::select('id','name')->get()->toArray();
+		$allACL = array();
+		$allUserGroups = array();
+		foreach($allACL_array as $acl)
+		{
+			$allACL[$acl['id']]=$acl['name'];
+		}
+
+		foreach($allUserGroups_array as $ugrp)
+		{
+			$allUserGroups[$ugrp['id']]=$ugrp['name'];
+		}
 
 		$allDevices = ( $id == 0 ) ? TACDevices::select()->get()->toArray() : TACDevices::select()->where('id', $id)->get()->toArray();
 		if ( $id == 0 ) $outputDevices[0][0]=array('title_flag' => 1, 'name' =>
@@ -165,39 +178,54 @@ class ConfigPatterns
 			'host = '.$host['name'].' {');
 			///DEVICE IP ADDRESS///
 			array_push($outputDevices[$host['id']],
-			($html) ? self::$html_tags['param'][0] . "address" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] .$host['ipaddr'].'/'.$host['prefix']. self::$html_tags['val'][1]
+			($html) ? '	'.self::$html_tags['param'][0] . "address" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] .$host['ipaddr'].'/'.$host['prefix']. self::$html_tags['val'][1]
 			:
-			'address = "'.$host['ipaddr'].'/'.$host['prefix'].'"');
+			' address = "'.$host['ipaddr'].'/'.$host['prefix'].'"');
 			///DEVICE KEY///
 			if ($host['key']!='')array_push($outputDevices[$host['id']],
-			($html) ? self::$html_tags['param'][0] . "key" . self::$html_tags['param'][1] . ' = "' . self::$html_tags['val'][0] .$host['key']. self::$html_tags['val'][1].'"'
+			($html) ? '	'.self::$html_tags['param'][0] . "key" . self::$html_tags['param'][1] . ' = "' . self::$html_tags['val'][0] .$host['key']. self::$html_tags['val'][1].'"'
 			:
-			'key = "'.$host['key'].'"');
+			' key = "'.$host['key'].'"');
 			///DEVICE ENABLE///
 			if ($host['enable']!='')array_push($outputDevices[$host['id']],
-			($html) ? self::$html_tags['param'][0] . "enable" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] .self::$crypto_flag[$host['enable_flag']] . ' '. $host['enable'] . self::$html_tags['val'][1]
+			($html) ? '	'.self::$html_tags['param'][0] . "enable" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] .self::$crypto_flag[$host['enable_flag']] . ' '. $host['enable'] . self::$html_tags['val'][1]
 			:
-			'enable = '.self::$crypto_flag[$host['enable_flag']].' '.$host['enable']);
+			' enable = '.self::$crypto_flag[$host['enable_flag']].' '.$host['enable']);
+      ///DEVICE ACL///
+			if ($host['acl'] > 0)array_push($outputDevices[$host['id']],
+			($html) ? '	'.self::$html_tags['param'][0] . "access acl" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . $allACL[$host['acl']] . self::$html_tags['val'][1]
+			:
+			'	access acl = '. $allACL[$host['acl']]);
+      ///DEFAULT USER GROUP///
+			if ($host['user_group'] > 0)array_push($outputDevices[$host['id']],
+			($html) ? '	'.self::$html_tags['param'][0] . "default group" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . $allUserGroups[$host['user_group']] . self::$html_tags['val'][1]
+			:
+			'	default group = '.$allUserGroups[$host['user_group']]);
+      ///CONNECTION TIMEOUT///
+			if ($host['connection_timeout'] > 0)array_push($outputDevices[$host['id']],
+			($html) ? '	'.self::$html_tags['param'][0] . "connection timeout" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . $host['connection_timeout'] . self::$html_tags['val'][1]
+			:
+			'	connection timeout = '.$host['connection_timeout']);
 			///DEVICE BANNER WELCOME///
 			if ($host['banner_welcome']!='')array_push($outputDevices[$host['id']],
-			($html) ? self::$html_tags['param'][0] . "welcome banner" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] .'"'.$host['banner_welcome'].'"'. self::$html_tags['val'][1]
+			($html) ? ' '.self::$html_tags['param'][0] . "welcome banner" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] .'"'.$host['banner_welcome'].'"'. self::$html_tags['val'][1]
 			:
-			'welcome banner = "'.$host['banner_welcome'].'"');
+			' welcome banner = "'.$host['banner_welcome'].'"');
 			///DEVICE BANNER MOTD///
 			if ($host['banner_motd']!='')array_push($outputDevices[$host['id']],
-			($html) ? self::$html_tags['param'][0] . "motd banner" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] .'"'.$host['banner_motd'].'"'. self::$html_tags['val'][1]
+			($html) ? ' '.self::$html_tags['param'][0] . "motd banner" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] .'"'.$host['banner_motd'].'"'. self::$html_tags['val'][1]
 			:
-			'motd banner = "'.$host['banner_motd'].'"');
+			' motd banner = "'.$host['banner_motd'].'"');
 			///DEVICE BANNER FAILED AUTH///
 			if ($host['banner_failed']!='')array_push($outputDevices[$host['id']],
-			($html) ? self::$html_tags['param'][0] . "failed authentication banner" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] .'"'.$host['banner_failed'].'"'. self::$html_tags['val'][1]
+			($html) ? ' '.self::$html_tags['param'][0] . "failed authentication banner" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] .'"'.$host['banner_failed'].'"'. self::$html_tags['val'][1]
 			:
-			'failed authentication banner = "'.$host['banner_failed'].'"');
+			' failed authentication banner = "'.$host['banner_failed'].'"');
 			///DEVICE GROUP///
 			array_push($outputDevices[$host['id']],
-			($html) ? self::$html_tags['param'][0] . "template" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] .$allGroupsArr[$host['group']]. self::$html_tags['val'][1]
+			($html) ? '	'.self::$html_tags['param'][0] . "template" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] .$allGroupsArr[$host['group']]. self::$html_tags['val'][1]
 			:
-			'template = '.$allGroupsArr[$host['group']].'');
+			' template = '.$allGroupsArr[$host['group']].'');
 			///DEVICE MANUAL CONFIGURATION///
 			if ($host['manual']!="")
 			{
@@ -226,6 +254,19 @@ class ConfigPatterns
 
 	public static function tacDeviceGroupsPartGen($html = false, $id = 0)
 	{
+    $allACL_array = TACACL::select('id','name')->where([['line_number','=',0]])->get()->toArray();
+		$allUserGroups_array = TACUserGrps::select('id','name')->get()->toArray();
+		$allACL = array();
+		$allUserGroups = array();
+		foreach($allACL_array as $acl)
+		{
+			$allACL[$acl['id']]=$acl['name'];
+		}
+
+		foreach($allUserGroups_array as $ugrp)
+		{
+			$allUserGroups[$ugrp['id']]=$ugrp['name'];
+		}
 
 		$allDeviceGroups = ( $id == 0 ) ? TACDeviceGrps::select()->get()->toArray() : TACDeviceGrps::select()->where('id', $id)->get()->toArray();
 		if ( $id == 0 ) $outputDeviceGroups[0][0]=array('title_flag' => 1, 'name' =>
@@ -245,29 +286,44 @@ class ConfigPatterns
 			'host = '.$group['name'].' {');
 			///GROUP KEY///
 			if ($group['key']!='')array_push($outputDeviceGroups[$group['id']],
-			($html) ? self::$html_tags['param'][0] . "key" . self::$html_tags['param'][1] . ' = "' . self::$html_tags['val'][0] .$group['key']. self::$html_tags['val'][1] .'"'
+			($html) ? '	'.self::$html_tags['param'][0] . "key" . self::$html_tags['param'][1] . ' = "' . self::$html_tags['val'][0] .$group['key']. self::$html_tags['val'][1] .'"'
 			:
-			'key = "'.$group['key'] .'"');
+			' key = "'.$group['key'] .'"');
 			///GROUP ENABLE///
 			if ($group['enable']!='')array_push($outputDeviceGroups[$group['id']],
-			($html) ? self::$html_tags['param'][0] . "enable" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . self::$crypto_flag[$group['enable_flag']] . ' ' . $group['enable']. self::$html_tags['val'][1]
+			($html) ? '	'.self::$html_tags['param'][0] . "enable" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . self::$crypto_flag[$group['enable_flag']] . ' ' . $group['enable']. self::$html_tags['val'][1]
 			:
-			'enable = '.self::$crypto_flag[$group['enable_flag']].' '.$group['enable']);
+			' enable = '.self::$crypto_flag[$group['enable_flag']].' '.$group['enable']);
+      ///DEVICE ACL///
+      if ($group['acl'] > 0)array_push($outputDeviceGroups[$group['id']],
+      ($html) ? '	'.self::$html_tags['param'][0] . "access acl" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . $allACL[$group['acl']] . self::$html_tags['val'][1]
+      :
+      '	access acl = '. $allACL[$group['acl']]);
+      ///DEFAULT USER GROUP///
+      if ($group['user_group'] > 0)array_push($outputDeviceGroups[$group['id']],
+      ($html) ? '	'.self::$html_tags['param'][0] . "default group" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . $allUserGroups[$group['user_group']] . self::$html_tags['val'][1]
+      :
+      '	default group = '.$allUserGroups[$group['user_group']]);
+      ///CONNECTION TIMEOUT///
+      if ($group['connection_timeout'] > 0)array_push($outputDeviceGroups[$group['id']],
+      ($html) ? '	'.self::$html_tags['param'][0] . "connection timeout" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . $group['connection_timeout'] . self::$html_tags['val'][1]
+      :
+      '	connection timeout = '.$group['connection_timeout']);
 			///GROUP BANNER WELCOME///
 			if ($group['banner_welcome']!='')array_push($outputDeviceGroups[$group['id']],
-			($html) ? self::$html_tags['param'][0] . "welcome banner" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] .'"'.$group['banner_welcome'].'"'. self::$html_tags['val'][1]
+			($html) ? ' '.self::$html_tags['param'][0] . "welcome banner" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] .'"'.$group['banner_welcome'].'"'. self::$html_tags['val'][1]
 			:
-			'welcome banner = "'.$group['banner_welcome'].'"');
+			' welcome banner = "'.$group['banner_welcome'].'"');
 			///GROUP BANNER MOTD///
 			if ($group['banner_motd']!='')array_push($outputDeviceGroups[$group['id']],
-			($html) ? self::$html_tags['param'][0] . "motd banner" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] .'"'.$group['banner_motd'].'"'. self::$html_tags['val'][1]
+			($html) ? ' '.self::$html_tags['param'][0] . "motd banner" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] .'"'.$group['banner_motd'].'"'. self::$html_tags['val'][1]
 			:
-			'motd banner = "'.$group['banner_motd'].'"');
+			' motd banner = "'.$group['banner_motd'].'"');
 			///GROUP BANNER FAILED AUTH///
 			if ($group['banner_failed']!='')array_push($outputDeviceGroups[$group['id']],
-			($html) ? self::$html_tags['param'][0] . "failed authentication banner" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] .'"'.$group['banner_failed'].'"'. self::$html_tags['val'][1]
+			($html) ? ' '.self::$html_tags['param'][0] . "failed authentication banner" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] .'"'.$group['banner_failed'].'"'. self::$html_tags['val'][1]
 			:
-			'failed authentication banner = "'.$group['banner_failed'].'"');
+			' failed authentication banner = "'.$group['banner_failed'].'"');
 			///GROUP MANUAL CONFIGURATION///
 			if ($group['manual']!="")
 			{
@@ -379,6 +435,16 @@ class ConfigPatterns
 			($html) ? self::$html_tags['param'][0] . "message" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] .'"'.$group['message'].'"'. self::$html_tags['val'][1]
 			:
 			'message = "'.$group['message'].'"');
+      ///USER Valid From///
+      if ($group['valid_from']!='')array_push($outputUserGroup[$group['id']],
+			($html) ? '	'.self::$html_tags['param'][0] . "valid from" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] .strtotime($group['valid_from']). self::$html_tags['val'][1] .' # '.$group['valid_from']
+			:
+			'	valid from = '.strtotime($group['valid_from']).' # '.$group['valid_from']);
+      ///USER Valid Until///
+      if ($group['valid_until']!='')array_push($outputUserGroup[$group['id']],
+			($html) ? '	'.self::$html_tags['param'][0] . "valid until" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] .strtotime($group['valid_until']). self::$html_tags['val'][1] .' # '.$group['valid_until']
+			:
+			'	valid until = '.strtotime($group['valid_until']).' # '.$group['valid_until']);
 			///USER GROUP ACL///
 			if ($group['acl'] > 0) {
 				array_push($outputUserGroup[$group['id']],
@@ -386,6 +452,16 @@ class ConfigPatterns
 				:
 				'	acl = '. $allACL[$group['acl']]);
 			}
+      ///USER CLIENT IP///
+      if ($group['client_ip'] > 0)array_push($outputUserGroup[$group['id']],
+      ($html) ? '	'.self::$html_tags['param'][0] . "client" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . $group['client_ip'] . self::$html_tags['val'][1] . ' # NAC ip must be in that range'
+      :
+      '	client = '. $group['client_ip']);
+      ///USER SERVER IP///
+      if ($group['server_ip'] > 0)array_push($outputUserGroup[$group['id']],
+      ($html) ? '	'.self::$html_tags['param'][0] . "server" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . $group['server_ip'] . self::$html_tags['val'][1] . ' # NAS ip must be in that range'
+      :
+      '	server = '. $group['server_ip']);
 			///USER GROUP DEFAULT SERVICE///
 			$default_service = ($group['default_service']) ? 'permit' : 'deny';
 			array_push($outputUserGroup[$group['id']],
@@ -519,6 +595,11 @@ class ConfigPatterns
 			($html) ? '	'.self::$html_tags['param'][0] . "login" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . $login . self::$html_tags['val'][1]
 			:
 			'	login = '. $login);
+      ///USER MEMBER///
+			if ($user['group'] > 0)array_push($outputUsers[$user['id']],
+			($html) ? '	'.self::$html_tags['param'][0] . "member" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . $allUserGroups[$user['group']] . self::$html_tags['val'][1]
+			:
+			'	member = '.$allUserGroups[$user['group']]);
 			///USER PAP///
 			// if ($user['pap_clone'] == 1) array_push($outputUsers[$user['id']],
 			// ($html) ? '	'.self::$html_tags['param'][0] . "pap" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . $login . self::$html_tags['val'][1]
@@ -551,15 +632,31 @@ class ConfigPatterns
 			:
 			'	acl = '. $allACL[$user['acl']]);
 			///USER MESSAGE///
+			///USER CLIENT IP///
+			if ($user['client_ip'] > 0)array_push($outputUsers[$user['id']],
+			($html) ? '	'.self::$html_tags['param'][0] . "client" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . $user['client_ip'] . self::$html_tags['val'][1] . ' # NAC ip must be in that range'
+			:
+			'	client = '. $user['client_ip']);
+			///USER SERVER IP///
+			if ($user['server_ip'] > 0)array_push($outputUsers[$user['id']],
+			($html) ? '	'.self::$html_tags['param'][0] . "server" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . $user['server_ip'] . self::$html_tags['val'][1] . ' # NAS ip must be in that range'
+			:
+			'	server = '. $user['server_ip']);
+			///USER MESSAGE///
 			if ($user['message']!='')array_push($outputUsers[$user['id']],
 			($html) ? '	'.self::$html_tags['param'][0] . "message" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] .'"'.$user['message'].'"'. self::$html_tags['val'][1]
 			:
 			'	message = "'.$user['message'].'"');
-			///USER MEMBER///
-			if ($user['group'] > 0)array_push($outputUsers[$user['id']],
-			($html) ? '	'.self::$html_tags['param'][0] . "member" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . $allUserGroups[$user['group']] . self::$html_tags['val'][1]
+      ///USER Valid From///
+      if ($user['valid_from']!='')array_push($outputUsers[$user['id']],
+			($html) ? '	'.self::$html_tags['param'][0] . "valid from" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] .strtotime($user['valid_from']). self::$html_tags['val'][1] .' # '.$user['valid_from']
 			:
-			'	member = '.$allUserGroups[$user['group']]);
+			'	valid from = '.strtotime($user['valid_from']).' # '.$user['valid_from']);
+      ///USER Valid Until///
+      if ($user['valid_until']!='')array_push($outputUsers[$user['id']],
+			($html) ? '	'.self::$html_tags['param'][0] . "valid until" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] .strtotime($user['valid_until']). self::$html_tags['val'][1] .' # '.$user['valid_until']
+			:
+			'	valid until = '.strtotime($user['valid_until']).' # '.$user['valid_until']);
 			///USER SERVICE SHELL///
 			if ($user['service'] == 0 AND  $user['group'] == 0) {
 				///USER DEFAULT SERVICE///

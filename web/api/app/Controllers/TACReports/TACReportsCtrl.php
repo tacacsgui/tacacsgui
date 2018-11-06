@@ -79,17 +79,7 @@ class TACReportsCtrl extends Controller
 			],
 
 		];
-		// $first_period = date('Y-m-d H', strtotime( trim( shell_exec(TAC_ROOT_PATH . "/main.sh ntp get-time") ) ) );
-		// $first_period = date( 'Y-m-d H:i:s', strtotime($first_period.':00:00') );
-		// $second_period = date( 'Y-m-d H:i:s', strtotime($first_period) + 3600);
-		// $data['time_range'] = [];
-		// for ($i=0; $i < 24; $i++) {
-		// 	//$data['server_time_hour_'.$i] = $first_period;
-		// 	$data['time_range'][count($data['time_range'])] = date( 'H:i', strtotime( $first_period ) );
-		// 	$first_period = date( 'Y-m-d H:i:s', strtotime( $first_period ) - 3600 );
-		// }
-		//
-		// $data['server_time_hour'] = date('Y-m-d H', strtotime( trim( shell_exec(TAC_ROOT_PATH . "/main.sh ntp get-time") ) ) );
+
 		$now = date('Y-m-d', strtotime( trim( shell_exec(TAC_ROOT_PATH . "/main.sh ntp get-time") ) ) );
 		for ($i=0; $i < 7; $i++) {
 			$data['time_range'][count($data['time_range'])] = $now;
@@ -97,8 +87,8 @@ class TACReportsCtrl extends Controller
 			$authentication = Authentication::select()->whereBetween('date', $tRange);
 			$authorization = Authorization::select()->whereBetween('date', $tRange);
 			$t = &$data['charts']['authentication']['data'];
-			$t['success'][count($t['success'])] = Authentication::select()->whereBetween('date', $tRange)->where('action','NOT LIKE','%fail%')->count();
-			$t['fail'][count($t['fail'])] = Authentication::select()->whereBetween('date', $tRange)->where('action','LIKE','%fail%')->count();
+			$t['success'][count($t['success'])] = Authentication::select()->whereBetween('date', $tRange)->where('action','NOT LIKE','%succe%')->count();
+			$t['fail'][count($t['fail'])] = Authentication::select()->whereBetween('date', $tRange)->where('action','LIKE','%fail%')->orWhere('action','LIKE','%denied%')->count();
 			unset($t);
 			$t = &$data['charts']['authorization']['data'];
 			$t['success'][count($t['success'])] = Authorization::select()->whereBetween('date', $tRange)->where('action','=','permit')->get()->count();

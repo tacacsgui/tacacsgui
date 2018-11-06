@@ -13,6 +13,7 @@
 				<ul class="nav nav-tabs">
 					<li class="active"><a href="#general_info" data-toggle="tab" aria-expanded="true">General</a></li>
 					<li class=""><a href="#messages" data-toggle="tab" aria-expanded="false">Messages</a></li>
+					<li class=""><a href="#access" data-toggle="tab" aria-expanded="false">Access</a></li>
 					<li class="pull-right"><a href="#manual" data-toggle="tab" aria-expanded="false" class="text-muted"><i class="fa fa-gear"></i></a></li>
 				</ul>
 				<div class="tab-content">
@@ -22,6 +23,10 @@
 					<!-- /.tab-pane -->
 					<div class="tab-pane" id="messages">
 						<?php include __DIR__ . '/tabMessages.php';?>
+					</div>
+					<!-- /.tab-pane -->
+					<div class="tab-pane" id="access">
+						<?php include __DIR__ . '/tabAccessRules.php';?>
 					</div>
 					<!-- /.tab-pane -->
 					<div class="tab-pane" id="manual">

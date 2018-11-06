@@ -129,7 +129,7 @@ class TACDeviceGrpsCtrl extends Controller
 		}
 		//CHECK ACCESS TO THAT FUNCTION//END//
 
-		$data['group']=TACDeviceGrps::select('id','name','key','enable','enable_flag', 'default_flag','banner_welcome','banner_motd','banner_failed','manual','created_at', 'updated_at')->
+		$data['group']=TACDeviceGrps::select()->
 			where([['id','=',$req->getParam('id')],['name','=',$req->getParam('name')]])->
 			first();
 

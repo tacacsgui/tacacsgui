@@ -204,6 +204,10 @@ class TACConfigCtrl extends Controller
 		//MAVIS LDAP CONFIGURATION//START//
 		$output.=$this->arrayParserToText($tempMavisLdapArray,$lineSeparator);
 		//MAVIS LDAP CONFIGURATION//END//
+		//////////////////////////////////
+		//ACL LIST CONFIGURATION//START//
+		$output.=$this->arrayParserToText($tempACL,$lineSeparator);
+		//ACL LIST CONFIGURATION//END//
 		////////////////////////////////////
 		//DEVICE GROUP LIST CONFIGURATION//START//
 		$output.=$this->arrayParserToText($tempDeviceGroupArray,$lineSeparator);
@@ -212,10 +216,6 @@ class TACConfigCtrl extends Controller
 		//DEVICE LIST CONFIGURATION//START//
 		$output.=$this->arrayParserToText($tempDeviceArray,$lineSeparator);
 		//DEVICE LIST CONFIGURATION//END//
-		//////////////////////////////////
-		//ACL LIST CONFIGURATION//START//
-		$output.=$this->arrayParserToText($tempACL,$lineSeparator);
-		//ACL LIST CONFIGURATION//END//
 		//////////////////////////////////
 		//USER GROUP LIST CONFIGURATION//START//
 		$output.=$this->arrayParserToText($tempUserGroupArray,$lineSeparator);

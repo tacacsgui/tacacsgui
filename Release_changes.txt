@@ -1,4 +1,11 @@
 ##############################
+Version_0.9.47 20181106
+	* Added attributes Valid From, Valid Until for Tacacs User and Tacacs User Groups
+	* Added attributes Client IP and Server IP for Tacacs User and Tacacs User Groups
+	* Added attributes Default User Group and ACL for Tacacs Devices and Device Groups
+	* Added attribute Connection Timeout for Tacacs Devices and Device Groups
+	* Some Bugs fixed
+##############################
 Version_0.9.46 20181101
 	* Added MAVIS Local
 	* Tacacs User can change his password via GUI or CLI (if device support that)

@@ -64,16 +64,9 @@ var tgui_apiSettings = {
         url: API_LINK + "settings/smtp/",
         data: formData
       };//ajaxProps END
-      if ( Object.keys(ajaxProps.data).length <= 1) {
-        if (Object.keys(ajaxProps.data)[0] == "id") {
-          tgui_error.local.show({type:'warning', message: "Changes did not found"});
-          return;
-        }
-        if ( !Object.keys(ajaxProps.data).length ){
-          tgui_error.local.show({type:'warning', message: "Changes did not found"});
-          return;
-        }
-      }
+
+      if ( ! tgui_supplier.checkChanges(ajaxProps.data, ['id']) ) return false;
+
       ajaxRequest.send(ajaxProps).then(function(resp) {
         if (tgui_supplier.checkResponse(resp.error, '#smtpForm')){
           return;
@@ -190,16 +183,9 @@ var tgui_apiSettings = {
         url: API_LINK + "settings/pwpolicy/",
         data: formData
       };//ajaxProps END
-      if ( Object.keys(ajaxProps.data).length <= 1) {
-        if (Object.keys(ajaxProps.data)[0] == "id") {
-          tgui_error.local.show({type:'warning', message: "Changes did not found"});
-          return;
-        }
-        if ( !Object.keys(ajaxProps.data).length ){
-          tgui_error.local.show({type:'warning', message: "Changes did not found"});
-          return;
-        }
-      }
+
+      if ( ! tgui_supplier.checkChanges(ajaxProps.data, ['id']) ) return false;
+
       ajaxRequest.send(ajaxProps).then(function(resp) {
         if (tgui_supplier.checkResponse(resp.error, '#passwordPolicyForm')){
           return;
@@ -272,10 +258,9 @@ var tgui_apiSettings = {
         data: formData
       };//ajaxProps END
 
-      if ( Object.keys(ajaxProps.data).length == 0) {
-        tgui_error.local.show({type:'warning', message: "Changes did not found"});
+      if ( ! tgui_supplier.checkChanges(ajaxProps.data, ['id']) ) {
         $('div.overlay').hide();
-        return;
+        return false;
       }
 
       ajaxRequest.send(ajaxProps).then(function(resp) {
@@ -369,16 +354,15 @@ var tgui_apiSettings = {
 
       delete formData.network_interface;
 
-      if ( Object.keys(formData).length == 0) {
-        tgui_error.local.show({type:'warning', message: "Changes did not found"});
-        $('div.overlay').hide();
-        return;
-      }
-
       var ajaxProps = {
         url: API_LINK + "settings/network/interface/",
         data: tgui_supplier.getFormData('#networkForm', false)
       };//ajaxProps END
+
+      if ( ! tgui_supplier.checkChanges(ajaxProps.data, ['id']) ) {
+        $('div.overlay').hide();
+        return false;
+      }
 
       ajaxRequest.send(ajaxProps).then(function(resp) {
         if (tgui_supplier.checkResponse(resp.error, '#timeSettings')){

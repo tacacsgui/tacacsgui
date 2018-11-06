@@ -1,5 +1,5 @@
 <div class="row">
-<div class="col-lg-6 col-md-6">
+<div class="col-sm-6">
 	<div class="form-group name">
 		<label for="Name">Service Name</label>
 		<input type="text" class="form-control" name="name" data-type="input" data-default="" data-pickup="true" placeholder="Enter Service Name" autocomplete="off">
@@ -10,7 +10,7 @@
 </div>
 </div>
 <div class="row">
-	<div class="col-lg-6 col-md-6">
+	<div class="col-sm-6">
 		<div class="form-group priv-lvl">
 			<label for="priv-lvl">Privilege Level</label>
 			<div class="input-group">

@@ -95,6 +95,8 @@ class TACUsersCtrl extends Controller
 					passwdPolicyNumbers($policy['tac_pw_numbers'])->
 					desRestriction($req->getParam('login_flag')),
 			'login_flag' => v::noWhitespace()->numeric(),
+			'valid_from' => v::when( v::nullType() , v::alwaysValid(), v::date('Y-m-d HH:mm')->setName('Valid From') ),
+			'valid_until' => v::when( v::nullType() , v::alwaysValid(), v::date('Y-m-d HH:mm')->setName('Valid Until') )
 		]);
 
 		if ($validation->failed()){

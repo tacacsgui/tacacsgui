@@ -40,6 +40,8 @@ require __DIR__ . '/templates/header.php';
 	<link rel="stylesheet" href="bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css">
 	<!-- iCheck -->
 	<link rel="stylesheet" href="/plugins/iCheck/square/blue.css">
+	<!-- Select2 -->
+	<link rel="stylesheet" href="bower_components/select2/dist/css/select2.min.css">
 	<style>
 	.greenRow{
 		background-color: #00800036 !important;
@@ -117,14 +119,20 @@ require __DIR__ . '/templates/footer_end.php';
 ?>
 <!-- ADDITIONAL JS FILES START-->
 
-<script src="bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
-<script src="bower_components/datatables.net/js/dataTables.select.min.js"></script>
-<script src="bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
-<!-- iCheck -->
-<script src="plugins/iCheck/icheck.min.js"></script>
-<!-- jquery-csv -->
-<script src="plugins/jquery-csv/jquery-csv.min.js"></script>
+	<script src="bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+	<script src="bower_components/datatables.net/js/dataTables.select.min.js"></script>
+	<script src="bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+	<!-- Select2 -->
+	<script src="bower_components/select2/dist/js/select2.full.min.js"></script>
+	<!-- iCheck -->
+	<script src="plugins/iCheck/icheck.min.js"></script>
+	<!-- jquery-csv -->
+	<script src="plugins/jquery-csv/jquery-csv.min.js"></script>
+	<!-- tgui_expander -->
+	<script src="dist/js/tgui_expander.js"></script>
 
+	<!-- Select2 Object -->
+	<script src="dist/js/tgui_select2.js"></script>
 	<!-- tgui_csvParser Object -->
 	<script src="dist/js/tgui_csvParser.js"></script>
 	<!-- main Object -->

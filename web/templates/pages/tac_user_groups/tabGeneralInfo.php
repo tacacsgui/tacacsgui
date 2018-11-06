@@ -1,5 +1,5 @@
 			<div class="row">
-			<div class="col-lg-6 col-md-6">
+			<div class="col-sm-6">
 				<div class="form-group name">
 					<label for="name">Name</label>
 					<input type="text" class="form-control" name="name" data-type="input" data-default="" data-pickup="true" placeholder="Enter Group Name" autocomplete="off">
@@ -10,14 +10,14 @@
       </div>
       </div>
 			<div class="row">
-				<div class="col-lg-6 col-md-6">
+				<div class="col-sm-6">
 					<div class="form-group enable">
 						<label for="enable">Enable Password</label>
 						<input type="text" class="form-control" name="enable" data-type="input" data-default="" data-pickup="true" placeholder="Write Enable Password" value="" autocomplete="off">
 						<input type="hidden" name="enable_native" value="">
 					</div>
 				</div>
-				<div class="col-lg-6 col-md-6">
+				<div class="col-sm-6">
 					<div class="form-group enable_flag">
 						<label for="enable_flag">Enable Encryption</label>
 						<select class="form-control" name="enable_flag" data-objtype="password" data-object="enable" data-type="select" data-default="1" data-pickup="true">

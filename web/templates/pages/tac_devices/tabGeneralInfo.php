@@ -1,5 +1,5 @@
 <div class="row">
-<div class="col-lg-6 col-md-6">
+<div class="col-sm-6">
   <div class="form-group name">
     <label for="Name">Device's Name</label>
     <div class="input-group">
@@ -15,17 +15,17 @@
     <p class="help-block">it should be unique, but you can change it later</p>
           </div>
       </div>
-<div class="col-lg-6 col-md-6">
+<div class="col-sm-6">
   <div class="form-group group">
     <label>Device Group Name</label>
     <input type="hidden" name="group_native" value="">
-    <select class="select_group form-control select2" style="width:100%"></select>
+    <select class="select_group form-control select2" name="group" data-type="select" data-default="" data-pickup="true" style="width:100%"></select>
     <p class="help-block">Preconfigured values: <small class="label bg-green" style="margin:3px">k</small> - key; <small class="label bg-yellow" style="margin:3px">e</small> - enable; <small class="label bg-gray" style="margin:3px">d</small> - default</p>
           </div>
         </div>
 </div>
 <div class="row">
-  <div class="col-lg-6 col-md-6">
+  <div class="col-sm-6">
     <div class="form-group ipaddr">
       <label for="IPAddress">Device's IP Address</label>
       <div class="input-group">
@@ -37,7 +37,7 @@
       </div>
     </div>
   </div>
-  <div class="col-lg-5 col-md-5">
+  <div class="col-sm-5">
     <div class="form-group prefix">
       <label for="Prefix">Prefix</label>
       <span><b>/<span name="prefix-value">32</span></b></span>
@@ -47,27 +47,27 @@
   </div>
 </div>
 <div class="row">
-  <div class="col-lg-6 col-md-6">
+  <div class="col-sm-6">
     <div class="form-group key">
       <label for="key">Tacacs Key</label>
       <input type="text" class="form-control" name="key" data-type="input" data-default="" data-pickup="true" placeholder="Write Tacacs Key" value="" autocomplete="off">
       <input type="hidden" name="key_native" value="">
     </div>
   </div>
-  <div class="col-lg-6 col-md-6">
+  <div class="col-sm-6">
 
 
   </div>
 </div>
 <div class="row">
-  <div class="col-lg-6 col-md-6">
+  <div class="col-sm-6">
     <div class="form-group enable">
       <label for="enable">Enable Password</label>
       <input type="text" class="form-control" name="enable" data-type="input" data-default="" data-pickup="true" placeholder="Write Enable Password" value="" autocomplete="off">
       <input type="hidden" name="enable_native" value="">
     </div>
   </div>
-  <div class="col-lg-6 col-md-6">
+  <div class="col-sm-6">
     <div class="form-group enable_flag">
       <label for="enable_flag">Type of storing</label>
       <select class="form-control" name="enable_flag" data-objtype="password" data-object="enable" data-type="select" data-default="1" data-pickup="true">

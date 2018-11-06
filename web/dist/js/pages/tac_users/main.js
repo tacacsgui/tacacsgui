@@ -5,7 +5,7 @@ $('document').ready(function(){
     Promise.resolve(tgui_status.getStatus({url: API_LINK+"apicheck/status/"})).then(function(resp) {
       tgui_status.fulfill(resp);
 			//MAIN CODE//Start
-			tguiInit.iCheck();
+			tguiInit.iCheck().datetimepicker().tgui_expander();
 			tgui_tacUser.init();
 			dataTable.init();
 
@@ -14,7 +14,7 @@ $('document').ready(function(){
 				container: 'body',
 				content: $('.filter-info-content').html()
 			});
-			
+
 			//MAIN CODE//END
       $('div.loading').hide();/*---*/
     }).catch(function(err){

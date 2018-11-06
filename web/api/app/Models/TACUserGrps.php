@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class TACUserGrps extends Model
 {
 	protected $table = 'tac_user_groups';
-	
+
 	protected $fillable = [
 		'name',
 		'enable',
@@ -20,6 +20,8 @@ class TACUserGrps extends Model
 		'default_service',
 		'valid_from',
 		'valid_until',
+		'client_ip',
+		'server_ip',
 		'manual',
 	];
 }
