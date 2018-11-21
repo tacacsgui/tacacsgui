@@ -2,7 +2,12 @@
   <div class="col-xs-12">
     <div class="dropdown pull-right">
       <?php if( !empty($addBtn) ) : ?>
+      <?php if( empty($addBtn['html']) ) : ?>
       <a class="btn btn-flat btn-success" id="<?php echo $addBtn['id']; ?>" data-toggle="modal" data-target="<?php echo $addBtn['modalId']; ?>"><?php echo $addBtn['name']; ?></a>
+      <?php endif; ?>
+      <?php if( !empty($addBtn['html']) ) : ?>
+      <?php echo  $addBtn['html'];?>
+      <?php endif; ?>
       <?php endif; ?>
       <?php if( $filterBtn ) : ?>
       <a class="btn btn-flat btn-info" onclick="dataTable.settings.filter()">Filter</a>

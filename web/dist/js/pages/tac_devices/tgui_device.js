@@ -31,6 +31,7 @@ var tgui_device = {
     var self = this;
 
     this.csvParser = new tgui_csvParser(this.csv);
+
     /*cleare forms when modal is hided*/
     $('#addDevice').on('hidden.bs.modal', function(){
     	self.clearForm();
@@ -238,7 +239,6 @@ var tgui_device = {
       setTimeout( function () {dataTable.table.ajax.reload()}, 2000 );
     }
   },
-  csvParser: {},
   getFormAction: function functionName(e, b) {
     if (b) return $($(e).parents('form')[0]).attr('form-action');
     return $(e).parents('form')[0];

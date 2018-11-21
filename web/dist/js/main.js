@@ -259,6 +259,15 @@ var tguiInit = {
       format: 'YYYY-MM-DD HH:mm',
     });
     return this;
+  },
+  bootstrap_toggle: function(o){
+    o = o || {}
+    $('.bootstrap-toggle').bootstrapToggle( { width:'100%' } );
+    return this;
+  },
+  tgui_search_bar: function(){
+    $('.tgui-search-bar').tgui_search_bar();
+    return this;
   }
 }//Tacacs Initiator Object//end
 /*-
@@ -387,7 +396,12 @@ var tgui_supplier = { //Tacacs Supplier Object
           element.val(element.attr('data-default'))
           break;
         case 'checkbox':
-          element.iCheck( (element.attr('data-default') == 'checked') ? 'check' : 'uncheck')
+          if (element.iCheck) {
+            element.iCheck( (element.attr('data-default') == 'checked') ? 'check' : 'uncheck');
+            break;
+          }
+          element.prop( 'checked', (element.attr('data-default') == 'checked') )
+          element.change();
           break;
       }
     }
@@ -397,6 +411,7 @@ var tgui_supplier = { //Tacacs Supplier Object
     form = form || "";
     form = (form != '') ? form + ' ' : form;
     obj = obj || {};
+
     var el = {}, el_n = {};
     for (var param in obj) {
       if (obj.hasOwnProperty(param)) {
@@ -415,7 +430,13 @@ var tgui_supplier = { //Tacacs Supplier Object
               break;
             case 'checkbox':
               tgui_error.debug({}, 'Fulfill. Checkbox: ', el, 'Value: '+obj[param]);
-              el.iCheck( (obj[param] == 1) ? 'check' : 'uncheck');
+              if (el.iCheck && !$(el).hasClass('bootstrap-toggle')) {
+                el.iCheck( (obj[param] == 1) ? 'check' : 'uncheck');
+                if (el_n.length) el_n.val(obj[param]);
+                break;
+              }
+              el.prop('checked', (obj[param] == 1) );
+              el.change();
               if (el_n.length) el_n.val(obj[param]);
               //console.log(el_n);
               break;
@@ -517,6 +538,7 @@ var tgui_supplier = { //Tacacs Supplier Object
       for (var target in resp.output) {
         if (resp.output.hasOwnProperty(target)) {
           el = resp.output[target];
+          //console.log(el);
           for (var someLine = 0; someLine < el.length; someLine++)
           {
             if (someLine > 0)

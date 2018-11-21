@@ -7,7 +7,7 @@
 			<input type="checkbox" name="mavis_otp_enabled" data-type="checkbox" data-default="" data-pickup="true" checked> Enable OTP Auth
 			<input type="hidden" name="mavis_otp_enabled_native" value="">
 		</label>
-		<p class="help-block">if you check it, it will mean that that user can be authenticated only with this way</p>
+		<p class="help-block">if you check it, it will mean that user can be authenticated only with this way</p>
 	</div>
 </div>
 </div>

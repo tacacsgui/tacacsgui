@@ -140,21 +140,44 @@ $TAC_ACL = array(
 	'type' => 0, //type 0 used for linked menu item, type 1 user for header in menu
 	'submenuFlag' => 1,
 	'submenu' => [
+			'autho' => [
+			'id' => 520,
+			'name' => 'Authorization Rules',
+			'href' => '',
+			'li-class' => '',
+			'icon' => 'fa fa-lock',
+			'icon-class' => 'text-red',
+			'type' => 0, //type 0 used for linked menu item, type 1 user for header in menu
+			'submenuFlag' => 1,
+			'submenu' => [
+					[
+						'id' => 525,
+						'name' => 'Services',
+						'href' => 'tac_services.php',
+						'li-class' => '',
+						'icon' => 'fa fa-circle-o',
+						'icon-class' => 'text-red',
+						'type' => 0, //type 0 used for linked menu item, type 1 user for header in menu
+						'submenuFlag' => 0,
+						'submenu' => [],//.submenu
+					],//.submenu
+					[
+						'id' => 528,
+						'name' => 'CMD Attributes',
+						'href' => 'tac_services_cmd.php',
+						'li-class' => '',
+						'icon' => 'fa fa-circle-o',
+						'icon-class' => 'text-red',
+						'type' => 0, //type 0 used for linked menu item, type 1 user for header in menu
+						'submenuFlag' => 0,
+						'submenu' => [],//.submenu
+					],//.submenu
+				],
+			],
 			'acls' => [
 			'id' => 510,
 			'name' => 'ACLs',
 			'href' => 'tac_acl.php',
-			'li-class' => '',
-			'icon' => 'fa fa-circle-o',
-			'icon-class' => 'text-red',
-			'type' => 0, //type 0 used for linked menu item, type 1 user for header in menu
-			'submenuFlag' => 0,
-			'submenu' => [],//.submenu
-			],
-			'services' => [
-			'id' => 520,
-			'name' => 'Services',
-			'href' => 'tac_services.php',
 			'li-class' => '',
 			'icon' => 'fa fa-circle-o',
 			'icon-class' => 'text-red',

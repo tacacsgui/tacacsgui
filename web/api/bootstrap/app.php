@@ -119,6 +119,10 @@ $container['TACServicesCtrl'] = function($container) {
 	return new \tgui\Controllers\TACServices\TACServicesCtrl($container);
 };
 
+$container['TACCMDCtrl'] = function($container) {
+	return new \tgui\Controllers\TACCMD\TACCMDCtrl($container);
+};
+
 $container['TACConfigCtrl'] = function($container) {
 	return new \tgui\Controllers\TACConfig\TACConfigCtrl($container);
 };

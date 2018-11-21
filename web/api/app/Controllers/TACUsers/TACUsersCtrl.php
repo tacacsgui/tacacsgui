@@ -63,11 +63,13 @@ class TACUsersCtrl extends Controller
 			return $res -> withStatus(403) -> write(json_encode($data));
 		}
 		//CHECK ACCESS TO THAT FUNCTION//END//
+		//$enable_flag_test = $req->getParam('enable_flag');
+		$data['test01'] = v::numeric()->validate($req->getParam('enable_flag'));
 		$policy = APIPWPolicy::select()->first(1);
 		$validation = $this->validator->validate($req, [
 			'username' => v::noWhitespace()->notEmpty()->userTacAvailable(0),
 			'group' => v::noWhitespace(),
-			'enable' => v::when( v::oneOf( v::nullType(), v::equals('') ) , v::alwaysValid(), v::noWhitespace()->notContainChars()->
+			'enable' => v::when( v::oneOf( v::nullType(), v::equals(''), v::loginClone( $req->getParam('enable_flag') ) ) , v::alwaysValid(), v::noWhitespace()->notContainChars()->
 				length($policy['tac_pw_length'], 64)->
 				notEmpty()->
 				passwdPolicyUppercase($policy['tac_pw_uppercase'])->
@@ -75,8 +77,8 @@ class TACUsersCtrl extends Controller
 				passwdPolicySpecial($policy['tac_pw_special'])->
 				passwdPolicyNumbers($policy['tac_pw_numbers'])->
 				desRestriction($req->getParam('enable_flag'))->setName('Enable') ),
-			'enable_flag' => v::noWhitespace()->numeric(),
-			'pap' => v::when( v::nullType() , v::alwaysValid(), v::noWhitespace()->notContainChars()->
+			'enable_flag' => v::when( v::nullType() , v::alwaysValid(), v::oneOf( v::equals('1'), v::equals('0'), v::equals('4') ) ),
+			'pap' => v::when( v::oneOf( v::nullType(), v::equals(''), v::loginClone( $req->getParam('pap_flag') ) ) , v::alwaysValid(), v::noWhitespace()->notContainChars()->
 				length($policy['tac_pw_length'], 64)->
 				notEmpty()->
 				passwdPolicyUppercase($policy['tac_pw_uppercase'])->
@@ -84,7 +86,7 @@ class TACUsersCtrl extends Controller
 				passwdPolicySpecial($policy['tac_pw_special'])->
 				passwdPolicyNumbers($policy['tac_pw_numbers'])->
 				desRestriction($req->getParam('pap_flag'))->setName('PAP') ),
-			'pap_flag' => v::noWhitespace()->numeric(),
+			'pap_flag' => v::when( v::nullType() , v::alwaysValid(), v::oneOf( v::equals('1'), v::equals('0'), v::equals('4') ) ),
 			'login' => v::noWhitespace()->
 					notContainChars()->
 					length($policy['tac_pw_length'], 64)->
@@ -94,7 +96,7 @@ class TACUsersCtrl extends Controller
 					passwdPolicySpecial($policy['tac_pw_special'])->
 					passwdPolicyNumbers($policy['tac_pw_numbers'])->
 					desRestriction($req->getParam('login_flag')),
-			'login_flag' => v::noWhitespace()->numeric(),
+			'login_flag' => v::noWhitespace()->numeric()->oneOf( v::equals('1'), v::equals('0'), v::equals('3') ),
 			'valid_from' => v::when( v::nullType() , v::alwaysValid(), v::date('Y-m-d HH:mm')->setName('Valid From') ),
 			'valid_until' => v::when( v::nullType() , v::alwaysValid(), v::date('Y-m-d HH:mm')->setName('Valid Until') )
 		]);
@@ -205,11 +207,12 @@ class TACUsersCtrl extends Controller
 			return $res -> withStatus(403) -> write(json_encode($data));
 		}
 		//CHECK ACCESS TO THAT FUNCTION//END//
+
 		$policy = APIPWPolicy::select()->first(1);
 		$validation = $this->validator->validate($req, [
 			'username' => v::noWhitespace()->when( v::nullType() , v::alwaysValid(), v::notEmpty()->userTacAvailable($req->getParam('id'))),
 			'group' => v::noWhitespace()->when( v::nullType() , v::alwaysValid(), v::numeric()),
-			'enable' => v::when( v::oneOf( v::nullType(), v::equals('') ) , v::alwaysValid(), v::noWhitespace()->notContainChars()->
+			'enable' => v::when( v::oneOf( v::nullType(), v::equals(''), v::loginClone( $req->getParam('enable_flag') ) ) , v::alwaysValid(), v::noWhitespace()->notContainChars()->
 				length($policy['tac_pw_length'], 64)->
 				notEmpty()->
 				passwdPolicyUppercase($policy['tac_pw_uppercase'])->
@@ -217,7 +220,7 @@ class TACUsersCtrl extends Controller
 				passwdPolicySpecial($policy['tac_pw_special'])->
 				passwdPolicyNumbers($policy['tac_pw_numbers'])->
 				desRestriction($req->getParam('enable_flag'))->setName('Enable') ),
-			'enable_flag' => v::noWhitespace()->when( v::nullType() , v::alwaysValid(), v::numeric()),
+			'enable_flag' => v::when( v::nullType() , v::alwaysValid(), v::oneOf( v::equals('1'), v::equals('0'), v::equals('4') ) ),
 			'login' => v::when( v::nullType() , v::alwaysValid(), v::noWhitespace()->
 					notContainChars()->
 					length($policy['tac_pw_length'], 64)->
@@ -227,8 +230,8 @@ class TACUsersCtrl extends Controller
 					passwdPolicySpecial($policy['tac_pw_special'])->
 					passwdPolicyNumbers($policy['tac_pw_numbers'])->
 					desRestriction($req->getParam('login_flag'))->setName('Login') ),
-			'login_flag' => v::noWhitespace()->when( v::nullType() , v::alwaysValid(), v::numeric()),
-			'pap' => v::when( v::nullType() , v::alwaysValid(), v::noWhitespace()->notContainChars()->
+			'login_flag' => v::when( v::nullType() , v::alwaysValid(), v::oneOf( v::equals('1'), v::equals('0'), v::equals('3') ) ),
+			'pap' => v::when( v::oneOf( v::nullType(), v::equals(''), v::loginClone( $req->getParam('pap_flag') ) ) , v::alwaysValid(), v::noWhitespace()->notContainChars()->
 				length($policy['tac_pw_length'], 64)->
 				notEmpty()->
 				passwdPolicyUppercase($policy['tac_pw_uppercase'])->
@@ -236,7 +239,7 @@ class TACUsersCtrl extends Controller
 				passwdPolicySpecial($policy['tac_pw_special'])->
 				passwdPolicyNumbers($policy['tac_pw_numbers'])->
 				desRestriction($req->getParam('pap_flag'))->setName('PAP') ),
-			'pap_flag' => v::noWhitespace()->when( v::nullType() , v::alwaysValid(), v::numeric()),
+			'pap_flag' => v::when( v::nullType() , v::alwaysValid(), v::oneOf( v::equals('1'), v::equals('0'), v::equals('4') ) ),
 			'mavis_otp_period' => v::noWhitespace()->when( v::nullType() , v::alwaysValid(), v::intVal()->between(30, 120)),
 			'mavis_otp_digits' => v::noWhitespace()->when( v::nullType() , v::alwaysValid(), v::intVal()->between(5, 8)),
 		]);

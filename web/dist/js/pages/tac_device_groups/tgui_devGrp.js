@@ -18,7 +18,8 @@ var tgui_devGrp = {
   init:function() {
     var self = this;
 
-    this.csvParser = new tgui_csvParser(this.csv);
+    this.csvParser = new tgui_csvParser(this.csv),
+
     /*cleare forms when modal is hided*/
     $('#addDeviceGroup').on('hidden.bs.modal', function(){
     	self.clearForm();
@@ -227,6 +228,7 @@ var tgui_devGrp = {
       setTimeout( function () {dataTable.table.ajax.reload()}, 2000 );
     }
   },
+  //csvDownload: this.csvParser.csvDownload,
   clearForm: function() {
     tgui_supplier.clearForm();
     $('input[name="default_flag"]').iCheck('enable');

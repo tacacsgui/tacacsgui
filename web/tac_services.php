@@ -21,6 +21,12 @@ $BREADCRUMB = array(
 		'icon' => 'fa fa-exchange', //leave empty if you won't put icon
 		'class' => '' //last item should have active class!!
 	],
+	'autho' => [
+		'name' => 'Authorisation Rules',
+		'href' => '',
+		'icon' => 'fa fa-lock', //leave empty if you won't put icon
+		'class' => '' //last item should have active class!!
+	],
 	'Services' => [
 		'name' => 'Services',
 		'href' => '',
@@ -29,8 +35,8 @@ $BREADCRUMB = array(
 	]
 );
 ///!!!!!////
-$ACTIVE_MENU_ID=50;
-$ACTIVE_SUBMENU_ID=520;
+$ACTIVE_MENU_ID=[50,520,525];
+$ACTIVE_SUBMENU_ID=525;
 ///!!!!!////
 ///PAGE VARIABLES///END
 ?>
@@ -46,7 +52,16 @@ require __DIR__ . '/templates/header.php';
 	<!-- DataTables -->
 	<link rel="stylesheet" href="bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css">
 	<!-- iCheck -->
-	<link rel="stylesheet" href="/plugins/iCheck/square/blue.css">
+	<link rel="stylesheet" href="plugins/iCheck/square/blue.css">
+	<!-- Select2 -->
+	<link rel="stylesheet" href="bower_components/select2/dist/css/select2.min.css">
+	<!-- dropdown-submenu -->
+	<link rel="stylesheet" href="/dist/css/dropdown-submenu.css">
+	<!-- device-patterns -->
+	<link rel="stylesheet" href="/dist/css/tgui_device_patterns.css">
+	<!-- tgui_sortable -->
+	<link rel="stylesheet" href="/dist/css/tgui_sortable.css">
+
 <!--ADDITIONAL CSS FILES END-->
 
 <?php
@@ -122,11 +137,21 @@ require __DIR__ . '/templates/footer_end.php';
 	<script src="bower_components/datatables.net/js/dataTables.select.min.js"></script>
 	<script src="bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
 	<!-- iCheck -->
-	<script src="/plugins/iCheck/icheck.min.js"></script>
-	<script src="plugins/jquery-csv/jquery-csv.min.js"></script>
+	<script src="plugins/iCheck/icheck.min.js"></script>
+	<!-- Select2 -->
+	<script src="bower_components/select2/dist/js/select2.full.min.js"></script>
 
+	<script src="plugins/jquery-csv/jquery-csv.min.js"></script>
+	<script src="plugins/jQueryUI/jquery-ui.min.js"></script>
+
+	<!-- tgui_device_patterns Object -->
+  <script src="dist/js/tgui_device_patterns.js"></script>
+	<!-- tgui_sortable Object -->
+  <script src="dist/js/tgui_sortable.js"></script>
 	<!-- tgui_csvParser Object -->
   <script src="dist/js/tgui_csvParser.js"></script>
+	<!-- tgui_select2 Object -->
+  <script src="dist/js/tgui_select2.js"></script>
 	<!-- main Object -->
   <script src="dist/js/pages/tac_services/tgui_service.js"></script>
 	<!-- DATATABLES MAIN -->

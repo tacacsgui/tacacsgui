@@ -18,8 +18,9 @@ var tgui_tacUser = {
   select_service_edit: '#editUserForm .select_service',
   init: function(){
     var self = this;
-
+    console.log(this.csv);
     this.csvParser = new tgui_csvParser(this.csv);
+    console.log(this.csvParser);
     /*cleare forms when modal is hided*/
     $('#addUser').on('hidden.bs.modal', function(){
     	self.clearForm();

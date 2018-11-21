@@ -31,6 +31,8 @@ class EmailEngine
     $this->mail->Subject = 'Hello From TacacsGUI';
     $this->mail->Body    = 'Something goes <b>wrong!</b>';
     $this->mail->AltBody = '';
+    $this->mail->isHTML(true); // Set email format to HTML
+    $this->mail->isSMTP(); // Set mailer to use SMTP
   }
 
   public function setTemplate($name = 'test', $variables = [])
@@ -59,14 +61,7 @@ class EmailEngine
     try {
         //Server settings
         if ($this->smtp_debug) $this->mail->SMTPDebug = 2;          // Enable verbose debug output
-        $this->mail->isSMTP();                                      // Set mailer to use SMTP
-
-        //Recipients
-        //$this->mail->addAddress('joe@example.net', 'Joe User');     // Add a recipient
-
-
-        //Content
-        $this->mail->isHTML(true);                                  // Set email format to HTML
+                                              
 
         $this->mail->send();
         return 'Message has been sent';

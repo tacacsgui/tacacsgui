@@ -11,12 +11,33 @@
 		<form id="addServiceForm">
 		<div class="nav-tabs-custom">
       <ul class="nav nav-tabs">
+				<li class="dropdown">
+					<a class="dropdown-toggle" data-toggle="dropdown" href="#" aria-expanded="false" data-submenu="">
+						<i class="fa fa-server"></i> Patterns <span class="caret"></span>
+					</a>
+					<ul class="dropdown-menu pattern-set">
+						<li class="dropdown-submenu">
+							<a href="#" data-toggle="dropdown"><i class="fa fa-clone"></i> Cisco Systems</a>
+							<ul class="dropdown-menu">
+								<li><a href="#" data-pattern="cisco-rs" data-disabled="1" onclick="tgui_device_patterns.switch(this)"><i class="fa fa-square-o"></i> Cisco R/S</a></li>
+								<li><a href="#" data-pattern="cisco-nexus" data-disabled="1" onclick="tgui_device_patterns.switch(this)"><i class="fa fa-square-o"></i> Cisco Nexus</a></li>
+								<li><a href="#" data-pattern="cisco-wlc" data-disabled="1" onclick="tgui_device_patterns.switch(this)"><i class="fa fa-square-o"></i> Cisco WLC</a></li>
+							</ul>
+						</li>
+						<li><a href="#" data-pattern="juniper" data-disabled="1" onclick="tgui_device_patterns.switch(this)"><i class="fa fa-square-o"></i> Juniper</a></li>
+						<li><a href="#" data-pattern="huawei" data-disabled="1" onclick="tgui_device_patterns.switch(this)"><i class="fa fa-square-o"></i> Huawei</a></li>
+						<li><a href="#" data-pattern="paloalto" data-disabled="1" onclick="tgui_device_patterns.switch(this)"><i class="fa fa-square-o"></i> Palo Alto</a></li>
+						<li><a href="#" data-pattern="fortios" data-disabled="1" onclick="tgui_device_patterns.switch(this)"><i class="fa fa-square-o"></i> FortiOS</a></li>
+					</ul>
+				</li>
         <li class="active"><a href="#general_info" data-toggle="tab" aria-expanded="true">General</a></li>
-        <li><a href="#cisco" data-toggle="tab" aria-expanded="true">Cisco</a></li>
-        <li><a href="#ciscowlc" data-toggle="tab" aria-expanded="true">CiscoWLC</a></li>
-        <li><a href="#juniper" data-toggle="tab" aria-expanded="true">Juniper</a></li>
-        <li><a href="#huawei" data-toggle="tab" aria-expanded="true">Huawei</a></li>
-        <li><a href="#fortios" data-toggle="tab" aria-expanded="true">FortiOS</a></li>
+        <li class="device-pattern device-pattern-hidden cisco-rs"><a href="#cisco" data-toggle="tab" aria-expanded="true">Cisco R/S</a></li>
+        <li class="device-pattern device-pattern-hidden cisco-wlc"><a href="#cisco-wlc" data-toggle="tab" aria-expanded="true">Cisco WLC</a></li>
+        <li class="device-pattern device-pattern-hidden cisco-nexus"><a href="#cisco-nexus" data-toggle="tab" aria-expanded="true">Cisco Nexus</a></li>
+        <li class="device-pattern device-pattern-hidden juniper"><a href="#juniper" data-toggle="tab" aria-expanded="true">Juniper</a></li>
+        <li class="device-pattern device-pattern-hidden huawei"><a href="#huawei" data-toggle="tab" aria-expanded="true">Huawei</a></li>
+        <li class="device-pattern device-pattern-hidden paloalto"><a href="#paloalto" data-toggle="tab" aria-expanded="true">Palo Alto</a></li>
+        <li class="device-pattern device-pattern-hidden fortios"><a href="#fortios" data-toggle="tab" aria-expanded="true">FortiOS</a></li>
   			<li class="pull-right"><a href="#manual" data-toggle="tab" aria-expanded="false" class="text-muted"><i class="fa fa-gear"></i></a></li>
       </ul>
       <div class="tab-content">
@@ -28,16 +49,24 @@
 					<?php include __DIR__ . '/tabCisco.php';?>
 				</div>
 				<!-- /.tab-pane -->
-				<div class="tab-pane" id="ciscowlc">
+				<div class="tab-pane" id="cisco-nexus">
+					What should be here? :(
+				</div>
+				<!-- /.tab-pane -->
+				<div class="tab-pane" id="cisco-wlc">
 					<?php include __DIR__ . '/tabCiscoWLC.php';?>
 				</div>
 				<!-- /.tab-pane -->
 				<div class="tab-pane" id="juniper">
-					<?php include __DIR__ . '/tabJuniper.php';?>
+					What should be here? :(
 				</div>
 				<!-- /.tab-pane -->
 				<div class="tab-pane" id="huawei">
-					<?php include __DIR__ . '/tabHuawei.php';?>
+					What should be here? :(
+				</div>
+				<!-- /.tab-pane -->
+				<div class="tab-pane" id="paloalto">
+					<?php include __DIR__ . '/tabPaloAlto.php';?>
 				</div>
 				<!-- /.tab-pane -->
 				<div class="tab-pane" id="fortios">

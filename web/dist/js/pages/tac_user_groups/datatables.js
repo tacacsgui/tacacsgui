@@ -4,7 +4,7 @@ var initialData =
 	tableSelector: '#userGroupsDataTable',
 	item: 'userGrp',
 	deleteItems: tgui_tacUserGrp.delete,
-	exportCsv: tgui_tacUserGrp.csvDownload || function(){return false;},
+	exportCsv: function(idList){ tgui_tacUserGrp.csvParser.csvDownload(idList); return true;},
   columns:
 	{
 		id: {title: "ID", data : "id", orderable: true, visible: false,},

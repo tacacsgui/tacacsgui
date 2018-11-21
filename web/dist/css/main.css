@@ -1,3 +1,6 @@
+.empty-paragraph {
+  margin: 0px !important;
+}
 .tgui_expander .header i {
   color: #999;
 }

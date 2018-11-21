@@ -544,6 +544,34 @@ class TACConfigCtrl extends Controller
 				}
 				$data['output'] = ConfigPatterns::tacACLPartGen(true, $allParams['id']);
 				break;
+			case 'service':
+				//CHECK ACCESS TO THAT FUNCTION//START//
+				if(!$this->checkAccess(11, true))
+				{
+					return $res -> withStatus(403) -> write(json_encode($data));
+				}
+				//CHECK ACCESS TO THAT FUNCTION//END//
+				if ( !isset($allParams['id']) OR $allParams['id'] == 0){
+					$data['error']['status']=true;
+					$data['error']['message']='Bad Request';
+					return $res -> withStatus(200) -> write(json_encode($data));
+				}
+				$data['output'] = ConfigPatterns::tacService(true, $allParams['id']);
+				break;
+			case 'cmd':
+				//CHECK ACCESS TO THAT FUNCTION//START//
+				if(!$this->checkAccess(11, true))
+				{
+					return $res -> withStatus(403) -> write(json_encode($data));
+				}
+				//CHECK ACCESS TO THAT FUNCTION//END//
+				if ( !isset($allParams['id']) OR $allParams['id'] == 0){
+					$data['error']['status']=true;
+					$data['error']['message']='Bad Request';
+					return $res -> withStatus(200) -> write(json_encode($data));
+				}
+				$data['output'] = ConfigPatterns::tacCMDAttr(true, $allParams['id']);
+				break;
 			default:
 				$data['error']['status']=true;
 				$data['error']['message']='Bad Request';

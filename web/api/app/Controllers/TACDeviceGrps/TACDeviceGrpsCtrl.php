@@ -72,7 +72,7 @@ class TACDeviceGrpsCtrl extends Controller
 				passwdPolicySpecial($policy['tac_pw_special'])->
 				passwdPolicyNumbers($policy['tac_pw_numbers'])->
 				desRestriction($req->getParam('enable_flag'))->setName('Enable') ),
-			'enable_flag' => v::noWhitespace()->numeric(),
+			'enable_flag' => v::when( v::nullType() , v::alwaysValid(), v::oneOf( v::equals('1'), v::equals('0') ) ),
 			'key' => v::noWhitespace()->prohibitedChars(),
 		]);
 
@@ -176,7 +176,7 @@ class TACDeviceGrpsCtrl extends Controller
 				passwdPolicySpecial($policy['tac_pw_special'])->
 				passwdPolicyNumbers($policy['tac_pw_numbers'])->
 				desRestriction($req->getParam('enable_flag'))->setName('Enable') ),
-			'enable_flag' => v::noWhitespace()->when( v::nullType() , v::alwaysValid(), v::numeric()),
+			'enable_flag' => v::when( v::nullType() , v::alwaysValid(), v::oneOf( v::equals('1'), v::equals('0') ) ),
 			'key' => v::noWhitespace()->when( v::nullType() , v::alwaysValid(), v::prohibitedChars()),
 		]);
 

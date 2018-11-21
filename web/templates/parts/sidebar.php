@@ -18,26 +18,31 @@
 
 		<!-- Sidebar Menu -->
 		<ul class="sidebar-menu" data-widget="tree">
-		<?php foreach ($MAIN_MENU as $itemMenu){
-				if ($itemMenu['type']){
-					echo '<li class="header '.$itemMenu['li-class'].'">'.$itemMenu['name'].'</li>';
-				} else {
-					if ($itemMenu['submenuFlag']){
-						echo '<li class="treeview grp_access_parent '.$itemMenu['li-class'].' '. (($itemMenu['id']==$ACTIVE_MENU_ID) ? 'active':'').'">
-							<a href="#"><i class="'.$itemMenu['icon'].' '.$itemMenu['icon-class'].'"></i> <span>'.$itemMenu['name'].'</span>
-							<span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i>
-							</span></a>';
-						echo '<ul class="treeview-menu">';
-						foreach ($itemMenu['submenu'] as $subitemMenu){
-							echo '<li class=" grp_access '.$subitemMenu['li-class'].' '. (($subitemMenu['id']==$ACTIVE_SUBMENU_ID) ? 'active':'').'"><a href="'.$subitemMenu['href'].'"><i class="'.$subitemMenu['icon'].' '.$subitemMenu['icon-class'].'"></i> '.$subitemMenu['name'].'</a></li>';
-						}
-						echo '</ul></li>';
-					} else {
-						echo '<li class=" grp_access '.$itemMenu['li-class'].' '. (($itemMenu['id']==$ACTIVE_MENU_ID) ? 'active':'').'"><a href="'.$itemMenu['href'].'"><i class="'.$itemMenu['icon'].' '.$itemMenu['icon-class'].'"></i> <span>'.$itemMenu['name'].'</span></a></li>';
-					}
-				}
-			}
-		?>
+
+    <?php function menu_constructor($menu = [], $ACTIVE_MENU_ID = []){
+      if ( empty($menu) ) return false;
+      foreach ($menu as $itemMenu) {
+        if ($itemMenu['type'] == 1){
+          echo '<li class="header '.$itemMenu['li-class'].'">'.$itemMenu['name'].'</li>';
+          continue;
+        }
+        if ($itemMenu['submenuFlag'] == 1){
+          echo '<li class="treeview grp_access_parent '.$itemMenu['li-class'].' '. ( ( in_array($itemMenu['id'], $ACTIVE_MENU_ID) ) ? 'active':'').'">
+            <a href="#"><i class="'.$itemMenu['icon'].' '.$itemMenu['icon-class'].'"></i> <span>'.$itemMenu['name'].'</span>
+            <span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i>
+            </span></a>';
+          echo '<ul class="treeview-menu">';
+          menu_constructor($itemMenu['submenu'],$ACTIVE_MENU_ID);
+
+          echo '</ul></li>';
+        } else {
+          echo '<li class=" grp_access '.$itemMenu['li-class'].' '. ( ( in_array($itemMenu['id'], $ACTIVE_MENU_ID) ) ? 'active':'').'"><a href="'.$itemMenu['href'].'"><i class="'.$itemMenu['icon'].' '.$itemMenu['icon-class'].'"></i> <span>'.$itemMenu['name'].'</span></a></li>';
+        }
+      }
+    }
+      menu_constructor($MAIN_MENU, $ACTIVE_MENU_ID);
+    ?>
+
       </ul>
       <!-- /.sidebar-menu -->
     </section>

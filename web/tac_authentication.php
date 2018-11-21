@@ -23,7 +23,7 @@ $BREADCRUMB = array(
 	]
 );
 ///!!!!!////
-$ACTIVE_MENU_ID=90;
+$ACTIVE_MENU_ID=[90,910];
 $ACTIVE_SUBMENU_ID=910;
 ///!!!!!////
 ///PAGE VARIABLES///END

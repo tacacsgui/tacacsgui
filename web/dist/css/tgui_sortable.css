@@ -1,0 +1,55 @@
+.tgui_sortable {
+  list-style-type: none;
+  padding-inline-start: 0px;
+  padding: 5px;
+  background-color: #eee;
+  border: 1px solid #999;
+  min-height: 100px;
+  max-height: 300px;
+  overflow: auto;
+}
+
+.tgui_sortable > li {
+  cursor: grab;
+  border: 1px solid rgb(85, 85, 85);
+  padding: 5px;
+  background-color: rgb(255, 255, 255);
+  margin-bottom: 3px;
+  display: table;
+  width: 100%; /*Optional*/
+  table-layout: fixed; /*Optional*/
+}
+
+.tgui_sortable > li.info {
+  border: 1px solid #3c8dbc;
+  background-color: #3c8dbc52;
+}
+.tgui_sortable > li.permit {
+  border: 1px solid rgb(0, 166, 90);
+  background-color: #00a65a26;
+}
+.tgui_sortable > li.deny {
+  border: 1px solid #dd4b39;
+  background-color: rgba(236, 151, 31, 0.2);
+}
+
+.tgui_sortable > li > div.el-text {
+  text-align: center;
+  display: table-cell;
+  table-layout: fixed; /*Optional*/
+  padding-left: 5px;
+  width: 75%;
+  overflow:hidden;
+  white-space:nowrap;
+  text-overflow: ellipsis;
+}
+.tgui_sortable > li > div.el-close {
+  color: #777;
+  display: table-cell;
+  width: 20%;
+  text-align: right;
+  padding-right: 5px;
+}
+.tgui_sortable > li > div.el-close > span {
+  cursor: pointer;
+}

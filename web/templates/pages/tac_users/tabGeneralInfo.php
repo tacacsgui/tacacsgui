@@ -12,7 +12,7 @@
 					<input type="hidden" data-type="input" data-default="" name="disabled_native">
 				</div>
 			</div>
-			<p class="help-block">it will be used for authorization and you can change it later</p>
+			<p class="help-block">it will be used for authentication and you can change it later</p>
 		</div>
 	</div>
 	<div class="col-sm-6">

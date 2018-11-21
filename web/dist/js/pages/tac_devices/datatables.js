@@ -4,7 +4,7 @@ var initialData =
 	tableSelector: '#devicesDataTable',
 	item: 'device',
 	deleteItems: tgui_device.delete,
-	exportCsv: tgui_device.csvDownload,
+	exportCsv: function(idList){ tgui_device.csvParser.csvDownload(idList); return true;},
   columns:
 	{
 		id: {title: "ID", data : "id", orderable: true, visible: false,},

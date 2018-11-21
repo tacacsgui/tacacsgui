@@ -23,8 +23,7 @@ $BREADCRUMB = array(
 	]
 );
 ///!!!!!////
-$ACTIVE_MENU_ID=40;
-$ACTIVE_SUBMENU_ID=410;
+$ACTIVE_MENU_ID=[40,410];
 ///!!!!!////
 ///PAGE VARIABLES///END
 ?>
@@ -95,7 +94,7 @@ require __DIR__ . '/templates/body_start.php';
 			<div class="box-body">
 				<form id="tacGlobalForm" method="post">
 				<div class="row">
-				<div class="col-md-4 col-lg-4">
+				<div class="col-sm-4">
 					<div class="form-group port">
 						<label>Listening Port</label>
 						<input type="number" class="form-control" name="port" data-type="input" data-default="" data-pickup="true" placeholder="Enter Listening Port">
@@ -106,7 +105,7 @@ require __DIR__ . '/templates/body_start.php';
 				<hr>
 				<h3>Authentication</h3>
 				<div class="row">
-				<div class="col-md-4 col-lg-4">
+				<div class="col-sm-4">
 					<div class="form-group max_attempts">
 						<label>Authentication Max Attempt</label>
 						<input type="number" class="form-control max_attempts" name="max_attempts" data-type="input" data-default="" data-pickup="true" placeholder="Enter Max Attempt">
@@ -114,7 +113,7 @@ require __DIR__ . '/templates/body_start.php';
 						<input type="hidden" name="max_attempts_native" value="">
 					</div>
 				</div>
-				<div class="col-md-4 col-lg-4">
+				<div class="col-sm-4">
 					<div class="form-group backoff">
 						<label>Backoff Timer</label>
 						<input type="number" class="form-control backoff" name="backoff" data-type="input" data-default="" data-pickup="true" placeholder="Enter Backoff Timer">
@@ -126,7 +125,7 @@ require __DIR__ . '/templates/body_start.php';
 				<hr>
 				<h3>Limits and Timeouts</h3>
 				<div class="row">
-				<div class="col-md-4 col-lg-4">
+				<div class="col-sm-4">
 					<div class="form-group connection_timeout">
 						<label>Connection Timeout</label>
 						<input type="number" class="form-control" name="connection_timeout" data-type="input" data-default="" data-pickup="true" placeholder="Enter Connection Timeout">
@@ -134,7 +133,7 @@ require __DIR__ . '/templates/body_start.php';
 						<input type="hidden" name="connection_timeout_native" value="">
 					</div>
 				</div>
-				<div class="col-md-4 col-lg-4">
+				<div class="col-sm-4">
 					<div class="form-group context_timeout">
 						<label>Context Timeout</label>
 						<input type="number" class="form-control" name="context_timeout" data-type="input" data-default="" data-pickup="true" placeholder="Enter Context Timeout">
@@ -147,7 +146,7 @@ require __DIR__ . '/templates/body_start.php';
 				<h3>Reports Settings</h3>
 				<small class="text-red">be careful with those settings! it influences on log parser script!</small>
 				<div class="row">
-				<div class="col-md-4 col-lg-4">
+				<div class="col-sm-4">
 					<div class="form-group authentication">
 						<label>Authentication</label>
 						<input type="text" class="form-control" name="authentication" data-type="input" data-default="" data-pickup="true" placeholder="Enter Authentication Settings">
@@ -155,7 +154,7 @@ require __DIR__ . '/templates/body_start.php';
 						<input type="hidden" name="authentication_native" value="">
 					</div>
 				</div>
-				<div class="col-md-4 col-lg-4">
+				<div class="col-sm-4">
 					<div class="form-group authorization">
 						<label>Authorization</label>
 						<input type="text" class="form-control" name="authorization" data-type="input" data-default="" data-pickup="true" placeholder="Enter Authorization Settings">
@@ -163,7 +162,7 @@ require __DIR__ . '/templates/body_start.php';
 						<input type="hidden" name="authorization_native" value="">
 					</div>
 				</div>
-				<div class="col-md-4 col-lg-4">
+				<div class="col-sm-4">
 					<div class="form-group accounting">
 						<label>Accounting</label>
 						<input type="text" class="form-control" name="accounting" data-type="input" data-default="" data-pickup="true" placeholder="Enter Accounting Settings">
@@ -173,7 +172,7 @@ require __DIR__ . '/templates/body_start.php';
 				</div>
 				</div>
 				<!--<div class="row">
-				<div class="col-md-4 col-lg-4">
+				<div class="col-sm-4">
 					<div class="form-group">
 						<label>Log Separator</label>
 						<input type="text" class="form-control" name="separator" placeholder="Enter Log Separator">

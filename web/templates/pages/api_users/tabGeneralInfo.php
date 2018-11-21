@@ -11,7 +11,7 @@
 <div class="col-sm-6">
   <div class="form-group group">
     <label>User Group</label>
-    <select class="select_group form-control select2" style="width:100%"></select>
+    <select class="select_group form-control select2" name="group" data-type="select" data-default="" data-pickup="true" style="width:100%"></select>
     <input type="hidden" name="group_native">
   </div>
 </div>

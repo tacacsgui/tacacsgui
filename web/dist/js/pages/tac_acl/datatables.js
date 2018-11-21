@@ -4,7 +4,7 @@ var initialData =
 	tableSelector: '#aclDataTable',
 	item: 'acl',
 	deleteItems: tgui_acl.delete,
-	exportCsv: tgui_acl.csvDownload || function(){return false;},
+	exportCsv: function(idList){ tgui_acl.csvParser.csvDownload(idList); return true;},
   columns:
 	{
 		id: {title: "ID", data : "id", orderable: true, visible: false,},

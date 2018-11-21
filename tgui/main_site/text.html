@@ -1,0 +1,173 @@
+<div class="box box-solid">
+  <div class="box-body">
+    <h2>Tacacs Global Settings</h2>
+    <hr>
+    [main-title content="Section Content"]
+    <ul class="content-overview-list">
+      <li><h3><a href="#start_stop">Start/Stop Tacacs Daemon</a></h3></li>
+      <li><h3><a href="#global_settings">Tacacs Daemon Global Settings</a></h3></li>
+    </ul>
+    <hr>
+    [main-title content="Start/Stop Tacacs Daemon" id="start_stop"]
+    [doc-image width="60%" help_block="Table Overview" src="/wp-content/uploads/2018/11/start_stop.png"]
+    [table-title content="Buttons Overview"]
+    <table class="table table-striped">
+      <thead>
+        <tr class="table-header">
+          <th>Button</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><a class="btn btn-app"><i class="fa fa-play"></i> Start</a></td>
+          <td>Start tacacs daemon</td>
+        </tr>
+        <tr>
+          <td><a class="btn btn-app"><i class="fa fa-pause"></i> Stop</a></td>
+          <td>Stop tacacs daemon</td>
+        </tr>
+        <tr>
+          <td><a class="btn btn-app"><i class="fa fa-repeat"></i> Reload</a></td>
+          <td>Reload tacacs daemon</td>
+        </tr>
+        <tr>
+          <td><a class="btn btn-app"><i class="fa fa-info"></i> Get Status</a></td>
+          <td>Get daemon status info</td>
+        </tr>
+      </tbody>
+    </table>
+    <p>Also this section have field where shown tacacs daemon status, like feild below.</p>
+    <div class="row">
+      <div class="col-md-6">
+        <div class="form-group">
+					<label>Current Status</label>
+					<input type="text" class="form-control" name="deamon_status" disabled value="Active: active (running) since Fri 2018-11-09 13:56:51 GMT; 1 day 17h ago">
+				</div>
+      </div>
+    </div>
+    <p>To show tacacs daemon status via cli, use command <code>service tac_plus status</code>, example below.</p>
+<pre>tacgui@tacgui:~$ service tac_plus status
+● tac_plus.service - LSB: Starts and stops the tac_plus server process.
+   Loaded: loaded (/etc/init.d/tac_plus; bad; vendor preset: enabled)
+   Active: active (running) since Fri 2018-11-09 09:19:54 MSK; 2 days ago
+     Docs: man:systemd-sysv-generator(8)
+  Process: 9768 ExecStop=/etc/init.d/tac_plus stop (code=exited, status=0/SUCCESS)
+  Process: 9776 ExecStart=/etc/init.d/tac_plus start (code=exited, status=0/SUCCESS)
+    Tasks: 7
+   Memory: 20.5M
+      CPU: 6.579s
+   CGroup: /system.slice/tac_plus.service
+           ├─9783 tac_plus: 0 connections, accepting up to 480 more
+           ├─9785 tac_plus: 0 connections
+           ├─9786 tac_plus: 0 connections
+           ├─9790 /usr/bin/php /opt/tacacsgui/mavis-modules/local/module.php
+           ├─9791 /usr/bin/php /opt/tacacsgui/mavis-modules/otp/module.php
+           ├─9802 sh -c  /opt/tacacsgui/parser/tacacs_parser.sh authentication
+           └─9803 /bin/bash /opt/tacacsgui/parser/tacacs_parser.sh authentication</pre>
+    [main-title content="Tacacs Daemon Global Settings" id="global_settings"]
+    [doc-image width="60%" help_block="Global Settings" src="/wp-content/uploads/2018/11/global_settings.png"]
+    [table-title content="Fields Overview"]
+    <table class="table table-striped">
+      <col width="50%">
+      <col width="50%">
+      <thead>
+        <tr class="table-header">
+          <th>Field</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+            <div class="form-group port">
+  						<label>Listening Port</label>
+  						<input type="number" class="form-control" placeholder="Enter Listening Port">
+					  </div>
+          </td>
+          <td>Listening Port. By default, it is 49 (TCP).</td>
+        </tr>
+        <tr>
+          <td>
+            <div class="form-group">
+  						<label>Authentication Max Attempt</label>
+  						<input type="number" class="form-control" placeholder="Enter Max Attempt">
+  						<p class="help-block">that parameter limits the number of <i>Password:</i> prompts per TACACS+ session at login, default: 1</p>
+					  </div>
+          </td>
+          <td>This parameter limits the number of Password: prompts per TACACS+ session at login. It currently defaults to 1</td>
+        </tr>
+        <tr>
+          <td>
+            <div class="form-group">
+						<label>Backoff Timer</label>
+						<input type="number" class="form-control" placeholder="Enter Backoff Timer">
+						<p class="help-block">tacacs will wait for <i>seconds</i> before returning a final authentication failure (password incorrect) message, default: 1 second</p>
+					</div>
+          </td>
+          <td>This parameter sets a backoff time for failed authentications. The daemon will wait for seconds seconds before returning a final authentication failure (password incorrect) message.</td>
+        </tr>
+        <tr>
+          <td>
+            <div class="form-group">
+  						<label>Connection Timeout</label>
+  						<input type="number" class="form-control" placeholder="Enter Connection Timeout">
+  						<p class="help-block">terminate a connection to a NAS after an idle period of at least <i>s</i> seconds, default: 600 seconds</p>
+					  </div>
+          </td>
+          <td>Terminate a connection to a NAS after an idle period of at least s seconds.</td>
+        </tr>
+        <tr>
+          <td>
+            <div class="form-group">
+  						<label>Context Timeout</label>
+  						<input type="number" class="form-control" placeholder="Enter Context Timeout">
+  						<p class="help-block">clears context cache entries after <i>s</i> seconds of inactivity, default: 3600 seconds</p>
+					  </div>
+          </td>
+          <td>Clears context cache entries after s seconds of inactivity. Default: 3600 seconds.</td>
+        </tr>
+        <tr>
+          <td>
+            <div class="form-group">
+  						<label>Authentication</label>
+  						<input type="text" class="form-control" placeholder="Enter Authentication Settings">
+  						<p class="help-block">here you can set path to file on the server, command or syslog server ip and port, <text class="text-red">by default it used for Log Parser script</text></p>
+					  </div>
+          </td>
+          <td>This parameter used for Log Parser system. But you can set your own, beware with that. There is more info <a href="http://www.pro-bono-publico.de/projects/tac_plus.html#AEN383" target="_blank">here</a>.</td>
+        </tr>
+        <tr>
+          <td>
+            <div class="form-group">
+  						<label>Authorization</label>
+  						<input type="text" class="form-control" placeholder="Enter Authorization Settings">
+  						<p class="help-block">here you can set path to file on the server, command or syslog server ip and port, <text class="text-red">by default it used for Log Parser script</text></p>
+					  </div>
+          </td>
+          <td>This parameter used for Log Parser system. But you can set your own, beware with that. There is more info <a href="http://www.pro-bono-publico.de/projects/tac_plus.html#AEN383" target="_blank">here</a>.</td>
+        </tr>
+        <tr>
+          <td>
+            <div class="form-group accounting">
+  						<label>Accounting</label>
+  						<input type="text" class="form-control" placeholder="Enter Accounting Settings">
+  						<p class="help-block">here you can set path to file on the server, command or syslog server ip and port, <text class="text-red">by default it used for Log Parser script</text></p>
+					  </div>
+          </td>
+          <td>This parameter used for Log Parser system. But you can set your own, beware with that. There is more info <a href="http://www.pro-bono-publico.de/projects/tac_plus.html#AEN383" target="_blank">here</a>.</td>
+        </tr>
+        <tr>
+          <td>
+            <div class="form-group">
+              <label>Manual Configuration</label>
+  						<textarea class="form-control" placeholder="Manual configuration"></textarea>
+				  	</div>
+          </td>
+          <td>Here you can add manual settings in global scope. By default, there is Log Parser settings here.</td>
+        </tr>
+      </tbody>
+    </table>
+[documentation_footer]
+  </div>
+</div>

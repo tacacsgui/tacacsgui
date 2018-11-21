@@ -4,7 +4,7 @@ var initialData =
 	tableSelector: '#usersDataTable',
 	item: 'user',
 	deleteItems: tgui_tacUser.delete,
-	exportCsv: tgui_tacUser.csvDownload || function(){return false;},
+	exportCsv: function(idList){ tgui_tacUser.csvParser.csvDownload(idList); return true;},
   columns:
 	{
 		id: {title: "ID", data : "id", orderable: true, visible: false,},
@@ -30,6 +30,7 @@ var initialData =
 var dataTable = {
 	init: function() {
 		this.settings.columnsFilter();
+		console.log(initialData);
 		this.settings.preview();
 		this.settings.columnDefs =
 		[{

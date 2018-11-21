@@ -1,0 +1,10 @@
+.device-pattern {
+
+}
+.device-pattern-hidden {
+  display:none !important;
+}
+.nav-pills>li.active>a, .nav-pills>li.active>a:focus, .nav-pills>li.active>a:hover {
+  background: transparent;
+  color: #444;
+}

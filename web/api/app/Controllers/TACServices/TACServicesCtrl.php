@@ -64,8 +64,8 @@ class TACServicesCtrl extends Controller
 
 		$validation = $this->validator->validate($req, [
 			'name' => v::noWhitespace()->notEmpty()->serviceTacAvailable(0),
-			'priv-lvl' => v::noWhitespace()->numeric()->between(-1, 15),
-			'default_cmd' => v::noWhitespace()->boolVal(),
+			//'priv-lvl' => v::noWhitespace()->numeric()->between(-1, 15),
+			//'default_cmd' => v::noWhitespace()->boolVal(),
 			'manual_conf_only' => v::noWhitespace()->boolVal(),
 		]);
 
@@ -154,8 +154,8 @@ class TACServicesCtrl extends Controller
 
 		$validation = $this->validator->validate($req, [
 			'name' => v::noWhitespace()->when( v::nullType() , v::alwaysValid(), v::notEmpty()->serviceTacAvailable($req->getParam('id'))),
-			'priv-lvl' => v::noWhitespace()->when( v::nullType() , v::alwaysValid(), v::numeric()->between(-1, 15)),
-			'default_cmd' => v::noWhitespace()->when( v::nullType() , v::alwaysValid(), v::boolVal()),
+			//'priv-lvl' => v::noWhitespace()->when( v::nullType() , v::alwaysValid(), v::numeric()->between(-1, 15)),
+			//'default_cmd' => v::noWhitespace()->when( v::nullType() , v::alwaysValid(), v::boolVal()),
 			'manual_conf_only' => v::noWhitespace()->when( v::nullType() , v::alwaysValid(), v::boolVal()),
 		]);
 
@@ -469,7 +469,6 @@ class TACServicesCtrl extends Controller
 			offset($offset);
 
 		$tempCounter = $tempData->count();
-
 		$tempData = $tempData->get()->toArray();
 		$data['pagination'] = (!$tempData OR $tempCounter < 10) ? ['more' => false] : [ 'more' => true];
 		$data['results']= ( $take == 10 AND empty($search) ) ? array( 0 => $noneItem) : array();

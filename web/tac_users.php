@@ -23,7 +23,7 @@ $BREADCRUMB = array(
 	]
 );
 ///!!!!!////
-$ACTIVE_MENU_ID=30;
+$ACTIVE_MENU_ID=[30,310];
 $ACTIVE_SUBMENU_ID=310;
 ///!!!!!////
 ///PAGE VARIABLES///END
@@ -133,8 +133,6 @@ require __DIR__ . '/templates/footer_end.php';
 	<script src="bower_components/moment/moment.js"></script>
 	<!-- bootstrap-datetimepicker -->
 	<script src="plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js"></script>
-	<!-- tgui_expander -->
-	<script src="dist/js/tgui_expander.js"></script>
 
 	<!-- Select2 Object -->
 	<script src="dist/js/tgui_select2.js"></script>

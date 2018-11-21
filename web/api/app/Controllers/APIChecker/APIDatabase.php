@@ -200,8 +200,48 @@ class APIDatabase
   		'name' => ['string',''],
   		'priv-lvl' => ['integer', -1],
   		'default_cmd' => ['integer', '0'],
+      //Patterns List//
+        //Cisco RS//
+        'cisco_rs_enable' => ['integer', '0'],
+        'cisco_rs_privlvl' => ['integer', '15'],
+        'cisco_rs_def_cmd' => ['integer', '1'],
+        'cisco_rs_def_attr' => ['integer', '1'],
+        'cisco_rs_idletime' => ['integer', '_'],
+        'cisco_rs_timeout' => ['integer', '_'],
+        'cisco_rs_debug_message' => ['integer', '0'],
+        'cisco_rs_cmd' => ['string', ''],
+        'cisco_rs_autocmd' => ['string', ''],
+        'cisco_rs_manual' => ['text', '_'],
+        //Cisco WLC//
+        'cisco_wlc_enable' => ['integer', '0'],
+        'cisco_wlc_roles' => ['string', ''],
+        'cisco_wlc_manual' => ['text', '_'],
+        //FortiOS//
+        'fortios_enable' => ['integer', '0'],
+        'fortios_admin_prof' => ['string', ''],
+        'fortios_manual' => ['text', '_'],
+        //PaloAlto//
+        'paloalto_enable' => ['integer', '0'],
+        'paloalto_admin_role' => ['string', ''],
+        'paloalto_admin_domain' => ['string', ''],
+        'paloalto_panorama_admin_role' => ['string', ''],
+        'paloalto_panorama_admin_domain' => ['string', ''],
+        'paloalto_user_group' => ['string', ''],
+        'paloalto_manual' => ['text', '_'],
+      //END Pattern List
   		'manual' => ['text', '_'],
   		'manual_conf_only' => ['integer', '0'],
+  	],
+  	'tac_cmd' =>
+  	[
+  		'name' => ['string',''],
+      'type' => ['string',''],
+      'cmd' => ['string',''],
+      'cmd_attr' => ['text','_'],
+      'cmd_permit_end' => ['integer',0],
+      'manual' => ['text','_'],
+      'message_deny' => ['string',''],
+      'message_permit' => ['string',''],
   	],
   	'mavis_ldap' =>
   	[

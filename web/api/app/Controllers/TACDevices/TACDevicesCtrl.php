@@ -116,7 +116,7 @@ class TACDevicesCtrl extends Controller
 				passwdPolicySpecial($policy['tac_pw_special'])->
 				passwdPolicyNumbers($policy['tac_pw_numbers'])->
 				desRestriction($req->getParam('enable_flag'))->setName('Enable') ),
-			'enable_flag' => v::noWhitespace(),
+			'enable_flag' => v::when( v::nullType() , v::alwaysValid(), v::oneOf( v::equals('1'), v::equals('0') ) ),
 			'key' => v::when( v::tacacsKeyAvailable($allParams['group']), v::alwaysValid(),
 			 	v::noWhitespace()->notContainChars()->
 				length($policy['tac_pw_length'], 64)->
@@ -231,7 +231,7 @@ class TACDevicesCtrl extends Controller
 				passwdPolicySpecial($policy['tac_pw_special'])->
 				passwdPolicyNumbers($policy['tac_pw_numbers'])->
 				desRestriction($req->getParam('enable_flag'))->setName('Enable') ),
-			'enable_flag' => v::noWhitespace()->when( v::nullType() , v::alwaysValid(), v::numeric()),
+			'enable_flag' => v::when( v::nullType() , v::alwaysValid(), v::oneOf( v::equals('1'), v::equals('0') ) ),
 			'key' => v::when( v::oneOf(v::tacacsKeyAvailable($group), v::nullType()) , v::alwaysValid(), v::noWhitespace()->notContainChars()->
 				length($policy['tac_pw_length'], 64)->
 				notEmpty()->

@@ -78,19 +78,22 @@ class PostEngine extends Controller
     if (!$settings->smtp_servers OR !$settings->smtp_port) return false;
     if ($settings->smtp_auth AND (!$settings->smtp_username OR !$settings->smtp_password)) return false;
     $mail = new PHPMailer(true);
-    $mail->Host =  $settings->smtp_servers;
-    if ( isset($settings->smtp_username) ) $mail->Username =  $settings->smtp_username;
-    if ( isset($settings->smtp_password) ) $mail->Password =  $settings->smtp_password;
-    $mail->Port =  $settings->smtp_port;
-    $mail->SMTPSecure =  $settings->smtp_secure;
-    $mail->SMTPAuth =  !!$settings->smtp_auth;
 
+    $mail->Host = ( isset($settings->smtp_servers) ) ? $settings->smtp_servers : 'smtp.example.com';
+    if ( isset($settings->smtp_username) ) $mail->Username = $settings->smtp_username;
+    if ( isset($settings->smtp_password) ) $mail->Password = $settings->smtp_password;
+    $mail->Port = ( isset($settings->smtp_port) ) ? $settings->smtp_port : 465;
+    if ( isset($settings->smtp_secure) ) $mail->SMTPSecure = $settings->smtp_secure;
+    if ( isset($settings->smtp_auth) ) $mail->SMTPAuth = $settings->smtp_auth;
+    $mail->setFrom($settings->smtp_from, 'TacacsGUI');
+    $mail->SMTPAutoTLS = ( isset($settings->smtp_autotls) ) ? $settings->smtp_autotls : false;
     $mail->Subject = 'Hello From TacacsGUI';
     $mail->Body    = 'Something goes <b>wrong!</b>';
-    $mail->AltBody = '__empty_alternative_body__';
-    $mail->setFrom($mail->Username, 'TacacsGUI');
-    $mail->isSMTP();
-    $mail->isHTML(true);                                  // Set email format to HTML
+    $mail->AltBody = '';
+    $mail->isHTML(true); // Set email format to HTML
+    $mail->isSMTP(); // Set mailer to use SMTP
+
+
     $this->engine = $mail;
     return true;
   }

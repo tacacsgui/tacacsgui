@@ -2,9 +2,9 @@ var initialData =
 {
 	ajaxLink: "tacacs/services/datatables/",
 	tableSelector: '#servicesDataTable',
-	item: 'servise',
+	item: 'service',
 	deleteItems: tgui_service.delete,
-	exportCsv: tgui_service.csvDownload || function(){return false;},
+	exportCsv: function(idList){ tgui_service.csvParser.csvDownload(idList); return true;},
   columns:
 	{
 		id: {title: "ID", data : "id", orderable: true, visible: false,},
@@ -17,7 +17,7 @@ var initialData =
   column:
 	{
 		select: true,
-		preview: false
+		preview: true
 	},
   sort:
 	{

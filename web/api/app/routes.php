@@ -114,6 +114,17 @@ $app->post('/tacacs/services/delete/', 'TACServicesCtrl:postServiceDelete');
 $app->get('/tacacs/services/list/', 'TACServicesCtrl:getServiceList');
 $app->post('/tacacs/services/csv/', 'TACServicesCtrl:postServiceCsv');
 #####################################################
+###Tacacs CMD Routes#######################################
+$app->post('/tacacs/cmd/datatables/', 'TACCMDCtrl:postDatatables');
+$app->get('/tacacs/cmd/add/', 'TACCMDCtrl:getAdd');
+$app->post('/tacacs/cmd/add/', 'TACCMDCtrl:postAdd');
+$app->get('/tacacs/cmd/edit/', 'TACCMDCtrl:getEdit');
+$app->post('/tacacs/cmd/edit/', 'TACCMDCtrl:postEdit');
+$app->get('/tacacs/cmd/delete/', 'TACCMDCtrl:getDelete');
+$app->post('/tacacs/cmd/delete/', 'TACCMDCtrl:postDelete');
+$app->get('/tacacs/cmd/list/', 'TACCMDCtrl:getList');
+$app->post('/tacacs/cmd/csv/', 'TACCMDCtrl:postCsv');
+#####################################################
 ###Tacacs Configuration Generator Routes#######################################
 $app->get('/tacacs/config/generate/file/', 'TACConfigCtrl:getConfigGenFile');
 $app->get('/tacacs/config/generate/', 'TACConfigCtrl:getConfigGen');
