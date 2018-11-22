@@ -400,6 +400,14 @@ class TACServicesCtrl extends Controller
 		foreach($tempData as $service){
 			$buttons='<button class="btn btn-warning btn-xs btn-flat" onclick="tgui_service.getService(\''.$service['id'].'\',\''.$service['name'].'\')">Edit</button> <button class="btn btn-danger btn-xs btn-flat" onclick="tgui_service.delete(\''.$service['id'].'\',\''.$service['name'].'\')">Del</button>';
 			$service['buttons'] = $buttons;
+			$service['patterns'] = '';
+			if ( !$service['manual_conf_only'] ){
+				if ($service['cisco_rs_enable']) $service['patterns'] .= '<p class="empty-paragraph">Cisco R/S</p>';
+				if ($service['cisco_wlc_enable']) $service['patterns'] .= '<p class="empty-paragraph">Cisco WLC</p>';
+				if ($service['fortios_enable']) $service['patterns'] .= '<p class="empty-paragraph">FortiOS</p>';
+				if ($service['paloalto_enable']) $service['patterns'] .= '<p class="empty-paragraph">Palo Alto</p>';
+			} else $service['patterns'] .= '<p class="empty-paragraph">Manual ONLY</p>';
+
 			array_push($data['data'],$service);
 		}
 		//Some additional parameters for Datatables

@@ -19,10 +19,10 @@
         </button>
         <ul class="dropdown-menu dropdown-menu-right">
           <?php if( !empty($extraBtn['exportCsv']) ) : ?>
-          <li><a href="#" onclick="dataTable.settings.exportCsv()">Export Selected (CSV)</a></li>
+          <li><a href="javascript: void(0)" onclick="dataTable.settings.exportCsv()">Export Selected (CSV)</a></li>
           <?php endif; ?>
           <?php if( !empty($extraBtn['delete']) ) : ?>
-          <li><a href="#" onclick="dataTable.settings.deleteSelected()">Delete Selected</a></li>
+          <li><a href="javascript: void(0)" onclick="dataTable.settings.deleteSelected()">Delete Selected</a></li>
           <?php endif; ?>
         </ul>
       </div>

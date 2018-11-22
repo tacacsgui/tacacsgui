@@ -9,7 +9,7 @@ var initialData =
 	{
 		id: {title: "ID", data : "id", orderable: true, visible: false,},
 		name: {title: "Name", data : "name", visible: true, orderable: true},
-		'priv-lvl': {title: "Privilege Lvl", data : "priv-lvl", visible: false, orderable: true},
+		patterns: {title: "Patterns", data : "patterns", visible: true, orderable: false},
 	 	created_at: {title: "Created at", data : "created_at", visible: false, orderable: true},
 	 	updated_at: {title: "Updated at", data : "updated_at", visible: false, orderable: true},
 		buttons: {title: "Action", data : "buttons", visible: true, orderable: false},
@@ -21,7 +21,7 @@ var initialData =
 	},
   sort:
 	{
-		column: 2,
+		column: 3,
 		order: 'asc'
 	},
 };

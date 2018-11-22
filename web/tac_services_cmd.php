@@ -107,7 +107,7 @@ require __DIR__ . '/templates/body_start.php';
 	</div><!-- /.col -->
 </div><!-- /.row -->
 <?php
-$jsMainObjName = 'tgui_service';
+$jsMainObjName = 'tgui_cmd';
 require __DIR__ . '/templates/parts/part_csvParser.php';
 
 ?>

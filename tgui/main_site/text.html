@@ -1,16 +1,34 @@
 <div class="box box-solid">
   <div class="box-body">
-    <h2>Tacacs Global Settings</h2>
+    <h2>Tacacs CMD Attributes. General Info</h2>
     <hr>
     [main-title content="Section Content"]
     <ul class="content-overview-list">
-      <li><h3><a href="#start_stop">Start/Stop Tacacs Daemon</a></h3></li>
-      <li><h3><a href="#global_settings">Tacacs Daemon Global Settings</a></h3></li>
+      <li><h3><a href="#tableOverview">Table Overview</a></h3>
+        <ul>
+          <li><h4><a href="#tobButtons">Top Buttons</a></h4></li>
+          <li><h4><a href="#rowsSelection">Rows Selection</a></h4></li>
+          <li><h4><a href="#confPreview">Configuration Preview</a></h4></li>
+        </ul>
+      </li>
+      <li><h3><a href="#tableFiltering">Table Filtering</a></h3>
+        <ul>
+          <li><h4><a href="#filterConditions">Filter Conditions</a></h4></li>
+          <li><h4><a href="#filteringAttrs">Filtering Attributes</a></h4></li>
+        </ul>
+      </li>
+      <li><h3><a href="#csv_main">CSV Export/Import</a></h3>
+        <ul>
+          <li><h4><a href="#csv_export_all">CSV Export All Data</a></h4></li>
+          <li><h4><a href="#csv_export_selected">CSV Export Selected Items</a></h4></li>
+          <li><h4><a href="#csv_import">CSV Import</a></h4></li>
+        </ul>
+      </li>
     </ul>
     <hr>
-    [main-title content="Start/Stop Tacacs Daemon" id="start_stop"]
-    [doc-image width="60%" help_block="Table Overview" src="/wp-content/uploads/2018/11/start_stop.png"]
-    [table-title content="Buttons Overview"]
+    [main-title content="Table Overview" id="tableOverview"]
+    [doc-image width="60%" help_block="Table Overview" src="/wp-content/uploads/2018/11/tableoverview.png"]
+    [sub-title content="Top Buttons" id="tobButtons"]
     <table class="table table-striped">
       <thead>
         <tr class="table-header">
@@ -20,154 +38,274 @@
       </thead>
       <tbody>
         <tr>
-          <td><a class="btn btn-app"><i class="fa fa-play"></i> Start</a></td>
-          <td>Start tacacs daemon</td>
+          <td><div class="btn-group">
+                  <button type="button" class="btn btn-success btn-flat" onclick="return false;">+ Add CMD</button>
+                  <button type="button" class="btn btn-success btn-flat dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                    <span class="caret"></span>
+                    <span class="sr-only">Toggle Dropdown</span>
+                  </button>
+                  <ul class="dropdown-menu" role="menu">
+                    <li><a href="#" onclick="return false;">Cisco Type</a></li>
+                  </ul>
+                </div></td>
+          <td>used to add new cmd</td>
         </tr>
         <tr>
-          <td><a class="btn btn-app"><i class="fa fa-pause"></i> Stop</a></td>
-          <td>Stop tacacs daemon</td>
+          <td><a class="btn btn-flat btn-info" href="#" onclick="return false;">Filter</a></td>
+          <td>used to filter main table. There are filter attributes below in that section</td>
         </tr>
         <tr>
-          <td><a class="btn btn-app"><i class="fa fa-repeat"></i> Reload</a></td>
-          <td>Reload tacacs daemon</td>
+          <td><div class="btn-group"><button type="button" class="btn btn-warning btn-flat dropdown-toggle" data-toggle="dropdown" aria-expanded="false">Action <span class="caret"></span></button><ul class="dropdown-menu dropdown-menu-right"><li><a href="#" onclick="return false;">Export Selected (CSV)</a></li><li><a href="#" onclick="return false;">Delete Selected</a></li></ul></div></td>
+          <td>apply action to selected elements (rows)</td>
         </tr>
         <tr>
-          <td><a class="btn btn-app"><i class="fa fa-info"></i> Get Status</a></td>
-          <td>Get daemon status info</td>
+          <td><div class="btn-group"><button type="button" class="btn btn-default btn-flat dropdown-toggle" data-toggle="dropdown">More Columns <span class="caret"></span></button></div></td>
+          <td>hide/show more columns</td>
         </tr>
       </tbody>
     </table>
-    <p>Also this section have field where shown tacacs daemon status, like feild below.</p>
-    <div class="row">
-      <div class="col-md-6">
-        <div class="form-group">
-					<label>Current Status</label>
-					<input type="text" class="form-control" name="deamon_status" disabled value="Active: active (running) since Fri 2018-11-09 13:56:51 GMT; 1 day 17h ago">
-				</div>
-      </div>
-    </div>
-    <p>To show tacacs daemon status via cli, use command <code>service tac_plus status</code>, example below.</p>
-<pre>tacgui@tacgui:~$ service tac_plus status
-● tac_plus.service - LSB: Starts and stops the tac_plus server process.
-   Loaded: loaded (/etc/init.d/tac_plus; bad; vendor preset: enabled)
-   Active: active (running) since Fri 2018-11-09 09:19:54 MSK; 2 days ago
-     Docs: man:systemd-sysv-generator(8)
-  Process: 9768 ExecStop=/etc/init.d/tac_plus stop (code=exited, status=0/SUCCESS)
-  Process: 9776 ExecStart=/etc/init.d/tac_plus start (code=exited, status=0/SUCCESS)
-    Tasks: 7
-   Memory: 20.5M
-      CPU: 6.579s
-   CGroup: /system.slice/tac_plus.service
-           ├─9783 tac_plus: 0 connections, accepting up to 480 more
-           ├─9785 tac_plus: 0 connections
-           ├─9786 tac_plus: 0 connections
-           ├─9790 /usr/bin/php /opt/tacacsgui/mavis-modules/local/module.php
-           ├─9791 /usr/bin/php /opt/tacacsgui/mavis-modules/otp/module.php
-           ├─9802 sh -c  /opt/tacacsgui/parser/tacacs_parser.sh authentication
-           └─9803 /bin/bash /opt/tacacsgui/parser/tacacs_parser.sh authentication</pre>
-    [main-title content="Tacacs Daemon Global Settings" id="global_settings"]
-    [doc-image width="60%" help_block="Global Settings" src="/wp-content/uploads/2018/11/global_settings.png"]
-    [table-title content="Fields Overview"]
+    [sub-title content="Rows Selection" id="rowsSelection"]
+    <p>To select rows one by one hold on <kbd>Ctrl</kbd> key. To select range of rows hold on <kbd>Shift</kbd> key. Like it shown on the picture below.</p>
+    [doc-image width="60%" help_block="Rows Selection" src="/wp-content/uploads/2018/11/service_selecting.gif"]
+    [sub-title content="Configuration Preview" id="confPreview"]
+    <p>To preview tacacs user configuration click on preview button, like it shown on the picture below.</p>
+    [doc-image width="60%" help_block="Configuration Preview" src="/wp-content/uploads/2018/11/service_preview.gif"]
+    [main-title content="Table Filtering" id="tableFiltering"]
+    <p>To filter the table use Filter field, like it done on the picture below</p>
+    [doc-image width="60%" help_block="Table Filtering" src="/wp-content/uploads/2018/11/service_filtering.gif"]
+    [sub-title content="Filtering Conditions" id="filterConditions"]
     <table class="table table-striped">
-      <col width="50%">
-      <col width="50%">
       <thead>
-        <tr class="table-header">
-          <th>Field</th>
+        <tr>
+          <th>Condition</th>
           <th>Description</th>
         </tr>
       </thead>
       <tbody>
         <tr>
-          <td>
-            <div class="form-group port">
-  						<label>Listening Port</label>
-  						<input type="number" class="form-control" placeholder="Enter Listening Port">
-					  </div>
-          </td>
-          <td>Listening Port. By default, it is 49 (TCP).</td>
+          <td>=</td>
+          <td>implicit equal</td>
         </tr>
         <tr>
-          <td>
-            <div class="form-group">
-  						<label>Authentication Max Attempt</label>
-  						<input type="number" class="form-control" placeholder="Enter Max Attempt">
-  						<p class="help-block">that parameter limits the number of <i>Password:</i> prompts per TACACS+ session at login, default: 1</p>
-					  </div>
-          </td>
-          <td>This parameter limits the number of Password: prompts per TACACS+ session at login. It currently defaults to 1</td>
+          <td>!=</td>
+          <td>implicit not equal</td>
         </tr>
         <tr>
-          <td>
-            <div class="form-group">
-						<label>Backoff Timer</label>
-						<input type="number" class="form-control" placeholder="Enter Backoff Timer">
-						<p class="help-block">tacacs will wait for <i>seconds</i> before returning a final authentication failure (password incorrect) message, default: 1 second</p>
-					</div>
-          </td>
-          <td>This parameter sets a backoff time for failed authentications. The daemon will wait for seconds seconds before returning a final authentication failure (password incorrect) message.</td>
+          <td>==</td>
+          <td>equal</td>
         </tr>
         <tr>
-          <td>
-            <div class="form-group">
-  						<label>Connection Timeout</label>
-  						<input type="number" class="form-control" placeholder="Enter Connection Timeout">
-  						<p class="help-block">terminate a connection to a NAS after an idle period of at least <i>s</i> seconds, default: 600 seconds</p>
-					  </div>
-          </td>
-          <td>Terminate a connection to a NAS after an idle period of at least s seconds.</td>
+          <td>!==</td>
+          <td>not equal</td>
         </tr>
         <tr>
-          <td>
-            <div class="form-group">
-  						<label>Context Timeout</label>
-  						<input type="number" class="form-control" placeholder="Enter Context Timeout">
-  						<p class="help-block">clears context cache entries after <i>s</i> seconds of inactivity, default: 3600 seconds</p>
-					  </div>
-          </td>
-          <td>Clears context cache entries after s seconds of inactivity. Default: 3600 seconds.</td>
+          <td>,</td>
+          <td>bool AND</td>
         </tr>
         <tr>
-          <td>
-            <div class="form-group">
-  						<label>Authentication</label>
-  						<input type="text" class="form-control" placeholder="Enter Authentication Settings">
-  						<p class="help-block">here you can set path to file on the server, command or syslog server ip and port, <text class="text-red">by default it used for Log Parser script</text></p>
-					  </div>
-          </td>
-          <td>This parameter used for Log Parser system. But you can set your own, beware with that. There is more info <a href="http://www.pro-bono-publico.de/projects/tac_plus.html#AEN383" target="_blank">here</a>.</td>
-        </tr>
-        <tr>
-          <td>
-            <div class="form-group">
-  						<label>Authorization</label>
-  						<input type="text" class="form-control" placeholder="Enter Authorization Settings">
-  						<p class="help-block">here you can set path to file on the server, command or syslog server ip and port, <text class="text-red">by default it used for Log Parser script</text></p>
-					  </div>
-          </td>
-          <td>This parameter used for Log Parser system. But you can set your own, beware with that. There is more info <a href="http://www.pro-bono-publico.de/projects/tac_plus.html#AEN383" target="_blank">here</a>.</td>
-        </tr>
-        <tr>
-          <td>
-            <div class="form-group accounting">
-  						<label>Accounting</label>
-  						<input type="text" class="form-control" placeholder="Enter Accounting Settings">
-  						<p class="help-block">here you can set path to file on the server, command or syslog server ip and port, <text class="text-red">by default it used for Log Parser script</text></p>
-					  </div>
-          </td>
-          <td>This parameter used for Log Parser system. But you can set your own, beware with that. There is more info <a href="http://www.pro-bono-publico.de/projects/tac_plus.html#AEN383" target="_blank">here</a>.</td>
-        </tr>
-        <tr>
-          <td>
-            <div class="form-group">
-              <label>Manual Configuration</label>
-  						<textarea class="form-control" placeholder="Manual configuration"></textarea>
-				  	</div>
-          </td>
-          <td>Here you can add manual settings in global scope. By default, there is Log Parser settings here.</td>
+          <td>=''</td>
+          <td>an attribute equals empty value (not all attribute can be filtered by that condition)</td>
         </tr>
       </tbody>
     </table>
+    <div class="callout callout-info">
+      <h4>Example</h4>
+      <p><i>name=serv_1</i> - it means, you try to find row where service name contains (=) "serv_1".</p>
+    </div>
+    [sub-title content="Filter Attributes" id="filteringAttrs"]
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th>Attribute</th>
+            <th>Type</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>name</td>
+            <td>string</td>
+            <td>service name</td>
+          </tr>
+        </tbody>
+      </table>
+      [main-title content="CSV Export/Import" id="csv_main"]
+      <p>With CSV file you can easily add bunch of services.</p>
+      [sub-title content="CSV Export All Data" id="csv_export_all"]
+      <p>To export all data click on <button type="button" class="btn btn-success btn-flat">Save as CSV</button> button, that prepare export file. Then click on <a href="#" onclick="return false;">Download</a> link and save file on your local disk.</p>
+      [sub-title content="CSV Export Selected Items" id="csv_export_selected"]
+      <p>To export part of data, select items, click on <button type="button" class="btn btn-warning btn-flat dropdown-toggle">Action <span class="caret"></span></button> button and then click on <span style="padding:5px;background-color:#eee;color:#777;">Export Selected (CSV)</span>, that prepare export file. Then click on <a class="btn btn-flat btn-warning"><i class="fa fa-download"></i></a> button and save file on your local disk.</p>
+      [sub-title content="CSV Import" id="csv_import"]
+      <p>CSV file must contain header with list of attribute names and data. Attribute names in the table below.</p>
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th>Attribute Name</th>
+            <th>Type</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>name (<span class="text-red">Required!</span>)</td>
+            <td>string</td>
+            <td>unique service name</td>
+          </tr>
+          <tr>
+            <td>priv-lvl (<span class="text-warning">Depricated!</span>)</td>
+            <td>integer</td>
+            <td>general privelege level</td>
+          </tr>
+          <tr>
+            <td>default_cmd (<span class="text-warning">Depricated!</span>)</td>
+            <td>integer</td>
+            <td>default cmd (0 - disabled, 1 - enabled)</td>
+          </tr>
+          <tr>
+            <td>manual_conf_only</td>
+            <td>integer</td>
+            <td>use only manual settings, all patterns will be ignored  (0 - disabled, 1 - enabled), default 0</td>
+          </tr>
+          <tr>
+            <td>manual</td>
+            <td>string</td>
+            <td>configure manual settings for that pattern</td>
+          </tr>
+          <tr>
+            <th colspan="3">Cisco Router/Switch Pattern Attributes</th>
+          </tr>
+          <tr>
+            <td>cisco_rs_enable</td>
+            <td>integer</td>
+            <td>enable cisco r/s pattern (0 - disabled, 1 - enabled), default 0</td>
+          </tr>
+          <tr>
+            <td>cisco_rs_privlvl</td>
+            <td>integer</td>
+            <td>privilege level (between 0 or 15), default 15</td>
+          </tr>
+          <tr>
+            <td>cisco_rs_def_cmd</td>
+            <td>integer</td>
+            <td>permit any command by default (0 - disabled, 1 - enabled), default 1</td>
+          </tr>
+          <tr>
+            <td>cisco_rs_def_attr</td>
+            <td>integer</td>
+            <td>permit any attribute by default (0 - disabled, 1 - enabled), default 1</td>
+          </tr>
+          <tr>
+            <td>cisco_rs_idletime</td>
+            <td>integer</td>
+            <td>idle time, default null</td>
+          </tr>
+          <tr>
+            <td>cisco_rs_timeout</td>
+            <td>integer</td>
+            <td>connection timeout time, default null</td>
+          </tr>
+          <tr>
+            <td>cisco_rs_debug_message</td>
+            <td>integer</td>
+            <td>output debug message afret any command (0 - disabled, 1 - enabled), default 0</td>
+          </tr>
+          <tr>
+            <td>cisco_rs_cmd</td>
+            <td>string</td>
+            <td>list of cmd id separated by ;; (10;;23;;3)</td>
+          </tr>
+          <tr>
+            <td>cisco_rs_autocmd</td>
+            <td>string</td>
+            <td>list of autocmd separated by ;; (sh ver;;sh runn)</td>
+          </tr>
+          <tr>
+            <td>cisco_rs_manual</td>
+            <td>string</td>
+            <td>manual configuration for that pattern</td>
+          </tr>
+          <tr>
+            <th colspan="3">Cisco WLC Pattern Attributes</th>
+          </tr>
+          <tr>
+            <td>cisco_wlc_enable</td>
+            <td>integer</td>
+            <td>enable cisco wlc pattern (0 - disabled, 1 - enabled), default 0</td>
+          </tr>
+          <tr>
+            <td>cisco_wlc_roles</td>
+            <td>string</td>
+            <td>list of roles number separated by ;; (2;;4)</td>
+          </tr>
+          <tr>
+            <td>cisco_wlc_manual</td>
+            <td>string</td>
+            <td>manual configuration for that pattern</td>
+          </tr>
+          <tr>
+            <th colspan="3">FortiOS Pattern Attributes</th>
+          </tr>
+          <tr>
+            <td>fortios_enable</td>
+            <td>integer</td>
+            <td>enable fortios pattern (0 - disabled, 1 - enabled), default 0</td>
+          </tr>
+          <tr>
+            <td>fortios_admin_prof</td>
+            <td>string</td>
+            <td>pre-configured admin profile</td>
+          </tr>
+          <tr>
+            <td>fortios_manual</td>
+            <td>string</td>
+            <td>manual configuration for that pattern</td>
+          </tr>
+          <tr>
+            <th colspan="3">Palo Alto Pattern Attributes</th>
+          </tr>
+          <tr>
+            <td>paloalto_enable</td>
+            <td>integer</td>
+            <td>enable palo alto pattern (0 - disabled, 1 - enabled), default 0</td>
+          </tr>
+          <tr>
+            <td>paloalto_admin_role</td>
+            <td>string</td>
+            <td>pre-configured admin role</td>
+          </tr>
+          <tr>
+            <td>paloalto_admin_domain</td>
+            <td>string</td>
+            <td>pre-configured admin domain</td>
+          </tr>
+          <tr>
+            <td>paloalto_panorama_admin_role</td>
+            <td>string</td>
+            <td>pre-configured panorama admin role</td>
+          </tr>
+          <tr>
+            <td>paloalto_panorama_admin_domain</td>
+            <td>string</td>
+            <td>pre-configured panorama admin domain</td>
+          </tr>
+          <tr>
+            <td>paloalto_user_group</td>
+            <td>string</td>
+            <td>pre-configured user group</td>
+          </tr>
+          <tr>
+            <td>paloalto_manual</td>
+            <td>string</td>
+            <td>manual configuration for that pattern</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="callout callout-info">
+        <h4>CSV Example</h4>
+        <p><a href="/wp-content/uploads/2018/11/tac_services_8OTxopb7.csv">Here is CSV example (tac_services_8OTxopb7.csv)</a></p>
+      </div>
+      <p>To Import CSV file, choose file from your local disk, select csv separator ( , or ; ) and push the <button type="button" class="btn btn-warning btn-flat">Upload CSV</button> button.</p>
+      [doc-image width="60%" help_block="Successful Import" src="/wp-content/uploads/2018/11/service_csv_import.png"]
 [documentation_footer]
   </div>
 </div>

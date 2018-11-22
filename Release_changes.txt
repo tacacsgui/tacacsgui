@@ -1,9 +1,13 @@
 ##############################
+Version_0.9.51 20181121
+	* Minor improvements
+	* Some Bugs fixed
+##############################
 Version_0.9.50 20181121
 	* Added Service Profiles
 	* Added CMD attributes base
 	* Added many new bugs
-	* Some Bugs fixed 
+	* Some Bugs fixed
 ##############################
 Version_0.9.47 20181106
 	* Added attributes Valid From, Valid Until for Tacacs User and Tacacs User Groups

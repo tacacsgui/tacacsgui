@@ -252,14 +252,14 @@ class TACCMDCtrl extends Controller
 		//CHECK ACCESS TO THAT FUNCTION//END//
 		$data['clear'] = shell_exec( TAC_ROOT_PATH . '/main.sh delete temp');
 		$path = TAC_ROOT_PATH . '/temp/';
-		$filename = 'tac_services_'. $this->generateRandomString(8) .'.csv';
+		$filename = 'tac_cmd_'. $this->generateRandomString(8) .'.csv';
 
-		$columns = $this->APICheckerCtrl->getTableTitles('tac_services');
+		$columns = $this->APICheckerCtrl->getTableTitles('tac_cmd');
 
 	  $f = fopen($path.$filename, 'w');
 		$idList = $req->getParam('idList');
 		$array = [];
-		$array = ( empty($idList) ) ? TACServices::select($columns)->get()->toArray() : TACServices::select($columns)->whereIn('id', $idList)->get()->toArray();
+		$array = ( empty($idList) ) ? TACCMD::select($columns)->get()->toArray() : TACCMD::select($columns)->whereIn('id', $idList)->get()->toArray();
 
 		fputcsv($f, $columns /*, ',)'*/);
 	  foreach ($array as $line) {
