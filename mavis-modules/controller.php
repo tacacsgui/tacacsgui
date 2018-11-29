@@ -11,7 +11,8 @@ class mavis_cotrl
 
   public function __construct($val = [])
   {
-    if ( ! empty($val['debugCleare']) ) file_put_contents('/var/log/tacacsgui/mavis_debug.txt', "");
+    //if ( ! empty($val['debugCleare']) )
+    file_put_contents('/var/log/tacacsgui/mavis_debug.txt', "");
   }
 
   public function in($value = '')
@@ -103,7 +104,7 @@ class mavis_cotrl
     if ($this->debug) file_put_contents('/var/log/tacacsgui/mavis_debug.txt', $output, FILE_APPEND);
 
     fwrite(STDOUT, $output);
-    die();
+    exit(0);
   }
 
 

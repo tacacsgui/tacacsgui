@@ -8,7 +8,8 @@ require __DIR__ . '/../controller.php';
 $mavis = new mavis_cotrl;
 
 $debug = true;
-$debugPrefix = 'LDAP Module. ';
+$date = new DateTime();
+$debugPrefix = $date->format('Y-m-d H:i:s') . ' LDAP Module. ';
 
 $settings = array(
 	'db' => [
@@ -33,6 +34,8 @@ while($f = fgets(STDIN)){
 	$mavis->in($f);
 }
 
+if ( ! $mavis->getUsername() ) exit(0);
+
 if ($debug) $mavis->debugIn($debugPrefix.'Start!');
 
 $ldap = $capsule->table('mavis_ldap')->select()->first();
@@ -41,17 +44,11 @@ $config = [
 	// Mandatory Configuration Options
 	'hosts'            => array_map('trim', explode(',', $ldap->hosts) ),
 	'base_dn'          => $ldap->base,
-	'username'         => $ldap->user,
+	'username'         => ( strpos($ldap->user, '@') !== false ) ? $ldap->user : $ldap->user . '@'.( str_replace( ',', '.', preg_replace('/DC=/i', '', $ldap->base) ) ),
 	'password'         => $ldap->password,
-
 	// Optional Configuration Options
 	'schema'           => Adldap\Schemas\ActiveDirectory::class,
-	//'account_prefix'   => 'ACME-',
-	//'account_suffix'   => '@acme.org',
 	'port'             => $ldap->port,
-	'follow_referrals' => false,
-	'use_ssl'          => false,
-	'use_tls'          => false,
 	'version'          => 3,
 	'timeout'          => 5,
 ];
@@ -72,18 +69,20 @@ try {
 if ($debug) $mavis->debugIn($debugPrefix.'Connect Success!');
 $search = $provider->search();
 
-//$filter = 'CN=FileAccess_1';
+if ($debug) $mavis->debugIn($debugPrefix.'User '.$mavis->getUsername().'.');
 
-$adUser = $search->select(['cn', 'memberOf'])->where('objectclass', 'user')->where( $ldap->filter, $mavis->getUsername() )->first();
+$adUser = $search->select(['distinguishedname', 'name', 'memberOf'])->where('objectclass', 'user')->where( $ldap->filter, $mavis->getUsername() )->first();
 
 if ( !$adUser ) {
-	if ($debug) $mavis->debugIn($debugPrefix.'User not found! Exit.');
+	if ($debug) $mavis->debugIn($debugPrefix.'User '.$mavis->getUsername().' not found! Exit.');
 	$mavis->out(AV_V_RESULT_NOTFOUND);
 }
+//var_dump($adUser->distinguishedname[0]);
+if ($debug) $mavis->debugIn($debugPrefix.'DN: '. $adUser->distinguishedname[0]);
 
 try {
 
-    if ( ! $ad->auth()->attempt( $mavis->getUsername(), $mavis->getPassword() ) ) {
+    if ( ! $ad->auth()->attempt( $adUser->distinguishedname[0], $mavis->getPassword() ) ) {
 			if ($debug) $mavis->debugIn($debugPrefix.'Auth FAIL!');
 			$mavis->out(AV_V_RESULT_FAIL);
 		}
@@ -100,7 +99,7 @@ try {
 
 if ($debug) $mavis->debugIn($debugPrefix.'Auth Success!');
 
-if ( ! $ad->auth()->attempt( $mavis->getUsername(), $mavis->getPassword() ) ) $mavis->out(AV_V_RESULT_FAIL);
+//if ( ! $ad->auth()->attempt( $adUser->distinguishedname[0], $mavis->getPassword() ) ) $mavis->out(AV_V_RESULT_FAIL);
 
 //$adUser = $search->rawFilter($filter)->get();
 if ($debug) $mavis->debugIn($debugPrefix.'Get Groups');
@@ -131,8 +130,5 @@ $mavis->setMempership($groupList_result);
 $mavis->auth();
 if ($debug) $mavis->debugIn($debugPrefix.'Exit');
 $mavis->out();
-
-
-die();
 
 if ($debug) $mavis->debugIn($debugPrefix.'Outside of Module!! Exit.');

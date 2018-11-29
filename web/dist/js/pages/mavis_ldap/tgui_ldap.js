@@ -57,9 +57,12 @@ var tgui_ldap = {
     l.start();
     $('.ldap-test').hide();
 
+    var formData = tgui_supplier.getFormData(self.formSelector);
+
     var ajaxProps = {
       url: API_LINK+"mavis/ldap/test/",
       type: 'POST',
+      data: formData
     };//ajaxProps END
 
     ajaxRequest.send(ajaxProps).then(function(resp) {

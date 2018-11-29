@@ -7,10 +7,11 @@ use Respect\Validation\Validator as v;
 
 require __DIR__ . '/../controller.php';
 
-$mavis = new mavis_cotrl(['debugCleare' => true]);
+$mavis = new mavis_cotrl();
 
 $debug = true;
-$debugPrefix = 'Local Module. ';
+$date = new DateTime();
+$debugPrefix = $date->format('Y-m-d H:i:s') . ' Local Module. ';
 
 $settings = array(
 	'db' => [
@@ -116,4 +117,4 @@ if ($debug) $mavis->debugIn($debugPrefix.'Start!');
 
 	if ($debug) $mavis->debugIn($debugPrefix.'Outside of module!');
 
-	die();
+	//die();

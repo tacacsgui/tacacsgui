@@ -568,19 +568,13 @@ class TACUserGrpsCtrl extends Controller
 
 		$config = [
 			// Mandatory Configuration Options
-			'hosts'            => explode(',', $ldap->hosts),
+			'hosts'            => array_map('trim', explode(',', $ldap->hosts) ),
 			'base_dn'          => $ldap->base,
-			'username'         => $ldap->user,
+			'username'         => ( strpos($ldap->user, '@') !== false ) ? $ldap->user : $ldap->user . '@'.( str_replace( ',', '.', preg_replace('/DC=/i', '', $ldap->base) ) ),
 			'password'         => $ldap->password,
-
 			// Optional Configuration Options
-			'schema'           => AD::class,
-			//'account_prefix'   => 'ACME-',
-			//'account_suffix'   => '@acme.org',
+			'schema'           => \Adldap\Schemas\ActiveDirectory::class,
 			'port'             => $ldap->port,
-			'follow_referrals' => false,
-			'use_ssl'          => false,
-			'use_tls'          => false,
 			'version'          => 3,
 			'timeout'          => 5,
 		];

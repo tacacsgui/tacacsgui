@@ -32,7 +32,7 @@ class MAVISLDAPCtrl extends Controller
 
 		$data['LDAP_Params']=MAVISLDAP::select()->first();
 
-		$data['LDAP_Params']['password'] = $this->generateRandomString( strlen($data['LDAP_Params']['password']) );
+		$data['LDAP_Params']['password'] = '***************';//$this->generateRandomString( strlen($data['LDAP_Params']['password']) );
 
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
@@ -163,20 +163,19 @@ class MAVISLDAPCtrl extends Controller
 
 		$data['test'] = false;
 
+		$allParams = $req->getParams();
+
 		$ldap = MAVISLDAP::select()->first();
 
 		$config = [
 			// Mandatory Configuration Options
-			'hosts'            => array_map('trim', explode(',', $ldap->hosts) ),
-			'base_dn'          => $ldap->base,
-			'username'         => $ldap->user,
-			'password'         => $ldap->password,
-
+			'hosts'            => array_map('trim', explode(',', $allParams['hosts']) ),
+			'base_dn'          => $allParams['base'],
+			'username'         => ( strpos($allParams['user'], '@') !== false ) ? $allParams['user'] : $allParams['user'] . '@'.( str_replace( ',', '.', preg_replace('/DC=/i', '', $allParams['base']) ) ),
+			'password'         => ( empty(preg_replace('/[\*]+/', '', $allParams['password'])) ) ? $ldap->password : $allParams['password'],
 			// Optional Configuration Options
 			'schema'           => ActiveDirectory::class,
-			//'account_prefix'   => 'ACME-',
-			//'account_suffix'   => '@acme.org',
-			'port'             => $ldap->port,
+			'port'             => intval($allParams['port']),
 			'follow_referrals' => false,
 			'use_ssl'          => false,
 			'use_tls'          => false,
@@ -193,6 +192,7 @@ class MAVISLDAPCtrl extends Controller
 		} catch (\Adldap\Auth\BindException $e) {
 				$data['test'] = 1;
 				$data['exception'] = $e->getMessage();
+				//var_dump($e); die;
 				return $res -> withStatus(200) -> write(json_encode($data));
 		}
 
