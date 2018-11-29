@@ -15,6 +15,8 @@ class TACGlobalConf extends Model
 		'authentication',
 		'connection_timeout',
 		'context_timeout',
+		'skip_conflicting_groups',
+		'skip_missing_groups',
 		'max_attempts',
 		'backoff',
 		'manual',

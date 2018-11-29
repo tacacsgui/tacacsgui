@@ -37,6 +37,8 @@ require __DIR__ . '/templates/header.php';
 
 	<!-- iCheck -->
 	<link rel="stylesheet" href="/plugins/iCheck/square/blue.css">
+
+  <link rel="stylesheet" href="plugins/ladda-ui/ladda-themeless.min.css">
 <!--ADDITIONAL CSS FILES END-->
 <?php
 
@@ -55,7 +57,7 @@ require __DIR__ . '/templates/body_start.php';
 	</div>
 	<div class="box-body">
 		<div class="row">
-			<div class="col-xs-12 col-sm-10 col-sm-offset-1 col-md-4 col-md-offset-4 col-lg-4 col-lg-offset-4">
+			<div class="col-xs-12 col-sm-10 col-sm-offset-1 col-sm-4 col-md-offset-4 col-lg-4 col-lg-offset-4">
 				<div class="form-group enabled">
 					<label>MAVIS LDAP Module</label>
 					<div class="checkbox icheck">
@@ -71,31 +73,31 @@ require __DIR__ . '/templates/body_start.php';
 		<div class="ldap-container">
 		<div class="disabled_shield"></div>
 		<div class="row">
-			<div class="col-md-4">
+			<div class="col-sm-4">
 				<div class="form-group type">
 					<label>LDAP Type</label>
 					<select class="form-control" name="type" data-type="select" data-default="" data-pickup="true">
 						<option value="microsoft" selected>Microsoft</option>
-						<option value="generic">Generic</option>
-						<option value="tacacs_schema">Tacacs Schema</option>
+						<option value="generic" disabled>Generic</option>
+						<option value="tacacs_schema" disabled>Tacacs Schema</option>
 					</select>
 					<input type="hidden" name="type_native" value="">
 					<p class="help-block">if you don't know what to choose leave it as default (first value)</p>
                 </div>
 			</div>
-			<div class="col-md-4">
+			<!-- <div class="col-sm-4">
 				<div class="form-group scope">
 					<label>LDAP Scope</label>
 					<select class="form-control" name="scope" data-type="select" data-default="" data-pickup="true">
-						<option value="sub" selected>sup</option>
+						<option value="sub" selected>sub</option>
 						<option value="base">base</option>
 						<option value="one">one</option>
 					</select>
 					<input type="hidden" name="scope_native" value="">
 					<p class="help-block">if you don't know what to choose leave it as default (first value)</p>
                 </div>
-			</div>
-			<div class="col-md-4">
+			</div> -->
+			<!-- <div class="col-sm-4">
 				<div class="form-group">
 					<label>TLS Support</label>
 					<div class="checkbox icheck">
@@ -106,20 +108,30 @@ require __DIR__ . '/templates/body_start.php';
 					</div>
 					<p class="help-block">by default unchecked</p>
                 </div>
-			</div>
+			</div> -->
 		</div>
 		<div class="row">
-			<div class="col-xs-12">
+			<div class="col-sm-12">
 				<div class="form-group hosts">
 					<label>LDAP Hosts</label>
-					<input type="text" class="form-control" name="hosts" data-type="input" data-default="" data-pickup="true" placeholder="E.g. ldap01 ldap02 OR ldaps://ads01:636 ldaps://ads02:636"/>
-					<p class="help-block">space-separated list of LDAP URLs or IP addresses or hostnames</p>
+					<input type="text" class="form-control" name="hosts" data-type="input" data-default="" data-pickup="true" placeholder="10.2.1.2, 10.2.3.2"/>
+					<p class="help-block">comma-separated list of IP addresses or hostnames (<text class="text-warning">don't try to set port here</text>), e.g. <i>10.2.1.2, 10.2.3.2</i></p>
 					<input type="hidden" name="hosts_native" value="">
-                </div>
+				</div>
 			</div>
 		</div>
 		<div class="row">
-			<div class="col-md-6">
+			<div class="col-sm-3">
+				<div class="form-group port">
+					<label>Port</label>
+					<input type="text" class="form-control" name="port" data-type="input" data-default="" data-pickup="true" placeholder="389"/>
+					<p class="help-block">default 389, global catalog is 3268</p>
+					<input type="hidden" name="port_native" value="">
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-sm-4">
 				<div class="form-group user">
 					<label>LDAP User</label>
 					<input type="text" class="form-control" name="user" data-type="input" data-default="" data-pickup="true" placeholder="LDAP User Name"/>
@@ -127,7 +139,7 @@ require __DIR__ . '/templates/body_start.php';
 					<input type="hidden" name="user_native" value="">
         </div>
 			</div>
-			<div class="col-md-6">
+			<div class="col-sm-4">
 				<div class="form-group password">
 					<label>LDAP Password</label>
 					<input type="password" class="form-control" name="password" data-type="input" data-default="" data-pickup="true" placeholder="LDAP User Password"/>
@@ -136,8 +148,8 @@ require __DIR__ . '/templates/body_start.php';
         </div>
 			</div>
 		</div>
-		<div class="row">
-			<div class="col-md-6">
+		<!-- <div class="row">
+			<div class="col-sm-4">
 				<div class="checkbox icheck password_hide">
 					<label>
 						<input type="checkbox" name="password_hide" data-type="checkbox" data-default="" data-pickup="true"> Hide password
@@ -146,9 +158,9 @@ require __DIR__ . '/templates/body_start.php';
 					<input type="hidden" name="password_hide_native" value="">
 				</div>
 			</div>
-		</div>
+		</div> -->
 		<div class="row">
-			<div class="col-md-6">
+			<div class="col-sm-4">
 				<div class="form-group base">
 					<label>LDAP Base</label>
 					<input type="text" class="form-control" name="base" data-type="input" data-default="" data-pickup="true" placeholder="E.g. dc=domain,dc=name"/>
@@ -156,17 +168,17 @@ require __DIR__ . '/templates/body_start.php';
 					<input type="hidden" name="base_native" value="">
 	      </div>
 			</div>
-			<div class="col-md-6">
+			<div class="col-sm-4">
 				<div class="form-group filter">
-					<label>LDAP Filter</label>
-					<input type="text" class="form-control" name="filter" data-type="input" data-default="" data-pickup="true" placeholder="E.g. (&(objectclass=user)(sAMAccountName=%s))"/>
+					<label>LDAP Search Attribute</label>
+					<input type="text" class="form-control" name="filter" data-type="input" data-default="" data-pickup="true" placeholder="E.g. sAMAccountName"/>
 					<input type="hidden" name="filter_native" value="">
-					<p class="help-block">LDAP search filter, e.g. (&(objectclass=user)(sAMAccountName=%s))</p>
+					<p class="help-block">LDAP search attribute, e.g. sAMAccountName</p>
         </div>
 			</div>
 		</div>
-		<div class="row">
-			<div class="col-md-4 memberOf">
+		<!-- <div class="row">
+			<div class="col-sm-4 memberOf">
 				<div class="form-group">
 					<label>Use attribute <code>memperOf</code></label>
 					<div class="checkbox icheck memberOf">
@@ -178,7 +190,7 @@ require __DIR__ . '/templates/body_start.php';
 					<p class="help-block">use the memberOf attribute for determining group membership</p>
         </div>
 			</div>
-			<div class="col-md-4">
+			<div class="col-sm-4">
 				<div class="form-group group_prefix_flag">
 					<label>Use AD Group Prefix</label>
 					<div class="checkbox icheck group_prefix_flag">
@@ -190,7 +202,7 @@ require __DIR__ . '/templates/body_start.php';
 					<p class="help-block">by default unchecked</p>
         </div>
 			</div>
-			<div class="col-md-4">
+			<div class="col-sm-4">
 				<div class="form-group group_prefix">
 					<label>AD Group Prefix</label>
 					<input type="text" class="form-control" name="group_prefix" data-type="input" data-default="" data-pickup="true" placeholder="tacacs"/>
@@ -200,7 +212,7 @@ require __DIR__ . '/templates/body_start.php';
 			</div>
 		</div>
 		<div class="row">
-			<div class="col-md-4">
+			<div class="col-sm-4">
 				<div class="form-group cache_conn">
 					<label>Cache Connection</label>
 					<div class="checkbox icheck cache_conn">
@@ -212,7 +224,7 @@ require __DIR__ . '/templates/body_start.php';
 					<p class="help-block">keep connection to LDAP server open</p>
         </div>
 			</div>
-			<div class="col-md-4">
+			<div class="col-sm-4">
 				<div class="form-group fallthrough">
 					<label>FallThrough</label>
 					<div class="checkbox icheck fallthrough">
@@ -236,11 +248,16 @@ require __DIR__ . '/templates/body_start.php';
 			</div>
 		</div>
 		</div>
+	</div> -->
+
 	</div>
-	<!-- /.box-body -->
-	<div class="box-footer">
-		<button class="btn btn-success btn-flat" onclick="tgui_ldap.save()">Apply</button>
-	</div>
+</div> <!-- /.box-body -->
+<div class="box-footer">
+	<button class="btn btn-success btn-sm btn-flat ladda-button" data-style="slide-left" onclick="tgui_ldap.save(this)">Apply</button>
+	<button class="btn btn-warning btn-sm btn-flat ladda-button" data-style="expand-right" onclick="tgui_ldap.test(this)"><span class="ladda-label">Test Connection</span></button>
+	<text class="ldap-test error text-danger" style="display: none;"></text>
+	<text class="ldap-test success text-success" style="display: none;">Success</text>
+</div>
 </div>
 
 <div class="box box-warning">
@@ -254,14 +271,14 @@ require __DIR__ . '/templates/body_start.php';
 			</div>
 		</div>
 		<div class="row">
-			<div class="col-md-4 col-sm-6">
+			<div class="col-sm-4 col-sm-6">
 				<div class="form-group test_username">
 					<label>Username</label>
 					<input type="text" class="form-control" name="test_username" data-type="input" data-default="" placeholder="Username of AD user"/>
 					<p class="help-block">username of AD user</p>
         </div>
 			</div>
-			<div class="col-md-4 col-sm-6">
+			<div class="col-sm-4 col-sm-6">
 				<div class="form-group test_password">
 					<label>Password</label>
 					<input type="password" class="form-control" name="test_password" data-type="input" data-default="" placeholder="Password of AD user"/>
@@ -296,6 +313,9 @@ require __DIR__ . '/templates/footer_end.php';
 <!-- ADDITIONAL JS FILES START-->
 	<!-- iCheck -->
 	<script src="/plugins/iCheck/icheck.min.js"></script>
+
+	<script src="plugins/ladda-ui/spin.min.js"></script>
+	<script src="plugins/ladda-ui/ladda.min.js"></script>
 
 	<!-- main Object -->
   <script src="dist/js/pages/mavis_ldap/tgui_ldap.js"></script>

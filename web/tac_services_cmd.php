@@ -4,10 +4,10 @@
 ///CONFIGURATION FILE///
 require __DIR__ . '/config.php';
 ///PAGE VARIABLES///START
-$PAGE_HEADER = 'Tacacs CMD Attributes';
-$PAGE_SUBHEADER = 'Here you can add cmd attributes to control user access';
+$PAGE_HEADER = 'Tacacs Command Sets';
+$PAGE_SUBHEADER = 'Here you can add command sets to control user access';
 $PAGE_TITLE = 'TacacsGUI';
-$PAGE_SUBTITLE = 'Tacacs CMD Attributes';
+$PAGE_SUBTITLE = 'Tacacs Command Sets';
 $BREADCRUMB = array(
 	'Tacacs' => [
 		'name' => 'Tacacs',
@@ -28,7 +28,7 @@ $BREADCRUMB = array(
 		'class' => '' //last item should have active class!!
 	],
 	'cmd' => [
-		'name' => 'CMD Attributes',
+		'name' => 'Command Sets',
 		'href' => '',
 		'icon' => '', //leave empty if you won't put icon
 		'class' => 'active' //last item should have active class!!
@@ -70,7 +70,7 @@ require __DIR__ . '/templates/body_start.php';
 	<div class="col-xs-12">
 		<div class="box box-primary">
 			<div class="box-header">
-				<h3 class="box-title">Tacacs Services</h3>
+				<h3 class="box-title">Tacacs Command Sets</h3>
 			</div><!-- /.box-header -->
 			<div class="box-body">
 				<?php

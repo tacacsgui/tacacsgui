@@ -16,6 +16,10 @@ var tgui_tacUser = {
   select_acl_edit: '#editUserForm .select_acl',
   select_service_add: '#addUserForm .select_service',
   select_service_edit: '#editUserForm .select_service',
+  select_devg_add: '#addUserForm .select_device_group_list',
+  select_devg_edit: '#editUserForm .select_device_group_list',
+  select_dev_add: '#addUserForm .select_device_list',
+  select_dev_edit: '#editUserForm .select_device_list',
   init: function(){
     var self = this;
     console.log(this.csv);
@@ -28,6 +32,12 @@ var tgui_tacUser = {
     $('#editUser').on('hidden.bs.modal', function(){
     	self.clearForm();
     })/*cleare forms*///end
+
+    $('[name="device_list_action"]').on('change', function(){
+      var formId = '#'+$($(this).closest('form')).attr('id')
+      if ( ! $(this).prop('checked') ) $(formId + ' div.device_action_change').removeClass('allow').addClass('deny');
+      else $(formId + ' div.device_action_change').removeClass('deny').addClass('allow');
+    })
 
     $('select[data-objtype="password"]').change(function(){
       tgui_supplier.selector({select: this});
@@ -76,6 +86,28 @@ var tgui_tacUser = {
     $(this.select_service_add).select2(this.serviceSelect2.select2Data());
     $(this.select_service_edit).select2(this.serviceSelect2.select2Data());
     /*Select2 Service*///end
+    /*Select2 Device Group*/
+    this.devgSelect2 = new tgui_select2({
+      ajaxUrl : API_LINK+"tacacs/device/group/list/",
+      template: this.selectionTemplate_devg,
+      divClass: 'device_group_list',
+      add: this.select_devg_add,
+      edit: this.select_devg_edit,
+    });
+    $(this.select_devg_add).select2(this.devgSelect2.select2Data());
+    $(this.select_devg_edit).select2(this.devgSelect2.select2Data());
+    /*Select2 Device Group*///end
+    /*Select2 Device*/
+    this.devSelect2 = new tgui_select2({
+      ajaxUrl : API_LINK+"tacacs/device/list/",
+      template: this.selectionTemplate_dev,
+      divClass: 'device_list',
+      add: this.select_dev_add,
+      edit: this.select_dev_edit,
+    });
+    $(this.select_dev_add).select2(this.devSelect2.select2Data());
+    $(this.select_dev_edit).select2(this.devSelect2.select2Data());
+    /*Select2 Device*///end
     $('#addUser').on('show.bs.modal', function(){
     	self.userGrpSelect2.preSelection(0, 'add');
     	self.aclSelect2.preSelection(0, 'add');
@@ -89,6 +121,19 @@ var tgui_tacUser = {
     formData.group = ($(this.select_group_add).select2('data').length) ? $(this.select_group_add).select2('data')[0].id : 0;
 		formData.acl = ($(this.select_acl_add).select2('data').length) ? $(this.select_acl_add).select2('data')[0].id : 0;
 		formData.service = ($(this.select_service_add).select2('data').length) ? $(this.select_service_add).select2('data')[0].id : 0;
+
+    //Device List
+    formData.device_list = '';
+    if ( $(this.select_dev_add).select2('data') ) for (var i = 0; i < $(this.select_dev_add).select2('data').length; i++) {
+      if (i == 0) { formData.device_list += $(this.select_dev_add).select2('data')[i].id; continue; }
+      formData.device_list += ';;' + $(this.select_dev_add).select2('data')[i].id;
+    }
+    //Device Groups List
+    formData.device_group_list = '';
+    if ( $(this.select_devg_add).select2('data') ) for (var i = 0; i < $(this.select_devg_add).select2('data').length; i++) {
+      if (i == 0) { formData.device_group_list += $(this.select_devg_add).select2('data')[i].id; continue; }
+      formData.device_group_list += ';;' + $(this.select_devg_add).select2('data')[i].id;
+    }
 
     var ajaxProps = {
       url: API_LINK+"tacacs/user/add/",
@@ -132,7 +177,8 @@ var tgui_tacUser = {
 
       $(self.formSelector_edit + ' input[name="priv-lvl-preview"]').val( ( parseInt(resp.user['priv-lvl']) > -1) ? resp.user['priv-lvl'] :  "Undefined");
 
-      // (resp.user.pap_clone == 1) ? $('input[name="pap"] , select[name="pap_flag"]').prop('disabled',true) : $('input[name="pap"] , select[name="pap_flag"]').prop('disabled',false);
+      if (resp.user.device_group_list) self.devgSelect2.preSelection(resp.user.device_group_list.split(';;'), 'edit');
+      if (resp.user.device_list) self.devSelect2.preSelection(resp.user.device_list.split(';;'), 'edit');
 
 
       $(self.formSelector_edit + ' input[name="group_native"]').val(resp.user.group);
@@ -154,7 +200,20 @@ var tgui_tacUser = {
     console.log('Edit user');
     var self = this;
     var formData = tgui_supplier.getFormData(self.formSelector_edit, true);
-    console.log(formData);
+
+    //Device Groups
+    var dev_grp_list_native = $(self.formSelector_edit + ' [name="device_group_list_native"]').val()
+    console.log($(self.formSelector_edit + ' [name="device_group_list_native"]').val());
+    var dev_grp_list = self.devgSelect2.getData(self.devgSelect2.edit, {formId: self.formSelector_edit});
+    dev_grp_list = ( dev_grp_list.attr && dev_grp_list.attr.id && dev_grp_list.attr.id.length ) ? dev_grp_list.attr.id.join(';;') : '';
+    if ( dev_grp_list != dev_grp_list_native ) formData.device_group_list = dev_grp_list;
+    //Device
+    var dev_list_native = $(self.formSelector_edit + ' [name="device_list_native"]').val()
+    console.log($(self.formSelector_edit + ' [name="device_list_native"]').val());
+    var dev_list = self.devSelect2.getData(self.devSelect2.edit, {formId: self.formSelector_edit});
+    dev_list = ( dev_list.attr && dev_list.attr.id && dev_list.attr.id.length ) ? dev_list.attr.id.join(';;') : '';
+    if ( dev_list != dev_list_native ) formData.device_list = dev_list;
+
     var ajaxProps = {
       url: API_LINK+"tacacs/user/edit/",
       type: 'POST',
@@ -263,6 +322,22 @@ var tgui_tacUser = {
   		output += '</specialFlags>'
   	output += '</div>'
   	return output;
+  },
+  selectionTemplate_devg: function(data) {
+    //console.log(data);
+    var output='<div class="selectServiceOption">';
+      output += '<text>'+data.text+'</text>';
+      output += '<input class="item-attr" type="hidden" name="id" value="'+data.id+'">';
+      output += '</div>'
+    return output;
+  },
+  selectionTemplate_dev: function(data) {
+    //console.log(data);
+    var output='<div class="selectServiceOption">';
+      output += '<text>'+data.text+'</text>';
+      output += '<input class="item-attr" type="hidden" name="id" value="'+data.id+'">';
+      output += '</div>'
+    return output;
   },
   selectionTemplate_acl: function(data){
     var output='<div class="selectAclOption">';

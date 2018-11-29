@@ -6,6 +6,9 @@ use tgui\Models\MAVISLDAP;
 use tgui\Controllers\Controller;
 use Respect\Validation\Validator as v;
 
+use Adldap\Adldap as Adldap;
+use Adldap\Schemas\ActiveDirectory as ActiveDirectory;
+
 class MAVISLDAPCtrl extends Controller
 {
 ################################################
@@ -134,4 +137,66 @@ class MAVISLDAPCtrl extends Controller
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
 ########	MAVIS LDAP Check	###############END###########
+########	LDAP Test	###############START###########
+	public function postTest($req,$res)
+	{
+		//INITIAL CODE////START//
+		$data=array();
+		$data=$this->initialData([
+			'type' => 'post',
+			'object' => 'mavis ldap',
+			'action' => 'test',
+		]);
+		#check error#
+		if ($_SESSION['error']['status']){
+			$data['error']=$_SESSION['error'];
+			return $res -> withStatus(401) -> write(json_encode($data));
+		}
+		//INITIAL CODE////END//
+
+		//CHECK ACCESS TO THAT FUNCTION//START//
+		if(!$this->checkAccess(11, true))
+		{
+			return $res -> withStatus(403) -> write(json_encode($data));
+		}
+		//CHECK ACCESS TO THAT FUNCTION//END//
+
+		$data['test'] = false;
+
+		$ldap = MAVISLDAP::select()->first();
+
+		$config = [
+			// Mandatory Configuration Options
+			'hosts'            => array_map('trim', explode(',', $ldap->hosts) ),
+			'base_dn'          => $ldap->base,
+			'username'         => $ldap->user,
+			'password'         => $ldap->password,
+
+			// Optional Configuration Options
+			'schema'           => ActiveDirectory::class,
+			//'account_prefix'   => 'ACME-',
+			//'account_suffix'   => '@acme.org',
+			'port'             => $ldap->port,
+			'follow_referrals' => false,
+			'use_ssl'          => false,
+			'use_tls'          => false,
+			'version'          => 3,
+			'timeout'          => 5,
+		];
+
+		$ad = new Adldap();
+
+		$ad->addProvider($config);
+
+		try {
+		    $provider = $ad->connect();
+		} catch (\Adldap\Auth\BindException $e) {
+				$data['test'] = 1;
+				$data['exception'] = $e->getMessage();
+				return $res -> withStatus(200) -> write(json_encode($data));
+		}
+
+		return $res -> withStatus(200) -> write(json_encode($data));
+	}
+########	LDAP Test	###############END###########
 }//END OF CLASS//

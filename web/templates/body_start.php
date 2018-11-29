@@ -73,3 +73,9 @@
 
     <!-- Main content -->
     <section class="content container-fluid">
+
+    <?php
+
+    require __DIR__ . '/parts/patreon_support.php';
+
+    ?>

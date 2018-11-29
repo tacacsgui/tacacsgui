@@ -1,4 +1,4 @@
-<div class="row">
+<!-- <div class="row">
 	<div class="col-lg-6 col-md-6">
 		<div class="form-group priv-lvl">
 			<label for="priv-lvl">Privilege Level</label>
@@ -18,7 +18,7 @@
 		</div>
 	</div>
 
-</div>
+</div> -->
 <div class="row">
 	<div class="col-sm-6">
 		<div class="form-group group">
@@ -80,7 +80,7 @@
 		      </div>
 		  </div>
 		</div>
-		<div class="row">
+		<!-- <div class="row">
 		  <div class='col-sm-6'>
 		      <div class="form-group client_ip">
 							<label>Client (NAC) IP Address</label>
@@ -97,6 +97,6 @@
 							<input type="hidden" name="server_ip_native" value="">
 		      </div>
 		  </div>
-		</div>
+		</div> -->
 	</div>
 </div>

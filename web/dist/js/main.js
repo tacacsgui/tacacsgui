@@ -262,7 +262,7 @@ var tguiInit = {
   },
   bootstrap_toggle: function(o){
     o = o || {}
-    $('.bootstrap-toggle').bootstrapToggle( { width:'100%' } );
+    $('.bootstrap-toggle').bootstrapToggle();
     return this;
   },
   tgui_search_bar: function(){
@@ -393,9 +393,20 @@ var tgui_supplier = { //Tacacs Supplier Object
           element.val(element.attr('data-default'))
           break;
         case 'select':
-          element.val(element.attr('data-default'))
+          if (element.hasClass('select2')) {
+            //console.log(element);
+            element.val(null).trigger("change");
+            element.empty();
+            break;
+          }
+          else element.val(element.attr('data-default'));
           break;
         case 'checkbox':
+          if ( $(element).data('toggle') == 'toggle'){
+            element.prop( 'checked', (element.attr('data-default') == 'checked') )
+            element.change();
+            break;
+          }
           if (element.iCheck) {
             element.iCheck( (element.attr('data-default') == 'checked') ? 'check' : 'uncheck');
             break;
@@ -422,6 +433,7 @@ var tgui_supplier = { //Tacacs Supplier Object
           switch ($(el).attr('data-type')) {
             case 'input':
               el.val(obj[param]);
+              //console.log(el, obj[param]);
               if (el_n.length) el_n.val(obj[param]);
               break;
             case 'select':

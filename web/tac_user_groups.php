@@ -45,6 +45,8 @@ require __DIR__ . '/templates/header.php';
 <!-- bootstrap-datetimepicker -->
 <link rel="stylesheet" href="plugins/bootstrap-datetimepicker/css/bootstrap-datetimepicker.min.css">
 
+<link rel="stylesheet" href="dist/css/pages/tac_user_groups/main.css">
+
 </head>
 <!--ADDITIONAL CSS FILES END-->
 
@@ -125,6 +127,7 @@ require __DIR__ . '/templates/footer_end.php';
 	<script src="bower_components/select2/dist/js/select2.full.min.js"></script>
 	<!-- jquery-csv -->
 	<script src="plugins/jquery-csv/jquery-csv.min.js"></script>
+	<script src="plugins/jQueryUI/jquery-ui.min.js"></script>
 	<!-- moment -->
 	<script src="bower_components/moment/moment.js"></script>
 	<!-- bootstrap-datetimepicker -->

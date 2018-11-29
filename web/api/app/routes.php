@@ -57,6 +57,7 @@ $app->post('/tacacs/device/edit/', 'TACDevicesCtrl:postDeviceEdit');
 $app->get('/tacacs/device/delete/', 'TACDevicesCtrl:getDeviceDelete');
 $app->post('/tacacs/device/delete/', 'TACDevicesCtrl:postDeviceDelete');
 $app->post('/tacacs/device/csv/', 'TACDevicesCtrl:postDeviceCsv');
+$app->get('/tacacs/device/list/', 'TACDevicesCtrl:getList');
 #####################################################
 ###Tacacs Device Groups Routes#######################################
 $app->post('/tacacs/device/group/datatables/', 'TACDeviceGrpsCtrl:postDeviceGroupsDatatables');
@@ -89,6 +90,7 @@ $app->post('/tacacs/user/group/edit/', 'TACUserGrpsCtrl:postUserGroupEdit');
 $app->get('/tacacs/user/group/delete/', 'TACUserGrpsCtrl:getUserGroupDelete');
 $app->post('/tacacs/user/group/delete/', 'TACUserGrpsCtrl:postUserGroupDelete');
 $app->get('/tacacs/user/group/list/', 'TACUserGrpsCtrl:getUserGroupList');
+$app->get('/tacacs/user/group/ldap/list/', 'TACUserGrpsCtrl:getLDAPGroupList');
 $app->post('/tacacs/user/group/csv/', 'TACUserGrpsCtrl:postUserGroupCsv');
 #####################################################
 #####################################################
@@ -178,6 +180,7 @@ $app->post('/update/upgrade/', 'APIUpdateCtrl:postUpgrade');
 $app->get('/mavis/ldap/', 'MAVISLDAP:getLDAPParams');
 $app->post('/mavis/ldap/', 'MAVISLDAP:postLDAPParams');
 $app->post('/mavis/ldap/check/', 'MAVISLDAP:postLDAPCheck');
+$app->post('/mavis/ldap/test/', 'MAVISLDAP:postTest');
 $app->post('/mavis/otp/generate/secret/', 'MAVISOTP:postOTPSecret');
 $app->post('/mavis/otp/generate/url', 'MAVISOTP:postOTPurl');
 $app->get('/mavis/otp/', 'MAVISOTP:getOTPParams');

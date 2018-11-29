@@ -22,9 +22,12 @@ class TACUsers extends Model
 		'group',
 		'disabled',
 		'message',
-		'priv-lvl',
+		//'priv-lvl', #deprecated
 		'acl',
 		'service',
+		'device_list_action',
+		'device_list',
+		'device_group_list',
 		'mavis_otp_ebabled',
 		'mavis_otp_secret',
 		'mavis_otp_period',
@@ -35,8 +38,8 @@ class TACUsers extends Model
 		'default_service',
 		'valid_from',
 		'valid_until',
-		'client_ip',
-		'server_ip',
+		//'client_ip', #deprecated
+		//'server_ip', #deprecated
 		'manual',
 	];
 }

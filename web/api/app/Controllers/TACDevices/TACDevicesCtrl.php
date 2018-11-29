@@ -516,6 +516,76 @@ public function postDeviceCsv($req,$res)
 	}
 
 ########	Device Datatables	###############END###########
+###############################################
+########	List Device	###############START###########
+	#########	GET List Device#########
+	public function getList($req,$res)
+	{
+		//INITIAL CODE////START//
+		$data=array();
+		$data=$this->initialData([
+			'type' => 'get',
+			'object' => 'device list',
+			'action' => 'list',
+		]);
+		#check error#
+		if ($_SESSION['error']['status']){
+			$data['error']=$_SESSION['error'];
+			return $res -> withStatus(401) -> write(json_encode($data));
+		}
+		//INITIAL CODE////END//
+
+		//CHECK ACCESS TO THAT FUNCTION//START//
+		if(!$this->checkAccess(3, true))
+		{
+			return $res -> withStatus(403) -> write(json_encode($data));
+		}
+		//CHECK ACCESS TO THAT FUNCTION//END//
+
+		///IF GROUPID SET///
+		if ($req->getParam('byId') != null){
+			$id = $req->getParam('byId');
+
+			$data['item'] = ( is_array($id) ) ? TACDevices::select(['id','name AS text', 'disabled'])->whereIn('id', $id)->get() : TACDevices::select(['id','name AS text', 'disabled'])->where('id', $req->getParam('byId') )->first();
+			//$data['item']['text'] = $data['item']['name'];
+			return $res -> withStatus(200) -> write(json_encode($data));
+		}
+		//////////////////////
+		////LIST OF GROUPS////
+		$data['incomplete_results'] = false;
+		$data['totalCount'] = TACDevices::select(['id','name'])->count();
+		$search = $req->getParam('search');
+		$take = 10 * $req->getParam('page');
+		$offset = 10 * ($req->getParam('page') - 1);
+		$data['take'] = $take;
+		$data['offset'] = $offset;
+		$tempData = TACDevices::select(['id','name AS text','key','enable', 'disabled'])->
+			when( !empty($search), function($query) use ($search)
+			{
+				$query->where('name','LIKE', '%'.$search.'%');
+			})->
+			take($take)->
+			offset($offset);
+
+		$tempCounter = $tempData->count();
+
+		$tempData = $tempData->get()->toArray();
+		$data['results']=array();
+		$data['pagination'] = (!$tempData OR $tempCounter < 10) ? ['more' => false] : [ 'more' => true];
+		foreach($tempData as $group)
+		{
+			//$group['text'] = $group['name'];
+			//unset($group['name']);
+			$group['key'] = ($group['key'] != '') ? true : false;
+			$group['enable'] = ($group['enable'] != '') ? true : false;
+			$group['default_flag'] = ($group['default_flag'] == 1) ? true : false;
+			$group['selected'] = ($group['default_flag']) ? true : false;
+			array_push($data['results'],$group);
+		}
+
+		return $res -> withStatus(200) -> write(json_encode($data));
+	}
+########	List Device Group	###############END###########
 ################################################
 
 }//END OF CLASS//

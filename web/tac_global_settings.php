@@ -123,6 +123,24 @@ require __DIR__ . '/templates/body_start.php';
 				</div>
 				</div>
 				<hr>
+				<h3>Miscellaneous</h3>
+				<div class="row">
+				<div class="col-sm-4">
+					<div class="form-group">
+			      <label>Skip conflicting groups</label><p class="empty-paragraph"></p>
+			      <input class="bootstrap-toggle" name="skip_conflicting_groups" data-type="checkbox" data-default="checked" data-pickup="true" data-width="100" data-toggle="toggle" type="checkbox" data-on="<i class='fa fa-check'></i> Yes" data-off="<i class='fa fa-close'></i> No" data-onstyle="success" data-offstyle="warning" checked>
+						<input type="hidden" name="skip_conflicting_groups_native">
+			    </div>
+				</div>
+				<div class="col-sm-4">
+					<div class="form-group">
+			      <label>Skip missing groups</label><p class="empty-paragraph"></p>
+			      <input class="bootstrap-toggle" name="skip_missing_groups" data-type="checkbox" data-default="checked" data-pickup="true" data-width="100" data-toggle="toggle" type="checkbox" data-on="<i class='fa fa-check'></i> Yes" data-off="<i class='fa fa-close'></i> No" data-onstyle="success" data-offstyle="warning" checked>
+						<input type="hidden" name="skip_missing_groups_native">
+			    </div>
+				</div>
+				</div>
+				<hr>
 				<h3>Limits and Timeouts</h3>
 				<div class="row">
 				<div class="col-sm-4">

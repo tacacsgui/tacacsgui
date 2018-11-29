@@ -1,0 +1,21 @@
+div.device_list ul li div.selectServiceOption,
+div.device_group_list ul li div.selectServiceOption {
+  max-width: 210px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+div.device_list ul li span.select2-selection__choice__remove,
+div.device_group_list ul li span.select2-selection__choice__remove {
+  float: right;
+  font-size: large;
+  padding-left: 5px;
+}
+div.device_action_change.allow ul.select2-selection__rendered > li.select2-selection__choice{
+  background-color: #00a65ac4;
+  border-color: #00a65a;
+}
+div.device_action_change.deny ul.select2-selection__rendered > li.select2-selection__choice{
+  background-color: #c9302cc4;
+  border-color: #c9302c;
+}

@@ -1,7 +1,7 @@
 <div class="row">
 	<div class="col-sm-6">
 		<div class="form-group name">
-			<label for="name">CMD Name</label>
+			<label for="name">Command Set Name</label>
 				<input type="text" class="form-control" name="name" data-type="input" data-default="" data-pickup="true" placeholder="Enter Name" autocomplete="off">
 				<input type="hidden" name="name_native" data-type="input" data-default="">
 				<input type="hidden"  data-type="input" data-default="" data-pickup="true" name="id">
@@ -14,7 +14,7 @@
 <div class="row">
 	<div class="col-sm-6">
     <div class="form-group cmd">
-			<label for="">Main CMD Name</label>
+			<label for="">Main Command Name (First part)</label>
 				<input type="text" class="form-control" name="cmd" data-type="input" data-default="" data-pickup="true" placeholder="Start of command" autocomplete="off">
 				<input type="hidden" name="cmd_native">
 			  <p class="help-block">first part of command, e.g. <i>show</i>,<i>telnet</i>,<i>configure</i> and so on</p>

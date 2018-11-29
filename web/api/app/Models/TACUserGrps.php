@@ -14,14 +14,18 @@ class TACUserGrps extends Model
 		'enable_flag',
 		'message',
 		'default_flag',
-		'priv-lvl',
+		//'priv-lvl', #deprecated
 		'acl',
 		'service',
+		'ldap_groups',
 		'default_service',
+		'device_list_action',
+		'device_list',
+		'device_group_list',
 		'valid_from',
 		'valid_until',
-		'client_ip',
-		'server_ip',
+		//'client_ip', #deprecated
+		//'server_ip', #deprecated
 		'manual',
 	];
 }

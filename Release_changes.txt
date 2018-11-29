@@ -1,4 +1,10 @@
 ##############################
+Version_0.9.52 20181129
+	* New LDAP Module. The easiest way to connect you DC.
+	* Now LDAP Groups inside of Tacacs User Groups
+	* Fast Access Restriction for Tacacs User Groups
+	* Some Bugs fixed
+##############################
 Version_0.9.51 20181121
 	* Minor improvements
 	* Some Bugs fixed

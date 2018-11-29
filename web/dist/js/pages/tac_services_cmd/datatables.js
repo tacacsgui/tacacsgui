@@ -3,7 +3,7 @@ var initialData =
 	ajaxLink: "tacacs/cmd/datatables/",
 	tableSelector: '#mainDataTable',
 	item: 'cmd',
-	deleteItems: tgui_cmd.delete,
+	deleteItems: tgui_cmd.del,
 	exportCsv: function(idList){ tgui_cmd.csvParser.csvDownload(idList); return true;},
   columns:
 	{

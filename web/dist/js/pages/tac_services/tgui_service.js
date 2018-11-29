@@ -86,6 +86,8 @@ var tgui_service = {
       tgui_device_patterns.pattern.cisco.rs.cmd.fill(resp.service.cisco_rs_cmd, self.formSelector_edit)
       $(self.formSelector_edit + ' [name="cisco_rs_autocmd"]').val(resp.service.cisco_rs_autocmd);
       tgui_device_patterns.pattern.cisco.rs.autocmd.fill(resp.service.cisco_rs_autocmd, self.formSelector_edit);
+      $( ".select2-selection__rendered" ).sortable();
+      $( ".select2-selection__rendered" ).disableSelection();
       $('#editService').modal('show')
     }).fail(function(err){
       tgui_error.getStatus(err, ajaxProps)

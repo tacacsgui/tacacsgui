@@ -24,7 +24,8 @@ var tgui_ldap = {
       }
     );
   },
-  save: function() {
+  save: function(o) {
+    var l = Ladda.create(o).start();
     console.log('Edit LDAP Settings');
     var self = this;
     var formData = tgui_supplier.getFormData(self.formSelector, true);
@@ -35,21 +36,50 @@ var tgui_ldap = {
       data: formData
     };//ajaxProps END
 
-    if ( ! tgui_supplier.checkChanges(ajaxProps.data, ['id']) ) return false;
-    
+    if ( ! tgui_supplier.checkChanges(ajaxProps.data, ['id']) ) { l.stop(); return false;}
+
     ajaxRequest.send(ajaxProps).then(function(resp) {
       if (tgui_supplier.checkResponse(resp.error, self.formSelector)){
         return;
       }
       tgui_error.local.show({type:'success', message: "LDAP settings was saved"})
-      tgui_status.changeStatus(resp.changeConfiguration)
+      tgui_status.changeStatus(resp.changeConfiguration);
+      l.stop();
       self.fulfill();
     }).fail(function(err){
+      l.stop();
       tgui_error.getStatus(err, ajaxProps)
     })
     return this;
   },
-  tester: function() {
+  test: function(o) {
+    var l = Ladda.create(o);
+    l.start();
+    $('.ldap-test').hide();
+
+    var ajaxProps = {
+      url: API_LINK+"mavis/ldap/test/",
+      type: 'POST',
+    };//ajaxProps END
+
+    ajaxRequest.send(ajaxProps).then(function(resp) {
+      l.stop();
+      if (resp.test){
+        tgui_error.local.show({type:'error', message: 'LDAP Test: ' + resp.exception})
+        $('.ldap-test.error').text('LDAP Test: ' + resp.exception).show();
+        return false;
+      }
+
+      tgui_error.local.show({type:'success', message: 'LDAP Test: Success'})
+      $('.ldap-test.success').text('LDAP Test: Success').show();
+      return false;
+    }).fail(function(err){
+      l.stop();
+      tgui_error.getStatus(err, ajaxProps)
+    })
+  },
+  tester: function(o) {
+
     $('pre.check_result').empty();
     $('pre.check_result').append( tgui_supplier.loadElement() );
 

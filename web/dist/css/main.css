@@ -1,3 +1,16 @@
+.please-support-jdfjdjsk {
+  background-color: #aadd3373;
+  display: table;
+  width: 100%;
+  padding: 25px;
+  border: 1px solid #444;
+  margin-bottom: 10px;
+}
+.support-message {
+  text-align: center;
+  display: table-row;
+  vertical-align: middle;
+}
 .empty-paragraph {
   margin: 0px !important;
 }

@@ -163,7 +163,7 @@ $TAC_ACL = array(
 					],//.submenu
 					[
 						'id' => 528,
-						'name' => 'CMD Attributes',
+						'name' => 'Command Sets',
 						'href' => 'tac_services_cmd.php',
 						'li-class' => '',
 						'icon' => 'fa fa-circle-o',

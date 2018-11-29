@@ -45,6 +45,8 @@ require __DIR__ . '/templates/header.php';
 	<!-- bootstrap-datetimepicker -->
 	<link rel="stylesheet" href="plugins/bootstrap-datetimepicker/css/bootstrap-datetimepicker.min.css">
 
+	<link rel="stylesheet" href="dist/css/pages/tac_users/main.css">
+
 <!--ADDITIONAL CSS FILES END-->
 
 <?php

@@ -58,23 +58,29 @@ class TACConfigCtrl extends Controller
 	{
 		$output='';
 		foreach($array as $someId => $someParams)
+		//for($someId = 0; $someId < count($array); $someId++)
 		{
-			if ($someId == 0)
-			{
-				$output.=$someParams[0]['name']." ".$separator;
-			}
-			else
-			{
+			// if ($someId == 0)
+			// {
+			// 	$output.=$someParams[0]['name'].$separator;
+			// }
+			// else
+			// {
+			  //$someParams = $array[$someId];
 				for($someLine = 0; $someLine < count($someParams); $someLine++)
 				{
+					if ( empty($someParams[$someLine]) ) continue;
+					
+					switch ($someLine) {
+						case 0:
+							$output.=$someParams[$someLine]['name'].$separator;
+							break;
 
-					if ($someLine == 0) {
-						$output.=$someParams[$someLine]['name']." ".$separator; continue;
+						default:
+							$output.=$someParams[$someLine].$separator;
+							break;
 					}
-					else{
-						$output.=$someParams[$someLine]." ".$separator;
-					}
-				}
+				//}
 			}
 		}
 		return $output;
@@ -156,7 +162,7 @@ class TACConfigCtrl extends Controller
 	////////////APPLY CONFIGURATION////END//
 	////////////////////////////////////////////////
 	//////////////CREATE CONFIGURATION////START//
-	public function createConfiguration($lineSeparator = "\n ")
+	public function createConfiguration($lineSeparator = "\n")
 	{
 		$tempMavisGeneralArray=ConfigPatterns::tacMavisGeneralGen(false);
 		$tempMavisLocalArray=ConfigPatterns::tacMavisLocal(false);
@@ -260,7 +266,7 @@ class TACConfigCtrl extends Controller
 		}
 		//CHECK ACCESS TO THAT FUNCTION//END//
 
-		$lineSeparator = ($req->getParam('contentType') == 'html' ) ? '</p>' : "\n ";
+		$lineSeparator = ($req->getParam('contentType') == 'html' ) ? '</p>' : "\n";
 		$contentTypeOutput = ($req->getParam('contentType') == 'html' ) ? 'text/html' : 'application/json';
 		$output="";
 

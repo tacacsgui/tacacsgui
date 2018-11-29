@@ -10,7 +10,7 @@ var initialData =
 		id: {title: "ID", data : "id", orderable: true, visible: false,},
 		username: {title: "Username", data : "username", visible: true, orderable: true},
 		group: {title: "Group", data : "group", visible: true, orderable: false},
-		'priv-lvl': {title: "Privilege Lvl", data : "priv-lvl", visible: false, orderable: false},
+		//'priv-lvl': {title: "Privilege Lvl", data : "priv-lvl", visible: false, orderable: false},
 	 	created_at: {title: "Created at", data : "created_at", visible: false, orderable: true},
 	 	updated_at: {title: "Updated at", data : "updated_at", visible: false, orderable: true},
 		buttons: {title: "Action", data : "buttons", visible: true, orderable: false},

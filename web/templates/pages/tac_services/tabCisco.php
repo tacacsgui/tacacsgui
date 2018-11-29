@@ -84,7 +84,7 @@
         <div class="form-group cisco_rs_cmd_list">
       		<label for="cisco_rs_cmd_list">Search CMD Name</label>
           <select class="select_cmd_cisco form-control select2" multiple="multiple" name="cisco_rs_cmd_list" style="width:100%"></select>
-          <input type="hidden" name="cisco_rs_cmd" data-type="input" data-default="" data-type="input" data-default="" data-pickup="true">
+          <input type="hidden" name="cisco_rs_cmd" data-type="input" data-default="" data-pickup="true">
           <input type="hidden" name="cisco_rs_cmd_native">
           <!-- <div class="tgui-search-bar"></div> -->
       		<p class="help-block">search for pre-configured cmd sets</p>

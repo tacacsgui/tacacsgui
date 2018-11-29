@@ -38,11 +38,11 @@ var tgui_configEngine = {
     			$('pre.configurationFile').append('<code class="tacacs_config language-none"></code>')
     			$('code.tacacs_config').append(self.lineNumber()).append('id = spawnd {').append('\n');
     			self.confParser(resp['spawndConfig'])
-    			$('code.tacacs_config').append(self.lineNumber()).append('}').append('\n');
+    			$('code.tacacs_config').append(self.lineNumber()).append('} <tac_comment>##END OF SPAWND</tac_comment>').append('\n');
     			//SPAWND //END//
     			/////////////////////
     			//TACACS GENERAL CONF //START//
-    			$('code.tacacs_config').append(self.lineNumber()).append('id = tac_plus {').append('\n');
+    			$('code.tacacs_config').append(self.lineNumber()).append('id = tac_plus { <tac_comment>##START GLOBAL CONFIGURATION</tac_comment>').append('\n');
     			self.confParser(resp['tacGeneralConfig'])
     			//TACACS GENERAL CONF //END//
     			/////////////////////
@@ -87,7 +87,7 @@ var tgui_configEngine = {
     			self.confParser(resp['usersConfig'])
     			//USER LIST //END//
     			///////////////////
-    			$('code.tacacs_config').append(self.lineNumber()).append('}###END OF GLOBAL PARAMETERS').append('\n');
+    			$('code.tacacs_config').append(self.lineNumber()).append('}##END GLOBAL CONFIGURATION').append('\n');
     			////END OF GLOBAL PARAMETERS////
     			$('code.tacacs_config').append('<span aria-hidden="true" class="line-numbers-rows"></span>')
     			$('span.line-numbers-rows').append(self.line_number_span)
@@ -113,20 +113,19 @@ var tgui_configEngine = {
         }
         if (someLine == 1)
         {
-          $('code.tacacs_config').append(this.lineNumber()).append('\t').append(some[someLine].replace(/\n/g,''))
+          $('code.tacacs_config').append(this.lineNumber()).append(some[someLine].replace(/\n/g,''))
             .append('\n')
           continue;
         }
         if (some.length == someLine+1)
         {
-          $('code.tacacs_config').append(this.lineNumber()).append('\t').append(some[someLine].replace(/\n/g,''))
+          $('code.tacacs_config').append(this.lineNumber()).append(some[someLine].replace(/\n/g,''))
             .append('\n');
         } else
         {
           //console.log(some);
           $('code.tacacs_config')
             .append(this.lineNumber())
-            .append('\t')
             .append(some[someLine].replace(/\n/g,''))
             .append('\n');
         }

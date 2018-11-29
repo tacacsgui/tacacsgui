@@ -4,9 +4,13 @@ namespace tgui\Controllers\TACUserGrps;
 
 use tgui\Models\TACUsers;
 use tgui\Models\TACUserGrps;
+use tgui\Models\MAVISLDAP;
 use tgui\Models\APIPWPolicy;
 use tgui\Controllers\Controller;
 use Respect\Validation\Validator as v;
+use Adldap\Adldap as Adldap;
+use Adldap\Schemas\ActiveDirectory as AD;
+use Adldap\Auth\BindException as ADErr;
 
 class TACUserGrpsCtrl extends Controller
 {
@@ -129,6 +133,8 @@ class TACUserGrpsCtrl extends Controller
 		$data['group']=TACUserGrps::select()->
 			where([['id','=',$req->getParam('id')],['name','=',$req->getParam('name')]])->
 			first();
+
+		//$data['ldap_groups'] = explode(';;', $data['ldap_groups']);
 
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
@@ -523,6 +529,146 @@ class TACUserGrpsCtrl extends Controller
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
 ########	List User Group	###############END###########
+################################################
+########	List LDAP Group	###############START###########
+	#########	GET List LDAP	Group#########
+	public function getLDAPGroupList($req,$res)
+	{
+		//INITIAL CODE////START//
+		$data=array();
+		$data=$this->initialData([
+			'type' => 'get',
+			'object' => 'tacacs ldap group',
+			'action' => 'list',
+		]);
+		#check error#
+		if ($_SESSION['error']['status']){
+			$data['error']=$_SESSION['error'];
+			return $res -> withStatus(401) -> write(json_encode($data));
+		}
+		//INITIAL CODE////END//
+
+		//CHECK ACCESS TO THAT FUNCTION//START//
+		if(!$this->checkAccess(5, true))
+		{
+			return $res -> withStatus(403) -> write(json_encode($data));
+		}
+		//CHECK ACCESS TO THAT FUNCTION//END//
+		$ldap = MAVISLDAP::select()->first();
+
+		$data['results'] = [ [
+			'error' => true,
+			'text' => '<p class="text-danger">Server Error!</p>',
+			] ];
+
+		if ( ! $ldap->enabled ){
+			$data['results'][0]['text'] = '<p class="text-danger">LDAP Disabled!</p>';
+			return $res -> withStatus(200) -> write(json_encode($data));
+		}
+
+		$config = [
+			// Mandatory Configuration Options
+			'hosts'            => explode(',', $ldap->hosts),
+			'base_dn'          => $ldap->base,
+			'username'         => $ldap->user,
+			'password'         => $ldap->password,
+
+			// Optional Configuration Options
+			'schema'           => AD::class,
+			//'account_prefix'   => 'ACME-',
+			//'account_suffix'   => '@acme.org',
+			'port'             => $ldap->port,
+			'follow_referrals' => false,
+			'use_ssl'          => false,
+			'use_tls'          => false,
+			'version'          => 3,
+			'timeout'          => 5,
+		];
+
+		$ad = new Adldap();
+		$ad->addProvider($config);
+
+		try {
+		    $provider = $ad->connect();
+		} catch (ADErr $e) {
+				$data['results'][0]['text'] = '<p class="text-danger">LDAP Connection Error!</p>';
+				return $res -> withStatus(200) -> write(json_encode($data));
+		}
+
+		$adSearch = $provider->search();
+
+		//$filter = 'CN=FileAccess_1';
+		$search = $req->getParam('search');
+
+		$adGroups = ( empty($search) ) ? $adSearch->groups()->select()->limit(10)->get() : $adSearch->groups()->select()->where('cn', 'contains', $search)->limit(10)->get();
+
+		$items = [];
+
+		for ($i=0; $i < count($adGroups); $i++) {
+			$items[] = array(
+				'text' => (is_array($adGroups[$i]->cn)) ? $adGroups[$i]->cn[0] : $adGroups[$i]->cn,
+				'cn' => (is_array($adGroups[$i]->cn)) ? $adGroups[$i]->cn[0] : $adGroups[$i]->cn,
+				'dn' => (is_array($adGroups[$i]->distinguishedname)) ? $adGroups[$i]->distinguishedname[0] : $adGroups[$i]->distinguishedname,
+				'id' => (is_array($adGroups[$i]->distinguishedname)) ? $adGroups[$i]->distinguishedname[0] : $adGroups[$i]->distinguishedname,
+			);
+		}
+
+		$data['test1'] = $adGroups;
+		$data['results'] = $items;
+
+		// try {
+		//     if ( ! $ad->auth()->attempt( $mavis->getUsername(), $mavis->getPassword() ) ) $mavis->out(AV_V_RESULT_FAIL);
+		// } catch (Adldap\Auth\UsernameRequiredException $e) {
+		//     // The user didn't supply a username.
+		//     $mavis->out(AV_V_RESULT_FAIL);
+		// } catch (Adldap\Auth\PasswordRequiredException $e) {
+		//     // The user didn't supply a password.
+		//     $mavis->out(AV_V_RESULT_FAIL);
+		// }
+		//
+		// if ( ! $ad->auth()->attempt( $mavis->getUsername(), $mavis->getPassword() ) ) $mavis->out(AV_V_RESULT_FAIL);
+		//
+		// //$adUser = $search->rawFilter($filter)->get();
+		//
+		// $groupList = [];
+		// for ($i=0; $i < count($adUser->memberof); $i++) {
+		// 	preg_match_all('/^CN=(.*?),.*/s', $adUser->memberof[$i], $groupName);
+		// 	$groupList[] = $groupName[1][0];
+		// }
+
+		//////////////////////
+		////LIST OF GROUPS////
+		// $data['incomplete_results'] = false;
+		// $data['totalCount'] = TACUserGrps::select(['id','name'])->count();
+		//
+		// $take = 10 * $req->getParam('page');
+		// $offset = 10 * ($req->getParam('page') - 1);
+		// $data['take'] = $take;
+		// $data['offset'] = $offset;
+		// $tempData = TACUserGrps::select(['id','name','enable','message'])->
+		// 	when( !empty($search), function($query) use ($search)
+		// 	{
+		// 		$query->where('name','LIKE', '%'.$search.'%');
+		// 	})->
+		// 	take($take)->
+		// 	offset($offset);
+		//
+		// $tempCounter = $tempData->count();
+		//
+		// $tempData = $tempData->get()->toArray();
+		// $data['pagination'] = (!$tempData OR $tempCounter < 10) ? ['more' => false] : [ 'more' => true];
+		// $data['results']= ( $take == 10 AND empty($search) ) ? array( 0 => $noneItem) : array();
+		// foreach($tempData as $group)
+		// {
+		// 	$group['text'] = $group['name'];
+		// 	$group['message'] = ($group['message'] != '') ? true : false;
+		// 	$group['enable'] = ($group['enable'] != '') ? true : false;
+		// 	array_push($data['results'],$group);
+		// }
+
+		return $res -> withStatus(200) -> write(json_encode($data));
+	}
+########	List LDAP Group	###############END###########
 ################################################
 
 
