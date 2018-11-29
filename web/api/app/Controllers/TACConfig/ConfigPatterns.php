@@ -739,9 +739,9 @@ class ConfigPatterns
 		$sp->put().'mavis module = external {');
 		///LDAP PATH///
 		array_push($outputMavisLdap[$id],
-		($html) ? $sp->put('a').self::$html_tags['param'][0] . "exec" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . $mavis_ldap_settings['path'] . self::$html_tags['val'][1]
+		($html) ? $sp->put('a').self::$html_tags['param'][0] . "exec" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . '/opt/tacacsgui/mavis-modules/ldap/module.php' . self::$html_tags['val'][1]
 		:
-		$sp->put('a').'exec = '. $mavis_ldap_settings['path']);
+		$sp->put('a').'exec = /opt/tacacsgui/mavis-modules/ldap/module.php');
 		///USER MANUAL CONFIGURATION///
 
 		array_push($outputMavisLdap[$id],
