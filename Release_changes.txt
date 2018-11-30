@@ -1,4 +1,7 @@
 ##############################
+Version_0.9.53 20181130
+	* LDAP Module fix. If user doesn't match any tacacs group access restricted.
+##############################
 Version_0.9.52 20181129
 	* New LDAP Module. The easiest way to connect you DC.
 	* Now LDAP Groups inside of Tacacs User Groups

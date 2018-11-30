@@ -124,6 +124,12 @@ if ( ! empty($groupList) ){
 		$groupList_result[] = $ugrp->name;
 	}
 }
+
+if ( ! count( $groupList_result ) ){
+	if ($debug) $mavis->debugIn($debugPrefix.'Group Not found! Exit.');
+	$mavis->out(AV_V_RESULT_FAIL);
+}
+
 if ($debug) $mavis->debugIn($debugPrefix.'Group List: '. implode(',', $groupList_result));
 $mavis->setMempership($groupList_result);
 
