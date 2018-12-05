@@ -1,4 +1,8 @@
 ##############################
+Version_0.9.54 20181205
+	* New MAVIS Policy. There is only one MAVIS engine now.
+	* Some bug fixed
+##############################
 Version_0.9.53 20181130
 	* LDAP Module fix. If user doesn't match any tacacs group access restricted.
 ##############################
