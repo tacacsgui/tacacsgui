@@ -9,6 +9,9 @@
 <script src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
 <!-- bootstrap-toggle -->
 <script src="plugins/bootstrap-toggle/js/bootstrap-toggle.js"></script>
+<!-- ladda-ui -->
+<script src="plugins/ladda-ui/spin.min.js"></script>
+<script src="plugins/ladda-ui/ladda.min.js"></script>
 <!-- AdminLTE App -->
 <script src="dist/js/adminlte.min.js"></script>
 <!-- toastr -->

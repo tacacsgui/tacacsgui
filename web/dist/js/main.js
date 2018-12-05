@@ -385,6 +385,7 @@ var tgui_supplier = { //Tacacs Supplier Object
   	$('.form-group p.help-block').show();
     $('.nav.nav-tabs a[href="#general_info"]').tab('show');//select first tab
   	$('.nav.nav-tabs a[href="#general_info_edit"]').tab('show');//select first tab
+    Ladda.stopAll();
     //clear pre-defined elements
     for (var i = 0, len = $('[data-default]').length; i < len; i++) {
       element = $($('[data-default]')[i])

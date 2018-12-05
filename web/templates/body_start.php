@@ -17,6 +17,8 @@
   <link rel="stylesheet" href="dist/css/fonts/main.css">
   <!-- bootstrap-toggle -->
   <link rel="stylesheet" href="plugins/bootstrap-toggle/css/bootstrap-toggle.min.css">
+  <!-- ladda-ui -->
+  <link rel="stylesheet" href="plugins/ladda-ui/ladda-themeless.min.css">
 </head>
 <!-- !!!!BODY START HERE!!!! -->
 <body class="hold-transition <?php echo GUI_SKIN;?> sidebar-mini">

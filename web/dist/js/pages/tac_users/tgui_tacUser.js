@@ -114,8 +114,10 @@ var tgui_tacUser = {
     	self.serviceSelect2.preSelection(0, 'add');
     })
   },
-  add: function(){
+  add: function(o){
     console.log('Adding new user');
+    var lui = Ladda.create(o)
+    lui.start(); //button loading start
     var self = this;
     var formData = tgui_supplier.getFormData(self.formSelector_add);
     formData.group = ($(this.select_group_add).select2('data').length) ? $(this.select_group_add).select2('data')[0].id : 0;
@@ -140,6 +142,7 @@ var tgui_tacUser = {
       data: formData
     };//ajaxProps END
     ajaxRequest.send(ajaxProps).then(function(resp) {
+      lui.stop(); //button loading stop
       if (tgui_supplier.checkResponse(resp.error, self.formSelector_add)){
         return;
       }
@@ -149,6 +152,7 @@ var tgui_tacUser = {
       self.clearForm();
       setTimeout( function () {dataTable.table.ajax.reload()}, 2000 );
     }).fail(function(err){
+      lui.stop(); //button loading stop
       tgui_error.getStatus(err, ajaxProps)
     })
     return this;

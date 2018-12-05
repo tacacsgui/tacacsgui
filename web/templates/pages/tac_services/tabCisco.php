@@ -4,6 +4,7 @@
       <li class="active"><a href="#general" data-init="true" data-toggle="tab" aria-expanded="true">General</a></li>
       <li><a href="#restrictions" data-toggle="tab" aria-expanded="true">CMD Restrictions</a></li>
       <li><a href="#autocmd" data-toggle="tab" aria-expanded="true">AutoCMD</a></li>
+      <li><a href="#nexus" data-toggle="tab" aria-expanded="true">Nexus Roles</a></li>
       <li><a href="#cisco_rs_manual" data-toggle="tab" aria-expanded="true">Manual</a></li>
     </ul>
   </div>
@@ -115,6 +116,15 @@
         		<p class="help-block">list of attributes</p>
           </div>
       </div>
+      </div>
+      <!-- /.tab-pane -->
+      <div class="tab-pane" id="nexus">
+        <div class="form-group cisco_rs_nexus_roles">
+          <label for="cisco_rs_cmd_list">Nexus Roles</label>
+          <input type="text" class="form-control" name="cisco_rs_nexus_roles" data-type="input" data-default="" data-pickup="true">
+          <input type="hidden" name="cisco_rs_nexus_roles_native">
+          <p class="help-block">set space sepparated roles, e.g. <i>network-admin vdc-admin vdc-operator</i></p>
+        </div>
       </div>
       <!-- /.tab-pane -->
       <div class="tab-pane tab-pane-edit" id="cisco_rs_manual">

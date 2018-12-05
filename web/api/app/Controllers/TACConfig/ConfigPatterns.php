@@ -714,44 +714,6 @@ class ConfigPatterns
 		return $outputUsers;
 	}
 
-	public static function tacMavisLdapGen($html)
-	{
-		$html = (empty($html)) ? false : true;
-    $sp = new spacer();
-		$mavis_ldap_settings = MAVISLDAP::select()->first();
-
-		if ($mavis_ldap_settings->enabled == 0) return array('title_flag' => 0, 'name' =>"");
-
-		$id = $mavis_ldap_settings->id;
-
-		$outputMavisLdap[0][0]=array('title_flag' => 1, 'name' =>
-		($html) ? $sp->put('a').self::$html_tags['comment'][0] . "####MAVIS LDAP MODULE####" . self::$html_tags['comment'][1]
-		:
-		$sp->put('a')."####MAVIS LDAP MODULE####");
-		///EMPTY ARRAY///
-		$outputMavisLdap[$id] = array();
-		///MAVIS LDAP TITLE///
-		$outputMavisLdap[$id][0] = array('title_flag' => 0, 'name' =>"");
-		///MAVIS LDAP SETTINGS START///
-		array_push($outputMavisLdap[$id],
-		($html) ? $sp->put().self::$html_tags['attr'][0] . "mavis module" . self::$html_tags['attr'][1] . ' = ' . self::$html_tags['object'][0] . 'external' . self::$html_tags['object'][1] . ' {'
-		:
-		$sp->put().'mavis module = external {');
-		///LDAP PATH///
-		array_push($outputMavisLdap[$id],
-		($html) ? $sp->put('a').self::$html_tags['param'][0] . "exec" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . '/opt/tacacsgui/mavis-modules/ldap/module.php' . self::$html_tags['val'][1]
-		:
-		$sp->put('a').'exec = /opt/tacacsgui/mavis-modules/ldap/module.php');
-		///USER MANUAL CONFIGURATION///
-
-		array_push($outputMavisLdap[$id],
-		($html) ? $sp->put('d').'} ' . self::$html_tags['comment'][0] . '#END OF MAVIS LDAP SETTINGS' . self::$html_tags['comment'][1]
-		:
-		$sp->put('d').'} #END OF MAVIS LDAP SETTINGS');
-
-		return $outputMavisLdap;
-	}
-
 	public static function tacMavisGeneralGen($html)
 	{
 		$html = (empty($html)) ? false : true;
@@ -776,129 +738,39 @@ class ConfigPatterns
 		($html) ? $sp->put().self::$html_tags['attr'][0] . "user backend" . self::$html_tags['attr'][1] . ' = ' . self::$html_tags['object'][0] . 'mavis' . self::$html_tags['object'][1]
 		:
 		$sp->put().'user backend = mavis');
+    $mavis_params = '';
+    $mavis_params .= ( MAVISLocal::where([['enabled', 1],['change_passwd_cli', 1]])->count() ) ? ' chpass' : '';
+    $mavis_params .= ( MAVISSMS::where('enabled', 1)->count() ) ? ' chalresp' : '';
 		array_push($outputMavisGeneral[1],
-		($html) ? $sp->put().self::$html_tags['attr'][0] . "login backend" . self::$html_tags['attr'][1] . ' = ' . self::$html_tags['object'][0] . 'mavis'. ( ($mavis_local_settings->enabled == 1 AND $mavis_local_settings->enabled == 1) ? ' chpass' : '' ) .' #chalresp' . self::$html_tags['object'][1]
+		($html) ? $sp->put().self::$html_tags['attr'][0] . "login backend" . self::$html_tags['attr'][1] . ' = ' . self::$html_tags['object'][0] . 'mavis'.  $mavis_params . self::$html_tags['object'][1]
 		:
-		$sp->put().'login backend = mavis'. ( ($mavis_local_settings->enabled == 1 AND $mavis_local_settings->enabled == 1) ? ' chpass' : '' ) .' #chalresp');
+		$sp->put().'login backend = mavis'. $mavis_params);
 		array_push($outputMavisGeneral[1],
 		($html) ? $sp->put().self::$html_tags['attr'][0] . "pap backend" . self::$html_tags['attr'][1] . ' = ' . self::$html_tags['object'][0] . 'mavis' . self::$html_tags['object'][1]
 		:
 		$sp->put().'pap backend = mavis');
 
+    if ( MAVISLocal::where('enabled', 1)->count() OR MAVISLDAP::where('enabled', 1)->count() OR MAVISOTP::where('enabled', 1)->count() OR MAVISSMS::where('enabled', 1)->count() ){
+      array_push($outputMavisGeneral[1],
+  		($html) ? $sp->put().self::$html_tags['attr'][0] . "mavis module" . self::$html_tags['attr'][1] . ' = ' . self::$html_tags['object'][0] . 'external' . self::$html_tags['object'][1] . ' {'
+  		:
+  		$sp->put().'mavis module = external {');
+
+  		///MAVIS GLOBAL PATH///
+  		array_push($outputMavisGeneral[1],
+  		($html) ? $sp->put('a').self::$html_tags['param'][0] . "exec" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . TAC_ROOT_PATH . '/mavis/app.php' . self::$html_tags['val'][1]
+  		:
+  		$sp->put('a').'exec = ' . TAC_ROOT_PATH . '/mavis/app.php');
+
+  		array_push($outputMavisGeneral[1],
+  		($html) ? $sp->put('d').'} ' . self::$html_tags['comment'][0] . '#END OF MAVIS GLOBAL SETTINGS' . self::$html_tags['comment'][1]
+  		:
+  		$sp->put('d').'} #END OF MAVIS GLOBAL SETTINGS');
+    }
+
 	return $outputMavisGeneral;
 	}
 
-	public static function tacMavisOTPGen($html)
-	{
-		$html = (empty($html)) ? false : true;
-    $sp = new spacer();
-		$mavis_otp_settings = MAVISOTP::select('enabled')->first();
-
-		if ($mavis_otp_settings->enabled == 0) return array('title_flag' => 0, 'name' =>"");
-
-		$outputMavisOTP[0][0]=array('title_flag' => 1, 'name' =>
-		($html) ? $sp->put('a').self::$html_tags['comment'][0] . "####MAVIS OTP SETTINGS####" . self::$html_tags['comment'][1]
-		:
-		$sp->put('a')."####MAVIS OTP SETTINGS####");
-		///EMPTY ARRAY///
-		$outputMavisOTP[1] = array();
-		///MAVIS OTP TITLE///
-		$outputMavisOTP[1][0] = array('title_flag' => 0, 'name' =>"");
-		///MAVIS OTP SETTINGS START///
-		array_push($outputMavisOTP[1],
-		($html) ? $sp->put().self::$html_tags['attr'][0] . "mavis module" . self::$html_tags['attr'][1] . ' = ' . self::$html_tags['object'][0] . 'external' . self::$html_tags['object'][1] . ' {'
-		:
-		$sp->put().'mavis module = external {');
-
-		///OTP PATH///
-		array_push($outputMavisOTP[1],
-		($html) ? $sp->put('a').self::$html_tags['param'][0] . "exec" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . TAC_ROOT_PATH . '/mavis-modules/otp/module.php' . self::$html_tags['val'][1]
-		:
-		$sp->put('a').'exec = ' . TAC_ROOT_PATH . '/mavis-modules/otp/module.php');
-
-		array_push($outputMavisOTP[1],
-		($html) ? $sp->put('d').'} ' . self::$html_tags['comment'][0] . '#END OF MAVIS OTP SETTINGS' . self::$html_tags['comment'][1]
-		:
-		$sp->put('d').'} #END OF MAVIS OTP SETTINGS');
-
-
-
-	return $outputMavisOTP;
-	}
-
-	////MAVIS SMS////
-	public static function tacMavisSMSGen($html)
-	{
-		$html = (empty($html)) ? false : true;
-    $sp = new spacer();
-		$mavis_sms_settings = MAVISSMS::select('enabled')->first();
-
-		if ($mavis_sms_settings->enabled == 0) return array('title_flag' => 0, 'name' =>"");
-
-		$outputMavisSMS[0][0]=array('title_flag' => 1, 'name' =>
-		($html) ? $sp->put('a').self::$html_tags['comment'][0] . "####MAVIS SMS SETTINGS####" . self::$html_tags['comment'][1]
-		:
-		$sp->put('a')."####MAVIS SMS SETTINGS####");
-		///EMPTY ARRAY///
-		$outputMavisSMS[1] = array();
-		///MAVIS SMS TITLE///
-		$outputMavisSMS[1][0] = array('title_flag' => 0, 'name' =>"");
-		///MAVIS SMS SETTINGS START///
-		array_push($outputMavisSMS[1],
-		($html) ? $sp->put().self::$html_tags['attr'][0] . "mavis module" . self::$html_tags['attr'][1] . ' = ' . self::$html_tags['object'][0] . 'external' . self::$html_tags['object'][1] . ' {'
-		:
-		$sp->put().'mavis module = external {');
-
-		///SMS PATH///
-		array_push($outputMavisSMS[1],
-		($html) ? $sp->put('a').self::$html_tags['param'][0] . "exec" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . TAC_ROOT_PATH . '/mavis-modules/sms/module.php' . self::$html_tags['val'][1]
-		:
-		$sp->put('a').'exec  = ' . TAC_ROOT_PATH . '/mavis-modules/sms/module.php');
-
-		array_push($outputMavisSMS[1],
-		($html) ? $sp->put('d').'} ' . self::$html_tags['comment'][0] . '#END OF MAVIS SMS SETTINGS' . self::$html_tags['comment'][1]
-		:
-		$sp->put('d').'} #END OF MAVIS SMS SETTINGS');
-
-	return $outputMavisSMS;
-	}
-
-	////MAVIS Local////
-	public static function tacMavisLocal($html)
-	{
-		$html = (empty($html)) ? false : true;
-    $sp = new spacer();
-		$mavis_local_settings = MAVISLocal::select('enabled')->first();
-
-		if ($mavis_local_settings->enabled == 0) return array('title_flag' => 0, 'name' =>"");
-
-		$outputMavisLocal[0][0]=array('title_flag' => 1, 'name' =>
-		($html) ? $sp->put('a').self::$html_tags['comment'][0] . "####MAVIS Local DB SETTINGS####" . self::$html_tags['comment'][1]
-		:
-		$sp->put('a')."####MAVIS Local DB SETTINGS####");
-		///EMPTY ARRAY///
-		$outputMavisLocal[1] = array();
-		///MAVIS Local TITLE///
-		$outputMavisLocal[1][0] = array('title_flag' => 0, 'name' =>"");
-		///MAVIS Local SETTINGS START///
-		array_push($outputMavisLocal[1],
-		($html) ? $sp->put().self::$html_tags['attr'][0] . "mavis module" . self::$html_tags['attr'][1] . ' = ' . self::$html_tags['object'][0] . 'external' . self::$html_tags['object'][1] . ' {'
-		:
-		$sp->put().'mavis module = external {');
-
-		///Local PATH///
-		array_push($outputMavisLocal[1],
-		($html) ? $sp->put('a').self::$html_tags['param'][0] . "exec" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . TAC_ROOT_PATH . '/mavis-modules/local/module.php' . self::$html_tags['val'][1]
-		:
-		$sp->put('a').'exec  = ' . TAC_ROOT_PATH . '/mavis-modules/local/module.php');
-
-		array_push($outputMavisLocal[1],
-		($html) ? $sp->put('d').'} ' . self::$html_tags['comment'][0] . '#END OF MAVIS Local DB SETTINGS' . self::$html_tags['comment'][1]
-		:
-		$sp->put('d').'} #END OF MAVIS Local DB SETTINGS');
-
-	return $outputMavisLocal;
-	}
   public static function tacService($html = false, $id = 0, $noPreview = false)
 	{
     if ( $id == 0 ) return [];
@@ -917,6 +789,11 @@ class ConfigPatterns
         ///Cisco RS///START///
         if ( $service['cisco_rs_enable'] ) {
           //start//
+          // if ( !empty($service['cisco_rs_privlvl']) ) array_push($outputService[$service['id']],
+    			// ($html) ? self::$html_tags['param'][0] . "priv-lvl" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . $service['cisco_rs_privlvl'] . self::$html_tags['val'][1]
+    			// :
+    			// 'priv-lvl = '.$service['cisco_rs_privlvl']);
+
           array_push($outputService[$service['id']],
     			($html) ? self::$html_tags['attr'][0] . "service" . self::$html_tags['attr'][1] . ' = ' . self::$html_tags['object'][0]. 'shell' . self::$html_tags['object'][1] . ' {'
     			:
@@ -959,6 +836,21 @@ class ConfigPatterns
             $cmdIdList = explode( ';;', $service['cisco_rs_cmd'] );
 
             $outputService[$service['id']] = array_merge( $outputService[$service['id']],  self::tacCMDAttr($html, $cmdIdList, 'cisco') );
+
+          }
+
+          if ( !empty($service['cisco_rs_nexus_roles']) ){
+
+            $nexusRoles = explode( ' ', $service['cisco_rs_nexus_roles'] );
+            $shellRoles = '';
+            for ($nxr=0; $nxr < count($nexusRoles); $nxr++) {
+              $comma = ($nxr == 0 ) ? '' : ',';
+              $shellRoles .= $comma.'\"'.$nexusRoles[$nxr].'\"';
+            }
+            array_push($outputService[$service['id']],
+      			($html) ? self::$html_tags['param'][0] . "set shell:roles" . self::$html_tags['param'][1] . ' = "' . self::$html_tags['val'][0] . $shellRoles . self::$html_tags['val'][1] .'"'
+      			:
+      			'set shell:roles = "' . $shellRoles .'"');
 
           }
 

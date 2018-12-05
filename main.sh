@@ -38,7 +38,7 @@ case $1 in
 
 		smpp-client)
 			#php $ROOT_PATH/mavis-modules/sms/smpptest.php <type> <ipddr> <port> <debug> <login> <pass> <srcname> <number> <username>
-			php $ROOT_PATH/mavis-modules/sms/smpptest.php $3 $4 $5 $6 $7 $8 $9 ${10} ${11}
+			php $ROOT_PATH/mavis/sms/smpptest.php "$3" "$4" "$5" "$6" "$7" "$8" "$9" "${10}" "${11}"
 		;;
 
 		*)

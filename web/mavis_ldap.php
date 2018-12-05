@@ -37,8 +37,6 @@ require __DIR__ . '/templates/header.php';
 
 	<!-- iCheck -->
 	<link rel="stylesheet" href="/plugins/iCheck/square/blue.css">
-
-  <link rel="stylesheet" href="plugins/ladda-ui/ladda-themeless.min.css">
 <!--ADDITIONAL CSS FILES END-->
 <?php
 
@@ -313,9 +311,6 @@ require __DIR__ . '/templates/footer_end.php';
 <!-- ADDITIONAL JS FILES START-->
 	<!-- iCheck -->
 	<script src="/plugins/iCheck/icheck.min.js"></script>
-
-	<script src="plugins/ladda-ui/spin.min.js"></script>
-	<script src="plugins/ladda-ui/ladda.min.js"></script>
 
 	<!-- main Object -->
   <script src="dist/js/pages/mavis_ldap/tgui_ldap.js"></script>

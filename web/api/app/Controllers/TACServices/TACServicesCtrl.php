@@ -402,7 +402,7 @@ class TACServicesCtrl extends Controller
 			$service['buttons'] = $buttons;
 			$service['patterns'] = '';
 			if ( !$service['manual_conf_only'] ){
-				if ($service['cisco_rs_enable']) $service['patterns'] .= '<p class="empty-paragraph">Cisco R/S</p>';
+				if ($service['cisco_rs_enable']) $service['patterns'] .= '<p class="empty-paragraph">Cisco General</p>';
 				if ($service['cisco_wlc_enable']) $service['patterns'] .= '<p class="empty-paragraph">Cisco WLC</p>';
 				if ($service['fortios_enable']) $service['patterns'] .= '<p class="empty-paragraph">FortiOS</p>';
 				if ($service['paloalto_enable']) $service['patterns'] .= '<p class="empty-paragraph">Palo Alto</p>';

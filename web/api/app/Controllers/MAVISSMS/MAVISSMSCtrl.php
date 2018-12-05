@@ -117,7 +117,7 @@ class MAVISSMSCtrl extends Controller
 
 		$validation = $this->validator->validate($req, [
 			'port' => v::notEmpty()->numeric(),
-			'ipaddr' => v::notEmpty()->ip(),
+			'ipaddr' => v::notEmpty()->oneOf( v::ip(), v::domain() ),
 			'login' => v::notEmpty(),
 			'srcname' => v::notEmpty(),
 		]);

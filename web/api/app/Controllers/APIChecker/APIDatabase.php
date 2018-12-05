@@ -210,7 +210,7 @@ class APIDatabase
   		'priv-lvl' => ['integer', -1],
   		'default_cmd' => ['integer', '0'],
       //Patterns List//
-        //Cisco RS//
+        //Cisco General//
         'cisco_rs_enable' => ['integer', '0'],
         'cisco_rs_privlvl' => ['integer', '15'],
         'cisco_rs_def_cmd' => ['integer', '1'],
@@ -220,6 +220,7 @@ class APIDatabase
         'cisco_rs_debug_message' => ['integer', '0'],
         'cisco_rs_cmd' => ['string', ''],
         'cisco_rs_autocmd' => ['string', ''],
+        'cisco_rs_nexus_roles' => ['string', ''],
         'cisco_rs_manual' => ['text', '_'],
         //Cisco WLC//
         'cisco_wlc_enable' => ['integer', '0'],

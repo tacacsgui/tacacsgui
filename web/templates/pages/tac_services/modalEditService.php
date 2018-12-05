@@ -19,8 +19,7 @@
 							<li class="dropdown-submenu">
 								<a href="#" data-toggle="dropdown"><i class="fa fa-clone"></i> Cisco Systems</a>
 								<ul class="dropdown-menu">
-									<li><a href="#" data-pattern="cisco-rs" data-disabled="1" onclick="tgui_device_patterns.switch(this)"><i class="fa fa-square-o"></i> Cisco R/S</a></li>
-									<li><a href="#" data-pattern="cisco-nexus" data-disabled="1" onclick="tgui_device_patterns.switch(this)"><i class="fa fa-square-o"></i> Cisco Nexus</a></li>
+									<li><a href="#" data-pattern="cisco-rs" data-disabled="1" onclick="tgui_device_patterns.switch(this)"><i class="fa fa-square-o"></i> Cisco General</a></li>
 									<li><a href="#" data-pattern="cisco-wlc" data-disabled="1" onclick="tgui_device_patterns.switch(this)"><i class="fa fa-square-o"></i> Cisco WLC</a></li>
 								</ul>
 							</li>
@@ -31,9 +30,8 @@
 						</ul>
 					</li>
 					<li class="active"><a href="#general_info_edit" data-toggle="tab" aria-expanded="true">General</a></li>
-					<li class="device-pattern device-pattern-hidden cisco-rs"><a href="#cisco_edit" data-toggle="tab" aria-expanded="true">Cisco R/S</a></li>
+					<li class="device-pattern device-pattern-hidden cisco-rs"><a href="#cisco_edit" data-toggle="tab" aria-expanded="true">Cisco General</a></li>
 					<li class="device-pattern device-pattern-hidden cisco-wlc"><a href="#cisco-wlc_edit" data-toggle="tab" aria-expanded="true">Cisco WLC</a></li>
-					<li class="device-pattern device-pattern-hidden cisco-nexus"><a href="#cisco-nexus_edit" data-toggle="tab" aria-expanded="true">Cisco Nexus</a></li>
 					<li class="device-pattern device-pattern-hidden juniper"><a href="#juniper_edit" data-toggle="tab" aria-expanded="true">Juniper</a></li>
 					<li class="device-pattern device-pattern-hidden huawei"><a href="#huawei_edit" data-toggle="tab" aria-expanded="true">Huawei</a></li>
 					<li class="device-pattern device-pattern-hidden paloalto"><a href="#paloalto_edit" data-toggle="tab" aria-expanded="true">Palo Alto</a></li>
@@ -47,10 +45,6 @@
 					<!-- /.tab-pane -->
 					<div class="tab-pane" id="cisco_edit">
 						<?php include __DIR__ . '/tabCisco.php';?>
-					</div>
-					<!-- /.tab-pane -->
-					<div class="tab-pane" id="cisco-nexus_edit">
-						What should be here? :(
 					</div>
 					<!-- /.tab-pane -->
 					<div class="tab-pane" id="cisco-wlc_edit">

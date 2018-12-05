@@ -49,22 +49,6 @@ var tgui_configEngine = {
     			//MAVIS GENERAL SETTINGS //START//
     			self.confParser(resp['mavisGeneralConfig'])
     			//MAVIS GENERAL SETTINGS //END//
-    			/////////////////////
-    			//MAVIS Local SETTINGS //START//
-    			self.confParser(resp['mavisLocalConfig'])
-    			//MAVIS Local SETTINGS //END//
-    			/////////////////////
-    			//MAVIS OTP SETTINGS //START//
-    			self.confParser(resp['mavisOTPConfig'])
-    			//MAVIS OTP SETTINGS //END//
-    			/////////////////////
-    			//MAVIS SMS SETTINGS //START//
-    			self.confParser(resp['mavisSMSConfig'])
-    			//MAVIS SMS SETTINGS //END//
-    			/////////////////////
-    			//MAVIS LDAP SETTINGS //START//
-    			self.confParser(resp['mavisLdapConfig'])
-    			//MAVIS LDAP SETTINGS //END//
           /////////////////////
     			//ACL LIST //START//
     			self.confParser(resp['tacACL'])
