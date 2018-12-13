@@ -4,6 +4,8 @@ var tgui_service = {
   formSelector_edit: 'form#editServiceForm',
   select_cmd_add: '#addServiceForm .select_cmd_cisco',
   select_cmd_edit: '#editServiceForm .select_cmd_cisco',
+  select_cmd_h3c_add: '#addServiceForm .select_cmd_h3c',
+  select_cmd_h3c_edit: '#editServiceForm .select_cmd_h3c',
   init: function() {
     var self = this;
 
@@ -11,7 +13,7 @@ var tgui_service = {
 
     tgui_sortable.init();
 
-    /*Select2 Group*/
+    /*Select2 Cisco CMD Set*/
     this.cmdSelect2 = new tgui_select2({
       ajaxUrl : API_LINK+"tacacs/cmd/list/",
       template: this.selectionTemplate_cmd,
@@ -20,7 +22,17 @@ var tgui_service = {
     });
     $(this.select_cmd_add).select2(this.cmdSelect2.select2Data());
     $(this.select_cmd_edit).select2(this.cmdSelect2.select2Data());
-    /*Select2 Group*///END
+    /*Select2 Cisco CMD Set*///END
+    /*Select2 H3C CMD Set*/
+    this.cmd_h3cSelect2 = new tgui_select2({
+      ajaxUrl : API_LINK+"tacacs/cmd/list/",
+      template: this.selectionTemplate_cmd,
+      add: this.select_cmd_h3c_add,
+      edit: this.select_cmd_h3c_edit,
+    });
+    $(this.select_cmd_h3c_add).select2(this.cmd_h3cSelect2.select2Data());
+    $(this.select_cmd_h3c_edit).select2(this.cmd_h3cSelect2.select2Data());
+    /*Select2 H3C CMD Set*///END
 
     //console.log( $($(this.formSelector_edit + ' .nav-pills-edit > li > a')[0]).attr('href') );
     for (var u = 0; u < $(this.formSelector_edit + ' .nav-pills-edit > li > a').length; u++) {
@@ -52,6 +64,9 @@ var tgui_service = {
     };//ajaxProps END
 
     formData.cisco_wlc_roles = tgui_device_patterns.pattern.cisco.wlc.get(self.formSelector_add);
+    formData.h3c_cmd = ( tgui_device_patterns.pattern.h3c.general.cmd.get(self.formSelector_add) ) ? tgui_device_patterns.pattern.h3c.general.cmd.get(self.formSelector_add) : '';
+    formData.cisco_rs_cmd = ( tgui_device_patterns.pattern.cisco.rs.cmd.get(self.formSelector_add) ) ? tgui_device_patterns.pattern.cisco.rs.cmd.get(self.formSelector_add) : '';
+
     formData.cisco_rs_autocmd = (tgui_sortable.get( self.formSelector_add).separate.autocmd) ? tgui_sortable.get( self.formSelector_add).separate.autocmd.join(';;') : '';
     ajaxRequest.send(ajaxProps).then(function(resp) {
       if (tgui_supplier.checkResponse(resp.error, self.formSelector_add)){
@@ -86,6 +101,7 @@ var tgui_service = {
       tgui_device_patterns.pattern.cisco.rs.cmd.fill(resp.service.cisco_rs_cmd, self.formSelector_edit)
       $(self.formSelector_edit + ' [name="cisco_rs_autocmd"]').val(resp.service.cisco_rs_autocmd);
       tgui_device_patterns.pattern.cisco.rs.autocmd.fill(resp.service.cisco_rs_autocmd, self.formSelector_edit);
+      tgui_device_patterns.pattern.h3c.general.cmd.fill(resp.service.h3c_cmd, self.formSelector_edit)
       $( ".select2-selection__rendered" ).sortable();
       $( ".select2-selection__rendered" ).disableSelection();
       $('#editService').modal('show')
@@ -108,6 +124,10 @@ var tgui_service = {
     }
     if ( tgui_device_patterns.pattern.cisco.rs.autocmd.diff(tgui_sortable.get( self.formSelector_edit).separate.autocmd, self.formSelector_edit) ){
       formData.cisco_rs_autocmd = tgui_sortable.get( self.formSelector_edit).separate.autocmd.join(';;');
+    }
+    if ( tgui_device_patterns.pattern.h3c.general.cmd.diff(self.formSelector_edit) ){
+      //console.log(tgui_device_patterns.pattern.cisco.rs.cmd.get(self.formSelector_edit));
+      formData.h3c_cmd = tgui_device_patterns.pattern.h3c.general.cmd.get(self.formSelector_edit)
     }
     //formData.cisco_rs_autocmd = tgui_sortable.get( self.formSelector_edit).separate.autocmd.join(';;');
     var ajaxProps = {

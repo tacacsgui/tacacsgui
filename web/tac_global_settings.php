@@ -121,6 +121,14 @@ require __DIR__ . '/templates/body_start.php';
 						<input type="hidden" name="backoff_native" value="">
 					</div>
 				</div>
+				<div class="col-sm-4">
+					<div class="form-group separation_tag">
+						<label>Separation Tag</label>
+						<input type="text" class="form-control separation_tag" name="separation_tag" data-type="input" data-default="" data-pickup="true" placeholder="Separation Tag">
+						<p class="help-block">separation tag used to separate users and groups, by default <i>*</i> </p>
+						<input type="hidden" name="separation_tag_native" value="">
+					</div>
+				</div>
 				</div>
 				<hr>
 				<h3>Miscellaneous</h3>

@@ -1,3 +1,4 @@
+var tgui_user = {};
 //AJAX Request Function//
 var ajaxRequest = {
     send: function (props){
@@ -42,11 +43,15 @@ var tgui_error = {
       getStatus:function(err, extra, signin){
         signin = signin || false;
         err = err || {};
-        //console.log(err);
-        this.status = err.status || this.status;
+        console.log(err);
+        //this.status = err.status || this.status;
         if (window.location.hash.substr(1) == 'debug') console.log(err);
+        if ( !err.status ) {
+          this.local.show({type:"error", message: "Server Unreachable!"});
+          return this;
+        }
         if (signin) return true;
-        switch(this.status)
+        switch(err.status)
       	{
           case 400:
             if (err.responseJSON && err.responseJSON.error && err.responseJSON.error.message){
@@ -61,6 +66,12 @@ var tgui_error = {
       			break;
       		case 403:
             this.local.show({type:"warning", message: "You do not have enough rights to do that!"});
+      			break;
+      		case 404:
+            this.local.show({type:"error", message: "Server not found!"});
+      			break;
+      		case 504:
+            this.local.show({type:"error", message: "Server Unreachable!"});
       			break;
       		default:
       			toastr['error']('Oops! Unknown error appeared, try to move to home page. :(');
@@ -114,6 +125,7 @@ var tgui_apiUser = {
     return info;
   },
   fulfill: function(resp) {
+    tgui_user = resp.user;
     $('firstname_info').text(resp.user.firstname + ' ');
     $('surname_info').text(resp.user.surname);
     $('position_info').text(resp.user.position);
@@ -234,7 +246,7 @@ var tguiInit = {
     return this;
   },
   toggleMavis: function() {
-    $('input[name="enabled"]').on('ifToggled', function(event){
+    $('input[name="enabled"]').on('change', function(event){
       ( $('input[name="enabled"]').prop( "checked" ) ) ? $('div.disabled_shield').hide() : $('div.disabled_shield').show()
     });
     return this;

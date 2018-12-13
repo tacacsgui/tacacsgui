@@ -100,7 +100,7 @@ class LDAP extends Controller
     }
 
     $this->mavis->debugIn( $this->dPrefix() .'Group List: '. implode(',', $groupList_result));
-    $this->mavis->setMempership($groupList_result);
+    $this->mavis->setMempership( $groupList_result , $this->ldap->group_selection );
 
     $this->mavis->auth();
   }

@@ -97,21 +97,21 @@ var tgui_configEngine = {
         }
         if (someLine == 1)
         {
-          $('code.tacacs_config').append(this.lineNumber()).append(some[someLine].replace(/\n/g,''))
+          $('code.tacacs_config').append(this.lineNumber()).append(some[someLine].replace(/\n/g,'\n'))
             .append('\n')
           continue;
         }
         if (some.length == someLine+1)
         {
-          $('code.tacacs_config').append(this.lineNumber()).append(some[someLine].replace(/\n/g,''))
+          $('code.tacacs_config').append(this.lineNumber()).append(some[someLine].replace(/\n/g,'\n'))
             .append('\n');
         } else
         {
           //console.log(some);
-          $('code.tacacs_config')
-            .append(this.lineNumber())
-            .append(some[someLine].replace(/\n/g,''))
-            .append('\n');
+          var s_lines = some[someLine].split("\n");
+          for (var i = 0; i < s_lines.length; i++) {
+            $('code.tacacs_config').append(this.lineNumber()).append(s_lines[i]).append('\n');
+          }
         }
       }
     }

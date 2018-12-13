@@ -147,6 +147,11 @@ class ConfigPatterns
 			($html) ? $sp->put() . self::$html_tags['attr'][0] . 'password backoff' . self::$html_tags['attr'][1] . ' = ' .self::$html_tags['val'][0] . $globalVariables['backoff'] . self::$html_tags['val'][1]
 			:
 			$sp->put() . 'password backoff = '.$globalVariables['backoff']);
+			///Separation Tag///
+			if ( !empty($globalVariables['separation_tag']) ) array_push($outputGeneralConf[1],
+			($html) ? $sp->put() . self::$html_tags['attr'][0] . 'separation tag' . self::$html_tags['attr'][1] . ' = "' .self::$html_tags['val'][0] .$globalVariables['separation_tag']. self::$html_tags['val'][1].'"'
+			:
+			$sp->put() . 'separation tag = "'.$globalVariables['separation_tag'].'"');
 			///Skip conflicting groups///
 			if ( $globalVariables['skip_conflicting_groups'] ) array_push($outputGeneralConf[1],
 			($html) ? $sp->put() . self::$html_tags['attr'][0] . 'skip conflicting groups' . self::$html_tags['attr'][1] . ' = ' .self::$html_tags['val'][0] .'yes'. self::$html_tags['val'][1]
@@ -471,10 +476,10 @@ class ConfigPatterns
 				$sp->put().'acl = '. $allACL[$group['acl']]);
 			}
       ///USER CLIENT IP///
-      if ($group['client_ip'] > 0)array_push($outputUserGroup[$group['id']],
-      ($html) ? $sp->put().self::$html_tags['param'][0] . "client" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . $group['client_ip'] . self::$html_tags['val'][1] . ' # NAC ip must be in that range'
-      :
-      $sp->put().'client = '. $group['client_ip']);
+      // if ($group['client_ip'] > 0)array_push($outputUserGroup[$group['id']],
+      // ($html) ? $sp->put().self::$html_tags['param'][0] . "client" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . $group['client_ip'] . self::$html_tags['val'][1] . ' # NAC ip must be in that range'
+      // :
+      // $sp->put().'client = '. $group['client_ip']);
       ///USER SERVER IP///
       if ( !empty($group['device_group_list']) OR !empty($group['device_list']) ){
         $dev_list = TACDevices::select('name', 'ipaddr', 'prefix', 'disabled')->whereIn( 'id', explode(';;', $group['device_list']) )->get();
@@ -504,10 +509,10 @@ class ConfigPatterns
         $sp->put().'server = deny 0.0.0.0/0 # permit ONLY');
 
       }
-      if ($group['server_ip'] > 0)array_push($outputUserGroup[$group['id']],
-      ($html) ? $sp->put().self::$html_tags['param'][0] . "server" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . $group['server_ip'] . self::$html_tags['val'][1] . ' # NAS ip must be in that range'
-      :
-      $sp->put().'server = '. $group['server_ip']);
+      // if ($group['server_ip'] > 0)array_push($outputUserGroup[$group['id']],
+      // ($html) ? $sp->put().self::$html_tags['param'][0] . "server" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . $group['server_ip'] . self::$html_tags['val'][1] . ' # NAS ip must be in that range'
+      // :
+      // $sp->put().'server = '. $group['server_ip']);
 			///USER GROUP DEFAULT SERVICE///
 			$default_service = ($group['default_service']) ? 'permit' : 'deny';
 			array_push($outputUserGroup[$group['id']],
@@ -582,10 +587,21 @@ class ConfigPatterns
 			:
 			$sp->put('a').'login = '. $login);
       ///USER MEMBER///
-			if ($user['group'] > 0)array_push($outputUsers[$user['id']],
-			($html) ? $sp->put().self::$html_tags['param'][0] . "member" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . $allUserGroups[$user['group']] . self::$html_tags['val'][1]
-			:
-			$sp->put().'member = '.$allUserGroups[$user['group']]);
+			if ( !empty($user['group']) ){
+        $user_group_id = explode(';;', $user['group']);
+        $user_group = '';
+        for ($i=0; $i < count($user_group_id); $i++) {
+          if ( isset($allUserGroups[$user_group_id[$i]]) ) {
+            if ( $i == 0 ) $user_group .= $allUserGroups[$user_group_id[$i]];
+            else $user_group .= '/'.$allUserGroups[$user_group_id[$i]];
+          }
+        }
+
+        array_push($outputUsers[$user['id']],
+  			($html) ? $sp->put().self::$html_tags['param'][0] . "member" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . $user_group . self::$html_tags['val'][1]
+  			:
+  			$sp->put().'member = '.$user_group);
+      }
 			///USER PAP///
 			// if ($user['pap_clone'] == 1) array_push($outputUsers[$user['id']],
 			// ($html) ? '	'.self::$html_tags['param'][0] . "pap" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . $login . self::$html_tags['val'][1]
@@ -619,15 +635,15 @@ class ConfigPatterns
 			$sp->put().'acl = '. $allACL[$user['acl']]);
 			///USER MESSAGE///
 			///USER CLIENT IP///
-			if ($user['client_ip'] > 0)array_push($outputUsers[$user['id']],
-			($html) ? $sp->put().self::$html_tags['param'][0] . "client" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . $user['client_ip'] . self::$html_tags['val'][1] . ' # NAC ip must be in that range'
-			:
-			$sp->put().'client = '. $user['client_ip']);
-			///USER SERVER IP///
-			if ($user['server_ip'] > 0)array_push($outputUsers[$user['id']],
-			($html) ? $sp->put().self::$html_tags['param'][0] . "server" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . $user['server_ip'] . self::$html_tags['val'][1] . ' # NAS ip must be in that range'
-			:
-			$sp->put().'server = '. $user['server_ip']);
+			// if ($user['client_ip'] > 0)array_push($outputUsers[$user['id']],
+			// ($html) ? $sp->put().self::$html_tags['param'][0] . "client" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . $user['client_ip'] . self::$html_tags['val'][1] . ' # NAC ip must be in that range'
+			// :
+			// $sp->put().'client = '. $user['client_ip']);
+			// ///USER SERVER IP///
+			// if ($user['server_ip'] > 0)array_push($outputUsers[$user['id']],
+			// ($html) ? $sp->put().self::$html_tags['param'][0] . "server" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . $user['server_ip'] . self::$html_tags['val'][1] . ' # NAS ip must be in that range'
+			// :
+			// $sp->put().'server = '. $user['server_ip']);
 			///USER MESSAGE///
 			if ($user['message']!='')array_push($outputUsers[$user['id']],
 			($html) ? $sp->put().self::$html_tags['param'][0] . "message" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] .'"'.$user['message'].'"'. self::$html_tags['val'][1]
@@ -771,18 +787,19 @@ class ConfigPatterns
 	return $outputMavisGeneral;
 	}
 
-  public static function tacService($html = false, $id = 0, $noPreview = false)
+  public static function tacService($html = false, $id = 0, $noPreview = false, $space = 0)
 	{
     if ( $id == 0 ) return [];
+    $sp = new spacer(1);
     $service = TACServices::select()->where('id', $id)->first()->toArray();
 
 			///EMPTY ARRAY///
 			$outputService[$service['id']] = array();
 			///Service TITLE///
 			if ( ! $noPreview ) $outputService[$service['id']][0] = array('title_flag' => 0, 'name' =>"");
-			array_push($outputService[$service['id']], ($html) ? self::$html_tags['comment'][0] . '###Service '.$service['name'].' START###' . self::$html_tags['comment'][1]
+			array_push($outputService[$service['id']], ($html) ? $sp->put('a').self::$html_tags['comment'][0] . '###Service '.$service['name'].' START###' . self::$html_tags['comment'][1]
 			:
-			'###Service '.$service['name'].' START###');
+			$sp->put('a').'###Service '.$service['name'].' START###');
 
       if( ! $service['manual_conf_only'] ){
 
@@ -795,47 +812,48 @@ class ConfigPatterns
     			// 'priv-lvl = '.$service['cisco_rs_privlvl']);
 
           array_push($outputService[$service['id']],
-    			($html) ? self::$html_tags['attr'][0] . "service" . self::$html_tags['attr'][1] . ' = ' . self::$html_tags['object'][0]. 'shell' . self::$html_tags['object'][1] . ' {'
+    			($html) ? $sp->put().self::$html_tags['attr'][0] . "service" . self::$html_tags['attr'][1] . ' = ' . self::$html_tags['object'][0]. 'shell' . self::$html_tags['object'][1] . ' {'
     			:
-    			'service = shell {');
+    			$sp->put().'service = shell {');
 
           $autoCmd = explode( ';;', $service['cisco_rs_autocmd'] );
+          $sp->put('a');
           for ($i=0; $i < count($autoCmd); $i++) {
             if ( empty($autoCmd[$i]) ) continue;
 
             array_push($outputService[$service['id']],
-      			($html) ? self::$html_tags['param'][0] . "set autocmd" . self::$html_tags['param'][1] . ' = "' . self::$html_tags['val'][0] . $autoCmd[$i] . self::$html_tags['val'][1] . '"'
+      			($html) ? $sp->put().self::$html_tags['param'][0] . "set autocmd" . self::$html_tags['param'][1] . ' = "' . self::$html_tags['val'][0] . $autoCmd[$i] . self::$html_tags['val'][1] . '"'
       			:
-      			'set autocmd = "' . $autoCmd[$i] . '"');
+      			$sp->put().'set autocmd = "' . $autoCmd[$i] . '"');
           }
 
-          if ( !empty($service['cisco_rs_privlvl']) ) array_push($outputService[$service['id']],
-    			($html) ? self::$html_tags['param'][0] . "set priv-lvl" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . $service['cisco_rs_privlvl'] . self::$html_tags['val'][1]
+          if ( $service['cisco_rs_privlvl'] != -1 ) array_push($outputService[$service['id']],
+    			($html) ? $sp->put().self::$html_tags['param'][0] . "set priv-lvl" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . $service['cisco_rs_privlvl'] . self::$html_tags['val'][1]
     			:
-    			'set priv-lvl = '.$service['cisco_rs_privlvl']);
+    			$sp->put().'set priv-lvl = '.$service['cisco_rs_privlvl']);
 
           if ( !empty($service['cisco_rs_def_attr']) ) array_push($outputService[$service['id']],
-    			($html) ? self::$html_tags['param'][0] . "default attribute" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . 'permit' . self::$html_tags['val'][1]
+    			($html) ? $sp->put().self::$html_tags['param'][0] . "default attribute" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . 'permit' . self::$html_tags['val'][1]
     			:
-    			'default attribute = permit');
+    			$sp->put().'default attribute = permit');
           if ( !empty($service['cisco_rs_def_cmd']) ) array_push($outputService[$service['id']],
-    			($html) ? self::$html_tags['param'][0] . "default cmd" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . 'permit' . self::$html_tags['val'][1]
+    			($html) ? $sp->put().self::$html_tags['param'][0] . "default cmd" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . 'permit' . self::$html_tags['val'][1]
     			:
-    			'default cmd = permit');
+    			$sp->put().'default cmd = permit');
           if ( !empty($service['cisco_rs_idletime']) ) array_push($outputService[$service['id']],
-    			($html) ? self::$html_tags['param'][0] . "set idletime" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . $service['cisco_rs_idletime'] . self::$html_tags['val'][1]
+    			($html) ? $sp->put().self::$html_tags['param'][0] . "set idletime" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . $service['cisco_rs_idletime'] . self::$html_tags['val'][1]
     			:
-    			'set idletime = ' . $service['cisco_rs_idletime']);
+    			$sp->put().'set idletime = ' . $service['cisco_rs_idletime']);
           if ( !empty($service['cisco_rs_timeout']) ) array_push($outputService[$service['id']],
-    			($html) ? self::$html_tags['param'][0] . "set timeout" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . $service['cisco_rs_timeout'] . self::$html_tags['val'][1]
+    			($html) ? $sp->put().self::$html_tags['param'][0] . "set timeout" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . $service['cisco_rs_timeout'] . self::$html_tags['val'][1]
     			:
-    			'set timeout = ' . $service['cisco_rs_timeout']);
+    			$sp->put().'set timeout = ' . $service['cisco_rs_timeout']);
 
           if ( !empty($service['cisco_rs_cmd']) ){
 
             $cmdIdList = explode( ';;', $service['cisco_rs_cmd'] );
 
-            $outputService[$service['id']] = array_merge( $outputService[$service['id']],  self::tacCMDAttr($html, $cmdIdList, 'cisco') );
+            $outputService[$service['id']] = array_merge( $outputService[$service['id']],  self::tacCMDAttr($html, $cmdIdList, 'cisco', 3) );
 
           }
 
@@ -848,121 +866,168 @@ class ConfigPatterns
               $shellRoles .= $comma.'\"'.$nexusRoles[$nxr].'\"';
             }
             array_push($outputService[$service['id']],
-      			($html) ? self::$html_tags['param'][0] . "set shell:roles" . self::$html_tags['param'][1] . ' = "' . self::$html_tags['val'][0] . $shellRoles . self::$html_tags['val'][1] .'"'
+      			($html) ? $sp->put().self::$html_tags['param'][0] . "set shell:roles" . self::$html_tags['param'][1] . ' = "' . self::$html_tags['val'][0] . $shellRoles . self::$html_tags['val'][1] .'"'
       			:
-      			'set shell:roles = "' . $shellRoles .'"');
+      			$sp->put().'set shell:roles = "' . $shellRoles .'"');
 
           }
 
           if ( !empty($service['cisco_rs_debug_message']) ) array_push($outputService[$service['id']],
-    			($html) ? self::$html_tags['param'][0] . "message debug" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . '"to permit: cmd = %c { permit /^%a$/ } '."\n".'to deny: cmd = %c { deny /^%a$/ }"' . self::$html_tags['val'][1]
+    			($html) ? $sp->put().self::$html_tags['param'][0] . "message debug" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . '"to permit: cmd = %c { permit /^%a$/ } to deny: cmd = %c { deny /^%a$/ }"' . self::$html_tags['val'][1]
     			:
-    			'message debug = ' . '"to permit: cmd = %c { permit /^%a$/ } '."\n".'to deny: cmd = %c { deny /^%a$/ }"');
+    			$sp->put().'message debug = ' . '"to permit: cmd = %c { permit /^%a$/ } to deny: cmd = %c { deny /^%a$/ }"');
 
           $outputService[$service['id']] = array_merge( $outputService[$service['id']],  self::manualConfigPrint($service['cisco_rs_manual'], $html) );
 
           //end//
           array_push($outputService[$service['id']],
-    			($html) ? '} ' . self::$html_tags['comment'][0] . '#END OF Cisco Router/Switch Service'. self::$html_tags['comment'][1]
+    			($html) ? $sp->put('d').'} ' . self::$html_tags['comment'][0] . '#END OF Cisco Router/Switch Service'. self::$html_tags['comment'][1]
     			:
-    			'} #END OF Cisco Router/Switch Service');
+    			$sp->put('d').'} #END OF Cisco Router/Switch Service');
         }
         ///Cisco RS///END///
+        ///H3C///START///
+        if ( $service['h3c_enable'] ) {
+          //start//
+          array_push($outputService[$service['id']],
+    			($html) ? $sp->put().self::$html_tags['attr'][0] . "service" . self::$html_tags['attr'][1] . ' = ' . self::$html_tags['object'][0]. 'shell' . self::$html_tags['object'][1] . ' {'
+    			:
+    			$sp->put().'service = shell {');
+
+          if ( $service['h3c_privlvl'] != -1 ) array_push($outputService[$service['id']],
+    			($html) ? $sp->put('a').self::$html_tags['param'][0] . "set priv-lvl" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . $service['h3c_privlvl'] . self::$html_tags['val'][1]
+    			:
+    			$sp->put('a').'set priv-lvl = '.$service['h3c_privlvl']);
+
+          if ( !empty($service['h3c_def_attr']) ) array_push($outputService[$service['id']],
+    			($html) ? $sp->put().self::$html_tags['param'][0] . "default attribute" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . 'permit' . self::$html_tags['val'][1]
+    			:
+    			$sp->put().'default attribute = permit');
+          if ( !empty($service['h3c_def_cmd']) ) array_push($outputService[$service['id']],
+    			($html) ? $sp->put().self::$html_tags['param'][0] . "default cmd" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . 'permit' . self::$html_tags['val'][1]
+    			:
+    			$sp->put().'default cmd = permit');
+          if ( !empty($service['h3c_idletime']) ) array_push($outputService[$service['id']],
+    			($html) ? $sp->put().self::$html_tags['param'][0] . "set idletime" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . $service['h3c_idletime'] . self::$html_tags['val'][1]
+    			:
+    			$sp->put().'set idletime = ' . $service['h3c_idletime']);
+          if ( !empty($service['h3c_timeout']) ) array_push($outputService[$service['id']],
+    			($html) ? $sp->put().self::$html_tags['param'][0] . "set timeout" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . $service['h3c_timeout'] . self::$html_tags['val'][1]
+    			:
+    			$sp->put().'set timeout = ' . $service['h3c_timeout']);
+
+          if ( !empty($service['h3c_cmd']) ){
+
+            $cmdIdList = explode( ';;', $service['h3c_cmd'] );
+
+            $outputService[$service['id']] = array_merge( $outputService[$service['id']],  self::tacCMDAttr($html, $cmdIdList, 'cisco', 3) );
+
+          }
+
+          $outputService[$service['id']] = array_merge( $outputService[$service['id']],  self::manualConfigPrint($service['h3c_manual'], $html) );
+
+          //end//
+          array_push($outputService[$service['id']],
+    			($html) ? $sp->put('d').'} ' . self::$html_tags['comment'][0] . '#END OF H3C General Service'. self::$html_tags['comment'][1]
+    			:
+    			$sp->put('d').'} #END OF H3C General Service');
+        }
+        ///H3C///END///
         ///Cisco WLC///START///
         if ( $service['cisco_wlc_enable'] ) {
           //start//
           array_push($outputService[$service['id']],
-    			($html) ? self::$html_tags['attr'][0] . "service " . self::$html_tags['attr'][1] . ' = ' . self::$html_tags['object'][0]. 'ciscowlc' . self::$html_tags['object'][1] . ' {'
+    			($html) ? $sp->put('a').self::$html_tags['attr'][0] . "service " . self::$html_tags['attr'][1] . ' = ' . self::$html_tags['object'][0]. 'ciscowlc' . self::$html_tags['object'][1] . ' {'
     			:
-    			'service = ciscowlc {');
-
+    			$sp->put().'service = ciscowlc {');
+          $sp->put('a');
           $roles = explode( ';;', $service['cisco_wlc_roles'] );
 
           for ($i=0; $i < count($roles); $i++) {
             if (! in_array($roles[$i], array_keys(self::$ciscoWLCRoles) ) ) continue;
 
             array_push($outputService[$service['id']],
-      			($html) ? self::$html_tags['param'][0] . "set role". ($i + 1) . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . self::$ciscoWLCRoles[$roles[$i]] . self::$html_tags['val'][1]
+      			($html) ? $sp->put().self::$html_tags['param'][0] . "set role". ($i + 1) . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . self::$ciscoWLCRoles[$roles[$i]] . self::$html_tags['val'][1]
       			:
-      			'set role'. ($i + 1) .' = ' . self::$ciscoWLCRoles[$roles[$i]] );
+      			$sp->put().'set role'. ($i + 1) .' = ' . self::$ciscoWLCRoles[$roles[$i]] );
           }
 
           $outputService[$service['id']] = array_merge( $outputService[$service['id']],  self::manualConfigPrint($service['cisco_wlc_manual'], $html) );
 
           //end//
           array_push($outputService[$service['id']],
-    			($html) ? '} ' . self::$html_tags['comment'][0] . '#END OF Cisco WLC Service'. self::$html_tags['comment'][1]
+    			($html) ? $sp->put('d').'} ' . self::$html_tags['comment'][0] . '#END OF Cisco WLC Service'. self::$html_tags['comment'][1]
     			:
-    			'} #END OF Cisco WLC Service');
+    			$sp->put('d').'} #END OF Cisco WLC Service');
         }
         ///Cisco WLC///END///
         ///FortiOS///START///
         if ( $service['fortios_enable'] ) {
           //start//
           array_push($outputService[$service['id']],
-    			($html) ? self::$html_tags['attr'][0] . "service " . self::$html_tags['attr'][1] . ' = ' . self::$html_tags['object'][0]. 'fortigate' . self::$html_tags['object'][1] . ' {'
+    			($html) ? $sp->put().self::$html_tags['attr'][0] . "service " . self::$html_tags['attr'][1] . ' = ' . self::$html_tags['object'][0]. 'fortigate' . self::$html_tags['object'][1] . ' {'
     			:
-    			'service = fortigate {');
+    			$sp->put().'service = fortigate {');
 
           if (!empty($service['fortios_admin_prof'])) array_push($outputService[$service['id']],
-    			($html) ? self::$html_tags['param'][0] . "optional admin_prof" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . $service['fortios_admin_prof'] . self::$html_tags['val'][1]
+    			($html) ? $sp->put('a').self::$html_tags['param'][0] . "optional admin_prof" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . $service['fortios_admin_prof'] . self::$html_tags['val'][1]
     			:
-    			'optional admin_prof = '.$service['fortios_admin_prof']);
+    			$sp->put('a').'optional admin_prof = '.$service['fortios_admin_prof']);
 
           $outputService[$service['id']] = array_merge( $outputService[$service['id']],  self::manualConfigPrint($service['fortios_manual'], $html) );
 
           //end//
           array_push($outputService[$service['id']],
-    			($html) ? '} ' . self::$html_tags['comment'][0] . '#END OF FortiOS Service'. self::$html_tags['comment'][1]
+    			($html) ? $sp->put('d').'} ' . self::$html_tags['comment'][0] . '#END OF FortiOS Service'. self::$html_tags['comment'][1]
     			:
-    			'} #END OF FortiOS Service');
+    			$sp->put('d').'} #END OF FortiOS Service');
         }
         ///FortiOS///END///
         ///PaloALto///START///
         if ( $service['paloalto_enable'] ) {
           //start//
           array_push($outputService[$service['id']],
-    			($html) ? self::$html_tags['attr'][0] . "service" . self::$html_tags['attr'][1] . ' = ' . self::$html_tags['object'][0]. 'PaloAlto' . self::$html_tags['object'][1] . ' {'
+    			($html) ? $sp->put().self::$html_tags['attr'][0] . "service" . self::$html_tags['attr'][1] . ' = ' . self::$html_tags['object'][0]. 'PaloAlto' . self::$html_tags['object'][1] . ' {'
     			:
-    			'service = PaloAlto {');
+    			$sp->put().'service = PaloAlto {');
 
           array_push($outputService[$service['id']],
-    			($html) ? self::$html_tags['object'][0] . "set protocol = firewall" . self::$html_tags['object'][1] . self::$html_tags['comment'][0] . " #default settings" . self::$html_tags['comment'][1]
+    			($html) ? $sp->put('a').self::$html_tags['object'][0] . "set protocol = firewall" . self::$html_tags['object'][1] . self::$html_tags['comment'][0] . " #default settings" . self::$html_tags['comment'][1]
     			:
-    			'set protocol = firewall #default settings');
+    			$sp->put('a').'set protocol = firewall #default settings');
 
           if (!empty($service['paloalto_admin_role'])) array_push($outputService[$service['id']],
-    			($html) ? self::$html_tags['param'][0] . "set PaloAlto-Admin-Role" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . $service['paloalto_admin_role'] . self::$html_tags['val'][1]
+    			($html) ? $sp->put().self::$html_tags['param'][0] . "set PaloAlto-Admin-Role" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . $service['paloalto_admin_role'] . self::$html_tags['val'][1]
     			:
-    			'set PaloAlto-Admin-Role = '.$service['paloalto_admin_role']);
+    			$sp->put().'set PaloAlto-Admin-Role = '.$service['paloalto_admin_role']);
 
           if (!empty($service['paloalto_admin_domain'])) array_push($outputService[$service['id']],
-    			($html) ? self::$html_tags['param'][0] . "set PaloAlto-Admin-Access-Domain" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . $service['paloalto_admin_domain'] . self::$html_tags['val'][1]
+    			($html) ? $sp->put().self::$html_tags['param'][0] . "set PaloAlto-Admin-Access-Domain" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . $service['paloalto_admin_domain'] . self::$html_tags['val'][1]
     			:
-    			'set PaloAlto-Admin-Access-Domain = '.$service['paloalto_admin_domain']);
+    			$sp->put().'set PaloAlto-Admin-Access-Domain = '.$service['paloalto_admin_domain']);
 
           if (!empty($service['paloalto_panorama_admin_role'])) array_push($outputService[$service['id']],
-    			($html) ? self::$html_tags['param'][0] . "set PaloAlto-Panorama-Admin-Role" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . $service['paloalto_panorama_admin_role'] . self::$html_tags['val'][1]
+    			($html) ? $sp->put().self::$html_tags['param'][0] . "set PaloAlto-Panorama-Admin-Role" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . $service['paloalto_panorama_admin_role'] . self::$html_tags['val'][1]
     			:
-    			'set PaloAlto-Panorama-Admin-Role = '.$service['paloalto_panorama_admin_role']);
+    			$sp->put().'set PaloAlto-Panorama-Admin-Role = '.$service['paloalto_panorama_admin_role']);
 
           if (!empty($service['paloalto_panorama_admin_domain'])) array_push($outputService[$service['id']],
-    			($html) ? self::$html_tags['param'][0] . "set PaloAlto-Panorama-Admin-Access-Domain" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . $service['paloalto_panorama_admin_domain'] . self::$html_tags['val'][1]
+    			($html) ? $sp->put().self::$html_tags['param'][0] . "set PaloAlto-Panorama-Admin-Access-Domain" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . $service['paloalto_panorama_admin_domain'] . self::$html_tags['val'][1]
     			:
-    			'set PaloAlto-Panorama-Admin-Access-Domain = '.$service['paloalto_panorama_admin_domain']);
+    			$sp->put().'set PaloAlto-Panorama-Admin-Access-Domain = '.$service['paloalto_panorama_admin_domain']);
 
           if (!empty($service['paloalto_user_group'])) array_push($outputService[$service['id']],
-    			($html) ? self::$html_tags['param'][0] . "set PaloAlto-User-Group" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . $service['paloalto_user_group'] . self::$html_tags['val'][1]
+    			($html) ? $sp->put().self::$html_tags['param'][0] . "set PaloAlto-User-Group" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . $service['paloalto_user_group'] . self::$html_tags['val'][1]
     			:
-    			'set PaloAlto-User-Group = '.$service['paloalto_user_group']);
+    			$sp->put().'set PaloAlto-User-Group = '.$service['paloalto_user_group']);
 
           $outputService[$service['id']] = array_merge( $outputService[$service['id']],  self::manualConfigPrint($service['paloalto_manual'], $html) );
 
           //end//
           array_push($outputService[$service['id']],
-    			($html) ? '} ' . self::$html_tags['comment'][0] . '#END OF PaloAlto Service'. self::$html_tags['comment'][1]
+    			($html) ? $sp->put('d').'} ' . self::$html_tags['comment'][0] . '#END OF PaloAlto Service'. self::$html_tags['comment'][1]
     			:
-    			'} #END OF PaloAlto Service');
+    			$sp->put('d').'} #END OF PaloAlto Service');
         }
         ///PaloAlto///END///
       }
@@ -970,19 +1035,20 @@ class ConfigPatterns
 
       $outputService[$service['id']] = array_merge( $outputService[$service['id']],  self::manualConfigPrint($service['manual'], $html) );
 
-			array_push($outputService[$service['id']], ($html) ? self::$html_tags['comment'][0] . '###Service '.$service['name'].' END###' . self::$html_tags['comment'][1]
+			array_push($outputService[$service['id']], ($html) ? $sp->put().self::$html_tags['comment'][0] . '###Service '.$service['name'].' END###' . self::$html_tags['comment'][1]
 			:
-			'###Service '.$service['name'].' END###');
+			$sp->put().'###Service '.$service['name'].' END###');
 
 		if ( $noPreview ) return $outputService[$service['id']]; else return $outputService;
 	}
 
-  public static function tacCMDAttr($html = false, $id = [], $type = '')
+  public static function tacCMDAttr($html = false, $id = [], $type = '', $space = 0 )
   {
 
     $cmdList = ( is_array($id) ) ? TACCMD::select()->where('type', $type)->whereIn('id', $id)->get() : TACCMD::select()->where('id', $id)->get();
 
-    $onlyOne = ( !is_array($id) ) ;
+    //$onlyOne = ( !is_array($id) ) ;
+    $sp = new spacer($space);
 
     $outputCMDAttr[0] = array();
 
@@ -993,44 +1059,44 @@ class ConfigPatterns
       $outputCMDAttr[$cmdId] = ($onlyOne) ? array() : $outputCMDAttr[$cmdId];
       ///Service TITLE///
       if ($onlyOne) $outputCMDAttr[$cmdId][0] = array('title_flag' => 0, 'name' =>"");
-      array_push($outputCMDAttr[$cmdId], ($html) ? self::$html_tags['comment'][0] . '###CMD Attr '.$cmdList[$cl]->name.' START###' . self::$html_tags['comment'][1]
+      array_push($outputCMDAttr[$cmdId], ($html) ? $sp->put().self::$html_tags['comment'][0] . '###CMD Attr '.$cmdList[$cl]->name.' START###' . self::$html_tags['comment'][1]
       :
-      '###CMD Attr '.$cmdList[$cl]->name.' START###');
+      $sp->put().'###CMD Attr '.$cmdList[$cl]->name.' START###');
 
       array_push($outputCMDAttr[$cmdId],
-      ($html) ? self::$html_tags['param'][0] . "cmd" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . $cmdList[$cl]->cmd . self::$html_tags['val'][1]. ' {'
+      ($html) ? $sp->put().self::$html_tags['param'][0] . "cmd" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . $cmdList[$cl]->cmd . self::$html_tags['val'][1]. ' {'
       :
-      'cmd = ' . $cmdList[$cl]->cmd . ' {');
-
+      $sp->put().'cmd = ' . $cmdList[$cl]->cmd . ' {');
+      $sp->put('a');
       $cmdAttrList = explode( ';;', $cmdList[$cl]->cmd_attr );
       for ($al=0; $al < count($cmdAttrList); $al++) {
         if ( empty($cmdAttrList[$al]) ) continue;
 
         array_push($outputCMDAttr[$cmdId],
-        ($html) ?  $cmdAttrList[$al]
+        ($html) ?  $sp->put().$cmdAttrList[$al]
         :
-        $cmdAttrList[$al]);
+        $sp->put().$cmdAttrList[$al]);
       }
 
       $outputCMDAttr[$cmdId] = array_merge( $outputCMDAttr[$cmdId],  self::manualConfigPrint($cmdList[$cl]->manual, $html) );
 
       if ( !empty($cmdList[$cl]->cmd_permit_end) ) array_push($outputCMDAttr[$cmdId],
-      ($html) ? 'permit .*'.self::$html_tags['comment'][0].' # default permit any'.self::$html_tags['comment'][1]
+      ($html) ? $sp->put().'permit .*'.self::$html_tags['comment'][0].' # default permit any'.self::$html_tags['comment'][1]
       :
-      'permit .* # default permit any');
+      $sp->put().'permit .* # default permit any');
       if ( !empty($cmdList[$cl]->message_permit) ) array_push($outputCMDAttr[$cmdId],
-      ($html) ? 'message permit = "'.$cmdList[$cl]->message_permit.'"'
+      ($html) ? $sp->put().'message permit = "'.$cmdList[$cl]->message_permit.'"'
       :
-      'message permit = "'.$cmdList[$cl]->message_permit.'"');
+      $sp->put().'message permit = "'.$cmdList[$cl]->message_permit.'"');
       if ( !empty($cmdList[$cl]->message_deny) ) array_push($outputCMDAttr[$cmdId],
-      ($html) ? 'message deny = "'.$cmdList[$cl]->message_deny.'"'
+      ($html) ? $sp->put().'message deny = "'.$cmdList[$cl]->message_deny.'"'
       :
-      'message deny = "'.$cmdList[$cl]->message_deny.'"');
+      $sp->put().'message deny = "'.$cmdList[$cl]->message_deny.'"');
 
       array_push($outputCMDAttr[$cmdId],
-      ($html) ? '} ' . self::$html_tags['comment'][0] . '#END OF CMD Attr ' . $cmdList[$cl]->name . self::$html_tags['comment'][1]
+      ($html) ? $sp->put('d').'} ' . self::$html_tags['comment'][0] . '#END OF CMD Attr ' . $cmdList[$cl]->name . self::$html_tags['comment'][1]
       :
-      '} #END OF CMD Attr ' . $cmdList[$cl]->name );
+      $sp->put('d').'} #END OF CMD Attr ' . $cmdList[$cl]->name );
     }
 
     if ($onlyOne) return $outputCMDAttr; else return $outputCMDAttr[0];
@@ -1084,7 +1150,11 @@ class spacer
         return $this->space;
 
       case 'd':
-        $this->space = preg_replace('/\s{3}$/', ' ', $this->space);;
+        if ($this->space == '' OR $this->space == ' ') {
+          $this->space = '';
+          return $this->space;
+        }
+        $this->space = preg_replace('/\s{2}$/', '', $this->space);;
         return $this->space;
     }
     return $this->space;

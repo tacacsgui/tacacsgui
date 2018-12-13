@@ -25,11 +25,21 @@ class TACServices extends Model
 			'cisco_rs_timeout',
 			'cisco_rs_cmd',
 			'cisco_rs_autocmd',
+			'cisco_rs_nexus_roles',
 			'cisco_rs_manual',
 			//Cisco WLC//
 			'cisco_wlc_enable',
 			'cisco_wlc_roles',
 			'cisco_wlc_manual',
+			//H3C//
+			'h3c_enable',
+			'h3c_privlvl',
+			'h3c_def_cmd',
+			'h3c_def_attr',
+			'h3c_idletime',
+			'h3c_timeout',
+			'h3c_cmd',
+			'h3c_manual',
 			//FortiOS//
 			'fortios_enable',
 			'fortios_admin_prof',

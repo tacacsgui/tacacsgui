@@ -30,7 +30,7 @@ var initialData =
 var dataTable = {
 	init: function() {
 		this.settings.columnsFilter();
-		console.log(initialData);
+		//console.log(initialData);
 		this.settings.preview();
 		this.settings.columnDefs =
 		[{
@@ -45,13 +45,16 @@ var dataTable = {
 		{
 			targets: [ 4 ],
 			createdCell: function (td, cellData, rowData, row, col) {
-				//console.log(rowData.group)
-				if (rowData.group == null) {$(td).append("-Not set-"); return;}
-				if (rowData.groupMessage) $(td).append(' <small class="label bg-gray" data-toggle="tooltip" data-placement="top" title="Message configured" style="margin:3px">m</small>')
-				if (rowData.groupEnable) $(td).append(' <small class="label bg-yellow" data-toggle="tooltip" data-placement="top" title="Enable password configured" style="margin:3px">e</small>')
+				$(td).empty();
+				if ( !cellData.length ) { $(td).append("-Not set-"); return; }
+				for (var i = 0; i < cellData.length; i++) {
+					( i == 0 ) ? $(td).append(cellData[i].name) :  $(td).append(', '+cellData[i].name);
+				}
+				// if (rowData.groupMessage) $(td).append(' <small class="label bg-gray" data-toggle="tooltip" data-placement="top" title="Message configured" style="margin:3px">m</small>')
+				// if (rowData.groupEnable) $(td).append(' <small class="label bg-yellow" data-toggle="tooltip" data-placement="top" title="Enable password configured" style="margin:3px">e</small>')
 			},
 		}],
-		console.log(this.settings);
+		//console.log(this.settings);
 		this.table = $(initialData.tableSelector).DataTable(this.settings);
 	},
 	table: {},

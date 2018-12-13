@@ -55,8 +55,6 @@ require __DIR__ . '/templates/header.php';
 	<link rel="stylesheet" href="plugins/iCheck/square/blue.css">
 	<!-- Select2 -->
 	<link rel="stylesheet" href="bower_components/select2/dist/css/select2.min.css">
-	<!-- dropdown-submenu -->
-	<link rel="stylesheet" href="/dist/css/dropdown-submenu.css">
 	<!-- device-patterns -->
 	<link rel="stylesheet" href="/dist/css/tgui_device_patterns.css">
 	<!-- tgui_sortable -->

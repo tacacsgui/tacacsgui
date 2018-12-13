@@ -22,9 +22,9 @@ var tgui_tacUser = {
   select_dev_edit: '#editUserForm .select_device_list',
   init: function(){
     var self = this;
-    console.log(this.csv);
+    //console.log(this.csv);
     this.csvParser = new tgui_csvParser(this.csv);
-    console.log(this.csvParser);
+    //console.log(this.csvParser);
     /*cleare forms when modal is hided*/
     $('#addUser').on('hidden.bs.modal', function(){
     	self.clearForm();
@@ -58,6 +58,8 @@ var tgui_tacUser = {
     /*Select2 Group*/
     this.userGrpSelect2 = new tgui_select2({
       ajaxUrl : API_LINK+"tacacs/user/group/list/",
+      divClass: 'group',
+      multiple: 1,
       template: this.selectionTemplate_grp,
       add: this.select_group_add,
       edit: this.select_group_edit,
@@ -109,7 +111,7 @@ var tgui_tacUser = {
     $(this.select_dev_edit).select2(this.devSelect2.select2Data());
     /*Select2 Device*///end
     $('#addUser').on('show.bs.modal', function(){
-    	self.userGrpSelect2.preSelection(0, 'add');
+    	self.userGrpSelect2.init_sortable('group');
     	self.aclSelect2.preSelection(0, 'add');
     	self.serviceSelect2.preSelection(0, 'add');
     })
@@ -120,7 +122,12 @@ var tgui_tacUser = {
     lui.start(); //button loading start
     var self = this;
     var formData = tgui_supplier.getFormData(self.formSelector_add);
-    formData.group = ($(this.select_group_add).select2('data').length) ? $(this.select_group_add).select2('data')[0].id : 0;
+    formData.group = '';
+    if ( $(this.select_group_add).select2('data').length ) for (var i = 0; i < $(this.select_group_add).select2('data').length; i++) {
+      if (i == 0) { formData.group += $(this.select_group_add).select2('data')[i].id; continue; }
+      formData.group += ';;' + $(this.select_group_add).select2('data')[i].id;
+    }
+
 		formData.acl = ($(this.select_acl_add).select2('data').length) ? $(this.select_acl_add).select2('data')[0].id : 0;
 		formData.service = ($(this.select_service_add).select2('data').length) ? $(this.select_service_add).select2('data')[0].id : 0;
 
@@ -137,6 +144,8 @@ var tgui_tacUser = {
       formData.device_group_list += ';;' + $(this.select_devg_add).select2('data')[i].id;
     }
 
+    // console.log(formData);lui.stop();
+    // return;
     var ajaxProps = {
       url: API_LINK+"tacacs/user/add/",
       data: formData
@@ -175,15 +184,16 @@ var tgui_tacUser = {
       tgui_supplier.selector( {select: self.formSelector_edit + ' select[name="enable_flag"]', flag: resp.user.enable_flag } )
       tgui_supplier.selector( {select: self.formSelector_edit + ' select[name="pap_flag"]', flag: resp.user.pap_flag } )
 
-      self.userGrpSelect2.preSelection(resp.user.group, 'edit');
+      //self.userGrpSelect2.preSelection(resp.user.group, 'edit');
     	self.aclSelect2.preSelection(resp.user.acl, 'edit');
     	self.serviceSelect2.preSelection(resp.user.service, 'edit');
 
       $(self.formSelector_edit + ' input[name="priv-lvl-preview"]').val( ( parseInt(resp.user['priv-lvl']) > -1) ? resp.user['priv-lvl'] :  "Undefined");
 
+      if (resp.user.group) self.userGrpSelect2.preSelection(resp.user.group.split(';;'), 'edit');
       if (resp.user.device_group_list) self.devgSelect2.preSelection(resp.user.device_group_list.split(';;'), 'edit');
       if (resp.user.device_list) self.devSelect2.preSelection(resp.user.device_list.split(';;'), 'edit');
-
+      self.userGrpSelect2.init_sortable('group');
 
       $(self.formSelector_edit + ' input[name="group_native"]').val(resp.user.group);
       $(self.formSelector_edit + ' input[name="acl_native"]').val(resp.user.acl);
@@ -205,15 +215,21 @@ var tgui_tacUser = {
     var self = this;
     var formData = tgui_supplier.getFormData(self.formSelector_edit, true);
 
+    //Groups
+    var groups_native = $(self.formSelector_edit + ' [name="group_native"]').val()
+    //console.log($(self.formSelector_edit + ' [name="device_group_list_native"]').val());
+    var grp_list = self.userGrpSelect2.getData(self.userGrpSelect2.edit, {formId: self.formSelector_edit});
+    grp_list = ( grp_list.attr && grp_list.attr.id && grp_list.attr.id.length ) ? grp_list.attr.id.join(';;') : '';
+    if ( grp_list != groups_native ) formData.group = grp_list;
     //Device Groups
     var dev_grp_list_native = $(self.formSelector_edit + ' [name="device_group_list_native"]').val()
-    console.log($(self.formSelector_edit + ' [name="device_group_list_native"]').val());
+    //console.log($(self.formSelector_edit + ' [name="device_group_list_native"]').val());
     var dev_grp_list = self.devgSelect2.getData(self.devgSelect2.edit, {formId: self.formSelector_edit});
     dev_grp_list = ( dev_grp_list.attr && dev_grp_list.attr.id && dev_grp_list.attr.id.length ) ? dev_grp_list.attr.id.join(';;') : '';
     if ( dev_grp_list != dev_grp_list_native ) formData.device_group_list = dev_grp_list;
     //Device
     var dev_list_native = $(self.formSelector_edit + ' [name="device_list_native"]').val()
-    console.log($(self.formSelector_edit + ' [name="device_list_native"]').val());
+    //console.log($(self.formSelector_edit + ' [name="device_list_native"]').val());
     var dev_list = self.devSelect2.getData(self.devSelect2.edit, {formId: self.formSelector_edit});
     dev_list = ( dev_list.attr && dev_list.attr.id && dev_list.attr.id.length ) ? dev_list.attr.id.join(';;') : '';
     if ( dev_list != dev_list_native ) formData.device_list = dev_list;
@@ -314,18 +330,31 @@ var tgui_tacUser = {
   	$('.nav.nav-tabs a[href="#general_info_edit"]').tab('show');//select first tab
     $('input[name="pap"] , select[name="pap_flag"]').prop('disabled',false);
   },
+  // selectionTemplate_grp: function(data){
+  //   data.default_flag = (data.id != 0) ? data.default_flag : false;
+  //   var default_flag_class = (data.default_flag) ? 'option_default_flag': ''
+  // 	var output='<div class="selectGroupOption '+ default_flag_class +'">';
+  // 		output += '<text>'+data.text+'</text>';
+  // 		output += '<specialFlags>';
+  // 		output += (data.key) ? '<small class="label pull-right bg-green" style="margin:3px">k</small>' : '';
+  // 		output += (data.enable) ? ' <small class="label pull-right bg-yellow" style="margin:3px">e</small>' : '';
+  // 		output += (data.default_flag) ? ' <small class="label pull-right bg-gray" style="margin:3px">d</small>' : '';
+  // 		output += '</specialFlags>'
+  // 	output += '</div>'
+  // 	return output;
+  // },
   selectionTemplate_grp: function(data){
-    data.default_flag = (data.id != 0) ? data.default_flag : false;
-    var default_flag_class = (data.default_flag) ? 'option_default_flag': ''
-  	var output='<div class="selectGroupOption '+ default_flag_class +'">';
-  		output += '<text>'+data.text+'</text>';
-  		output += '<specialFlags>';
-  		output += (data.key) ? '<small class="label pull-right bg-green" style="margin:3px">k</small>' : '';
-  		output += (data.enable) ? ' <small class="label pull-right bg-yellow" style="margin:3px">e</small>' : '';
-  		output += (data.default_flag) ? ' <small class="label pull-right bg-gray" style="margin:3px">d</small>' : '';
-  		output += '</specialFlags>'
-  	output += '</div>'
-  	return output;
+    //console.log(data);
+    var output='<div class="selectServiceOption">';
+      output += '<text>'+data.text+'</text>';
+      output += '<p>';
+      output += '<small class="label" style="margin:3px"> </small>';
+      output += (data.enable) ? ' <small class="label bg-yellow" title="Enable Password" style="margin:3px">e</small>' : '';
+      output += (data.default_flag) ? ' <small class="label bg-gray" style="margin:3px">d</small>' : '';
+      output += '</p>';
+      output += '<input class="item-attr" type="hidden" name="id" value="'+data.id+'">';
+      output += '</div>'
+    return output;
   },
   selectionTemplate_devg: function(data) {
     //console.log(data);

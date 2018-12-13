@@ -73,7 +73,7 @@
 		})
 		this.$toggle.append($toggleGroup)
 
-		var width = this.options.width || Math.max($toggleOn.outerWidth(), $toggleOff.outerWidth())+($toggleHandle.outerWidth()/2)
+		var width = this.options.width || Math.max($toggleOn.width(), $toggleOff.width())+($toggleHandle.width()/2)
 		var height = this.options.height || Math.max($toggleOn.height(), $toggleOff.height())
 		$toggleOn.addClass('toggle-on')
 		$toggleOff.addClass('toggle-off')

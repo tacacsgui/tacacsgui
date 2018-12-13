@@ -129,6 +129,7 @@ require __DIR__ . '/templates/footer_end.php';
 	<script src="bower_components/select2/dist/js/select2.full.min.js"></script>
 	<!-- jquery-csv -->
 	<script src="plugins/jquery-csv/jquery-csv.min.js"></script>
+	<script src="plugins/jQueryUI/jquery-ui.min.js"></script>
 	<!-- jquery-qrcode -->
 	<script src="plugins/qrcode/jquery.qrcode.min.js"></script>
 	<!-- moment -->

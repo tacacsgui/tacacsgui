@@ -11,19 +11,24 @@
 		<div class="modal-body">
 		<form id="addUserForm">
 		<div class="nav-tabs-custom">
-            <ul class="nav nav-tabs">
-              <li class="active"><a href="#general_info" data-toggle="tab" aria-expanded="true">General</a></li>
-              <li class=""><a href="#message" data-toggle="tab" aria-expanded="false">Message</a></li>
-              <li class=""><a href="#aclService" data-toggle="tab" aria-expanded="false">ACL/Service</a></li>
-              <li class=""><a href="#access" data-toggle="tab" aria-expanded="false">Access Rules</a></li>
-              <li class=""><a href="#extraOptions" data-toggle="tab" aria-expanded="false">Extra Options</a></li>
-              <li class=""><a href="#otp" data-toggle="tab" aria-expanded="false">OTP Auth</a></li>
-              <li class=""><a href="#sms" data-toggle="tab" aria-expanded="false">SMS Auth</a></li>
-			  			<li class="pull-right"><a href="#manual" data-toggle="tab" aria-expanded="false" class="text-muted"><i class="fa fa-gear"></i></a></li>
-            </ul>
-            <div class="tab-content">
+      <ul class="nav nav-tabs">
+        <li class="active"><a href="#general_info" data-toggle="tab" aria-expanded="true">General</a></li>
+        <li class=""><a href="#groups" data-toggle="tab" aria-expanded="true">Groups</a></li>
+        <li class=""><a href="#message" data-toggle="tab" aria-expanded="false">Message</a></li>
+        <li class=""><a href="#aclService" data-toggle="tab" aria-expanded="false">ACL/Service</a></li>
+        <li class=""><a href="#access" data-toggle="tab" aria-expanded="false">Access Rules</a></li>
+        <li class=""><a href="#extraOptions" data-toggle="tab" aria-expanded="false">Extra Options</a></li>
+        <li class=""><a href="#otp" data-toggle="tab" aria-expanded="false">OTP Auth</a></li>
+        <li class=""><a href="#sms" data-toggle="tab" aria-expanded="false">SMS Auth</a></li>
+  			<li class="pull-right"><a href="#manual" data-toggle="tab" aria-expanded="false" class="text-muted"><i class="fa fa-gear"></i></a></li>
+      </ul>
+      <div class="tab-content">
 				<div class="tab-pane active" id="general_info">
 					<?php include __DIR__ . '/tabGeneralInfo.php';?>
+				</div>
+				<!-- /.tab-pane -->
+				<div class="tab-pane" id="groups">
+					<?php include __DIR__ . '/tabGroups.php';?>
 				</div>
 				<!-- /.tab-pane -->
 				<div class="tab-pane" id="message">

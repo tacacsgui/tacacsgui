@@ -55,16 +55,15 @@ require __DIR__ . '/templates/body_start.php';
 	</div>
 	<div class="box-body">
 		<div class="row">
-			<div class="col-xs-12 col-sm-10 col-sm-offset-1 col-sm-4 col-md-offset-4 col-lg-4 col-lg-offset-4">
+			<div class="col-xs-12 col-sm-10 col-sm-offset-1 col-md-4 col-md-offset-4 col-lg-4 col-lg-offset-4">
 				<div class="form-group enabled">
 					<label>MAVIS LDAP Module</label>
 					<div class="checkbox icheck">
-						<label>
-						<input type="checkbox" name="enabled" data-type="checkbox" data-default="checked" data-pickup="true"> Enabled
-						</label>
+						<p class="empty-paragraph"></p>
+			      <input class="bootstrap-toggle" name="enabled" data-type="checkbox" data-default="unchecked" data-pickup="true" data-toggle="toggle" type="checkbox" data-on="<i class='fa fa-check'></i> Enabled" data-off="<i class='fa fa-close'></i> Disabled" data-onstyle="success" data-offstyle="warning">
 						<input type="hidden" name="enabled_native" value="">
 					</div>
-                </div>
+				</div>
 			</div>
 		</div>
 		<hr>
@@ -81,7 +80,17 @@ require __DIR__ . '/templates/body_start.php';
 					</select>
 					<input type="hidden" name="type_native" value="">
 					<p class="help-block">if you don't know what to choose leave it as default (first value)</p>
-                </div>
+				</div>
+			</div>
+			<div class="col-sm-4">
+				<div class="form-group group_selection">
+					<label>User will manually select tacacs group</label>
+					<div class="checkbox icheck">
+						<p class="empty-paragraph"></p>
+						<input class="bootstrap-toggle" name="group_selection" data-type="checkbox" data-default="checked" data-pickup="true" data-toggle="toggle" type="checkbox" data-on="<i class='fa fa-check'></i> Yes" data-off="<i class='fa fa-close'></i> No" data-onstyle="success" data-offstyle="warning" checked>
+						<input type="hidden" name="group_selection_native" value="">
+					</div>
+				</div>
 			</div>
 			<!-- <div class="col-sm-4">
 				<div class="form-group scope">
@@ -247,7 +256,6 @@ require __DIR__ . '/templates/body_start.php';
 		</div>
 		</div>
 	</div> -->
-
 	</div>
 </div> <!-- /.box-body -->
 <div class="box-footer">

@@ -60,9 +60,8 @@ require __DIR__ . '/templates/body_start.php';
 				<div class="form-group enabled">
 					<label>MAVIS SMS Authentication Module</label>
 					<div class="checkbox icheck">
-						<label>
-						<input type="checkbox" name="enabled" data-type="checkbox" data-default="unchecked" data-pickup="true"> Enabled
-						</label>
+						<p class="empty-paragraph"></p>
+			      <input class="bootstrap-toggle" name="enabled" data-type="checkbox" data-default="unchecked" data-pickup="true" data-toggle="toggle" type="checkbox" data-on="<i class='fa fa-check'></i> Enabled" data-off="<i class='fa fa-close'></i> Disabled" data-onstyle="success" data-offstyle="warning">
 						<input type="hidden" name="enabled_native" value="">
 					</div>
                 </div>

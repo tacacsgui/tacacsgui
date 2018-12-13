@@ -487,13 +487,12 @@ class TACUserGrpsCtrl extends Controller
 				$data['item']=$noneItem;
 				return $res -> withStatus(200) -> write(json_encode($data));
 			}
-			$data['item'] = TACUserGrps::select(['id','name','enable','message'])->
-			where([['id', '=', $req->getParam('byId')]])->
-			first();
+			$id = $req->getParam('byId');
+			$data['item'] = ( is_array($id) ) ? TACUserGrps::select(['id','name AS text','enable','message'])->whereIn('id', $id)->get() : TACUserGrps::select(['id','name AS text','enable','message'])->where('id', $req->getParam('byId') )->first();
 
-			$data['item']['text'] = $data['item']['name'];
-			$data['item']['message'] = ($data['item']['message'] != '') ? true : false;
-			$data['item']['enable'] = ($data['item']['enable'] != '') ? true : false;
+			// $data['item']['text'] = $data['item']['name'];
+			// $data['item']['message'] = ($data['item']['message'] != '') ? true : false;
+			// $data['item']['enable'] = ($data['item']['enable'] != '') ? true : false;
 			return $res -> withStatus(200) -> write(json_encode($data));
 		}
 		//////////////////////
@@ -501,6 +500,7 @@ class TACUserGrpsCtrl extends Controller
 		$data['incomplete_results'] = false;
 		$data['totalCount'] = TACUserGrps::select(['id','name'])->count();
 		$search = $req->getParam('search');
+		$multiple = $req->getParam('multiple');
 		$take = 10 * $req->getParam('page');
 		$offset = 10 * ($req->getParam('page') - 1);
 		$data['take'] = $take;
@@ -517,7 +517,8 @@ class TACUserGrpsCtrl extends Controller
 
 		$tempData = $tempData->get()->toArray();
 		$data['pagination'] = (!$tempData OR $tempCounter < 10) ? ['more' => false] : [ 'more' => true];
-		$data['results']= ( $take == 10 AND empty($search) ) ? array( 0 => $noneItem) : array();
+		$data['123123'] = $multiple;
+		$data['results']= ( !$multiple AND $take == 10 AND empty($search) ) ? array( 0 => $noneItem) : array();
 		foreach($tempData as $group)
 		{
 			$group['text'] = $group['name'];

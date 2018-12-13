@@ -63,8 +63,27 @@ class TACServicesCtrl extends Controller
 		//CHECK ACCESS TO THAT FUNCTION//END//
 
 		$validation = $this->validator->validate($req, [
+			//Service Name//
 			'name' => v::noWhitespace()->notEmpty()->serviceTacAvailable(0),
-			//'priv-lvl' => v::noWhitespace()->numeric()->between(-1, 15),
+			//Cisco General Pattern//
+			'cisco_rs_enable' => v::noWhitespace()->boolVal(),
+			'cisco_rs_privlvl' => v::when( v::nullType(), v::alwaysValid(), v::noWhitespace()->numeric()->between(-1, 15)->setName('Privilege Level') ),
+			'cisco_rs_def_cmd' => v::noWhitespace()->boolVal(),
+			'cisco_rs_def_attr' => v::noWhitespace()->boolVal(),
+			'cisco_rs_idletime' => v::when( v::nullType(), v::alwaysValid(), v::numeric()->between(0, 128)->setName('Idle time') ),
+			'cisco_rs_timeout' => v::when( v::nullType(), v::alwaysValid(), v::numeric()->between(0, 128)->setName('Connection timeout') ),
+			'cisco_rs_debug_message' => v::noWhitespace()->boolVal(),
+			//'cisco_rs_cmd' => ['string', ''],
+			//'cisco_rs_autocmd' => ['string', ''],
+			//'cisco_rs_nexus_roles' => ['string', ''],
+			//'cisco_rs_manual' => ['text', '_'],
+			//H3C General Pattern//
+			'h3c_enable' => v::noWhitespace()->boolVal(),
+			'h3c_privlvl' => v::when( v::nullType(), v::alwaysValid(), v::noWhitespace()->numeric()->between(-1, 15)->setName('Privilege Level') ),
+			'h3c_def_cmd' => v::noWhitespace()->boolVal(),
+			'h3c_def_attr' => v::noWhitespace()->boolVal(),
+			'h3c_idletime' => v::when( v::nullType(), v::alwaysValid(), v::numeric()->between(0, 128)->setName('Idle time') ),
+			'h3c_timeout' => v::when( v::nullType(), v::alwaysValid(), v::numeric()->between(0, 128)->setName('Connection timeout') ),
 			//'default_cmd' => v::noWhitespace()->boolVal(),
 			'manual_conf_only' => v::noWhitespace()->boolVal(),
 		]);
@@ -154,6 +173,8 @@ class TACServicesCtrl extends Controller
 
 		$validation = $this->validator->validate($req, [
 			'name' => v::noWhitespace()->when( v::nullType() , v::alwaysValid(), v::notEmpty()->serviceTacAvailable($req->getParam('id'))),
+			'cisco_rs_privlvl' => v::noWhitespace()->when( v::nullType() , v::alwaysValid(), v::numeric()->between(-1, 15)->setName('Privilege Level') ),
+			'h3c_privlvl' => v::noWhitespace()->when( v::nullType() , v::alwaysValid(), v::numeric()->between(-1, 15)->setName('Privilege Level') ),
 			//'priv-lvl' => v::noWhitespace()->when( v::nullType() , v::alwaysValid(), v::numeric()->between(-1, 15)),
 			//'default_cmd' => v::noWhitespace()->when( v::nullType() , v::alwaysValid(), v::boolVal()),
 			'manual_conf_only' => v::noWhitespace()->when( v::nullType() , v::alwaysValid(), v::boolVal()),
@@ -166,6 +187,11 @@ class TACServicesCtrl extends Controller
 		}
 
 		$allParams = $req->getParams();
+
+		if ( $allParams['h3c_idletime'] == '' OR !is_int($allParams['h3c_idletime']) ) $allParams['h3c_idletime'] = null;
+		if ( $allParams['cisco_rs_idletime'] == '' OR !is_int($allParams['cisco_rs_idletime']) ) $allParams['cisco_rs_idletime'] = null;
+		if ( $allParams['cisco_rs_timeout'] == '' OR !is_int($allParams['cisco_rs_timeout']) ) $allParams['cisco_rs_timeout'] = null;
+		if ( $allParams['h3c_timeout'] == '' OR !is_int($allParams['h3c_timeout']) ) $allParams['h3c_timeout'] = null;
 
 		$id = $allParams['id'];
 		unset($allParams['id']);
@@ -404,6 +430,7 @@ class TACServicesCtrl extends Controller
 			if ( !$service['manual_conf_only'] ){
 				if ($service['cisco_rs_enable']) $service['patterns'] .= '<p class="empty-paragraph">Cisco General</p>';
 				if ($service['cisco_wlc_enable']) $service['patterns'] .= '<p class="empty-paragraph">Cisco WLC</p>';
+				if ($service['h3c_enable']) $service['patterns'] .= '<p class="empty-paragraph">H3C</p>';
 				if ($service['fortios_enable']) $service['patterns'] .= '<p class="empty-paragraph">FortiOS</p>';
 				if ($service['paloalto_enable']) $service['patterns'] .= '<p class="empty-paragraph">Palo Alto</p>';
 			} else $service['patterns'] .= '<p class="empty-paragraph">Manual ONLY</p>';

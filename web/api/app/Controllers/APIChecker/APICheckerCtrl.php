@@ -227,6 +227,7 @@ class APICheckerCtrl extends Controller
 		}
 		//INITIAL CODE////END//
 		$updateFlag = (@$req->getParam('update')) ? 1 : 0;
+		//var_dump( $this->db::getSchemaBuilder()->getColumnType('tac_users', 'username') ); die;
 		//var_dump($req->getParam('update'));die();
 		$data['messages'] = array( );
 		foreach ($this->databases as $database) {
@@ -363,6 +364,16 @@ class APICheckerCtrl extends Controller
 	private function databaseFix()
 	{
 		$response = ['status' => false, 'message' => ''];
+
+		if ( $this->db::connection('default')->getSchemaBuilder()->getColumnType('tac_users', 'group') == 'integer' ) {
+			$response['status'] = true;
+			$this->db::connection('default')->getSchemaBuilder()->table('tac_users', function (Blueprint $table) {
+			    $table->string('group')->nullable()->change();
+					//$table->renameColumn('group', 'groups');
+			});
+
+			$response['message'] = 'Table fix for tac_users';
+		}
 
 		if ( array_search('userName', $this->db::connection('logging')->getSchemaBuilder()->getColumnListing('api_logging')) )
 		{

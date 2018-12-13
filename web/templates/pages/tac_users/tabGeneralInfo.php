@@ -15,14 +15,6 @@
 			<p class="help-block">it will be used for authentication and you can change it later</p>
 		</div>
 	</div>
-	<div class="col-sm-6">
-		<div class="form-group group">
-			<label>User Group Name</label>
-			<select class="select_group form-control select2" name="group" data-type="select" data-default="" data-pickup="true" style="width:100%"></select>
-			<p class="help-block">Preconfigured values: <small class="label bg-yellow" style="margin:3px">e</small> - enable; <small class="label bg-gray" style="margin:3px">m</small> - message</p>
-			<input type="hidden" name="group_native" value="">
-		</div>
-	</div>
 </div>
 <div class="row">
 	<div class="col-sm-6">

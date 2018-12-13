@@ -89,6 +89,7 @@ var tgui_tacUserGrp = {
     $(this.select_dev_edit).select2(this.devSelect2.select2Data());
     /*Select2 Device*///end
     $('#addGroup').on('show.bs.modal', function(){
+      self.ldapSelect2.init_sortable('ldap_groups');
       self.aclSelect2.preSelection(0, 'add');
       self.serviceSelect2.preSelection(0, 'add');
     })

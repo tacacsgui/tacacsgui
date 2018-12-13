@@ -2,7 +2,7 @@
   <div class="col-md-3">
     <ul class="nav nav-pills nav-pills-edit nav-stacked">
       <li class="active"><a href="#general" data-init="true" data-toggle="tab" aria-expanded="true">General</a></li>
-      <li><a href="#restrictions" data-toggle="tab" aria-expanded="true">CMD Restrictions</a></li>
+      <li><a href="#restrictions" data-toggle="tab" aria-expanded="true">CMD Set</a></li>
       <li><a href="#autocmd" data-toggle="tab" aria-expanded="true">AutoCMD</a></li>
       <li><a href="#nexus" data-toggle="tab" aria-expanded="true">Nexus Roles</a></li>
       <li><a href="#cisco_rs_manual" data-toggle="tab" aria-expanded="true">Manual</a></li>
@@ -25,7 +25,7 @@
         	<div class="col-sm-4">
             <div class="form-group cisco_rs_privlvl">
               <label for="cisco_rs_privlvl">Privilege Level</label>
-              <input type="number" class="form-control" name="cisco_rs_privlvl" data-type="input" data-default="15" data-pickup="true" value="15" min=0 max=15>
+              <input type="number" class="form-control" name="cisco_rs_privlvl" data-type="input" data-default="15" data-pickup="true" value="15" min="-1" max=15>
         			<input type="hidden" name="cisco_rs_privlvl_native" data-type="input" data-default="">
         	  </div>
         	</div>
@@ -83,7 +83,7 @@
       <!-- /.tab-pane -->
       <div class="tab-pane" id="restrictions">
         <div class="form-group cisco_rs_cmd_list">
-      		<label for="cisco_rs_cmd_list">Search CMD Name</label>
+      		<label for="cisco_rs_cmd_list">Search CMD Set Name</label>
           <select class="select_cmd_cisco form-control select2" multiple="multiple" name="cisco_rs_cmd_list" style="width:100%"></select>
           <input type="hidden" name="cisco_rs_cmd" data-type="input" data-default="" data-pickup="true">
           <input type="hidden" name="cisco_rs_cmd_native">

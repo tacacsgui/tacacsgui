@@ -15,6 +15,8 @@
 
    <!-- Google Font-->
   <link rel="stylesheet" href="dist/css/fonts/main.css">
+  <!-- dropdown-submenu -->
+	<link rel="stylesheet" href="/dist/css/dropdown-submenu.css">
   <!-- bootstrap-toggle -->
   <link rel="stylesheet" href="plugins/bootstrap-toggle/css/bootstrap-toggle.min.css">
   <!-- ladda-ui -->

@@ -27,6 +27,7 @@ var tgui_select2 = function(o)
             var query = {
               search: params.term,
               page: params.page || 1,
+              multiple: o.multiple || 0,
               type: 'public'
             }
             // Query parameters will be ?search=[term]&type=public

@@ -31,6 +31,7 @@ var tgui_device_patterns = {
     data = data || {};
     if ( data.cisco_rs_enable ) this.show($(formId).find('[data-pattern="cisco-rs"]'), formId)
     if ( data.cisco_wlc_enable ) this.show($(formId).find('[data-pattern="cisco-wlc"]'), formId)
+    if ( data.h3c_enable ) this.show($(formId).find('[data-pattern="h3c-general"]'), formId)
     if ( data.paloalto_enable ) this.show($(formId).find('[data-pattern="paloalto"]'), formId)
     if ( data.fortios_enable ) this.show($(formId).find('[data-pattern="fortios"]'), formId)
   },
@@ -201,6 +202,59 @@ var tgui_device_patterns = {
         }
 
       }
+    },
+    h3c: {
+      general: {
+        cmd: {
+          get: function(formId) {
+            var a = ( $(formId + ' [name="h3c_cmd_list"]').val().length ) ? ( $(formId + ' [name="h3c_cmd_list"]').val() ) : [];
+            var b = [];
+            console.log(a,b);
+            a.forEach(function(el){
+               b.push(el);
+            });
+            return b.join(';;');
+          },
+          diff: function(formId) {
+            var a = ( $(formId + ' [name="h3c_cmd"]').val() ) ? $(formId + ' [name="h3c_cmd"]').val().split(';;') : [];
+            var b = ( $(formId + ' [name="h3c_cmd_list"]').val().length ) ? ( $(formId + ' [name="h3c_cmd_list"]').val() ) : [];
+
+            //console.log(a);console.log(b);
+            //console.log( $(formId + ' [name="h3c_cmd_list"]').val() );
+            if (a.length != b.length) return true;
+            //console.log(1);
+            for (var i = 0; i < a.length; ++i) {
+              if (! b.includes(a[i]) ) return true;
+            }
+            //console.log(2);
+            return false;
+          },
+          fill: function(data,formId) {
+            data = data.split(';;') || []
+            console.log(data);
+            var ajaxProps = {
+              url: API_LINK+'tacacs/cmd/list/',
+              type: "GET",
+              data: { "byId": data }
+            };
+
+            ajaxRequest.send(ajaxProps).then(function(resp) {
+              console.log(resp.item);
+              if ( ! resp.item.length ) return false;
+              for (var i = 0; i < resp.item.length; i++) {
+                var option = new Option(tgui_service.selectionTemplate_cmd(resp.item[i]), resp.item[i].id, true, true);
+                $(formId + ' [name="h3c_cmd_list"]').append(option);
+              }
+              $(formId + ' [name="h3c_cmd_list"]').trigger('change');
+            })
+            //var option = new Option('123', 1, true, true);
+            //$(formId + ' [name="h3c_cmd_list"]').append(option).trigger('change');
+          },
+          clear: function() {
+            $('[name="h3c_cmd_list"]').empty().trigger('change');
+          }
+        }
+      },
     }
   }
   // cisco_wlc_role: function(o){

@@ -211,7 +211,7 @@ class TACUsersCtrl extends Controller
 		$policy = APIPWPolicy::select()->first(1);
 		$validation = $this->validator->validate($req, [
 			'username' => v::noWhitespace()->when( v::nullType() , v::alwaysValid(), v::notEmpty()->userTacAvailable($req->getParam('id'))),
-			'group' => v::noWhitespace()->when( v::nullType() , v::alwaysValid(), v::numeric()),
+			//'group' => v::noWhitespace()->when( v::nullType() , v::alwaysValid(), v::numeric()),
 			'enable' => v::when( v::oneOf( v::nullType(), v::equals(''), v::loginClone( $req->getParam('enable_flag') ) ) , v::alwaysValid(), v::noWhitespace()->notContainChars()->
 				length($policy['tac_pw_length'], 64)->
 				notEmpty()->
@@ -496,11 +496,15 @@ class TACUsersCtrl extends Controller
 
 		//Creating correct array of answer to Datatables
 		$data['data']=array();
-
+		$user['group'] = explode(';;', $user['group']);
 		$tempGroups = TACUserGrps::select('id','name','enable','message')->get()->toArray();
-
+		// $user['group'] = '';
+		// for ($i=0; $i < count($tempGroups); $i++) {
+		// 	if ( $i == 0 ) { $user['group'] .= $tempGroups[$i]['name']; continue; }
+		// 	$user['group'] .= '/'.$tempGroups[$i]['name'];
+		// }
+		$tempGroupsNew = [];
 		foreach($tempGroups as $group){
-
 			$messageExist = ($group['message']!== '') ? true : false;
 			$enableExist = ($group['enable']!== '') ? true : false;
 			$tempGroupsNew[$group['id']] = array('name' => $group['name'], 'message' => $messageExist, 'enable' => $enableExist);
@@ -508,10 +512,14 @@ class TACUsersCtrl extends Controller
 
 		foreach($tempData as $user){
 			$buttons='<button class="btn btn-warning btn-xs btn-flat" onclick="tgui_tacUser.getUserInfo(\''.$user['id'].'\',\''.$user['username'].'\')">Edit</button> <button class="btn btn-danger btn-xs btn-flat" onclick="tgui_tacUser.delete(\''.$user['id'].'\',\''.$user['username'].'\')">Del</button>';
-			$grpID = $user['group'];
-			$user['group'] = (empty($tempGroupsNew[$grpID]['name'])) ? null : $tempGroupsNew[$grpID]['name'];
-			$user['groupMessage'] = (empty($tempGroupsNew[$grpID]['message'])) ? null : $tempGroupsNew[$grpID]['message'];
-			$user['groupEnable']=(empty($tempGroupsNew[$grpID]['enable'])) ? null : $tempGroupsNew[$grpID]['enable'];
+			$user_group = explode(';;', $user['group']);
+			$user['group'] = [];
+			for ($i=0; $i < count($user_group); $i++) {
+				if ( isset($tempGroupsNew[$user_group[$i]]) ) $user['group'][] = $tempGroupsNew[$user_group[$i]] ;
+			}
+			//$user['group'] = (empty($tempGroupsNew[$grpID]['name'])) ? null : $tempGroupsNew[$grpID]['name'];
+			//$user['groupMessage'] = (empty($tempGroupsNew[$grpID]['message'])) ? null : $tempGroupsNew[$grpID]['message'];
+			//$user['groupEnable']=(empty($tempGroupsNew[$grpID]['enable'])) ? null : $tempGroupsNew[$grpID]['enable'];
 			$user['enable']=($user['enable']!== '' AND $user['enable']!== NULL) ? true : false;
 			$user['message']=($user['message']!== '' AND $user['message']!== NULL) ? true : false;
 			$user['buttons']=$buttons;

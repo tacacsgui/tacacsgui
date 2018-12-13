@@ -66,9 +66,13 @@ var tgui_cmd = {
       url: API_LINK+"tacacs/cmd/edit/",
       data: formData
     };//ajaxProps END
-    if ( ! self.cmd_attr.compare( tgui_sortable.get( self.formSelector_edit).text ) ) formData.cmd_attr = tgui_sortable.get(self.formSelector_edit).text;
-    //console.log(formData);
-    //return false;
+    if ( ! self.cmd_attr.compare( tgui_sortable.get( self.formSelector_edit).text ) ) {
+      formData.cmd_attr = tgui_sortable.get(self.formSelector_edit).text;
+      formData.cmd_attr = ( formData.cmd_attr.length ) ? formData.cmd_attr : false;
+    }
+
+    // console.log(tgui_sortable.get(self.formSelector_edit));
+    // return false;
     if ( ! tgui_supplier.checkChanges(ajaxProps.data, ['id']) ) return false;
     ajaxRequest.send(ajaxProps).then(function(resp) {
       if (tgui_supplier.checkResponse(resp.error, self.formSelector_edit)){

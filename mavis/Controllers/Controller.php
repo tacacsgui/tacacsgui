@@ -53,10 +53,11 @@ class Controller
     return false;
   }
 
-  public function setMempership($value = '')
+  public function setMempership($value = '', $manula_set = false)
   {
+    $separator = ( $manula_set ) ? '/' : '","';
     if ( empty($value) ) return false;
-    if ( is_array($value) ) $value = '"'.implode('","', $value).'"';;
+    if ( is_array($value) ) $value = '"'.implode($separator, $value).'"';;
     $this->V_IN[AV_A_TACMEMBER] = $value;
     return true;
   }
@@ -146,7 +147,7 @@ class Controller
     if ($this->debug) file_put_contents('/var/log/tacacsgui/mavis_debug.txt', $output, FILE_APPEND);
 
     fwrite(STDOUT, $output);
-    //exit(0);
+    exit(0);
   }
 
 

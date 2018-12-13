@@ -23,16 +23,28 @@
 								<li><a href="#" data-pattern="cisco-wlc" data-disabled="1" onclick="tgui_device_patterns.switch(this)"><i class="fa fa-square-o"></i> Cisco WLC</a></li>
 							</ul>
 						</li>
-						<li><a href="#" data-pattern="juniper" data-disabled="1" onclick="tgui_device_patterns.switch(this)"><i class="fa fa-square-o"></i> Juniper</a></li>
+						<li class="dropdown-submenu">
+							<a href="#" data-toggle="dropdown"><i class="fa fa-clone"></i> Juniper</a>
+							<ul class="dropdown-menu">
+								<li><a href="#" data-pattern="juniper" data-disabled="1" onclick="tgui_device_patterns.switch(this)"><i class="fa fa-square-o"></i> Juniper General</a></li>
+							</ul>
+						</li>
+						<li class="dropdown-submenu">
+							<a href="#" data-toggle="dropdown"><i class="fa fa-clone"></i> H3C</a>
+							<ul class="dropdown-menu">
+								<li><a href="#" data-pattern="h3c-general" data-disabled="1" onclick="tgui_device_patterns.switch(this)"><i class="fa fa-square-o"></i> H3C General</a></li>
+							</ul>
+						</li>
 						<li><a href="#" data-pattern="huawei" data-disabled="1" onclick="tgui_device_patterns.switch(this)"><i class="fa fa-square-o"></i> Huawei</a></li>
 						<li><a href="#" data-pattern="paloalto" data-disabled="1" onclick="tgui_device_patterns.switch(this)"><i class="fa fa-square-o"></i> Palo Alto</a></li>
 						<li><a href="#" data-pattern="fortios" data-disabled="1" onclick="tgui_device_patterns.switch(this)"><i class="fa fa-square-o"></i> FortiOS</a></li>
 					</ul>
 				</li>
         <li class="active"><a href="#general_info" data-toggle="tab" aria-expanded="true">General</a></li>
-        <li class="device-pattern device-pattern-hidden cisco-rs"><a href="#cisco" data-toggle="tab" aria-expanded="true">Cisco General</a></li>
+        <li class="device-pattern device-pattern-hidden cisco-rs"><a href="#cisco" data-toggle="tab" aria-expanded="true">Cisco</a></li>
         <li class="device-pattern device-pattern-hidden cisco-wlc"><a href="#cisco-wlc" data-toggle="tab" aria-expanded="true">Cisco WLC</a></li>
         <li class="device-pattern device-pattern-hidden juniper"><a href="#juniper" data-toggle="tab" aria-expanded="true">Juniper</a></li>
+				<li class="device-pattern device-pattern-hidden h3c-general"><a href="#h3c-general" data-toggle="tab" aria-expanded="true">H3C</a></li>
         <li class="device-pattern device-pattern-hidden huawei"><a href="#huawei" data-toggle="tab" aria-expanded="true">Huawei</a></li>
         <li class="device-pattern device-pattern-hidden paloalto"><a href="#paloalto" data-toggle="tab" aria-expanded="true">Palo Alto</a></li>
         <li class="device-pattern device-pattern-hidden fortios"><a href="#fortios" data-toggle="tab" aria-expanded="true">FortiOS</a></li>
@@ -49,6 +61,10 @@
 				<!-- /.tab-pane -->
 				<div class="tab-pane" id="cisco-wlc">
 					<?php include __DIR__ . '/tabCiscoWLC.php';?>
+				</div>
+				<!-- /.tab-pane -->
+				<div class="tab-pane" id="h3c-general">
+					<?php include __DIR__ . '/tabH3cGeneral.php';?>
 				</div>
 				<!-- /.tab-pane -->
 				<div class="tab-pane" id="juniper">
