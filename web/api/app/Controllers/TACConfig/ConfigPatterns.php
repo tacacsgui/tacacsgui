@@ -1047,7 +1047,7 @@ class ConfigPatterns
 
     $cmdList = ( is_array($id) ) ? TACCMD::select()->where('type', $type)->whereIn('id', $id)->get() : TACCMD::select()->where('id', $id)->get();
 
-    //$onlyOne = ( !is_array($id) ) ;
+    $onlyOne = ( !is_array($id) ) ; //VERY IMPORTANT FOR PREVIEW!!!//
     $sp = new spacer($space);
 
     $outputCMDAttr[0] = array();

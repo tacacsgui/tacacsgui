@@ -43,7 +43,7 @@ var tgui_error = {
       getStatus:function(err, extra, signin){
         signin = signin || false;
         err = err || {};
-        console.log(err);
+        //console.log(err);
         //this.status = err.status || this.status;
         if (window.location.hash.substr(1) == 'debug') console.log(err);
         if ( !err.status ) {
@@ -560,6 +560,7 @@ var tgui_supplier = { //Tacacs Supplier Object
       }
     };//ajaxProps END
     ajaxRequest.send(ajaxProps).then(function(resp) {
+      //console.log(resp);
       for (var target in resp.output) {
         if (resp.output.hasOwnProperty(target)) {
           el = resp.output[target];

@@ -151,17 +151,20 @@ var tgui_tacUserGrp = {
       }
     };//ajaxProps END
     var el = {}, el_n = {};
+    //console.log(id, name);
     ajaxRequest.send(ajaxProps).then(function(resp) {
+      //console.log(resp);
       tgui_supplier.fulfillForm(resp.group, self.formSelector_edit);
 
       tgui_supplier.selector( {select: self.formSelector_edit + ' select[name="enable_flag"]', flag: resp.group.enable_flag } )
 
       var ldap_groups = {};
       var ldap_groups_temp = (resp.group.ldap_groups) ? resp.group.ldap_groups.split(';;') : [];
+      //onsole.log( ldap_groups_temp[0].split(',')[0]);
       for (var i = 0; i < ldap_groups_temp.length; i++) {
         ldap_groups = {
           id: ldap_groups_temp[i],
-          text: ldap_groups_temp[i].split(',')[0].match( new RegExp("^CN=(.*)$") )[1],
+          text: ldap_groups_temp[i].split(',')[0],//.match( new RegExp("^CN=(.*)$") )[1],
           dn: ldap_groups_temp[i],
         }
         var option = new Option('', ldap_groups_temp[i], true, true);
@@ -183,6 +186,7 @@ var tgui_tacUserGrp = {
 
       $('#editGroup').modal('show')
     }).fail(function(err){
+      console.log(err);
       tgui_error.getStatus(err, ajaxProps)
     })
   },
@@ -332,7 +336,7 @@ var tgui_tacUserGrp = {
 
     if ( data.loading || data.error ) return '<text>'+data.text+'</text>';
     var output='<div class="selectServiceOption">';
-      output += '<p style="margin:0px"> CN="'+data.text+'"</p>';
+      output += '<p style="margin:0px">'+data.text+'</p>';
       output += '<p style="margin:0px"><small>'+data.dn+'</small></p>';
       output += '<textarea class="item-attr" style="display: none;" name="dn">'+data.dn+'</textarea>';
       output += '<textarea class="item-attr" style="display: none;" name="cn">'+data.text+'</textarea>';

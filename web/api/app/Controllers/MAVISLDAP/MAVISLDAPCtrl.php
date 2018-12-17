@@ -8,6 +8,7 @@ use Respect\Validation\Validator as v;
 
 use Adldap\Adldap as Adldap;
 use Adldap\Schemas\ActiveDirectory as ActiveDirectory;
+use Adldap\Schemas\OpenLDAP as OpenLDAP;
 
 class MAVISLDAPCtrl extends Controller
 {
@@ -167,14 +168,18 @@ class MAVISLDAPCtrl extends Controller
 
 		$ldap = MAVISLDAP::select()->first();
 
+		$username = ( strpos($allParams['user'], '@') !== false ) ? $allParams['user'] : $allParams['user'] . '@'.( str_replace( ',', '.', preg_replace('/DC=/i', '', $allParams['base']) ) );
+
+		$username = ( $allParams['type'] == 'openldap' ) ? $allParams['user'] : $username;
+
 		$config = [
 			// Mandatory Configuration Options
 			'hosts'            => array_map('trim', explode(',', $allParams['hosts']) ),
 			'base_dn'          => $allParams['base'],
-			'username'         => ( strpos($allParams['user'], '@') !== false ) ? $allParams['user'] : $allParams['user'] . '@'.( str_replace( ',', '.', preg_replace('/DC=/i', '', $allParams['base']) ) ),
+			'username'         => $username,
 			'password'         => ( empty(preg_replace('/[\*]+/', '', $allParams['password'])) ) ? $ldap->password : $allParams['password'],
 			// Optional Configuration Options
-			'schema'           => ActiveDirectory::class,
+			'schema'           => ( $allParams['type'] == 'openldap' ) ? OpenLDAP::class : ActiveDirectory::class,
 			'port'             => intval($allParams['port']),
 			'follow_referrals' => false,
 			'use_ssl'          => false,

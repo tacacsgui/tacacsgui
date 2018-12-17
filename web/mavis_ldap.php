@@ -75,8 +75,8 @@ require __DIR__ . '/templates/body_start.php';
 					<label>LDAP Type</label>
 					<select class="form-control" name="type" data-type="select" data-default="" data-pickup="true">
 						<option value="microsoft" selected>Microsoft</option>
-						<option value="generic" disabled>Generic</option>
-						<option value="tacacs_schema" disabled>Tacacs Schema</option>
+						<option value="openldap">OpenLDAP</option>
+						<!-- <option value="tacacs_schema" disabled>Tacacs Schema</option> -->
 					</select>
 					<input type="hidden" name="type_native" value="">
 					<p class="help-block">if you don't know what to choose leave it as default (first value)</p>

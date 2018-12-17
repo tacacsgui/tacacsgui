@@ -567,14 +567,18 @@ class TACUserGrpsCtrl extends Controller
 			return $res -> withStatus(200) -> write(json_encode($data));
 		}
 
+		$username = ( strpos($ldap->user, '@') !== false ) ? $ldap->user : $ldap->user . '@'.( str_replace( ',', '.', preg_replace('/DC=/i', '', $ldap->base) ) );
+
+		$username = ( $ldap->type == 'openldap' ) ? $ldap->user : $username;
+
 		$config = [
 			// Mandatory Configuration Options
 			'hosts'            => array_map('trim', explode(',', $ldap->hosts) ),
 			'base_dn'          => $ldap->base,
-			'username'         => ( strpos($ldap->user, '@') !== false ) ? $ldap->user : $ldap->user . '@'.( str_replace( ',', '.', preg_replace('/DC=/i', '', $ldap->base) ) ),
+			'username'         => $username,
 			'password'         => $ldap->password,
 			// Optional Configuration Options
-			'schema'           => \Adldap\Schemas\ActiveDirectory::class,
+			'schema'           => ( $ldap->type == 'openldap' ) ?\Adldap\Schemas\OpenLDAP::class : \Adldap\Schemas\ActiveDirectory::class,
 			'port'             => $ldap->port,
 			'version'          => 3,
 			'timeout'          => 5,
@@ -595,17 +599,32 @@ class TACUserGrpsCtrl extends Controller
 		//$filter = 'CN=FileAccess_1';
 		$search = $req->getParam('search');
 
-		$adGroups = ( empty($search) ) ? $adSearch->groups()->select()->limit(10)->get() : $adSearch->groups()->select()->where('cn', 'contains', $search)->limit(10)->get();
+		if ( $ldap->type == 'openldap' ) {
+			$adGroups = ( empty($search) ) ? $adSearch->select()->where('objectclass', 'posixGroup')->limit(10)->get() : $adSearch->select()->where('objectclass', 'posixGroup')->where('cn', 'contains', $search)->limit(10)->get();
 
-		$items = [];
+			$items = [];
 
-		for ($i=0; $i < count($adGroups); $i++) {
-			$items[] = array(
-				'text' => (is_array($adGroups[$i]->cn)) ? $adGroups[$i]->cn[0] : $adGroups[$i]->cn,
-				'cn' => (is_array($adGroups[$i]->cn)) ? $adGroups[$i]->cn[0] : $adGroups[$i]->cn,
-				'dn' => (is_array($adGroups[$i]->distinguishedname)) ? $adGroups[$i]->distinguishedname[0] : $adGroups[$i]->distinguishedname,
-				'id' => (is_array($adGroups[$i]->distinguishedname)) ? $adGroups[$i]->distinguishedname[0] : $adGroups[$i]->distinguishedname,
-			);
+			for ($i=0; $i < count($adGroups); $i++) {
+				$items[] = array(
+					'text' => (is_array($adGroups[$i]->cn)) ? $adGroups[$i]->cn[0] : $adGroups[$i]->cn,
+					'cn' => (is_array($adGroups[$i]->cn)) ? $adGroups[$i]->cn[0] : $adGroups[$i]->cn,
+					'dn' => (is_array($adGroups[$i]->dn)) ? $adGroups[$i]->dn[0] : $adGroups[$i]->dn,
+					'id' => (is_array($adGroups[$i]->dn)) ? $adGroups[$i]->dn[0] : $adGroups[$i]->dn,
+				);
+			}
+		} else {
+			$adGroups = ( empty($search) ) ? $adSearch->groups()->select()->limit(10)->get() : $adSearch->groups()->select()->where('cn', 'contains', $search)->limit(10)->get();
+
+			$items = [];
+
+			for ($i=0; $i < count($adGroups); $i++) {
+				$items[] = array(
+					'text' => (is_array($adGroups[$i]->cn)) ? $adGroups[$i]->cn[0] : $adGroups[$i]->cn,
+					'cn' => (is_array($adGroups[$i]->cn)) ? $adGroups[$i]->cn[0] : $adGroups[$i]->cn,
+					'dn' => (is_array($adGroups[$i]->distinguishedname)) ? $adGroups[$i]->distinguishedname[0] : $adGroups[$i]->distinguishedname,
+					'id' => (is_array($adGroups[$i]->distinguishedname)) ? $adGroups[$i]->distinguishedname[0] : $adGroups[$i]->distinguishedname,
+				);
+			}
 		}
 
 		$data['test1'] = $adGroups;

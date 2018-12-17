@@ -163,6 +163,7 @@ var tgui_datatables = function(data){
 	 	},
 	 	preview: function() {
 	 		/* Preview Function*/
+			//console.log(123123);
 	 		$(data.tableSelector + '').on('click', 'td.details-control', function () {
 	 		    var tr = $(this).closest('tr');
 	 		    var row = dataTable.table.row( tr );
@@ -175,6 +176,7 @@ var tgui_datatables = function(data){
 	 		        // Open this row
 	 		        row.child( '<pre class="partial_config partial_config_'+row.data().id+'">Loading...</pre>' ).show();
 	 		        tr.addClass('shown');
+							//console.log(data.item);
 	 						row.child( tgui_supplier.showConfiguration(row.data(), data.item) ).show();
 	 		    }
 	 		} );

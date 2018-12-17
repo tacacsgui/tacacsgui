@@ -7,6 +7,7 @@ use mavis\Controllers\Controller;
 use Respect\Validation\Validator as v;
 use Adldap\Adldap as Adldap;
 use Adldap\Schemas\ActiveDirectory as ActiveDirectory;
+use Adldap\Schemas\OpenLDAP as OpenLDAP;
 
 
 class LDAP extends Controller
@@ -52,9 +53,22 @@ class LDAP extends Controller
   {
     $this->mavis->debugIn( $this->dPrefix() .'DN: '. $this->adUser->distinguishedname[0]);
     $this->mavis->result('NAK');
+    //var_dump($this->adUser->dn[0]); die;
+    //var_dump( $this->ad->auth()->attempt( $this->adUser->dn[0], $this->mavis->getPassword() ) ); die;
     try {
+        $nice_try = false;
+        switch ($this->ldap->type) {
+          case 'openldap':
+            $dn_attr = ( is_array($this->adUser->dn) ) ? $this->adUser->dn[0] : $this->adUser->dn;
+            $nice_try = $this->ad->auth()->attempt( $dn_attr, $this->mavis->getPassword() );
+            break;
 
-        if ( ! $this->ad->auth()->attempt( $this->adUser->distinguishedname[0], $this->mavis->getPassword() ) ) {
+          default:
+            $nice_try = $this->ad->auth()->attempt( $this->adUser->distinguishedname[0], $this->mavis->getPassword() );
+            break;
+        }
+
+        if ( ! $nice_try ) {
     			$this->mavis->debugIn( $this->dPrefix() .'Auth FAIL!');
           return false;
     		}
@@ -72,13 +86,40 @@ class LDAP extends Controller
     $this->mavis->debugIn( $this->dPrefix() .'Auth Success!');
 
     $this->mavis->debugIn( $this->dPrefix() .'Get Groups');
+
+    $search = $this->provider->search();
+
+    $this->adUser->gidnumber = ( is_array($this->adUser->gidnumber) ) ? $this->adUser->gidnumber : [$this->adUser->gidnumber];
+
     $groupList = [];
-    for ($i=0; $i < count($this->adUser->memberof); $i++) {
-    	preg_match_all('/^CN=(.*?),.*/s', $this->adUser->memberof[$i], $groupName);
-    	$groupList[] = $groupName[1][0];
+    $groupList_fullNames = [];
+
+    if ( $this->ldap->type == 'openldap' ) {
+      //OpenLDAP//
+      for ($mgui=0; $mgui < count($this->adUser->gidnumber); $mgui++) {
+        $mainGUI = $search->where('objectclass', 'posixGroup')->where( 'gidNumber', $this->adUser->gidnumber[$mgui] )->first();
+        $groupList_fullNames[] = ( is_array($mainGUI->dn) ) ? $mainGUI->dn[0] : $mainGUI->dn;
+        $groupList[] = ( is_array($mainGUI->cn) ) ? $mainGUI->cn[0] : $mainGUI->cn;
+      }
+      $subGUI = $search->where('objectclass', 'posixGroup')->where( 'memberUid', $this->mavis->getUsername() )->get();
+      for ($sgui=0; $sgui < count($subGUI); $sgui++) {
+        $group_temp_full = ( is_array($subGUI[$sgui]->dn) ) ? $subGUI[$sgui]->dn[0] : $subGUI[$sgui]->dn;
+        $group_temp = ( is_array($subGUI[$sgui]->cn) ) ? $subGUI[$sgui]->cn[0] : $subGUI[$sgui]->cn;
+        if ( !in_array( $group_temp, $groupList ) )  $groupList[] = $group_temp;
+        if ( !in_array( $group_temp_full, $groupList_fullNames ) ) $groupList_fullNames[] = $group_temp_full;
+      }
+      //var_dump($groupList); var_dump($groupList_fullNames); die; //gidnumber $search->where( $this->ldap->filter, $this->mavis->getUsername() )->first()
+    } else {
+      //General LDAP//
+      for ($i=0; $i < count($this->adUser->memberof); $i++) {
+      	preg_match_all('/^CN=(.*?),.*/s', $this->adUser->memberof[$i], $groupName);
+      	$groupList[] = $groupName[1][0];
+      }
+
+      $groupList_fullNames = $this->adUser->memberof;
+
     }
 
-    $groupList_fullNames = $this->adUser->memberof;
     $groupList_result = [];
     if ( ! empty($groupList) ){
     	$user_grps = $this->db->table('tac_user_groups')->select('name')->
@@ -109,14 +150,18 @@ class LDAP extends Controller
   {
     $this->ldap = $this->db->table('mavis_ldap')->select()->first();
 
+    $username = ( strpos($this->ldap->user, '@') !== false ) ? $this->ldap->user : $this->ldap->user . '@'.( str_replace( ',', '.', preg_replace('/DC=/i', '', $this->ldap->base) ) );
+
+		$username = ( $this->ldap->type == 'openldap' ) ? $this->ldap->user : $username;
+
     $config = [
     	// Mandatory Configuration Options
     	'hosts'            => array_map('trim', explode(',', $this->ldap->hosts) ),
     	'base_dn'          => $this->ldap->base,
-    	'username'         => ( strpos($this->ldap->user, '@') !== false ) ? $this->ldap->user : $this->ldap->user . '@'.( str_replace( ',', '.', preg_replace('/DC=/i', '', $this->ldap->base) ) ),
+    	'username'         => $username,
     	'password'         => $this->ldap->password,
     	// Optional Configuration Options
-    	'schema'           => ActiveDirectory::class,
+    	'schema'           => ( $this->ldap->type == 'openldap' ) ? OpenLDAP::class : ActiveDirectory::class,
     	'port'             => $this->ldap->port,
     	'version'          => 3,
     	'timeout'          => 5,
@@ -141,7 +186,11 @@ class LDAP extends Controller
   {
     $search = $this->provider->search();
 
-    $this->adUser = $search->select(['distinguishedname', 'name', 'memberOf'])->where('objectclass', 'user')->where( $this->ldap->filter, $this->mavis->getUsername() )->first();
+    $this->adUser = ( $this->ldap->type == 'openldap' ) ?
+      $search->where('objectclass', 'inetOrgPerson')->where( $this->ldap->filter, $this->mavis->getUsername() )->first()
+      :
+      $search->select(['distinguishedname', 'name', 'memberOf'])->where('objectclass', 'user')->
+        where( $this->ldap->filter, $this->mavis->getUsername() )->first();
 
     if ( !$this->adUser ) return false;
 

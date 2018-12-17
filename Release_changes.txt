@@ -1,4 +1,8 @@
 ##############################
+Version_0.9.56 20181217
+	* Added OpenLDAP support.
+	* Some bug fixed
+##############################
 Version_0.9.55 20181213
 	* Added support of multiple group for user. Tacacs user can manually select group while log in.
 	* Added Pattern for H3C devices
