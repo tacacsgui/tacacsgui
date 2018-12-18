@@ -365,7 +365,7 @@ class APICheckerCtrl extends Controller
 	{
 		$response = ['status' => false, 'message' => ''];
 
-		if ( $this->db::connection('default')->getSchemaBuilder()->getColumnType('tac_users', 'group') == 'integer' ) {
+		if ( $this->db::connection('default')->getSchemaBuilder()->hasTable('tac_users') AND $this->db::connection('default')->getSchemaBuilder()->getColumnType('tac_users', 'group') == 'integer' ) {
 			$response['status'] = true;
 			$this->db::connection('default')->getSchemaBuilder()->table('tac_users', function (Blueprint $table) {
 			    $table->string('group')->nullable()->change();

@@ -109,7 +109,7 @@ class APIDatabase
   		'enable' => ['string', ''],
   		'enable_flag' => ['integer', '0'],
   		'enable_change' => ['integer', '1'],
-  		'group' => ['integer', '0'],
+  		'group' => ['string', ''],
   		'disabled' => ['integer', '0'],
   		'message' => ['text', '_'],
   		'manual_beginning' => ['text', '_'],
