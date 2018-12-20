@@ -161,6 +161,52 @@ class TACCMDCtrl extends Controller
 	}
 ########	Edit Service	###############END###########
 ################################################
+	#########	POST Edit CMD	#########
+	public function postEditType($req,$res)
+	{
+		//INITIAL CODE////START//
+		$data=array();
+		$data=$this->initialData([
+			'type' => 'post',
+			'object' => 'cmd',
+			'action' => 'edit',
+		]);
+		#check error#
+		if ($_SESSION['error']['status']){
+			$data['error']=$_SESSION['error'];
+			return $res -> withStatus(401) -> write(json_encode($data));
+		}
+		//INITIAL CODE////END//
+		//CHECK SHOULD I STOP THIS?//START//
+		if( $this->shouldIStopThis() )
+		{
+			$data['error'] = $this->shouldIStopThis();
+			return $res -> withStatus(400) -> write(json_encode($data));
+		}
+		//CHECK SHOULD I STOP THIS?//END//
+		//CHECK ACCESS TO THAT FUNCTION//START//
+		// if(!$this->checkAccess(13))
+		// {
+		// 	return $res -> withStatus(403) -> write(json_encode($data));
+		// }
+		//CHECK ACCESS TO THAT FUNCTION//END//
+
+		$validation = $this->validator->validate($req, [
+			'type' => v::numeric(),
+		]);
+
+		if ($validation->failed()){
+			$data['error']['status']=true;
+			$data['error']['validation']=$validation->error_messages;
+			return $res -> withStatus(200) -> write(json_encode($data));
+		}
+
+		$data['result'] = $this->APIUsersCtrl::changeCmdType( $req->getParam('type') );
+
+		return $res -> withStatus(200) -> write(json_encode($data));
+	}
+########	Edit Service	###############END###########
+################################################
 ########	Delete Service	###############START###########
 	#########	GET Delete Service	#########
 	// public function getServiceDelete($req,$res)
@@ -409,15 +455,16 @@ class TACCMDCtrl extends Controller
 			return $res -> withStatus(403) -> write(json_encode($data));
 		}
 		//CHECK ACCESS TO THAT FUNCTION//END//
-
+		$extraAttr = $req->getParam('extra');
+		$cmdType = ( !empty($extraAttr) AND isset($extraAttr['type']) ) ? $extraAttr['type'] : 'cisco';
 		$noneItem = array('id' => 0, 'text' => 'None');
 		///IF GROUPID SET///
 		if ($req->getParam('byId') != null){
 			$idValue = $req->getParam('byId');
 			$items = TACCMD::select(['id','name AS text']);
 			$data['item'] = [];
-			if ( is_array($idValue) )	$data['item'] = $items->whereIn('id', $idValue)->
-			get()->toArray(); else $data['item'] = $items->where('id', $idValue)->
+			if ( is_array($idValue) )	$data['item'] = $items->where('type',$cmdType)->whereIn('id', $idValue)->
+			get()->toArray(); else $data['item'] = $items->where('type',$cmdType)->where('id', $idValue)->
 			first();
 
 			return $res -> withStatus(200) -> write(json_encode($data));
@@ -425,13 +472,13 @@ class TACCMDCtrl extends Controller
 		//////////////////////
 		////LIST OF GROUPS////
 		$data['incomplete_results'] = false;
-		$data['totalCount'] = TACCMD::select(['id','name'])->count();
+		$data['totalCount'] = TACCMD::select(['id','name'])->where('type',$cmdType)->count();
 		$search = $req->getParam('search');
 		$take = 10 * $req->getParam('page');
 		$offset = 10 * ($req->getParam('page') - 1);
 		$data['take'] = $take;
 		$data['offset'] = $offset;
-		$tempData = TACCMD::select(['id','name'])->
+		$tempData = TACCMD::select(['id','name'])->where('type',$cmdType)->
 			when( !empty($search), function($query) use ($search)
 			{
 				$query->where('name','LIKE', '%'.$search.'%');

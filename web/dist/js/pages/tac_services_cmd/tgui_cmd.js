@@ -1,8 +1,12 @@
 var tgui_cmd = {
   formSelector_add: 'form#addCMDForm',
   formSelector_edit: 'form#editCMDForm',
+  formSelector_add_junos: 'form#addCMDForm_junos',
+  formSelector_edit_junos: 'form#editCMDForm_junos',
   init: function(){
     var self = this;
+
+    self.selectType(tgui_user.cmd_type);
 
     tgui_sortable.init();
 
@@ -11,9 +15,41 @@ var tgui_cmd = {
     $('#addCMD').on('hidden.bs.modal', function(){
       self.clearForm();
     })
+    $('#addCMD_junos').on('hidden.bs.modal', function(){
+      self.clearForm();
+    })
     $('#editCMD').on('hidden.bs.modal', function(){
       self.clearForm();
+    })
+    $('#editCMD_junos').on('hidden.bs.modal', function(){
+      self.clearForm();
     })/*cleare forms*///end
+  },
+  selectType: function(type, modal) {
+    type = (Number.isInteger(type) && type < 255) ? type : tgui_user.cmd_type;
+    modal = modal || false;
+    if ( tgui_user.cmd_type != type){
+      var ajaxProps = {
+        url: API_LINK+"tacacs/cmd/edit/type/",
+        data: {type: type}
+      };//ajaxProps END
+      ajaxRequest.send(ajaxProps).then(function(resp) {
+        tgui_user.cmd_type = type;
+        tgui_error.local.show({type:'success', message: "Default CMD type was changed"})
+      }).fail(function(err){
+        tgui_error.getStatus(err, ajaxProps)
+      })
+    }
+
+    switch (type) {
+      case 1:
+        $('cmdType').text('junos');
+        if (modal) $('#addCMD_junos').modal('show');
+        break;
+      default:
+        $('cmdType').text('default');
+        if (modal) $('#addCMD').modal('show');
+    }
   },
   add: function(){
     var self = this;
@@ -38,6 +74,30 @@ var tgui_cmd = {
     })
     return this;
   },
+  add_junos: function(){
+    var self = this;
+    var formData = tgui_supplier.getFormData(self.formSelector_add_junos);
+    var ajaxProps = {
+      url: API_LINK+"tacacs/cmd/add/",
+      data: formData
+    };//ajaxProps END
+    formData.cmd_attr = $(self.formSelector_add_junos + ' input[name="tagsinput"]').tagsinput('items');
+    console.log(formData);
+    //return;
+    ajaxRequest.send(ajaxProps).then(function(resp) {
+      if (tgui_supplier.checkResponse(resp.error, self.formSelector_add_junos)){
+        return;
+      }
+      tgui_error.local.show({type:'success', message: "CMD "+ $(self.formSelector_add_junos + ' input[name="name"]').val() +" was added"})
+      $("#addCMD_junos").modal("hide");
+      //tgui_status.changeStatus(resp.changeConfiguration)
+      self.clearForm();
+      setTimeout( function () {dataTable.table.ajax.reload()}, 2000 );
+    }).fail(function(err){
+      tgui_error.getStatus(err, ajaxProps)
+    })
+    return this;
+  },
   get: function(id, name) {
     var self = this;
     var ajaxProps = {
@@ -50,6 +110,15 @@ var tgui_cmd = {
     };//ajaxProps END
 
     ajaxRequest.send(ajaxProps).then(function(resp) {
+      if ( resp.cmd.type && resp.cmd.type == 'junos') {
+        tgui_supplier.fulfillForm(resp.cmd, self.formSelector_edit_junos);
+        var cmd_attr = resp.cmd.cmd_attr.split(';;');
+        for (var ca = 0; ca < cmd_attr.length; ca++) {
+          $(self.formSelector_edit_junos + ' input[name="tagsinput"]').tagsinput('add',cmd_attr[ca])
+        }
+        $('#editCMD_junos').modal('show');
+        return;
+      }
       tgui_supplier.fulfillForm(resp.cmd, self.formSelector_edit);
       $(self.formSelector_edit + ' [name="cmd_attr"]').val(resp.cmd.cmd_attr);
       self.cmd_attr.fill(resp.cmd.cmd_attr, self.formSelector_edit);
@@ -81,6 +150,36 @@ var tgui_cmd = {
       tgui_error.local.show({type:'success', message: "CMD "+ $(self.formSelector_edit + ' input[name="name"]').val() +" was changed"})
       $("#editCMD").modal("hide");
       //tgui_status.changeStatus(resp.changeConfiguration)
+      self.clearForm();
+      setTimeout( function () {dataTable.table.ajax.reload()}, 2000 );
+    }).fail(function(err){
+      tgui_error.getStatus(err, ajaxProps)
+    })
+    return this;
+  },
+  edit_junos: function() {
+    var self = this;
+    var formData = tgui_supplier.getFormData(self.formSelector_edit_junos, true);
+
+    var ajaxProps = {
+      url: API_LINK+"tacacs/cmd/edit/",
+      data: formData
+    };//ajaxProps END
+    var old_cmd_attr = $(self.formSelector_edit_junos + ' input[name="cmd_attr"]').val()
+    formData.cmd_attr = $(self.formSelector_edit_junos + ' input[name="tagsinput"]').tagsinput('items');
+    if ( formData.cmd_attr.join(';;') == old_cmd_attr ) {
+      delete formData.cmd_attr;
+    }
+    // console.log(formData);
+    // return false;
+    if ( ! tgui_supplier.checkChanges(ajaxProps.data, ['id']) ) return false;
+    ajaxRequest.send(ajaxProps).then(function(resp) {
+      if (tgui_supplier.checkResponse(resp.error, self.formSelector_edit_junos)){
+        return;
+      }
+      tgui_error.local.show({type:'success', message: "CMD "+ $(self.formSelector_edit_junos + ' input[name="name"]').val() +" was changed"})
+      $("#editCMD_junos").modal("hide");
+      tgui_status.changeStatus(resp.changeConfiguration)
       self.clearForm();
       setTimeout( function () {dataTable.table.ajax.reload()}, 2000 );
     }).fail(function(err){
@@ -239,6 +338,7 @@ var tgui_cmd = {
     tgui_supplier.clearForm();
     /*---*/
     this.cmd_attr.clear();
+    $('input[name="tagsinput"]').tagsinput('removeAll');
     $('.nav.nav-tabs a[href="#general_info"]').tab('show');//select first tab
     $('.nav.nav-tabs a[href="#general_info_edit"]').tab('show');//select first tab
   }

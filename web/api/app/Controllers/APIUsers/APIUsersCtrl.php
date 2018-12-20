@@ -451,4 +451,8 @@ class APIUsersCtrl extends Controller
 	}
 ########	Get User Info	###############END###########
 ######################################################
+	public static function changeCmdType($type = 0)
+	{
+		return APIUsers::where('id', $_SESSION['uid'])->update(['cmd_type' => $type]);
+	}
 }//END OF CLASS//

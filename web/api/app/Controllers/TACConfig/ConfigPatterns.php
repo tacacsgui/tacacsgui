@@ -422,7 +422,7 @@ class ConfigPatterns
 		($html) ? $sp->put().self::$html_tags['comment'][0] . "####LIST OF USER GROUPS####" . self::$html_tags['comment'][1]
 		:
 		$sp->put()."####LIST OF USER GROUPS####");
-    $sp->put('a');
+    //$sp->put('a');
 		foreach($allUserGroups as $group)
 		{
 			///EMPTY ARRAY///
@@ -434,6 +434,7 @@ class ConfigPatterns
 			($html) ? $sp->put().self::$html_tags['attr'][0] . "group" . self::$html_tags['attr'][1] . ' = ' . self::$html_tags['object'][0] .$group['name']. self::$html_tags['object'][1] . ' {'
 			:
 			$sp->put().'group = '.$group['name'].' {');
+      $sp->put('a');
       ///LDAP Groups///
       if ( $group['ldap_groups'] ){
         $ldapGrp = explode(';;', $group['ldap_groups']);
@@ -933,6 +934,69 @@ class ConfigPatterns
     			$sp->put('d').'} #END OF H3C General Service');
         }
         ///H3C///END///
+        ///JunOS///START///
+        if ( $service['junos_enable'] ) {
+          //start//
+          array_push($outputService[$service['id']],
+          ($html) ? $sp->put().self::$html_tags['attr'][0] . "service" . self::$html_tags['attr'][1] . ' = ' . self::$html_tags['object'][0]. 'junos-exec' . self::$html_tags['object'][1] . ' {'
+          :
+          $sp->put().'service = junos-exec {');
+
+          if ( empty($service['junos_username']) != -1 ) array_push($outputService[$service['id']],
+          ($html) ? $sp->put('a').self::$html_tags['param'][0] . "set local-user-name" . self::$html_tags['param'][1] . ' = "' . self::$html_tags['val'][0] . $service['junos_username'] . self::$html_tags['val'][1] . '"'
+          :
+          $sp->put('a').'set local-user-name = "'.$service['junos_username'].'"');
+
+          if ( !empty($service['junos_cmd_ao']) ){
+
+            $cmdIdList = explode( ';;', $service['junos_cmd_ao'] );
+
+            array_push($outputService[$service['id']],
+            ($html) ? $sp->put().self::$html_tags['param'][0] . "set set allow-commands" . self::$html_tags['param'][1] . ' = ' . self::tacCMDAttr($html, $cmdIdList, 'junos', 3)
+            :
+            $sp->put().'set allow-commands = ' . self::tacCMDAttr($html, $cmdIdList, 'junos', 3));
+
+          }
+          if ( !empty($service['junos_cmd_do']) ){
+
+            $cmdIdList = explode( ';;', $service['junos_cmd_do'] );
+
+            array_push($outputService[$service['id']],
+            ($html) ? $sp->put().self::$html_tags['param'][0] . "set set allow-commands" . self::$html_tags['param'][1] . ' = ' . self::tacCMDAttr($html, $cmdIdList, 'junos', 3)
+            :
+            $sp->put().'set deny-commands = ' . self::tacCMDAttr($html, $cmdIdList, 'junos', 3));
+
+          }
+          if ( !empty($service['junos_cmd_ac']) ){
+
+            $cmdIdList = explode( ';;', $service['junos_cmd_ac'] );
+
+            array_push($outputService[$service['id']],
+            ($html) ? $sp->put().self::$html_tags['param'][0] . "set set allow-configuration" . self::$html_tags['param'][1] . ' = ' . self::tacCMDAttr($html, $cmdIdList, 'junos', 3)
+            :
+            $sp->put().'set allow-configuration = ' . self::tacCMDAttr($html, $cmdIdList, 'junos', 3));
+
+          }
+          if ( !empty($service['junos_cmd_dc']) ){
+
+            $cmdIdList = explode( ';;', $service['junos_cmd_dc'] );
+
+            array_push($outputService[$service['id']],
+            ($html) ? $sp->put().self::$html_tags['param'][0] . "set set deny-configuration" . self::$html_tags['param'][1] . ' = ' . self::tacCMDAttr($html, $cmdIdList, 'junos', 3)
+            :
+            $sp->put().'set deny-configuration = ' . self::tacCMDAttr($html, $cmdIdList, 'junos', 3));
+
+          }
+
+          $outputService[$service['id']] = array_merge( $outputService[$service['id']],  self::manualConfigPrint($service['junos_manual'], $html) );
+
+          //end//
+          array_push($outputService[$service['id']],
+          ($html) ? $sp->put('d').'} ' . self::$html_tags['comment'][0] . '#END OF JunOS General Service'. self::$html_tags['comment'][1]
+          :
+          $sp->put('d').'} #END OF JunOS General Service');
+        }
+        ///JunOS///END///
         ///Cisco WLC///START///
         if ( $service['cisco_wlc_enable'] ) {
           //start//
@@ -1052,6 +1116,18 @@ class ConfigPatterns
 
     $outputCMDAttr[0] = array();
 
+    if ( $type == 'junos'){
+      for ($cl=0; $cl < count($cmdList); $cl++) {
+        $outputCMDAttr[0] = array_merge( $outputCMDAttr[0], explode( ';;', $cmdList[$cl]->cmd_attr ) );
+      }
+
+      $cmdAttrList = ( $html ) ? '"('.implode( '|', preg_filter('/$/', self::$html_tags['val'][1], preg_filter('/^/', self::$html_tags['val'][0], $outputCMDAttr[0] ) ) ) .')"'
+      :
+      '"('.implode( '|', $outputCMDAttr[0] ) .')"';
+      //var_dump($cmdAttrList);die;
+      return $cmdAttrList;
+    }
+
     for ($cl=0; $cl < count($cmdList); $cl++) {
       if ( empty($cmdList[$cl]) ) continue;
       $cmdId = ($onlyOne) ? $cmdList[$cl]->id : 0;
@@ -1062,7 +1138,19 @@ class ConfigPatterns
       array_push($outputCMDAttr[$cmdId], ($html) ? $sp->put().self::$html_tags['comment'][0] . '###CMD Attr '.$cmdList[$cl]->name.' START###' . self::$html_tags['comment'][1]
       :
       $sp->put().'###CMD Attr '.$cmdList[$cl]->name.' START###');
+      if ( $cmdList[$cl]->type == 'junos' ){
+        array_push($outputCMDAttr[$cmdId], ($html) ? $sp->put().self::$html_tags['comment'][0] . '### JunOS Attr ###' . self::$html_tags['comment'][1]
+        :
+        $sp->put().'### JunOS Attr ###');
 
+        $cmdAttrList = '"('.implode( '|', preg_filter('/$/', self::$html_tags['val'][1], preg_filter('/^/', self::$html_tags['val'][0], explode( ';;', $cmdList[$cl]->cmd_attr ) ) ) ) .')"';
+
+        array_push($outputCMDAttr[$cmdId], ($html) ? $sp->put(). $cmdAttrList
+        :
+        $sp->put().$cmdAttrList);
+
+        if ($onlyOne) return $outputCMDAttr; else return $outputCMDAttr[0];
+      }
       array_push($outputCMDAttr[$cmdId],
       ($html) ? $sp->put().self::$html_tags['param'][0] . "cmd" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . $cmdList[$cl]->cmd . self::$html_tags['val'][1]. ' {'
       :

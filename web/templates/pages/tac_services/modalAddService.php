@@ -68,7 +68,7 @@
 				</div>
 				<!-- /.tab-pane -->
 				<div class="tab-pane" id="juniper">
-					What should be here? :(
+					<?php include __DIR__ . '/tabJuniper.php';?>
 				</div>
 				<!-- /.tab-pane -->
 				<div class="tab-pane" id="huawei">

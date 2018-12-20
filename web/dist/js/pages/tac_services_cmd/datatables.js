@@ -20,7 +20,7 @@ var initialData =
 	},
   sort:
 	{
-		column: 2,
+		column: 3,
 		order: 'asc'
 	},
 };
@@ -29,7 +29,18 @@ var dataTable = {
 	init: function() {
 		this.settings.columnsFilter();
 		this.settings.preview();
-		this.settings.columnDefs = [];
+		this.settings.columnDefs = [
+			{
+				targets: [ 3 ],
+				createdCell: function (td, cellData, rowData, row, col) {
+					if (rowData.type == 'junos') {
+						//cellData = 123123;
+						//console.log(cellData);
+						$(td).addClass('junos');
+					}
+				},
+			}
+		];
 		this.table = $(initialData.tableSelector).DataTable(this.settings);
 	},
 	table: {},

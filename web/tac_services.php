@@ -59,6 +59,7 @@ require __DIR__ . '/templates/header.php';
 	<link rel="stylesheet" href="/dist/css/tgui_device_patterns.css">
 	<!-- tgui_sortable -->
 	<link rel="stylesheet" href="/dist/css/tgui_sortable.css">
+	<link rel="stylesheet" href="/dist/css/pages/tac_service/main.css">
 
 <!--ADDITIONAL CSS FILES END-->
 

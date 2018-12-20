@@ -431,6 +431,7 @@ class TACServicesCtrl extends Controller
 				if ($service['cisco_rs_enable']) $service['patterns'] .= '<p class="empty-paragraph">Cisco General</p>';
 				if ($service['cisco_wlc_enable']) $service['patterns'] .= '<p class="empty-paragraph">Cisco WLC</p>';
 				if ($service['h3c_enable']) $service['patterns'] .= '<p class="empty-paragraph">H3C</p>';
+				if ($service['junos_enable']) $service['patterns'] .= '<p class="empty-paragraph">JunOS</p>';
 				if ($service['fortios_enable']) $service['patterns'] .= '<p class="empty-paragraph">FortiOS</p>';
 				if ($service['paloalto_enable']) $service['patterns'] .= '<p class="empty-paragraph">Palo Alto</p>';
 			} else $service['patterns'] .= '<p class="empty-paragraph">Manual ONLY</p>';

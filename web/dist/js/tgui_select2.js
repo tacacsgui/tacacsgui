@@ -28,6 +28,7 @@ var tgui_select2 = function(o)
               search: params.term,
               page: params.page || 1,
               multiple: o.multiple || 0,
+              extra: o.extra || null,
               type: 'public'
             }
             // Query parameters will be ?search=[term]&type=public

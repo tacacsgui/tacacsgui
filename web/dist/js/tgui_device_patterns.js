@@ -26,6 +26,7 @@ var tgui_device_patterns = {
     this.pattern.cisco.wlc.clear();
     this.pattern.cisco.rs.cmd.clear();
     this.pattern.cisco.rs.autocmd.clear();
+    this.pattern.junos.general.cmd.clear();
   },
   fill: function(data,formId){
     data = data || {};
@@ -34,6 +35,7 @@ var tgui_device_patterns = {
     if ( data.h3c_enable ) this.show($(formId).find('[data-pattern="h3c-general"]'), formId)
     if ( data.paloalto_enable ) this.show($(formId).find('[data-pattern="paloalto"]'), formId)
     if ( data.fortios_enable ) this.show($(formId).find('[data-pattern="fortios"]'), formId)
+    if ( data.junos_enable ) this.show($(formId).find('[data-pattern="juniper"]'), formId)
   },
   pattern: {
     cisco: {
@@ -64,7 +66,7 @@ var tgui_device_patterns = {
           },
           fill: function(data,formId) {
             data = data.split(';;') || []
-            console.log(data);
+            //console.log(data);
             var ajaxProps = {
               url: API_LINK+'tacacs/cmd/list/',
               type: "GET",
@@ -72,7 +74,7 @@ var tgui_device_patterns = {
             };
 
             ajaxRequest.send(ajaxProps).then(function(resp) {
-              console.log(resp.item);
+              //console.log(resp.item);
               if ( ! resp.item.length ) return false;
               for (var i = 0; i < resp.item.length; i++) {
                 var option = new Option(tgui_service.selectionTemplate_cmd(resp.item[i]), resp.item[i].id, true, true);
@@ -231,7 +233,7 @@ var tgui_device_patterns = {
           },
           fill: function(data,formId) {
             data = data.split(';;') || []
-            console.log(data);
+            //console.log(data);
             var ajaxProps = {
               url: API_LINK+'tacacs/cmd/list/',
               type: "GET",
@@ -239,7 +241,7 @@ var tgui_device_patterns = {
             };
 
             ajaxRequest.send(ajaxProps).then(function(resp) {
-              console.log(resp.item);
+              //console.log(resp.item);
               if ( ! resp.item.length ) return false;
               for (var i = 0; i < resp.item.length; i++) {
                 var option = new Option(tgui_service.selectionTemplate_cmd(resp.item[i]), resp.item[i].id, true, true);
@@ -255,7 +257,64 @@ var tgui_device_patterns = {
           }
         }
       },
-    }
+    }, //end of h3c
+    junos: {
+      general: {
+        field_list : {ao: 'ao', do: 'do', ac: 'ac', dc: 'dc'},
+        cmd:{
+          get: function(formId, field_flag) {
+            field_flag = field_flag || 'ao';
+            var a = ( $(formId + ' [name="junos_cmd_'+field_flag+'_list"]').val().length ) ? ( $(formId + ' [name="junos_cmd_'+field_flag+'_list"]').val() ) : [];
+            var b = [];
+            //console.log(a,b);
+            a.forEach(function(el){
+               b.push(el);
+            });
+            return b.join(';;');
+          },
+          diff: function(formId, field_flag) {
+            var a = ( $(formId + ' [name="junos_cmd_'+field_flag+'"]').val() ) ? $(formId + ' [name="junos_cmd_'+field_flag+'"]').val().split(';;') : [];
+            var b = ( $(formId + ' [name="junos_cmd_'+field_flag+'_list"]').val().length ) ? ( $(formId + ' [name="junos_cmd_'+field_flag+'_list"]').val() ) : [];
+
+            if (a.length != b.length) return true;
+            //console.log(1);
+            for (var i = 0; i < a.length; ++i) {
+              if (! b.includes(a[i]) ) return true;
+            }
+            //console.log(2);
+            return false;
+          },
+          fill: function(data,formId,field_flag) {
+            field_flag = field_flag || 'ao';
+            data = data.split(';;') || []
+            //console.log(data);
+            var ajaxProps = {
+              url: API_LINK+'tacacs/cmd/list/',
+              type: "GET",
+              data: { "byId": data, extra: { type: 'junos' } }
+            };
+
+            ajaxRequest.send(ajaxProps).then(function(resp) {
+              console.log(resp.item);
+              if ( ! resp.item.length ) return false;
+              for (var i = 0; i < resp.item.length; i++) {
+                var option = new Option(tgui_service.selectionTemplate_cmd(resp.item[i]), resp.item[i].id, true, true);
+                $(formId + ' [name="junos_cmd_'+field_flag+'_list"]').append(option);
+              }
+              $(formId + ' [name="junos_cmd_'+field_flag+'_list"]').trigger('change');
+            })
+            //var option = new Option('123', 1, true, true);
+            //$(formId + ' [name="junos_cmd_'+field_flag+'_list"]').append(option).trigger('change');
+          },
+          clear: function() {
+            $('[name="junos_cmd_ao_list"]').empty().trigger('change');
+            $('[name="junos_cmd_do_list"]').empty().trigger('change');
+            $('[name="junos_cmd_ac_list"]').empty().trigger('change');
+            $('[name="junos_cmd_dc_list"]').empty().trigger('change');
+          }
+        },//end of junos general
+      }
+    }//end of junos
   }
   // cisco_wlc_role: function(o){
   //   console.log( $(o).val() );

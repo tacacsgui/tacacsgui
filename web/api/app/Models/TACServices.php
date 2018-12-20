@@ -44,6 +44,14 @@ class TACServices extends Model
 			'fortios_enable',
 			'fortios_admin_prof',
 			'fortios_manual',
+			//FortiOS//
+			'junos_enable',
+			'junos_username',
+			'junos_cmd_ao',
+			'junos_cmd_do',
+			'junos_cmd_ac',
+			'junos_cmd_dc',
+			'junos_manual',
 			//PaloAlto//
 			'paloalto_enable',
 			'paloalto_admin_role',

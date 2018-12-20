@@ -1,4 +1,9 @@
 ##############################
+Version_0.9.57 20181220
+	* Added Juniper Pattern.
+	* Added Juniper Command Set type.
+	* Some bug fixed
+##############################
 Version_0.9.56 20181217
 	* Added OpenLDAP support.
 	* Some bug fixed

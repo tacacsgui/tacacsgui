@@ -244,6 +244,14 @@ class APIDatabase
         'fortios_enable' => ['integer', '0'],
         'fortios_admin_prof' => ['string', ''],
         'fortios_manual' => ['text', '_'],
+        //JunOS//
+        'junos_enable' => ['integer', '0'],
+        'junos_username' => ['string', ''],
+        'junos_cmd_ao' => ['string', ''],
+        'junos_cmd_do' => ['string', ''],
+        'junos_cmd_ac' => ['string', ''],
+        'junos_cmd_dc' => ['string', ''],
+        'junos_manual' => ['text', '_'],
         //PaloAlto//
         'paloalto_enable' => ['integer', '0'],
         'paloalto_admin_role' => ['string', ''],

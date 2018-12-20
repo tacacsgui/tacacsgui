@@ -122,6 +122,7 @@ $app->get('/tacacs/cmd/add/', 'TACCMDCtrl:getAdd');
 $app->post('/tacacs/cmd/add/', 'TACCMDCtrl:postAdd');
 $app->get('/tacacs/cmd/edit/', 'TACCMDCtrl:getEdit');
 $app->post('/tacacs/cmd/edit/', 'TACCMDCtrl:postEdit');
+$app->post('/tacacs/cmd/edit/type/', 'TACCMDCtrl:postEditType');
 $app->get('/tacacs/cmd/delete/', 'TACCMDCtrl:getDelete');
 $app->post('/tacacs/cmd/delete/', 'TACCMDCtrl:postDelete');
 $app->get('/tacacs/cmd/list/', 'TACCMDCtrl:getList');
