@@ -86,8 +86,6 @@ require __DIR__ . '/templates/body_start.php';
                     <span class="sr-only">Toggle Dropdown</span>
                   </button>
                   <ul class="dropdown-menu" role="menu">
-                    <li><a href="#" data-toggle="modal" data-target="#addCMD" >General Type</a></li>
-                    <li><a href="#" data-toggle="modal" data-target="#addCMD_junos" >Juniper Type</a></li>
                     <li><a href="#" onclick="tgui_cmd.selectType(0, true); return false;" >General Type</a></li>
                     <li><a href="#" onclick="tgui_cmd.selectType(1, true); return false;" >Juniper Type</a></li>
                   </ul>

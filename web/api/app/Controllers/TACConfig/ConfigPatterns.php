@@ -962,7 +962,7 @@ class ConfigPatterns
             $cmdIdList = explode( ';;', $service['junos_cmd_do'] );
 
             array_push($outputService[$service['id']],
-            ($html) ? $sp->put().self::$html_tags['param'][0] . "set set allow-commands" . self::$html_tags['param'][1] . ' = ' . self::tacCMDAttr($html, $cmdIdList, 'junos', 3)
+            ($html) ? $sp->put().self::$html_tags['param'][0] . "set set allow-commands" . self::$html_tags['param'][1] . ' = ' . self::tacCMDAttr($html, $cmdIdList, 'junos', 3, ['action' => 'deny'])
             :
             $sp->put().'set deny-commands = ' . self::tacCMDAttr($html, $cmdIdList, 'junos', 3));
 
@@ -982,7 +982,7 @@ class ConfigPatterns
             $cmdIdList = explode( ';;', $service['junos_cmd_dc'] );
 
             array_push($outputService[$service['id']],
-            ($html) ? $sp->put().self::$html_tags['param'][0] . "set set deny-configuration" . self::$html_tags['param'][1] . ' = ' . self::tacCMDAttr($html, $cmdIdList, 'junos', 3)
+            ($html) ? $sp->put().self::$html_tags['param'][0] . "set set deny-configuration" . self::$html_tags['param'][1] . ' = ' . self::tacCMDAttr($html, $cmdIdList, 'junos', 3, ['action' => 'deny'])
             :
             $sp->put().'set deny-configuration = ' . self::tacCMDAttr($html, $cmdIdList, 'junos', 3));
 
@@ -1106,8 +1106,9 @@ class ConfigPatterns
 		if ( $noPreview ) return $outputService[$service['id']]; else return $outputService;
 	}
 
-  public static function tacCMDAttr($html = false, $id = [], $type = '', $space = 0 )
+  public static function tacCMDAttr($html = false, $id = [], $type = '', $space = 0, $params = [] )
   {
+    $junosCmdTag = ( isset( $params['action'] )  AND $params['action'] == 'deny' ) ? self::$html_tags['object'] : self::$html_tags['val'];
 
     $cmdList = ( is_array($id) ) ? TACCMD::select()->where('type', $type)->whereIn('id', $id)->get() : TACCMD::select()->where('id', $id)->get();
 
@@ -1121,7 +1122,7 @@ class ConfigPatterns
         $outputCMDAttr[0] = array_merge( $outputCMDAttr[0], explode( ';;', $cmdList[$cl]->cmd_attr ) );
       }
 
-      $cmdAttrList = ( $html ) ? '"('.implode( '|', preg_filter('/$/', self::$html_tags['val'][1], preg_filter('/^/', self::$html_tags['val'][0], $outputCMDAttr[0] ) ) ) .')"'
+      $cmdAttrList = ( $html ) ? '"('.implode( '|', preg_filter('/$/', $junosCmdTag[1], preg_filter('/^/', $junosCmdTag[0], $outputCMDAttr[0] ) ) ) .')"'
       :
       '"('.implode( '|', $outputCMDAttr[0] ) .')"';
       //var_dump($cmdAttrList);die;
