@@ -133,7 +133,7 @@ class MAVISLDAPCtrl extends Controller
 
 		$data['test_configuration'] = $this->TACConfigCtrl->testConfiguration($this->TACConfigCtrl->createConfiguration("\n "));
 
-		$data['check_result']=shell_exec(TAC_ROOT_PATH . '/main.sh check mavis '.$req->getParam('test_username').' '.$req->getParam('test_password').' 2>&1');
+		$data['check_result']=shell_exec(TAC_ROOT_PATH . '/main.sh check mavis '.escapeshellarg( $req->getParam('test_username') ).' '.escapeshellarg($req->getParam('test_password')).' 2>&1');
 
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
