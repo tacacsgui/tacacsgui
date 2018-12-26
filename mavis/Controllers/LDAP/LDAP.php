@@ -111,7 +111,9 @@ class LDAP extends Controller
       //var_dump($groupList); var_dump($groupList_fullNames); die; //gidnumber $search->where( $this->ldap->filter, $this->mavis->getUsername() )->first()
     } else {
       //General LDAP//
-      for ($i=0; $i < count($this->adUser->memberof); $i++) {
+      $this->mavis->debugIn( $this->dPrefix() . ( is_array(@$this->adUser->memberof) ? 'memberof, exist' : 'memberof, notexist') );
+      if ( is_array(@$this->adUser->memberOf) ) for ($i=0; $i < count($this->adUser->memberof); $i++) {
+        $this->mavis->debugIn( $this->dPrefix() . 'User memberof: ' . $this->adUser->memberof[$i] );
       	preg_match_all('/^CN=(.*?),.*/s', $this->adUser->memberof[$i], $groupName);
       	$groupList[] = $groupName[1][0];
       }
@@ -120,6 +122,7 @@ class LDAP extends Controller
 
     }
 
+    $this->mavis->debugIn( $this->dPrefix() . 'Trying to find group match...' );
     $groupList_result = [];
     if ( ! empty($groupList) ){
     	$user_grps = $this->db->table('tac_user_groups')->select('name')->

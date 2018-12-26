@@ -26,9 +26,12 @@ class Controller
 
   public function in($value = '')
   {
-    if ($this->debug) $myfile = file_put_contents('/var/log/tacacsgui/mavis_debug.txt', $value, FILE_APPEND);
     $tempArray = explode(" ", trim($value));
   	$this->V_IN[$tempArray[0]]=trim($tempArray[1]);
+    if ($this->debug) {
+      if ( $tempArray[0] != 8 ) $myfile = file_put_contents('/var/log/tacacsgui/mavis_debug.txt', $value, FILE_APPEND);
+      else $myfile = file_put_contents('/var/log/tacacsgui/mavis_debug.txt', '8 <password>'."\n", FILE_APPEND);
+    }
   	//if (trim($tempArray[0]) == 4) $username = trim($tempArray[1]);
   	//if (trim($tempArray[0]) == 8) $password = trim($tempArray[1]);
   	return true;
@@ -142,9 +145,12 @@ class Controller
     foreach($this->V_IN as $index => $value)
     {
     	$output.= $index.' '.$value."\n";
+      if ($this->debug) {
+        if ($index != 8) file_put_contents('/var/log/tacacsgui/mavis_debug.txt', $index.' '.$value."\n", FILE_APPEND);
+        else file_put_contents('/var/log/tacacsgui/mavis_debug.txt', '8 <password>'."\n", FILE_APPEND);
+      }
     }
     $output.="=".$this->mavis_result."\n";
-    if ($this->debug) file_put_contents('/var/log/tacacsgui/mavis_debug.txt', $output, FILE_APPEND);
 
     fwrite(STDOUT, $output);
     exit(0);
