@@ -256,6 +256,39 @@ require __DIR__ . '/templates/body_start.php';
 		</div>
 		</div>
 	</div> -->
+	<div class="tgui_expander">
+		<div class="header">
+			<h4><i class="fa fa-plus-square"></i> Advanced Settings </h4>
+		</div>
+		<div class="body">
+			<div class="row">
+				<div class="col-sm-6">
+					<div class="form-group enable_login">
+						<label for="enable_login">Enable password as Login</label><p class="empty-paragraph"></p>
+						<input type="checkbox" class="form-control bootstrap-toggle" name="enable_login"  data-type="checkbox" data-default="unchecked" data-pickup="true" data-toggle="toggle" data-on="<i class='fa fa-check'></i> Yes" data-off="<i class='fa fa-close'></i> No" data-onstyle="success" data-offstyle="warning" data-width="100">
+						<input type="hidden" name="enable_login_native" data-type="input" data-default="">
+						<p class="help-block">user can use your own ldap password to get privilege mode</p>
+					</div>
+				</div>
+				<div class="col-sm-6">
+					<div class="form-group pap_login">
+						<label for="pap_login">PAP password as Login</label><p class="empty-paragraph"></p>
+						<input type="checkbox" class="form-control bootstrap-toggle" name="pap_login"  data-type="checkbox" data-default="unchecked" data-pickup="true" data-toggle="toggle" data-on="<i class='fa fa-check'></i> Yes" data-off="<i class='fa fa-close'></i> No" data-onstyle="success" data-offstyle="warning" data-width="100">
+						<input type="hidden" name="pap_login_native" data-type="input" data-default="">
+						<p class="help-block">user can use your own ldap password if pap password will require</p>
+					</div>
+				</div>
+				<div class="col-sm-6">
+					<div class="form-group message_flag">
+						<label for="message_flag">Show default message</label><p class="empty-paragraph"></p>
+						<input type="checkbox" class="form-control bootstrap-toggle" name="message_flag"  data-type="checkbox" data-default="unchecked" data-pickup="true" data-toggle="toggle" data-on="<i class='fa fa-check'></i> Yes" data-off="<i class='fa fa-close'></i> No" data-onstyle="success" data-offstyle="warning" data-width="100">
+						<input type="hidden" name="message_flag_native" data-type="input" data-default="">
+						<p class="help-block">show default message, it contain Common Name of user, client ip, device ip and date</p>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
 	</div>
 </div> <!-- /.box-body -->
 <div class="box-footer">
@@ -309,7 +342,6 @@ Info will appeared here
 require __DIR__ . '/templates/body_end.php';
 
 ?>
-
 
 <?php
 

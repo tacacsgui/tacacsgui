@@ -83,68 +83,89 @@ class LDAP extends Controller
         return false;
     }
 
+    //var_dump($this->adUser);
+
     $this->mavis->debugIn( $this->dPrefix() .'Auth Success!');
 
-    $this->mavis->debugIn( $this->dPrefix() .'Get Groups');
+    $usr = $this->db->table('tac_users')->select('login_flag')->where([['username', $this->mavis->getUsername()],['login_flag', 20]]);
+    $usr_local = $usr->count();
 
-    $search = $this->provider->search();
+    $this->mavis->debugIn( $this->dPrefix() .'Does it locally predefined? '. ( ( $usr_local ) ? 'Yes' : 'No') );
 
-    $this->adUser->gidnumber = ( is_array($this->adUser->gidnumber) ) ? $this->adUser->gidnumber : [$this->adUser->gidnumber];
+    if ( $usr_local == 0 ){
 
-    $groupList = [];
-    $groupList_fullNames = [];
+      $this->mavis->debugIn( $this->dPrefix() .'Get Groups');
 
-    if ( $this->ldap->type == 'openldap' ) {
-      //OpenLDAP//
-      for ($mgui=0; $mgui < count($this->adUser->gidnumber); $mgui++) {
-        $mainGUI = $search->where('objectclass', 'posixGroup')->where( 'gidNumber', $this->adUser->gidnumber[$mgui] )->first();
-        $groupList_fullNames[] = ( is_array($mainGUI->dn) ) ? $mainGUI->dn[0] : $mainGUI->dn;
-        $groupList[] = ( is_array($mainGUI->cn) ) ? $mainGUI->cn[0] : $mainGUI->cn;
+      $search = $this->provider->search();
+
+      $this->adUser->gidnumber = ( is_array($this->adUser->gidnumber) ) ? $this->adUser->gidnumber : [$this->adUser->gidnumber];
+
+      $groupList = [];
+      $groupList_fullNames = [];
+
+      if ( $this->ldap->type == 'openldap' ) {
+        //OpenLDAP//
+        for ($mgui=0; $mgui < count($this->adUser->gidnumber); $mgui++) {
+          $mainGUI = $search->where('objectclass', 'posixGroup')->where( 'gidNumber', $this->adUser->gidnumber[$mgui] )->first();
+          $groupList_fullNames[] = ( is_array($mainGUI->dn) ) ? $mainGUI->dn[0] : $mainGUI->dn;
+          $groupList[] = ( is_array($mainGUI->cn) ) ? $mainGUI->cn[0] : $mainGUI->cn;
+        }
+        $subGUI = $search->where('objectclass', 'posixGroup')->where( 'memberUid', $this->mavis->getUsername() )->get();
+        for ($sgui=0; $sgui < count($subGUI); $sgui++) {
+          $group_temp_full = ( is_array($subGUI[$sgui]->dn) ) ? $subGUI[$sgui]->dn[0] : $subGUI[$sgui]->dn;
+          $group_temp = ( is_array($subGUI[$sgui]->cn) ) ? $subGUI[$sgui]->cn[0] : $subGUI[$sgui]->cn;
+          if ( !in_array( $group_temp, $groupList ) )  $groupList[] = $group_temp;
+          if ( !in_array( $group_temp_full, $groupList_fullNames ) ) $groupList_fullNames[] = $group_temp_full;
+        }
+        //var_dump($groupList); var_dump($groupList_fullNames); die; //gidnumber $search->where( $this->ldap->filter, $this->mavis->getUsername() )->first()
+      } else {
+        //General LDAP//
+        $this->mavis->debugIn( $this->dPrefix() . ( is_array(@$this->adUser->memberof) ? 'memberof, exist' : 'memberof, notexist') );
+        if ( is_array(@$this->adUser->memberOf) ) for ($i=0; $i < count($this->adUser->memberof); $i++) {
+          $this->mavis->debugIn( $this->dPrefix() . 'User memberof: ' . $this->adUser->memberof[$i] );
+        	preg_match_all('/^CN=(.*?),.*/s', $this->adUser->memberof[$i], $groupName);
+        	$groupList[] = $groupName[1][0];
+        }
+
+        $groupList_fullNames = $this->adUser->memberof;
+
       }
-      $subGUI = $search->where('objectclass', 'posixGroup')->where( 'memberUid', $this->mavis->getUsername() )->get();
-      for ($sgui=0; $sgui < count($subGUI); $sgui++) {
-        $group_temp_full = ( is_array($subGUI[$sgui]->dn) ) ? $subGUI[$sgui]->dn[0] : $subGUI[$sgui]->dn;
-        $group_temp = ( is_array($subGUI[$sgui]->cn) ) ? $subGUI[$sgui]->cn[0] : $subGUI[$sgui]->cn;
-        if ( !in_array( $group_temp, $groupList ) )  $groupList[] = $group_temp;
-        if ( !in_array( $group_temp_full, $groupList_fullNames ) ) $groupList_fullNames[] = $group_temp_full;
+
+      $this->mavis->debugIn( $this->dPrefix() . 'Trying to find group match...' );
+      $groupList_result = [];
+      if ( ! empty($groupList) ){
+      	$user_grps = $this->db->table('tac_user_groups')->select('name')->
+      			where(function ($query) use ($groupList_fullNames, $groupList) {
+      					for ($i=0; $i < count($groupList_fullNames) ; $i++) {
+      						if ( $i == 0 ) { $query->where('ldap_groups', 'like', '%'.$groupList_fullNames[$i].'%')->orWhere('name', $groupList[$i]); continue; }
+      						$query->orWhere('ldap_groups', 'LIKE', '%'.$groupList_fullNames[$i].'%')->orWhere('name', $groupList[$i]);
+      					}
+      	    })->get()->toArray();
+      	foreach ($user_grps as $ugrp) {
+      		//if ( ! in_array($ugrp->name, $groupList) ) $groupList[] = $ugrp->name;
+      		$groupList_result[] = $ugrp->name;
+      	}
       }
-      //var_dump($groupList); var_dump($groupList_fullNames); die; //gidnumber $search->where( $this->ldap->filter, $this->mavis->getUsername() )->first()
-    } else {
-      //General LDAP//
-      $this->mavis->debugIn( $this->dPrefix() . ( is_array(@$this->adUser->memberof) ? 'memberof, exist' : 'memberof, notexist') );
-      if ( is_array(@$this->adUser->memberOf) ) for ($i=0; $i < count($this->adUser->memberof); $i++) {
-        $this->mavis->debugIn( $this->dPrefix() . 'User memberof: ' . $this->adUser->memberof[$i] );
-      	preg_match_all('/^CN=(.*?),.*/s', $this->adUser->memberof[$i], $groupName);
-      	$groupList[] = $groupName[1][0];
+
+      if ( ! count( $groupList_result ) ){
+      	$this->mavis->debugIn( $this->dPrefix() .'Group Not found! Exit.');
+      	return false;
       }
 
-      $groupList_fullNames = $this->adUser->memberof;
+      $this->mavis->debugIn( $this->dPrefix() .'Group List: '. implode(',', $groupList_result));
+      $this->mavis->setMempership( $groupList_result , $this->ldap->group_selection );
 
-    }
+      $tacprofile = '';
+      if ($this->ldap->enable_login) $tacprofile .= ' enable = login ';
+      if ($this->ldap->pap_login) $tacprofile .= ' pap = login ';
+      if ( !empty($tacprofile) ) $tacprofile = ' login = mavis ' . $tacprofile;
 
-    $this->mavis->debugIn( $this->dPrefix() . 'Trying to find group match...' );
-    $groupList_result = [];
-    if ( ! empty($groupList) ){
-    	$user_grps = $this->db->table('tac_user_groups')->select('name')->
-    			where(function ($query) use ($groupList_fullNames, $groupList) {
-    					for ($i=0; $i < count($groupList_fullNames) ; $i++) {
-    						if ( $i == 0 ) { $query->where('ldap_groups', 'like', '%'.$groupList_fullNames[$i].'%')->orWhere('name', $groupList[$i]); continue; }
-    						$query->orWhere('ldap_groups', 'LIKE', '%'.$groupList_fullNames[$i].'%')->orWhere('name', $groupList[$i]);
-    					}
-    	    })->get()->toArray();
-    	foreach ($user_grps as $ugrp) {
-    		//if ( ! in_array($ugrp->name, $groupList) ) $groupList[] = $ugrp->name;
-    		$groupList_result[] = $ugrp->name;
-    	}
-    }
+      if ($this->ldap->message_flag) $tacprofile .= ' message = "\nHello '.$this->adUser->cn[0].'.\nYour ip address is %%c, you are connected to %%r.\nToday is %F.\n\nHave a nice day! " ';
 
-    if ( ! count( $groupList_result ) ){
-    	$this->mavis->debugIn( $this->dPrefix() .'Group Not found! Exit.');
-    	return false;
-    }
+      if ( !empty($tacprofile) ) $this->mavis->setVariable(AV_A_TACPROFILE, '{'.$tacprofile.'}');
 
-    $this->mavis->debugIn( $this->dPrefix() .'Group List: '. implode(',', $groupList_result));
-    $this->mavis->setMempership( $groupList_result , $this->ldap->group_selection );
+    } //search group end
+
 
     $this->mavis->auth();
   }
@@ -192,7 +213,7 @@ class LDAP extends Controller
     $this->adUser = ( $this->ldap->type == 'openldap' ) ?
       $search->where('objectclass', 'inetOrgPerson')->where( $this->ldap->filter, $this->mavis->getUsername() )->first()
       :
-      $search->select(['distinguishedname', 'name', 'memberOf'])->where('objectclass', 'user')->
+      $search->select()->where('objectclass', 'user')->
         where( $this->ldap->filter, $this->mavis->getUsername() )->first();
 
     if ( !$this->adUser ) return false;

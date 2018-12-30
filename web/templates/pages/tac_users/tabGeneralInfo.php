@@ -32,6 +32,9 @@
 				<option value="1">MD5</option>
 				<!--<option value="2">DES (deprecated)</option>-->
 				<option value="3" selected >Local Database (MAVIS)</option>
+				<option value="10" disabled >Get from OTP (MAVIS)</option>
+				<option value="20">Get from LDAP (MAVIS)</option>
+				<option value="30" disabled >Get from SMS (MAVIS)</option>
 			</select>
 			<input type="hidden" name="login_flag_native" value="">
 			<p class="help-block">it can be stored as clear text, MD5 hash or inside of local database</p>

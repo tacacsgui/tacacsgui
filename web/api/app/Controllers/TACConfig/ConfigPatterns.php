@@ -33,7 +33,7 @@ class ConfigPatterns
     100 => 'COMMANDS',
   ];
 
-  public static $crypto_flag = array(0 => 'clear', 1 => 'crypt', 2 => 'crypt', 3 => 'mavis', 4 => 'login');
+  public static $crypto_flag = array(0 => 'clear', 1 => 'crypt', 2 => 'crypt', 3 => '# Local Database', 4 => '# Clone login', 10 => '# One-Time Password', 20 => '# LDAP', 30 => '# SMS');
 	public static $html_tags = array(
 		'comment' => [
 			0 => '<tac_comment>',
@@ -581,7 +581,11 @@ class ConfigPatterns
 			:
 			$sp->put().'user = '.$user['username'].' {');
 			///USER KEY///
-			$login = self::$crypto_flag[$user['login_flag']].' '. ( ($user['login_flag'] != 3 ) ? $user['login'] : '#local' );
+			$login = '';
+			if ( !in_array( $user['login_flag'], [1, 0] ) ) {
+        $login = 'mavis ' . self::$crypto_flag[$user['login_flag']];
+      } else $login = self::$crypto_flag[$user['login_flag']].' '. $user['login'];
+			//$login = self::$crypto_flag[$user['login_flag']].' '. ( ($user['login_flag'] != 3 ) ? $user['login'] : '#local' );
 			if ($user['mavis_otp_enabled'] == 1 OR $user['mavis_sms_enabled'] == 1) $login = 'mavis';
 			array_push($outputUsers[$user['id']],
 			($html) ? $sp->put('a').self::$html_tags['param'][0] . "login" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . $login . self::$html_tags['val'][1]
@@ -604,15 +608,14 @@ class ConfigPatterns
   			$sp->put().'member = '.$user_group);
       }
 			///USER PAP///
-			// if ($user['pap_clone'] == 1) array_push($outputUsers[$user['id']],
-			// ($html) ? '	'.self::$html_tags['param'][0] . "pap" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . $login . self::$html_tags['val'][1]
-			// :
-			// '	pap = '. $login);
-			if ( $user['pap_flag'] == 3 ) $user['pap'] = ' #local';
-			if ( $user['pap'] != '' OR $user['pap_flag'] == 3 OR $user['pap_flag'] == 4 ) array_push($outputUsers[$user['id']],
-			($html) ? $sp->put().self::$html_tags['param'][0] . "pap" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . self::$crypto_flag[$user['pap_flag']].' '. ( ( $user['pap_flag'] != 4 ) ? $user['pap'] : '' ) . self::$html_tags['val'][1]
+      $pap = '';
+			if ( !in_array($user['pap_flag'], [1, 0]) ) {
+        $pap = 'login ' . self::$crypto_flag[$user['pap_flag']];
+      } else $pap = self::$crypto_flag[$user['pap_flag']].' '. $user['pap'];
+			if ( $user['pap'] != '' ) array_push($outputUsers[$user['id']],
+			($html) ? $sp->put().self::$html_tags['param'][0] . "pap" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . $pap . self::$html_tags['val'][1]
 			:
-			$sp->put().'pap = '. self::$crypto_flag[$user['pap_flag']].' '. ( ($user['pap_flag'] != 4 ) ? $user['pap'] : '' ) );
+			$sp->put().'pap = '. $pap );
 			///USER CHAP///
 			if (!empty($user['chap'])) array_push($outputUsers[$user['id']],
 			($html) ? $sp->put().self::$html_tags['param'][0] . "chap" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . 'clear '.$user['chap'] . self::$html_tags['val'][1]
@@ -624,11 +627,19 @@ class ConfigPatterns
 			:
 			$sp->put().'ms-chap = '. 'clear '.$user['ms-chap']);
 			///USER ENABLE///
-			if ( $user['enable_flag'] == 3 ) $user['enable'] = ' #local';
-			if ($user['enable'] != '' OR $user['enable_flag'] == 4 ) array_push($outputUsers[$user['id']],
-			($html) ? $sp->put().self::$html_tags['param'][0] . "enable" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . self::$crypto_flag[$user['enable_flag']].' '. ( ($user['enable_flag'] != 4 ) ? $user['enable'] : '') . self::$html_tags['val'][1]
-			:
-			$sp->put().'enable = '.self::$crypto_flag[$user['enable_flag']].' '. ( ($user['enable_flag'] != 4 ) ? $user['enable'] : '') );
+      $enable = '';
+      if ( !in_array($user['enable_flag'], [1, 0]) ) {
+        $enable = 'login ' . self::$crypto_flag[$user['enable_flag']];
+      } else $enable = self::$crypto_flag[$user['enable_flag']].' '. $user['enable'];
+      if ( $user['enable'] != '' ) array_push($outputUsers[$user['id']],
+      ($html) ? $sp->put().self::$html_tags['param'][0] . "enable" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . $enable . self::$html_tags['val'][1]
+      :
+      $sp->put().'enable = '. $enable );
+      // if ( $user['enable_flag'] == 3 ) $user['enable'] = ' #local';
+			// if ($user['enable'] != '' OR $user['enable_flag'] == 4 ) array_push($outputUsers[$user['id']],
+			// ($html) ? $sp->put().self::$html_tags['param'][0] . "enable" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . self::$crypto_flag[$user['enable_flag']].' '. ( ($user['enable_flag'] != 4 ) ? $user['enable'] : '') . self::$html_tags['val'][1]
+			// :
+			// $sp->put().'enable = '.self::$crypto_flag[$user['enable_flag']].' '. ( ($user['enable_flag'] != 4 ) ? $user['enable'] : '') );
 			///USER ACL///
 			if ($user['acl'] > 0)array_push($outputUsers[$user['id']],
 			($html) ? $sp->put().self::$html_tags['param'][0] . "acl" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . $allACL[$user['acl']] . self::$html_tags['val'][1]

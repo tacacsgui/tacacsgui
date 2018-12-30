@@ -80,4 +80,4 @@ switch (true) {
 }
 
 $container->mavis->out();
-exit (0);
+//exit (0);

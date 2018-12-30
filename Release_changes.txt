@@ -1,4 +1,11 @@
 ##############################
+Version_0.9.58 20181230
+	* You can predefine LDAP user.
+	* Enable or PAP password for LDAP user will be the same as login.
+	* You can enable default message for LDAP user.
+	* See you next year! Merry Christmas!
+	* Some bug fixed
+##############################
 Version_0.9.57 20181220
 	* Added Juniper Pattern.
 	* Added Juniper Command Set type.

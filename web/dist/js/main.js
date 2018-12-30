@@ -591,6 +591,7 @@ var tgui_supplier = { //Tacacs Supplier Object
     return text;
   },
   clone_login: '#clone_login_password',
+  ldap_login: '#get_password_from_ldap',
   selector: function(a){
     a = a || {}
     if ( ! a.select ) return false;
@@ -598,6 +599,7 @@ var tgui_supplier = { //Tacacs Supplier Object
     var form_id = '#' + $($(a.select).parents('form')[0]).attr('id');
     var o = {
       input: $(form_id + ' input[name="'+$(a.select).data('object')+'"]'),
+      div: $(form_id + ' div.'+$(a.select).data('object')),
       input_native: $(form_id + ' input[name="'+$(a.select).data('object')+'_native"]'),
       flag_native: $(form_id + ' input[name="'+$(a.select).data('object')+'_flag_native"]').val(),
       hash: $(form_id + ' div.'+$(a.select).data('object')+'_encrypt_section'),
@@ -638,6 +640,33 @@ var tgui_supplier = { //Tacacs Supplier Object
         $(o.input).prop('disabled', true);
         o.input.attr('type', 'text');
         $(o.input).val(tgui_supplier.clone_login);
+        o.passwd_change.hide();
+        o.hash.hide();
+        break;
+      case '10':
+        //Set OTP Login//
+        $(o.input).prop('disabled', true);
+        o.input.attr('type', 'text');
+        $(o.input).val(tgui_supplier.clone_login);
+        o.passwd_change.hide();
+        o.hash.hide();
+        break;
+      case '20':
+        //Set LDAP login//
+        $(o.input).prop('disabled', true);
+        o.input.attr('type', 'text');
+        $(o.input).val(tgui_supplier.ldap_login);
+        o.passwd_change.hide();
+        o.hash.hide();
+        break;
+      case '30':
+        //Set SMS login//
+        $(o.input).prop('disabled', false);
+        o.input.attr('type', 'text');
+        //$(o.input).val(tgui_supplier.clone_login);
+        console.log( $(o.div) );
+        console.log( $(o.div).find('label[for="login"]') );
+        $($(o.div).find('label[for="login"]')).text('123123');
         o.passwd_change.hide();
         o.hash.hide();
         break;
