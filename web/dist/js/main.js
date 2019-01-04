@@ -609,6 +609,8 @@ var tgui_supplier = { //Tacacs Supplier Object
     }
     o.input.val( (o.flag == o.flag_native) ? o.input_native.val() : '' );
     o.input.attr('onfocus', "").attr('onfocusout', "");
+    if ($(o.div).find('label[data-type="main"]').length) $($(o.div).find('label[data-type="main"]')).show();
+    if ($(o.div).find('label[data-type="sms"]').length) $($(o.div).find('label[data-type="sms"]')).hide();
     switch (o.flag.toString()) {
       case '0':
         //Clear text//
@@ -666,7 +668,8 @@ var tgui_supplier = { //Tacacs Supplier Object
         //$(o.input).val(tgui_supplier.clone_login);
         console.log( $(o.div) );
         console.log( $(o.div).find('label[for="login"]') );
-        $($(o.div).find('label[for="login"]')).text('123123');
+        $($(o.div).find('label[data-type="main"]')).hide();
+        $($(o.div).find('label[data-type="sms"]')).show();
         o.passwd_change.hide();
         o.hash.hide();
         break;

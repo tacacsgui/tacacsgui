@@ -223,7 +223,7 @@ class APIDatabase
         'cisco_rs_debug_message' => ['integer', '0'],
         'cisco_rs_cmd' => ['string', ''],
         'cisco_rs_autocmd' => ['string', ''],
-        //'cisco_rs_nexus_roles' => ['string', ''],
+        'cisco_rs_nexus_roles' => ['string', ''],
         'cisco_rs_manual' => ['text', '_'],
         //ASR//
         //'cisco_asr_enable' => ['integer', '0'],

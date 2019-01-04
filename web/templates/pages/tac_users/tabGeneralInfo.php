@@ -19,7 +19,8 @@
 <div class="row">
 	<div class="col-sm-6">
 		<div class="form-group login">
-			<label for="login">Login Password</label>
+			<label for="login" data-type="main">Login Password</label>
+			<label for="login" data-type="sms" style="display:none;">User Phone number</label>
 			<input type="password" class="form-control" name="login" data-type="input" data-default="" data-pickup="true" placeholder="Write Login Password" value="" onfocus="tgui_supplier.clearOnFocus(this)" onfocusout="tgui_supplier.clearOnFocus(this,'out')" autocomplete="new-password">
 			<input type="hidden" name="login_native" value="">
 		</div>
@@ -32,9 +33,9 @@
 				<option value="1">MD5</option>
 				<!--<option value="2">DES (deprecated)</option>-->
 				<option value="3" selected >Local Database (MAVIS)</option>
-				<option value="10" disabled >Get from OTP (MAVIS)</option>
+				<option value="10" disabled style="display:none;">Get from OTP (MAVIS)</option>
 				<option value="20">Get from LDAP (MAVIS)</option>
-				<option value="30" disabled >Get from SMS (MAVIS)</option>
+				<option value="30" disabled style="display:none;">Get from SMS (MAVIS)</option>
 			</select>
 			<input type="hidden" name="login_flag_native" value="">
 			<p class="help-block">it can be stored as clear text, MD5 hash or inside of local database</p>
