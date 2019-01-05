@@ -1,13 +1,14 @@
 var pieSettings = function(object){
-  object = object || {};
-  var data = [];
-  var labels = [];
-  for (var item in object) {
-    if (object.hasOwnProperty(item)) {
-      data[data.length] = object[item];
-      labels[labels.length] = item;
-    }
-  }
+  object = object || [ {item:'none', count:0} ];
+  var data = (object[0] && object[0].count) ? object.map( x => x.count ) : [];
+  var labels = (object[0] && object[0].label) ? object.map( x => x.label ) : [];
+  // for (var item in object) {
+  //   if (object.hasOwnProperty(item)) {
+  //     data[data.length].count = object[item];
+  //     labels[labels.length].item = item;
+  //   }
+  // }
+  //console.log(data, labels);
   return {
     type: 'pie',
     data: {

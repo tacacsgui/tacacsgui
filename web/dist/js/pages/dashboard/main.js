@@ -38,10 +38,10 @@ var tacacsWidgets = {
       };//ajaxProps END
 
 		ajaxRequest.send(ajaxProps).then(function(resp) {
-			$('.numberOfDevices').removeClass('lds-dual-ring').text(resp.numberOfDevices)
-			$('.numberOfUsers').removeClass('lds-dual-ring').text(resp.numberOfUsers)
-			$('.numberOfAuthFails').removeClass('lds-dual-ring').text(resp.numberOfAuthFails)
-			if (resp.update_check) self.updates();
+			$('.numberOfDevices').removeClass('lds-dual-ring').text(resp.widgets[0].devices)
+			$('.numberOfUsers').removeClass('lds-dual-ring').text(resp.widgets[0].users)
+			$('.numberOfAuthFails').removeClass('lds-dual-ring').text(resp.widgets[0].authe_err)
+			if (resp.widgets[0].update_) self.updates();
     }).fail(function(err){
       tgui_error.getStatus(err, ajaxProps)
     })
@@ -129,24 +129,24 @@ var tacacsWidgets = {
 				var configAutheChart = new authChartSettings({
 					labels: resp.time_range,
 					datasets: {
-						faildata: resp.charts.authentication.data.fail,
-						successdata: resp.charts.authentication.data.success,
+						faildata: resp.authe.chart.f,
+						successdata: resp.authe.chart.s,
 					},
 					options:{
-						step: resp.step.authe || 10
+						step: resp.authe.step || 10
 					}
 				});
 				var configAuthoChart = new authChartSettings({
 					labels: resp.time_range,
 					datasets: {
 						failLabel: 'Fail Authorization',
-						faildata: resp.charts.authorization.data.fail,
+						faildata: resp.autho.chart.f,
 						successLabel: 'Success Authorization',
-						successdata: resp.charts.authorization.data.success,
+						successdata: resp.autho.chart.s,
 					},
 					options: {
 						title: 'Authorization',
-						step: resp.step.autho || 10
+						step: resp.autho.step || 10
 					}
 				});
 				var autheLineChart = $("#authentication");

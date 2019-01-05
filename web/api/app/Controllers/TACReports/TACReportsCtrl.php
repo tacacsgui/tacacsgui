@@ -2,6 +2,8 @@
 
 namespace tgui\Controllers\TACReports;
 
+use Illuminate\Support\Facades\DB as DB;
+
 use tgui\Models\TACDevices;
 use tgui\Models\TACUsers;
 use tgui\Models\Accounting;
@@ -31,19 +33,27 @@ class TACReportsCtrl extends Controller
 		//INITIAL CODE////END//
 
 		//$data['22']=Authentication::select()->distinct(['action'])->get()->toArray();
-		$data['numberOfDevices']=TACDevices::select()->get()->count();
-		$data['numberOfDevicesDisables']=TACDevices::select()->where([['disabled','=','1']])->get()->count();
-		$data['numberOfUsers']=TACUsers::select()->get()->count();
-		$data['numberOfUsersDisables']=TACUsers::select()->where([['disabled','=','1']])->get()->count();
-		$data['update_check'] = APISettings::find(1)->update_signin;
+
+		// $data['numberOfDevices']=TACDevices::select()->get()->count();
+		// $data['numberOfDevicesDisables']=TACDevices::select()->where([['disabled','=','1']])->get()->count();
+		// $data['numberOfUsers']=TACUsers::select()->get()->count();
+		// $data['numberOfUsersDisables']=TACUsers::select()->where([['disabled','=','1']])->get()->count();
+		//$data['update_check'] = APISettings::find(1)->update_signin;
 		$weekTimeRange=array(
 			date('Y-m-d H:i:s', strtotime( trim( shell_exec(TAC_ROOT_PATH . "/main.sh ntp get-time") ))-(60*60*24*7+1)),
 			trim( shell_exec(TAC_ROOT_PATH . "/main.sh ntp get-time") )
 		);
 		$data['range']=$weekTimeRange;
 		/////////////NAMBER OF FAILED AUTH/////START//
-		$data['numberOfAuthFails']=Authentication::select()->whereBetween('date', $weekTimeRange)->where([['action','LIKE','%fail%']])->get()->count();
+		//$data['numberOfAuthFails']=Authentication::select()->whereBetween('date', $weekTimeRange)->where([['action','LIKE','%fail%']])->get()->count();
 		/////////////NUMBER OF FAILED AUTH/////end//
+		$data['widgets'] = $this->db::select( $this->db::raw(" SELECT ".
+			" (SELECT COUNT(*) FROM tgui.api_settings where `update_signin` = 1) as update_, ".
+  		' (SELECT COUNT(*) FROM tgui.tac_users) as users, '.
+  		" (SELECT COUNT(*) FROM tgui.tac_users where `disabled` = '1') as users_disabled, ".
+  		' (SELECT COUNT(*) FROM tgui.tac_devices) as devices,'.
+  		" (SELECT COUNT(*) FROM tgui.tac_devices where `disabled` = '1') as devices_disabled, ".
+  		" (SELECT COUNT(*) FROM tgui_log.tac_log_authentication where `date` between '".$weekTimeRange[0]."' and '".$weekTimeRange[1]."' and (`action` LIKE '%fail%') OR (`action` LIKE '%deny%') ) as authe_err ") );
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
 	##########STATISTICS PLEASE#######END##
@@ -81,41 +91,83 @@ class TACReportsCtrl extends Controller
 		];
 
 		$now = date('Y-m-d', strtotime( trim( shell_exec(TAC_ROOT_PATH . "/main.sh ntp get-time") ) ) );
-		for ($i=0; $i < 7; $i++) {
+		$data['test11'] = date('Y-m-d', strtotime( $now . " 00:00:00" ) - 86399*6);
+		$data['authe'] = [];
+		$data['autho'] = [];
+		$data['authe']['db'] = Authentication::select( [$this->db::raw('DATE_FORMAT(date, "%Y-%m-%d") as date_'), 'action', $this->db::raw('COUNT(1) as count')] )->whereBetween('date',[date('Y-m-d', strtotime( $now . " 00:00:00" ) - 86399*6), $now.' 23:59:59'])->groupBy('date_','action')->get();
+		$data['autho']['db'] = Authorization::select( [$this->db::raw('DATE_FORMAT(date, "%Y-%m-%d") as date_'), 'action', $this->db::raw('COUNT(1) as count')] )->whereBetween('date',[date('Y-m-d', strtotime( $now . " 00:00:00" ) - 86399*6), $now.' 23:59:59'])->groupBy('date_','action')->get();
+		$data['authe']['chart']['s'] = $data['autho']['chart']['s'] = $data['authe']['chart']['f'] = $data['autho']['chart']['f'] = [];
+		for ($it=0; $it < 7; $it++) {
 			$data['time_range'][count($data['time_range'])] = $now;
-			$tRange = [$now." 00:00:00", $now.' 23:59:59'];
-			$authentication = Authentication::select()->whereBetween('date', $tRange);
-			$authorization = Authorization::select()->whereBetween('date', $tRange);
-			$t = &$data['charts']['authentication']['data'];
-			$t['success'][count($t['success'])] = Authentication::select()->where('action','LIKE','%succe%')->whereBetween('date', $tRange)->count();
-			$t['fail'][count($t['fail'])] = Authentication::select()->
-				where(function($query){
-				 $query->where('action','LIKE','%fail%')->orWhere('action','LIKE','%denied%');
-				})->whereBetween('date', $tRange)->count();
-			unset($t);
-			$t = &$data['charts']['authorization']['data'];
-			$t['success'][count($t['success'])] = Authorization::select()->where('action','=','permit')->whereBetween('date', $tRange)->get()->count();
-			$t['fail'][count($t['fail'])] = Authorization::select()->whereBetween('date', $tRange)->where('action','=','deny')->get()->count();
-			unset($t);
+
+			$authe_chart_s = [ $now => 0 ]; $authe_chart_f = [ $now => 0 ];
+			$autho_chart_s = [ $now => 0 ]; $autho_chart_f = [ $now => 0 ];
+
+			for ($db=0; $db < count($data['authe']['db']) ; $db++) {
+				if ($data['authe']['db'][$db]['date_'] == $now ){
+					if ( preg_match('/.*(deny|fail|error).*/', $data['authe']['db'][$db]['action']) ) $authe_chart_f[$now] += $data['authe']['db'][$db]['count'];
+					if ( preg_match('/.*(succeeded|success).*/', $data['authe']['db'][$db]['action']) ) $authe_chart_s[$now] += $data['authe']['db'][$db]['count'];
+				}
+			}
+			for ($db=0; $db < count($data['autho']['db']) ; $db++) {
+				if ($data['autho']['db'][$db]['date_'] == $now ){
+					if ( preg_match('/.*(deny|fail|error).*/', $data['autho']['db'][$db]['action']) ) $autho_chart_f[$now] += $data['autho']['db'][$db]['count'];
+					if ( preg_match('/.*(succeeded|success|permit).*/', $data['autho']['db'][$db]['action']) ) $autho_chart_s[$now] += $data['autho']['db'][$db]['count'];
+				}
+			}
+			//$data['authe']['temp']
+			$data['authe']['chart']['s'][$now] = $authe_chart_s[$now];
+			$data['authe']['chart']['f'][$now] = $authe_chart_f[$now];
+			$data['autho']['chart']['s'][$now] = $autho_chart_s[$now];
+			$data['autho']['chart']['f'][$now] = $autho_chart_f[$now];
 			$now = date('Y-m-d', strtotime( $now . " 00:00:00" ) - 86399);
 		}
 
 		$data['time_range'] = array_reverse( $data['time_range'] );
-		$a1 = &$data['charts']['authentication']['data'];
-		$a2 = &$data['charts']['authorization']['data'];
-		$a1['success'] = array_reverse($a1['success']);
-		$a1['fail'] = array_reverse($a1['fail']);
-		$a2['success'] = array_reverse($a2['success']);
-		$a2['fail'] = array_reverse($a2['fail']);
-		$data['step'] = [
-			'authe' => 1,
-			'autho' => 1,
-		];
-		$data['step']['authe'] = self::chartStep(max($a1['success']), $data['step']['authe']);
-		$data['step']['authe'] = self::chartStep(max($a1['fail']), $data['step']['authe']);
-		$data['step']['autho'] = self::chartStep(max($a2['success']), $data['step']['autho']);
-		$data['step']['autho'] = self::chartStep(max($a2['fail']), $data['step']['autho']);
-		unset($a1); unset($a2);
+		$data['authe']['chart']['s'] = array_values( array_reverse( $data['authe']['chart']['s'] ) );
+		$data['authe']['chart']['f'] = array_values( array_reverse( $data['authe']['chart']['f'] ) );
+		$data['autho']['chart']['s'] = array_values( array_reverse( $data['autho']['chart']['s'] ) );
+		$data['autho']['chart']['f'] = array_values( array_reverse( $data['autho']['chart']['f'] ) );
+		$data['authe']['step'] = ( max( $data['authe']['chart']['s'] ) > max( $data['authe']['chart']['f'] ) ) ? max( $data['authe']['chart']['s'] ) : max( $data['authe']['chart']['f'] );
+		$data['authe']['step'] = round($data['authe']['step'] / 5);
+		$data['autho']['step'] = ( max( $data['autho']['chart']['s'] ) > max( $data['autho']['chart']['f'] ) ) ? max( $data['autho']['chart']['s'] ) : max( $data['autho']['chart']['f'] );
+		$data['autho']['step'] = round($data['autho']['step'] / 5);
+
+		// for ($i=0; $i < 7; $i++) {
+		// 	$data['time_range'][count($data['time_range'])] = $now;
+		// 	$tRange = [$now." 00:00:00", $now.' 23:59:59'];
+		// 	$authentication = Authentication::select()->whereBetween('date', $tRange);
+		// 	$authorization = Authorization::select()->whereBetween('date', $tRange);
+		// 	$t = &$data['charts']['authentication']['data'];
+		// 	$t['success'][count($t['success'])] = Authentication::select()->where('action','LIKE','%succe%')->whereBetween('date', $tRange)->count();
+		// 	$t['fail'][count($t['fail'])] = Authentication::select()->
+		// 		where(function($query){
+		// 		 $query->where('action','LIKE','%fail%')->orWhere('action','LIKE','%denied%');
+		// 		})->whereBetween('date', $tRange)->count();
+		// 	unset($t);
+		// 	$t = &$data['charts']['authorization']['data'];
+		// 	$t['success'][count($t['success'])] = Authorization::select()->where('action','=','permit')->whereBetween('date', $tRange)->get()->count();
+		// 	$t['fail'][count($t['fail'])] = Authorization::select()->whereBetween('date', $tRange)->where('action','=','deny')->get()->count();
+		// 	unset($t);
+		// 	$now = date('Y-m-d', strtotime( $now . " 00:00:00" ) - 86399);
+		// }
+		//
+		// $data['time_range'] = array_reverse( $data['time_range'] );
+		// $a1 = &$data['charts']['authentication']['data'];
+		// $a2 = &$data['charts']['authorization']['data'];
+		// $a1['success'] = array_reverse($a1['success']);
+		// $a1['fail'] = array_reverse($a1['fail']);
+		// $a2['success'] = array_reverse($a2['success']);
+		// $a2['fail'] = array_reverse($a2['fail']);
+		// $data['step'] = [
+		// 	'authe' => 1,
+		// 	'autho' => 1,
+		// ];
+		// $data['step']['authe'] = self::chartStep(max($a1['success']), $data['step']['authe']);
+		// $data['step']['authe'] = self::chartStep(max($a1['fail']), $data['step']['authe']);
+		// $data['step']['autho'] = self::chartStep(max($a2['success']), $data['step']['autho']);
+		// $data['step']['autho'] = self::chartStep(max($a2['fail']), $data['step']['autho']);
+		// unset($a1); unset($a2);
 
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
@@ -152,7 +204,8 @@ class TACReportsCtrl extends Controller
 		//$allParams['usersReload'] = ( !empty($allParams['usersReload']) ) ? $allParams['usersReload'] : 1;
 		if ($allParams['usersReload']){
 			//////////Top users///start//
-			$activeUserslist=Authentication::where('action', 'NOT LIKE', '%fail%')->whereBetween('date', $weekTimeRange)->distinct()->limit($allParams['users'])->get(['username']);
+			$data['topUsers'] = Authentication::select('username as label', $this->db::raw('COUNT(1) as count') )->where('action', 'NOT LIKE', '%fail%')->whereBetween('date', $weekTimeRange)->limit($allParams['users'])->groupBy('username')->get();
+			/*$activeUserslist=Authentication::where('action', 'NOT LIKE', '%fail%')->whereBetween('date', $weekTimeRange)->distinct()->limit($allParams['users'])->get(['username']);
 			$data['topUsers']=array();
 			for ($i=0; $i < count($activeUserslist); $i++)
 			{
@@ -160,30 +213,32 @@ class TACReportsCtrl extends Controller
 				$data['topUsers'][$activeUserslist[$i]['username']]=Authentication::whereBetween('date', $weekTimeRange)->where([['username','=',$activeUserslist[$i]['username']]])->get()->count();
 			}
 			//arsort($data['topUsers']);
-			$data['topUsers'] = $data['topUsers'];
+			$data['topUsers'] = $data['topUsers'];*/
 			//////////Top users///end//
 		}
 		//////////////////////////////
 		//////////Top Devices///start//
 		if ($allParams['devicesReload']){
-			$activeDeviceslist=Authentication::whereBetween('date', $weekTimeRange)->distinct()->limit($allParams['devices'])->get(['NAS']);
-			$data['activeDevices']=array();
-			for ($i=0; $i < count($activeDeviceslist); $i++)
-			{
-				if ($activeDeviceslist[$i]['NAS']=='') continue;
-				$data['activeDevices'][$activeDeviceslist[$i]['NAS']]=Authentication::whereBetween('date', $weekTimeRange)->where([['NAS','=',$activeDeviceslist[$i]['NAS']]])->get()->count();
-			}
-			arsort($data['activeDevices']);
-			$data['topDevices'] = $data['activeDevices'];
-			$data['nameOfDevices']=TACDevices::whereIn('ipaddr',array_keys($data['topDevices']))->get(['name', 'ipaddr']);
-			$data['topDevicesNamed']=array();
-			foreach ($data['topDevices'] as $ipaddress => $numberOfAuth)
-			{
-				for ($y=0; $y < count($data['nameOfDevices']);$y++)
-				{
-					if ($data['nameOfDevices'][$y]['ipaddr']==$ipaddress) $data['topDevicesNamed'][$data['nameOfDevices'][$y]['name']] = $numberOfAuth;
-				}
-			}
+			$data['topDevices'] = Authentication::select( $this->db::raw('IFNULL(dev.name, nas) label'), $this->db::raw('COUNT(1) as count') )->leftJoin('tgui.tac_devices as dev', 'tac_log_authentication.nas','=','dev.ipaddr')->where('tac_log_authentication.action', 'NOT LIKE', '%fail%')->whereBetween('tac_log_authentication.date', $weekTimeRange)->limit($allParams['users'])->groupBy('label')->get();
+			//$data['topDevices'] = Authentication::select( $this->db::raw('IFNULL(dev.name, nas) label'), $this->db::raw('COUNT(1) as count') )->leftJoin('tgui.tac_devices', 'tac_log_authentication.nas = tgui.tac_devices.ipaddr')->where('tac_log_authentication.action', 'NOT LIKE', '%fail%')->whereBetween('tac_log_authentication.date', $weekTimeRange)->limit($allParams['users'])->groupBy('label')->get();
+			// $activeDeviceslist=Authentication::whereBetween('date', $weekTimeRange)->distinct()->limit($allParams['devices'])->get(['NAS']);
+			// $data['activeDevices']=array();
+			// for ($i=0; $i < count($activeDeviceslist); $i++)
+			// {
+			// 	if ($activeDeviceslist[$i]['NAS']=='') continue;
+			// 	$data['activeDevices'][$activeDeviceslist[$i]['NAS']]=Authentication::whereBetween('date', $weekTimeRange)->where([['NAS','=',$activeDeviceslist[$i]['NAS']]])->get()->count();
+			// }
+			// arsort($data['activeDevices']);
+			// $data['topDevices'] = $data['activeDevices'];
+			// $data['nameOfDevices']=TACDevices::whereIn('ipaddr',array_keys($data['topDevices']))->get(['name', 'ipaddr']);
+			// $data['topDevicesNamed']=array();
+			// foreach ($data['topDevices'] as $ipaddress => $numberOfAuth)
+			// {
+			// 	for ($y=0; $y < count($data['nameOfDevices']);$y++)
+			// 	{
+			// 		if ($data['nameOfDevices'][$y]['ipaddr']==$ipaddress) $data['topDevicesNamed'][$data['nameOfDevices'][$y]['name']] = $numberOfAuth;
+			// 	}
+			// }
 		}
 		//////////Top Devices///end//
 		return $res -> withStatus(200) -> write(json_encode($data));
