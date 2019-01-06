@@ -204,7 +204,7 @@ class TACReportsCtrl extends Controller
 		//$allParams['usersReload'] = ( !empty($allParams['usersReload']) ) ? $allParams['usersReload'] : 1;
 		if ($allParams['usersReload']){
 			//////////Top users///start//
-			$data['topUsers'] = Authentication::select('username as label', $this->db::raw('COUNT(1) as count') )->where('action', 'NOT LIKE', '%fail%')->whereBetween('date', $weekTimeRange)->limit($allParams['users'])->groupBy('username')->get();
+			$data['topUsers'] = Authentication::select('username as label', $this->db::raw('COUNT(1) as count') )->where('action', 'LIKE', '%succeeded')->whereBetween('date', $weekTimeRange)->groupBy('username')->orderBy('count','desc')->limit($allParams['users'])get();
 			/*$activeUserslist=Authentication::where('action', 'NOT LIKE', '%fail%')->whereBetween('date', $weekTimeRange)->distinct()->limit($allParams['users'])->get(['username']);
 			$data['topUsers']=array();
 			for ($i=0; $i < count($activeUserslist); $i++)
@@ -219,7 +219,7 @@ class TACReportsCtrl extends Controller
 		//////////////////////////////
 		//////////Top Devices///start//
 		if ($allParams['devicesReload']){
-			$data['topDevices'] = Authentication::select( $this->db::raw('IFNULL(dev.name, nas) label'), $this->db::raw('COUNT(1) as count') )->leftJoin('tgui.tac_devices as dev', 'tac_log_authentication.nas','=','dev.ipaddr')->where('tac_log_authentication.action', 'NOT LIKE', '%fail%')->whereBetween('tac_log_authentication.date', $weekTimeRange)->limit($allParams['users'])->groupBy('label')->get();
+			$data['topDevices'] = Authentication::select( $this->db::raw(' nas as label'), $this->db::raw('COUNT(1) as count') )->where('tac_log_authentication.action', 'LIKE', '%succeeded')->whereBetween('tac_log_authentication.date', $weekTimeRange)->groupBy('label')->orderBy('count','desc')->limit($allParams['users'])->get();
 			//$data['topDevices'] = Authentication::select( $this->db::raw('IFNULL(dev.name, nas) label'), $this->db::raw('COUNT(1) as count') )->leftJoin('tgui.tac_devices', 'tac_log_authentication.nas = tgui.tac_devices.ipaddr')->where('tac_log_authentication.action', 'NOT LIKE', '%fail%')->whereBetween('tac_log_authentication.date', $weekTimeRange)->limit($allParams['users'])->groupBy('label')->get();
 			// $activeDeviceslist=Authentication::whereBetween('date', $weekTimeRange)->distinct()->limit($allParams['devices'])->get(['NAS']);
 			// $data['activeDevices']=array();
