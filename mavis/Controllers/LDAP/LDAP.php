@@ -23,9 +23,13 @@ class LDAP extends Controller
   }
 	public function check()
 	{
-    $check_first = $this->db->table('mavis_ldap')->where('enabled', 1)->count();
-    if (!$check_first){
+    //$check_first = $this->db->table('mavis_ldap')->where('enabled', 1)->count();
+    if ( ! $this->modules[0]->m_ldap ){
       $this->mavis->debugIn( $this->dPrefix() . 'Check Status: Module Disabled' );
+      return false;
+    }
+    if ( ! in_array($this->mavis->getVariable(AV_A_TACTYPE), ['AUTH']) ) {
+      $this->mavis->debugIn( $this->dPrefix() . 'Check Status: TACTYPE '.$this->mavis->getVariable(AV_A_TACTYPE).' Unsupported. Exit' );
       return false;
     }
     if ( !$this->conn() ){
@@ -35,10 +39,6 @@ class LDAP extends Controller
     $this->mavis->debugIn( $this->dPrefix() . 'Check Status: Connected Successful' );
     if ( !$this->search() ){
       $this->mavis->debugIn( $this->dPrefix() . 'Check Status: User Not Found' );
-      return false;
-    }
-    if ( ! in_array($this->mavis->getVariable(AV_A_TACTYPE), ['AUTH']) ) {
-      $this->mavis->debugIn( $this->dPrefix() . 'Check Status: TACTYPE '.$this->mavis->getVariable(AV_A_TACTYPE).' Unsupported. Exit' );
       return false;
     }
     if ($this->adUser){

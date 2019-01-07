@@ -17,8 +17,8 @@ class OTP extends Controller
   }
 	public function check()
 	{
-    $check_first = $this->db->table('mavis_otp')->where('enabled', 1)->count();
-    if (!$check_first){
+    //$check_first = $this->db->table('mavis_otp')->where('enabled', 1)->count();
+    if (! $this->modules[0]->m_otp ){
       $this->mavis->debugIn( $this->dPrefix() . 'Check Status: Module Disabled' );
       return false;
     }

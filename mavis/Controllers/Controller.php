@@ -141,7 +141,8 @@ class Controller
 
     $output = '';
     ksort($this->V_IN);
-    if ($this->V_IN[AV_A_TACTYPE] == 'CHAL' AND $this->V_IN[AV_A_RESULT] == AV_V_RESULT_ERROR) unset($this->V_IN[AV_A_RESULT]);
+    if ( $this->V_IN[AV_A_TACTYPE] == 'CHAL' AND $this->V_IN[AV_A_RESULT] == AV_V_RESULT_ERROR) unset($this->V_IN[AV_A_RESULT]);
+    if ( $this->V_IN[AV_A_TACTYPE] == 'INFO') unset($this->V_IN[AV_A_RESULT]);
     foreach($this->V_IN as $index => $value)
     {
     	$output.= $index.' '.$value."\n";

@@ -52,6 +52,12 @@ $container->mavis = new \mavis\Controllers\Controller($container);
 
 $container->mavis->debugEmpty();
 
+$container->modules = $container->db::select( $container->db::raw( "SELECT ".
+	"(SELECT COUNT(*) FROM tgui.mavis_local where `enabled` = 1) as m_local, ".
+	"(SELECT COUNT(*) FROM tgui.mavis_ldap where `enabled` = 1) as m_ldap, ".
+	"(SELECT COUNT(*) FROM tgui.mavis_otp where `enabled` = 1) as m_otp, ".
+	"(SELECT COUNT(*) FROM tgui.mavis_sms where `enabled` = 1) as m_sms" ) );
+
 while($f = fgets(STDIN)){
 	if (trim($f) == '=') break;
 	if (trim($f) == '') continue;
