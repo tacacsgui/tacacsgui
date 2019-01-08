@@ -28,7 +28,7 @@ class LDAP extends Controller
       $this->mavis->debugIn( $this->dPrefix() . 'Check Status: Module Disabled' );
       return false;
     }
-    if ( ! in_array($this->mavis->getVariable(AV_A_TACTYPE), ['AUTH']) ) {
+    if ( ! in_array($this->mavis->getVariable(AV_A_TACTYPE), ['AUTH', 'INFO']) ) {
       $this->mavis->debugIn( $this->dPrefix() . 'Check Status: TACTYPE '.$this->mavis->getVariable(AV_A_TACTYPE).' Unsupported. Exit' );
       return false;
     }
@@ -55,7 +55,8 @@ class LDAP extends Controller
     $this->mavis->result('NAK');
     //var_dump($this->adUser->dn[0]); die;
     //var_dump( $this->ad->auth()->attempt( $this->adUser->dn[0], $this->mavis->getPassword() ) ); die;
-    try {
+
+    if ( $this->mavis->getVariable(AV_A_TACTYPE) == 'AUTH' ) try {
         $nice_try = false;
         switch ($this->ldap->type) {
           case 'openldap':
@@ -85,7 +86,7 @@ class LDAP extends Controller
 
     //var_dump($this->adUser);
 
-    $this->mavis->debugIn( $this->dPrefix() .'Auth Success!');
+    $this->mavis->debugIn( $this->dPrefix() . ( ($this->mavis->getVariable(AV_A_TACTYPE) == 'AUTH') ? 'Auth Success!' : 'Auth via INFO!') );
 
     $usr = $this->db->table('tac_users')->select('login_flag')->where([['username', $this->mavis->getUsername()],['login_flag', 20]]);
     $usr_local = $usr->count();

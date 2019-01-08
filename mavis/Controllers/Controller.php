@@ -27,6 +27,7 @@ class Controller
   public function in($value = '')
   {
     $tempArray = explode(" ", trim($value));
+    if ( count($tempArray) <= 1 ) return false;
   	$this->V_IN[$tempArray[0]]=trim($tempArray[1]);
     if ($this->debug) {
       if ( $tempArray[0] != 8 ) $myfile = file_put_contents('/var/log/tacacsgui/mavis_debug.txt', $value, FILE_APPEND);
@@ -142,7 +143,7 @@ class Controller
     $output = '';
     ksort($this->V_IN);
     if ( $this->V_IN[AV_A_TACTYPE] == 'CHAL' AND $this->V_IN[AV_A_RESULT] == AV_V_RESULT_ERROR) unset($this->V_IN[AV_A_RESULT]);
-    if ( $this->V_IN[AV_A_TACTYPE] == 'INFO') unset($this->V_IN[AV_A_RESULT]);
+    //if ( $this->V_IN[AV_A_TACTYPE] == 'INFO') { unset($this->V_IN[AV_A_RESULT]); $this->mavisDown(); }
     foreach($this->V_IN as $index => $value)
     {
     	$output.= $index.' '.$value."\n";
@@ -154,7 +155,7 @@ class Controller
     $output.="=".$this->mavis_result."\n";
 
     fwrite(STDOUT, $output);
-    exit(0);
+    //exit(0);
   }
 
 

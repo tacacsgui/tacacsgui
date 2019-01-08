@@ -59,31 +59,32 @@ $container->modules = $container->db::select( $container->db::raw( "SELECT ".
 	"(SELECT COUNT(*) FROM tgui.mavis_sms where `enabled` = 1) as m_sms" ) );
 
 while($f = fgets(STDIN)){
-	if (trim($f) == '=') break;
-	if (trim($f) == '') continue;
 	$container->mavis->in($f);
-}
+	if ( ! preg_match("/^=$/i", trim($f) ) ) continue;
+	// if (trim($f) == '=') break;
+	// if (trim($f) == '') continue;
 
-switch (true) {
-	case ( $container->local->check() ):
-		$container->local->run();
+	switch (true) {
+		case ( $container->local->check() ):
+			$container->local->run();
 
-		break;
-	case ( $container->otp->check() ):
-		$container->otp->run();
+			break;
+		case ( $container->otp->check() ):
+			$container->otp->run();
 
-		break;
-	case ( $container->sms->check() ):
-		$container->sms->run();
+			break;
+		case ( $container->sms->check() ):
+			$container->sms->run();
 
-		break;
-	case ( $container->ldap->check() ):
-		$container->ldap->run();
+			break;
+		case ( $container->ldap->check() ):
+			$container->ldap->run();
 
-		break;
-  default:
-	  $container->mavis->result('NFD');
-}
+			break;
+	  default:
+		  $container->mavis->result('NFD');
+	}
 
-$container->mavis->out();
+	$container->mavis->out();
 //exit (0);
+}
