@@ -90,84 +90,57 @@ class TACReportsCtrl extends Controller
 
 		];
 
-		$now = date('Y-m-d', strtotime( trim( shell_exec(TAC_ROOT_PATH . "/main.sh ntp get-time") ) ) );
-		$data['test11'] = date('Y-m-d', strtotime( $now . " 00:00:00" ) - 86399*6);
+		$now = $startDate = date('Y-m-d', strtotime( trim( shell_exec(TAC_ROOT_PATH . "/main.sh ntp get-time") ) ) );
+		$days = 7;
+		$dateArray = [];
+		for ($i=0; $i < $days ; $i++) {
+			$dateArray[] = $startDate;
+			$startDate = date('Y-m-d', strtotime( $startDate . " 00:00:00" ) - 86399);
+		}
+		$now = $now . ' 23:59:59';
+		$startDate = $startDate . ' 00:00:00';
+		$data['time_range'] = array_reverse( $dateArray );
+
 		$data['authe'] = [];
 		$data['autho'] = [];
-		$data['authe']['db'] = Authentication::select( [$this->db::raw('DATE_FORMAT(date, "%Y-%m-%d") as date_'), 'action', $this->db::raw('COUNT(1) as count')] )->whereBetween('date',[date('Y-m-d', strtotime( $now . " 00:00:00" ) - 86399*6), $now.' 23:59:59'])->groupBy('date_','action')->get();
-		$data['autho']['db'] = Authorization::select( [$this->db::raw('DATE_FORMAT(date, "%Y-%m-%d") as date_'), 'action', $this->db::raw('COUNT(1) as count')] )->whereBetween('date',[date('Y-m-d', strtotime( $now . " 00:00:00" ) - 86399*6), $now.' 23:59:59'])->groupBy('date_','action')->get();
-		$data['authe']['chart']['s'] = $data['autho']['chart']['s'] = $data['authe']['chart']['f'] = $data['autho']['chart']['f'] = [];
-		for ($it=0; $it < 7; $it++) {
-			$data['time_range'][count($data['time_range'])] = $now;
-
-			$authe_chart_s = [ $now => 0 ]; $authe_chart_f = [ $now => 0 ];
-			$autho_chart_s = [ $now => 0 ]; $autho_chart_f = [ $now => 0 ];
-
-			for ($db=0; $db < count($data['authe']['db']) ; $db++) {
-				if ($data['authe']['db'][$db]['date_'] == $now ){
-					if ( preg_match('/.*(deny|fail|error).*/', $data['authe']['db'][$db]['action']) ) $authe_chart_f[$now] += $data['authe']['db'][$db]['count'];
-					if ( preg_match('/.*(succeeded|success).*/', $data['authe']['db'][$db]['action']) ) $authe_chart_s[$now] += $data['authe']['db'][$db]['count'];
-				}
-			}
-			for ($db=0; $db < count($data['autho']['db']) ; $db++) {
-				if ($data['autho']['db'][$db]['date_'] == $now ){
-					if ( preg_match('/.*(deny|fail|error).*/', $data['autho']['db'][$db]['action']) ) $autho_chart_f[$now] += $data['autho']['db'][$db]['count'];
-					if ( preg_match('/.*(succeeded|success|permit).*/', $data['autho']['db'][$db]['action']) ) $autho_chart_s[$now] += $data['autho']['db'][$db]['count'];
-				}
-			}
-			//$data['authe']['temp']
-			$data['authe']['chart']['s'][$now] = $authe_chart_s[$now];
-			$data['authe']['chart']['f'][$now] = $authe_chart_f[$now];
-			$data['autho']['chart']['s'][$now] = $autho_chart_s[$now];
-			$data['autho']['chart']['f'][$now] = $autho_chart_f[$now];
-			$now = date('Y-m-d', strtotime( $now . " 00:00:00" ) - 86399);
+		$data['authe']['db'] = $this->db::select( $this->db::raw("select date_ date,sum(authe_s) authe_s ,sum(authe_f) authe_f  from(".
+"select date_,if(`action_`='permit',count,0) authe_s,if(`action_`='deny',count,0) authe_f from".
+"(select date_format(date,'%Y-%m-%d') date_, if( `action` like \"%succeeded\",\"permit\",\"deny\") `action_`, count(*) count from tgui_log.tac_log_authentication where date between '".$startDate."' and '".$now."'  group by date_, action_) authe" .
+") test group by date_") );
+		$data['autho']['db'] = $this->db::select( $this->db::raw("select date_ date,sum(autho_s) autho_s ,sum(autho_f) autho_f  from(".
+			"select date_,if(action='permit',count,0) autho_s,if(action='deny',count,0) autho_f from".
+			"(select date_format(date,'%Y-%m-%d') date_,action, count(*) count from tgui_log.tac_log_authorization where date between '".$startDate."' and '".$now."' group by date_,action) autho".
+			") test group by date_ ") );
+		
+		$data['authe']['arr'] = [];
+		$data['autho']['arr'] = [];
+		for ($i=0; $i < count($data['authe']['db']); $i++) {
+			$data['authe']['arr'][$data['authe']['db'][$i]->date] = ['s' => $data['authe']['db'][$i]->authe_s, 'f' => $data['authe']['db'][$i]->authe_f];
+		}
+		for ($i=0; $i < count($data['autho']['db']); $i++) {
+			$data['autho']['arr'][$data['autho']['db'][$i]->date] = ['s' => $data['autho']['db'][$i]->autho_s, 'f' => $data['autho']['db'][$i]->autho_f];
 		}
 
-		$data['time_range'] = array_reverse( $data['time_range'] );
-		$data['authe']['chart']['s'] = array_values( array_reverse( $data['authe']['chart']['s'] ) );
-		$data['authe']['chart']['f'] = array_values( array_reverse( $data['authe']['chart']['f'] ) );
-		$data['autho']['chart']['s'] = array_values( array_reverse( $data['autho']['chart']['s'] ) );
-		$data['autho']['chart']['f'] = array_values( array_reverse( $data['autho']['chart']['f'] ) );
-		$data['authe']['step'] = ( max( $data['authe']['chart']['s'] ) > max( $data['authe']['chart']['f'] ) ) ? max( $data['authe']['chart']['s'] ) : max( $data['authe']['chart']['f'] );
-		$data['authe']['step'] = round($data['authe']['step'] / 5);
-		$data['autho']['step'] = ( max( $data['autho']['chart']['s'] ) > max( $data['autho']['chart']['f'] ) ) ? max( $data['autho']['chart']['s'] ) : max( $data['autho']['chart']['f'] );
-		$data['autho']['step'] = round($data['autho']['step'] / 5);
+		$data['authe']['chart'] = [];
+		$data['autho']['chart'] = [];
+		for ($i=0; $i < count( $data['time_range'] ); $i++) {
+			$data['authe']['chart']['s'][$i] = ( array_key_exists($data['time_range'][$i], $data['authe']['arr']) ) ? $data['authe']['arr'][$data['time_range'][$i]]['s'] : 0;
+			$data['authe']['chart']['f'][$i] = ( array_key_exists($data['time_range'][$i], $data['authe']['arr']) ) ? $data['authe']['arr'][$data['time_range'][$i]]['f']  : 0;
+			$data['autho']['chart']['s'][$i] = ( array_key_exists($data['time_range'][$i], $data['autho']['arr']) ) ? $data['autho']['arr'][$data['time_range'][$i]]['s']  : 0;
+			$data['autho']['chart']['f'][$i] = ( array_key_exists($data['time_range'][$i], $data['autho']['arr']) ) ? $data['autho']['arr'][$data['time_range'][$i]]['f']  : 0;
+		}
 
-		// for ($i=0; $i < 7; $i++) {
-		// 	$data['time_range'][count($data['time_range'])] = $now;
-		// 	$tRange = [$now." 00:00:00", $now.' 23:59:59'];
-		// 	$authentication = Authentication::select()->whereBetween('date', $tRange);
-		// 	$authorization = Authorization::select()->whereBetween('date', $tRange);
-		// 	$t = &$data['charts']['authentication']['data'];
-		// 	$t['success'][count($t['success'])] = Authentication::select()->where('action','LIKE','%succe%')->whereBetween('date', $tRange)->count();
-		// 	$t['fail'][count($t['fail'])] = Authentication::select()->
-		// 		where(function($query){
-		// 		 $query->where('action','LIKE','%fail%')->orWhere('action','LIKE','%denied%');
-		// 		})->whereBetween('date', $tRange)->count();
-		// 	unset($t);
-		// 	$t = &$data['charts']['authorization']['data'];
-		// 	$t['success'][count($t['success'])] = Authorization::select()->where('action','=','permit')->whereBetween('date', $tRange)->get()->count();
-		// 	$t['fail'][count($t['fail'])] = Authorization::select()->whereBetween('date', $tRange)->where('action','=','deny')->get()->count();
-		// 	unset($t);
-		// 	$now = date('Y-m-d', strtotime( $now . " 00:00:00" ) - 86399);
-		// }
-		//
-		// $data['time_range'] = array_reverse( $data['time_range'] );
-		// $a1 = &$data['charts']['authentication']['data'];
-		// $a2 = &$data['charts']['authorization']['data'];
-		// $a1['success'] = array_reverse($a1['success']);
-		// $a1['fail'] = array_reverse($a1['fail']);
-		// $a2['success'] = array_reverse($a2['success']);
-		// $a2['fail'] = array_reverse($a2['fail']);
-		// $data['step'] = [
-		// 	'authe' => 1,
-		// 	'autho' => 1,
-		// ];
-		// $data['step']['authe'] = self::chartStep(max($a1['success']), $data['step']['authe']);
-		// $data['step']['authe'] = self::chartStep(max($a1['fail']), $data['step']['authe']);
-		// $data['step']['autho'] = self::chartStep(max($a2['success']), $data['step']['autho']);
-		// $data['step']['autho'] = self::chartStep(max($a2['fail']), $data['step']['autho']);
-		// unset($a1); unset($a2);
+		$data['authe']['step'] = ( max( $data['authe']['chart']['s'] ) > max( $data['authe']['chart']['f'] ) ) ?
+			max( $data['authe']['chart']['s'] )
+			:
+			max( $data['authe']['chart']['f'] );
+		$data['authe']['step'] = ( $data['authe']['step'] < 50 ) ? 10 : round($data['authe']['step'] / 5);
+		$data['autho']['step'] = ( max( $data['autho']['chart']['s'] ) > max( $data['autho']['chart']['f'] ) ) ?
+			max( $data['autho']['chart']['s'] )
+			:
+			max( $data['autho']['chart']['f'] );
+		$data['autho']['step'] = ( $data['autho']['step'] < 50 ) ? 10 : round($data['autho']['step'] / 5);
+
 
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
