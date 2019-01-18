@@ -12,7 +12,8 @@
         "phpmailer/phpmailer": "^6.0",
         "guzzlehttp/guzzle": "^6.3",
         "webmozart/json": "^1.2",
-        "adldap2/adldap2": "^9.1"
+        "adldap2/adldap2": "^9.1",
+        "symfony/yaml": "^4.2"
     },
 	"autoload": {
 		"psr-4": {

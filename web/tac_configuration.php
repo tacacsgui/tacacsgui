@@ -61,12 +61,10 @@ require __DIR__ . '/templates/body_start.php';
 				<form id="testAndApplyForm">
 				<div class="row">
 				<div class="col-md-3">
-					<div class="form-group"><a class="btn btn-app bg-green" onclick="tgui_configEngine.testConf()">
-						<i class="fa fa-gears"></i> Test
-					</a>
-					<a class="btn btn-app bg-orange" onclick="tgui_configEngine.applyConf()">
-						<i class="fa fa-save"></i> Apply
-					</a></div>
+					<div class="form-group text-center">
+						<button class="btn btn-lg bg-green btn-flat ladda-button" data-style="slide-left" style="min-width:100px; margin: 5px;" onclick="tgui_configEngine.testConf(this).catch(function(error) {console.log(error);});"><span class="ladda-label"><i class="fa fa-gears"></i> Test</span></button>
+						<button class="btn btn-lg bg-orange btn-flat ladda-button" data-style="slide-left" style="min-width:100px; margin: 5px;" onclick="tgui_configEngine.applyConf(this)"><span class="ladda-label"><i class="fa fa-save"></i> Apply</span></button>
+					</div>
 					</br>
 					<div class="form-group icheck">
 						<input type="checkbox" class="from-control" name="tcfgSet" data-type="checkbox" data-default="check" data-pickup="true" checked> Make backup after applying
@@ -81,42 +79,44 @@ require __DIR__ . '/templates/body_start.php';
 						<!-- /.timeline-label -->
 						<!-- timeline item -->
 						<li class="testConfigurationItem">
-						<i class="fa fa-gears bg-gray testIcon"></i>
+							<i class="fa fa-circle-o-notch fa-spin" style="display:none"></i>
+							<i class="fa testIcon fa-gears bg-gray"></i>
 
-						<div class="timeline-item">
-							<!-- <span class="time"><i class="fa fa-clock-o"></i> 12:05</span> -->
+							<div class="timeline-item">
+								<!-- <span class="time"><i class="fa fa-clock-o"></i> 12:05</span> -->
 
-							<h3 class="timeline-header">Test configuration
-								<i class="fa fa-check text-green testSuccess" style="display:none"></i>
-								<i class="fa fa-times-circle text-red testError" style="display:none"></i>
-							</h3>
+								<h3 class="timeline-header">Test configuration
+									<i class="fas fa-circle-notch fa-spin"></i>
+									<i class="fa fa-check text-green testSuccess" style="display:none"></i>
+									<i class="fa fa-times-circle text-red testError" style="display:none"></i>
+								</h3>
 
-							<div class="timeline-body testItemBody">
-								Output of test will appear here...
+								<div class="timeline-body testItemBody">
+									Output of test will appear here...
+								</div>
+								<!--<div class="timeline-footer">
+								<a class="btn btn-primary btn-xs">Read more</a>
+								<a class="btn btn-danger btn-xs">Delete</a>
+								</div>-->
 							</div>
-							<!--<div class="timeline-footer">
-							<a class="btn btn-primary btn-xs">Read more</a>
-							<a class="btn btn-danger btn-xs">Delete</a>
-							</div>-->
-						</div>
 						</li>
 						<!-- END timeline item -->
 						<!-- timeline item -->
 						<li class="applyConfigurationItem">
-						<i class="fa fa-save bg-gray applyIcon"></i>
+							<i class="fa fa-save bg-gray applyIcon"></i>
 
-						<div class="timeline-item">
-							<!-- <span class="time"><i class="fa fa-clock-o"></i> 5 mins ago</span> -->
+							<div class="timeline-item">
+								<!-- <span class="time"><i class="fa fa-clock-o"></i> 5 mins ago</span> -->
 
-							<h3 class="timeline-header no-border">Apply and Save Configuration
-								<i class="fa fa-check text-green applySuccess" style="display:none"></i>
-								<i class="fa fa-times-circle text-red applyError" style="display:none"></i>
-							</h3>
-							<div class="timeline-body applyItemBody">
+								<h3 class="timeline-header no-border">Apply and Save Configuration
+									<i class="fa fa-check text-green applySuccess" style="display:none"></i>
+									<i class="fa fa-times-circle text-red applyError" style="display:none"></i>
+								</h3>
+								<div class="timeline-body applyItemBody">
 
-								Output of the save process will appear here...
+									Output of the save process will appear here...
+								</div>
 							</div>
-						</div>
 						</li>
 						<!-- END timeline item -->
 						<li class="endOfTimeine">

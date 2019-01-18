@@ -16,3 +16,13 @@ function root_access() {
   fi
   echo -n 1; return;
 }
+function date_(){
+  echo $(date +'%F %H:%M:%S')' ';
+  return;
+}
+function error_() {
+  if [[ ! -z $1 ]]; then
+    echo $1 >&2;
+  fi
+  exit 2;
+}

@@ -20,6 +20,7 @@
 		<ul class="sidebar-menu" data-widget="tree">
 
     <?php function menu_constructor($menu = [], $ACTIVE_MENU_ID = []){
+      if ( ! is_array($ACTIVE_MENU_ID) ) $ACTIVE_MENU_ID = [$ACTIVE_MENU_ID];
       if ( empty($menu) ) return false;
       foreach ($menu as $itemMenu) {
         if ($itemMenu['type'] == 1){

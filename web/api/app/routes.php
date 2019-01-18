@@ -46,6 +46,7 @@ $app->post('/settings/network/interface/', 'APISettingsCtrl:postInterfaceSetting
 $app->get('/settings/ha/', 'APISettingsCtrl:getHASettings');
 $app->post('/settings/ha/', 'APISettingsCtrl:postHASettings');
 $app->post('/settings/ha/status/', 'APISettingsCtrl:postHAStatus');
+$app->post('/settings/ha/slave/delete/', 'APISettingsCtrl:postHASlaveDel');
 #####################################################
 ###Tacacs Devices Routes#######################################
 $app->post('/tacacs/device/datatables/', 'TACDevicesCtrl:postDeviceDatatables');
@@ -129,7 +130,8 @@ $app->get('/tacacs/cmd/list/', 'TACCMDCtrl:getList');
 $app->post('/tacacs/cmd/csv/', 'TACCMDCtrl:postCsv');
 #####################################################
 ###Tacacs Configuration Generator Routes#######################################
-$app->get('/tacacs/config/generate/file/', 'TACConfigCtrl:getConfigGenFile');
+$app->get('/tacacs/config/apply/', 'TACConfigCtrl:getConfigGenFile');
+$app->post('/tacacs/config/apply/slave/', 'TACConfigCtrl:postApplySlaveCfg');
 $app->get('/tacacs/config/generate/', 'TACConfigCtrl:getConfigGen');
 $app->post('/tacacs/config/generate/', 'TACConfigCtrl:postConfigGen');
 $app->post('/tacacs/config/deamon/', 'TACConfigCtrl:postDeamonConfig');
@@ -215,6 +217,7 @@ $app->get('/download/log/', 'APIDownloadCtrl:getDownloadLog');
 
 ###API HA##################################################
 $app->post('/ha/sync/', 'APIHACtrl:postHASync');
+$app->post('/ha/info/', 'APIHACtrl:postHAInfo');
 $app->post('/ha/do/apply/', 'APIHACtrl:postHADoApplyConfig');
 $app->post('/ha/log/add/', 'APIHACtrl:postLoggingEvent');
 $app->post('/ha/update/check/', 'APIHACtrl:postCheckUpdate');

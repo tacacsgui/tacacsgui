@@ -6,6 +6,8 @@ use tgui\Controllers\APISettings\HA;
 use tgui\Models\APISettings;
 use tgui\Controllers\APIUpdate\APIUpdateCtrl;
 
+use tgui\Services\CMDRun\CMDRun as CMDRun;
+
 class APIHACtrl extends Controller
 {
   ####HA Sync####
@@ -26,6 +28,9 @@ class APIHACtrl extends Controller
       case 'sync-init':
         $data['dump'] = trim( shell_exec( TAC_ROOT_PATH . "/main.sh ha dump '". DB_USER ."' '". DB_PASSWORD."'") );
         $data['mysql'] = $ha->getMysqlParams();
+        //$data['slave_id_erase'] = $ha->delEmptySlaveId();
+        $data['slave_id'] = $ha->delEmptySlaveId()->makeSlaveId();
+        $data['master_cfg'] = $ha->getFullConfiguration();
         break;
       case 'dump':
         $path = TAC_ROOT_PATH . '/temp/';
@@ -43,13 +48,14 @@ class APIHACtrl extends Controller
         break;
       case 'final':
         $data['final'] = $ha->addNewSlave($allParams);
+        //$data['master_cfg'] = $ha->getFullConfiguration();
         $data['checksum'] = [];
-
+        $this->changeConfigurationFlag(['unset' => 0]);
         $tempArray = $this->db::select( 'CHECKSUM TABLE '. implode( ",", array_keys($this->tablesArr) ) );
         for ($i=0; $i < count($tempArray); $i++) {
           $data['checksum'][$tempArray[$i]->Table]=$tempArray[$i]->Checksum;
         }
-        $this->changeConfigurationFlag(['unset' => 0]);
+        $data['apiver'] = APIVER;
         break;
       default:
         return $res -> withStatus(403);// -> write('Access Restricted!');
@@ -60,15 +66,41 @@ class APIHACtrl extends Controller
     return $res -> withStatus(200) -> write(json_encode($data));
   }
   ####HA Sync####End
+  ####HA Info #####
+  public function postHAInfo( $req,$res )
+  {
+    //INITIAL CODE////START//
+    $data=array(
+      'remoteip' => $_SERVER['REMOTE_ADDR'],
+      'serverip' => $_SERVER['SERVER_ADDR'],
+      'apiver' => APIVER,
+      'time' => time(),
+      'access' => false);
+    $ha = new HA();
+    $allParams = $req->getParams();
+
+    if ( ! $this->checkServerAccess( $allParams, ( (HA::isSlave() ? 'slave' : 'master') ) ) ) return $res -> withStatus(403);// -> write('Access Restricted!');
+
+    $data['access'] = true;
+
+    $tempArray = $this->db::select( 'CHECKSUM TABLE '. implode( ",", array_keys($this->tablesArr) ) );
+    for ($i=0; $i < count($tempArray); $i++) {
+      $data['checksum'][$tempArray[$i]->Table]=$tempArray[$i]->Checksum;
+    }
+
+    return $res -> withStatus(200) -> write(json_encode($data));
+  }
+  ####HA Info ##### End
   public function postHADoApplyConfig($req,$res)
   {
     //INITIAL CODE////START//
     $data=array(
       'remoteip' => $_SERVER['REMOTE_ADDR'],
       'serverip' => $_SERVER['SERVER_ADDR'],
+      'apiver' => APIVER,
       'time' => time(),
       'access' => false);
-    $ha = new HA();
+    $ha = new HA;
     $allParams = $req->getParams();
     if ( ! $this->checkServerAccess( $allParams, 'slave' ) ) return $res -> withStatus(403); //-> write(json_encode($allParams));
     $data['access'] = true;
@@ -77,6 +109,10 @@ class APIHACtrl extends Controller
     for ($i=0; $i < count($tempArray); $i++) {
       $data['checksum'][$tempArray[$i]->Table]=$tempArray[$i]->Checksum;
     }
+    $data['slave_cfg'] = $ha->getFullData()['server'];
+    $data['db_check'] = ( $data['checksum'] == $allParams['checksum'] );
+    $data['api_check'] = ( APIVER == $allParams['api_version'] );
+    if ( ! $data['db_check'] OR  ! $data['api_check']) return $res -> withStatus(200) -> write(json_encode($data));
     $data['applyStatus'] = ['error' => true];
     $data['testStatus'] = ['error' => true];
     $data['version_check'] = (APIVER == $allParams['api_version']);

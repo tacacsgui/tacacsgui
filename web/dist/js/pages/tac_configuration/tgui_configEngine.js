@@ -127,22 +127,28 @@ var tgui_configEngine = {
     var errorIcon = $('.testConfigurationItem i.testError')
     var messageBody = $('.testConfigurationItem div.testItemBody')
 
-    mainIcon.removeClass('bg-green').removeClass('bg-red').addClass('bg-grey')
+    mainIcon.removeClass('bg-green bg-red bg-gray fa-gears fa-circle-o-notch fa-spin fa-exclamation-circle')
     successIcon.hide(); errorIcon.hide();
     messageBody.empty().append('Output of test will appear here...');
 
-    if (status == 'hide') return true;
-
+    if (status == 'loading') {
+      mainIcon.addClass('bg-gray fa-circle-o-notch fa-spin');
+      return true;
+    }
+    if (status == 'hide') {
+      mainIcon.addClass('bg-gray fa-gears');
+      return true;
+    }
     if (status == 'success')
     {
-      mainIcon.addClass('bg-green').removeClass('bg-red').removeClass('bg-grey')
+      mainIcon.addClass('bg-green fa-gears');
       successIcon.show();
       messageBody.empty().append(text);
       return true;
     }
     if (status == 'error')
     {
-      mainIcon.removeClass('bg-green').addClass('bg-red').removeClass('bg-grey')
+      mainIcon.addClass('bg-red fa-exclamation-circle')
       errorIcon.show();
       messageBody.empty().append('<pre>'+text+'</pre>');
       return false;
@@ -159,12 +165,19 @@ var tgui_configEngine = {
     var slaves = text.slaves || [];
     text = text.text || text;
 
-    mainIcon.removeClass('bg-green').removeClass('bg-red').addClass('bg-grey')
-    endofTimelineIcon.removeClass('bg-green fa-check').addClass('bg-grey fa-clock-o')
+    mainIcon.removeClass('bg-green bg-red bg-gray fa-save fa-circle-o-notch fa-spin fa-exclamation-circle')
+    endofTimelineIcon.removeClass('bg-green fa-check').addClass('bg-gray fa-clock-o')
     successIcon.hide(); errorIcon.hide();
     messageBody.empty().append('Output of the save process will appear here...');
 
-    if (status == 'hide') return true;
+    if (status == 'hide') {
+      mainIcon.addClass('bg-gray fa-save')
+      return true;
+    }
+    if (status == 'loading') {
+      mainIcon.addClass('bg-gray fa-circle-o-notch fa-spin')
+      return true;
+    }
     messageBody.empty().append('<pre>'+text+'</pre>');
     if (slaves.length)
     {
@@ -185,92 +198,196 @@ var tgui_configEngine = {
     }
     if (status == 'success')
     {
-      mainIcon.addClass('bg-green').removeClass('bg-red').removeClass('bg-grey')
+      mainIcon.addClass('bg-green fa-save')
       successIcon.show();
       //messageBody.empty().append(text);
-      endofTimelineIcon.removeClass('bg-grey fa-clock-o').addClass('bg-green fa-check')
+      endofTimelineIcon.removeClass('bg-gray fa-clock-o').addClass('bg-green fa-check')
       return true;
     }
     if (status == 'error')
     {
-      mainIcon.removeClass('bg-green').addClass('bg-red').removeClass('bg-grey')
+      mainIcon.addClass('bg-red fa-exclamation-circle')
       errorIcon.show();
       //messageBody.empty().append('<pre>'+text+'</pre>');
       return false;
     }
     return false;
   },
-  testConf: function(){
+  testConf: function(o){
     $('errorMessage').remove()
+    var l = (o) ? Ladda.create(o) : {start: function() {return false;}, stop: function() {return false;}};
+    l.start();
     var self = this;
-    this.testConfMethod('hide','false')
+    this.testConfMethod('loading','false')
     this.applyConfMethod('hide','false')
 
-    var ajaxProps = {
-      url: API_LINK+"tacacs/config/generate/file/",
-      type: 'GET',
-      data: {contentType: 'json', confTest: "on",}
-    };//ajaxProps END
+    return new Promise(
+      function (resolve, reject) {
+        var ajaxProps = {
+          url: API_LINK+"tacacs/config/apply/",
+          type: 'GET',
+          data: {contentType: 'json', confTest: "on",}
+        };//ajaxProps END
 
-    ajaxRequest.send(ajaxProps).then(function(resp) {
-      if (!resp.confTest.error)
-      {
-        self.testConfMethod('success',resp.confTest.message)
-        return;
-      }
-      var someErrorText = (resp.confTest.message) ? resp.confTest.message : 'Unknown error :(';
-      self.applyConfMethod('error',someErrorText)
-      if (resp.confTest.errorLine != undefined) {
-        $('line#line_num_'+resp.confTest.errorLine).append('<errorMessage><i class="fa  fa-exclamation-triangle"></i> Error here!</errorMessage>')
-        $('errorMessage').addClass('shakeIt');
-      }
-    }).fail(function(err){
-      tgui_error.getStatus(err, ajaxProps)
-    })
+        ajaxRequest.send(ajaxProps).then(function(resp) {
+          l.stop();
+          if (!resp.confTest.error)
+          {
+            self.testConfMethod('success',resp.confTest.message)
+            resolve(true);
+            return;
+          }
+          var someErrorText = (resp.confTest.message) ? resp.confTest.message : 'Unknown error :(';
+          //self.applyConfMethod('error',someErrorText)
+          self.testConfMethod('error',someErrorText)
+          if (resp.confTest.errorLine != undefined) {
+            $('line#line_num_'+resp.confTest.errorLine).append('<errorMessage><i class="fa  fa-exclamation-triangle"></i> Error here!</errorMessage>')
+            $('errorMessage').addClass('shakeIt');
+          }
+          reject(true);
+        }).fail(function(err){
+          reject(true);
+          tgui_error.getStatus(err, ajaxProps)
+        })
+      })
 
   },
-  applyConf: function() {
+  applyConf: function(o) {
     $('errorMessage').remove()
     self = this;
+    var l = (o) ? Ladda.create(o) : {start: function() {return false;}, stop: function() {return false;}};
+    l.start();
     this.testConfMethod('hide','false')
     this.applyConfMethod('hide','false')
 
-    var ajaxProps = {
-      url: API_LINK+"tacacs/config/generate/file/",
-      type: 'GET',
-      data: {
-        contentType: 'json',
-        confTest: "on",
-        confSave: "yes",
-        doBackup: $('input[name="tcfgSet"]').prop('checked')
+    Promise.resolve( self.testConf() )
+      .then( function(){
+        self.applyConfMethod('loading','false')
+        Promise.resolve( self.applyConfigMain() )
+        .then( function(resp){
+          console.log(resp, 'success');
+          if (resp.ha_role == "master") {
+            $('.applyConfigurationItem div.applyItemBody').append('</hr><h4>High Availability status: <u>Master</u></h4>');
+            if ( jQuery.isEmptyObject(resp.server_list.slave) ){
+              $('.applyConfigurationItem div.applyItemBody').append('<div class="callout callout-warning"><h4><i class="icon fa fa-warning"></i>There is no connected slave!</h4></div>');
+              l.stop();
+              return;
+            } ///no slaves. Exit!
+            console.log('There are slaves.');
+            self.slaveTable(resp.server_list.slave);
+          }
+          l.stop();
+        })
+        .catch( function(resp){
+          console.log(resp, 'bad');
+          l.stop();
+        })
+        //
+      })
+      .catch(function() {
+        l.stop();
+      });
+
+
+
+  },
+  applyConfigMain: function() {
+    return new Promise(
+      function (resolve, reject) {
+        var ajaxProps = {
+          url: API_LINK+"tacacs/config/apply/",
+          type: 'GET',
+          data: {
+            contentType: 'json',
+            confTest: "on",
+            confSave: "yes",
+            doBackup: $('input[name="tcfgSet"]').prop('checked')
+          }
+        };//ajaxProps END
+
+        ajaxRequest.send(ajaxProps).then(function(resp) {
+
+          if (resp.applyStatus.error)
+          {
+            reject(resp)
+            self.applyConfMethod('error',resp.applyStatus.message)
+            return;
+          }
+
+          var params = { text: resp.applyStatus.message };
+
+          //if (resp.server_list_response) params.slaves = resp.server_list_response;
+          //resp.server_list.slave = [];
+          //onsole.log(resp);
+          resolve(resp);
+          self.applyConfMethod('success', params)
+          tgui_status.changeStatus(0)
+        }).fail(function(err){
+          tgui_error.getStatus(err, ajaxProps)
+        })
       }
+    )//end of new promise
+  },//end of method
+  slaveTable: function(slaves) {
+    slaves = slaves || {}
+    var table = "</hr>"+'<div class="table-responsive"><table class="table table-striped slave-list" style="font-size:18px;"><thead><tr><td>ID</td><td>IP</td><td>DB</td><td>API</td><td>Apply</td></tr></thead><tbody>';
+    for (var slave in slaves) {
+      if (slaves.hasOwnProperty(slave)) {
+        console.log(slave, slaves[slave]);
+        table += '<tr class="slave_'+ slave +'"><td>'+ slave +'</td> <td class="ipddr">'+ slaves[slave]['ipaddr'] +'</i></td> <td class="db_check"><i class="fa fa-thumbs-o-down fa-spin"></i></td> <td class="api_check"><i class="fa fa-thumbs-o-down fa-spin"></i></td> <td class="apply_check"><i class="fa fa-thumbs-o-down fa-spin"></i></td></tr>'
+      }
+    }
+    $('.applyConfigurationItem div.applyItemBody').append(table + '</tbody></table></div>');
+    for (var slave in slaves) {
+      if (slaves.hasOwnProperty(slave)) {
+        this.applyConfigSlave(slave);
+      }
+    }
+  },
+  applyConfigSlave: function(sid){
+    var ajaxProps = {
+      url: API_LINK+"tacacs/config/apply/slave/",
+      data: { sid: sid }
     };//ajaxProps END
 
     ajaxRequest.send(ajaxProps).then(function(resp) {
-      if (resp.confTest.error)
-      {
-        self.testConfMethod('error',resp.confTest.message)
-        if (resp.confTest.errorLine != undefined) {
-          $('line#line_num_'+resp.confTest.errorLine).append('<errorMessage><i class="fa  fa-exclamation-triangle"></i> Error here!</errorMessage>')
-          $('errorMessage').addClass('shakeIt');
-        }
-        return;
+      console.log(resp);
+      if ( ! resp.server_response.responce ){
+
       }
+      var s_resp = resp.server_response.responce;
+      var table = 'table.slave-list';
+      var sid = s_resp.slave_cfg.slave_id;
+      var tr = table + ' tr.slave_'+sid+' '
+      var db_check = tr +' td.db_check i';
+      var db_check = tr +' td.db_check i';
+      var api_check = tr +' td.api_check i';
+      var apply_check = tr +' td.apply_check i';
 
-      self.testConfMethod('success',resp.confTest.message)
-
-      if (resp.applyStatus.error)
-      {
-        self.applyConfMethod('error',resp.applyStatus.message)
-        return;
+      if ( s_resp.db_check ) $(db_check).removeClass('fa-thumbs-o-down fa-spin').addClass('fa-thumbs-o-up text-success');
+      else $(db_check).removeClass('fa-spin').addClass('text-danger');
+      if ( s_resp.api_check ) $(api_check).removeClass('fa-thumbs-o-down fa-spin').addClass('fa-thumbs-o-up text-success');
+      else $(api_check).removeClass('fa-spin').addClass('text-danger');
+      if ( !s_resp.db_check || !s_resp.api_check ) {
+        $(apply_check).removeClass('fa-spin').addClass('text-warning');
+        var message = 'Unknown Error! :( ';
+        if ( !s_resp.db_check ) message = 'Database does not synced! Sorry.';
+        if ( !s_resp.api_check ) message = 'Slave use different api version with master! Sorry.'+"\n Master version: "+resp.info.version.APIVER+"\n Slave version: "+s_resp.apiver;
+        $('<tr class="bg-danger"><td colspan="5">Message from Slave: </p><pre>'+message+'</pre></td></tr>').insertAfter( $(tr) );
+        return false;
       }
-
-      var params = { text: resp.applyStatus.message };
-
-      if (resp.server_list_response) params.slaves = resp.server_list_response;
-      console.log(params);
-      self.applyConfMethod('success', params)
-      tgui_status.changeStatus(0)
+      if ( s_resp.applyStatus && !s_resp.applyStatus.error ) {
+        $(apply_check).removeClass('fa-thumbs-o-down fa-spin').addClass('fa-thumbs-o-up text-success');
+        $(tr).addClass('bg-success');
+        $('<tr class="bg-success"><td colspan="5">Message from Slave: </p><pre>'+s_resp.applyStatus.message+'</pre></td></tr>').insertAfter( $(tr) );
+        return true;
+      }
+      var message = 'Unknown Error! :( ';
+      if ( s_resp.applyStatus && s_resp.applyStatus.message ){
+        message = s_resp.applyStatus.message;
+      }
+      $('<tr class="bg-danger"><td colspan="5">Message from Slave: </p><pre>'+message+'</pre></td></tr>').insertAfter( $(tr) );
+      //console.log(resp);
     }).fail(function(err){
       tgui_error.getStatus(err, ajaxProps)
     })

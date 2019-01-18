@@ -486,24 +486,23 @@ public function postDeviceGroupCsv($req,$res)
 		if ($req->getParam('byId') != null){
 			if ($req->getParam('byId') == 0) {
 				$data['item'] = TACDeviceGrps::select(['id','name AS text','key','enable','default_flag'])->
-				where([['default_flag', '=', 1]])->
-				first();
+				where([['default_flag', '=', 1]])->first();
 				//$data['item']['text'] = $data['item']['name'];
 				$data['item']['key'] = ($data['item']['key'] != '') ? true : false;
 				$data['item']['enable'] = ($data['item']['enable'] != '') ? true : false;
 				$data['item']['default_flag'] = ($data['item']['default_flag'] == 1) ? true : false;
 				return $res -> withStatus(200) -> write(json_encode($data));
 			}
-			$id = $req->getParam('byId');
 
-				$data['item'] = ( is_array($id) ) ? TACDeviceGrps::select(['id','name AS text'])->whereIn('id', $id)->get()
-				:
-				TACDeviceGrps::select(['id','name AS text','key','enable','default_flag'])->where('id', $id)->first();
-				if ( is_array($id) ) return $res -> withStatus(200) -> write(json_encode($data));
-				$data['item']['text'] = $data['item']['name'];
-				$data['item']['key'] = ($data['item']['key'] != '') ? true : false;
-				$data['item']['enable'] = ($data['item']['enable'] != '') ? true : false;
-				$data['item']['default_flag'] = ($data['item']['default_flag'] == 1) ? true : false;
+			$id = $req->getParam('byId');
+			$data['item'] = ( is_array($id) ) ? TACDeviceGrps::select(['id','name AS text'])->whereIn('id', $id)->get()
+			:
+			TACDeviceGrps::select(['id','name AS text','key','enable','default_flag'])->where('id', $id)->first();
+			if ( is_array($id) ) return $res -> withStatus(200) -> write(json_encode($data));
+			//$data['item']['text'] = $data['item']['name'];
+			$data['item']['key'] = ($data['item']['key'] != '') ? true : false;
+			$data['item']['enable'] = ($data['item']['enable'] != '') ? true : false;
+			$data['item']['default_flag'] = ($data['item']['default_flag'] == 1) ? true : false;
 
 			return $res -> withStatus(200) -> write(json_encode($data));
 		}

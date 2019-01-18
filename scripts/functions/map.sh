@@ -13,3 +13,4 @@ FUN_HA="$ROOT_PATH/scripts/functions/fun_ha.sh";
 # NETWORK="$PWD/inc/interfaces.sh";
 # NET_SCRIPT_PATH="inc/interfaces.sh";
 HA_SCRIPT_PATH="$ROOT_PATH/scripts/ha.sh";
+CMDRUN="$ROOT_PATH/scripts/services/cmdrun.sh"

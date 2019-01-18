@@ -24,7 +24,14 @@ case $1 in
 	;;
 	ha)
 		#echo "${@:2}";
-		$HA_SCRIPT_PATH $(printf "%s\n" "${@:2}");
+		$CMDRUN $HA_SCRIPT_PATH $(printf "%s\n" "${@:2}");
+	;;
+	run)
+		case $2 in
+			cmd)
+				$CMDRUN $(printf "%s\n" "${@:3}");
+			;;
+		esac
 	;;
 	check)
 		case $2 in

@@ -697,4 +697,40 @@ public function postHAStatus($req,$res)
   return $res -> withStatus(200) -> write(json_encode($data));
 }
 ####High Availability SETTINGS######End
+
+public function postHASlaveDel($req,$res)
+{
+  //INITIAL CODE////START//
+  $data=array();
+  $data=$this->initialData([
+    'type' => 'get',
+    'object' => 'ha',
+    'action' => 'slave delete',
+  ]);
+  #check error#
+  if ($_SESSION['error']['status']){
+    $data['error']=$_SESSION['error'];
+    return $res -> withStatus(401) -> write(json_encode($data));
+  }
+  //INITIAL CODE////END//
+  //CHECK ACCESS TO THAT FUNCTION//START//
+  if(!$this->checkAccess(1, true))
+  {
+    return $res -> withStatus(403) -> write(json_encode($data));
+  }
+  //CHECK ACCESS TO THAT FUNCTION//END//
+  $validation = $this->validator->validate($req, [
+    'sid' => v::notEmpty()->numeric(),
+  ]);
+
+  if ($validation->failed()){
+    $data['error']['status']=true;
+    $data['status'] = false;
+    $data['error']['validation']=$validation->error_messages;
+    return $res -> withStatus(200) -> write(json_encode($data));
+  }
+  $data['status'] = HA::delSlave($req->getParam('sid'));
+  return $res -> withStatus(200) -> write(json_encode($data));
+}
+####High Availability SETTINGS######End
 }

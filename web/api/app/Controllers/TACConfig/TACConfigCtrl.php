@@ -265,14 +265,25 @@ class TACConfigCtrl extends Controller
 			$logEntry = array('action' => 'tacacs test conf', 'obj_name' => 'tacacs configuration', 'section' => 'tacacs configuration', 'message' => 501);
 			$this->APILoggingCtrl->makeLogEntry($logEntry);
 			///LOGGING//end//
-
+			$data['server_list'] = [];
+			$data['server_list_response'] = [];
+			if ( HA::isThereSlaves() ){
+				$ha = new HA(['capsule' => false ]);
+				$data['server_list'] = $ha->getServerList();
+				// $data['checksum'] = [];
+				// $tempArray = $this->db::select( 'CHECKSUM TABLE '. implode( ",", array_keys($this->tablesArr) ) );
+		    // for ($i=0; $i < count($tempArray); $i++) {
+		    //   $data['checksum'][$tempArray[$i]->Table]=$tempArray[$i]->Checksum;
+		    // }
+				// $data['server_list_response'] = $ha->sendConfigurationApply([ 'checksum'=>$data['checksum']]);
+			}
 			//$newSlaveAvailable = HA::isThereNewSlaves();
-			$data['unstoppable'] = $unstoppable = ( HA::isMAster() AND HA::unconfiguredSlaves() );
+			//$data['unstoppable'] = $unstoppable = ( HA::isMAster() AND HA::unconfiguredSlaves() );
 			//$data['test01']= $newSlaveAvailable;
 			$doBackup=$req->getParam('doBackup');
-			if ( $doBackup == 'true' OR $unstoppable ) {
+		if ( $doBackup == 'true' /*OR $unstoppable*/ ) {
 				$data['backup'] = $doBackup = $this->APIBackupCtrl->makeBackup(['make' => 'tcfg']);
-				if ( !$doBackup['status'] AND ! $unstoppable ) {
+			if ( !$doBackup['status'] /*AND ! $unstoppable */) {
 					$data['applyStatus'] = ['error' => true, 'message' => $doBackup['message'], 'errorLine' => 0];
 					return $res -> withStatus(200) -> withHeader('Content-type', $contentTypeOutput) -> write(json_encode($data));
 				}
@@ -285,12 +296,12 @@ class TACConfigCtrl extends Controller
 			if ( HA::isThereSlaves() ){
 				$ha = new HA(['capsule' => false ]);
 				$data['server_list'] = $ha->getServerList();
-				$data['checksum'] = [];
-				$tempArray = $this->db::select( 'CHECKSUM TABLE '. implode( ",", array_keys($this->tablesArr) ) );
-		    for ($i=0; $i < count($tempArray); $i++) {
-		      $data['checksum'][$tempArray[$i]->Table]=$tempArray[$i]->Checksum;
-		    }
-				$data['server_list_response'] = $ha->sendConfigurationApply([ 'checksum'=>$data['checksum']]);
+				// $data['checksum'] = [];
+				// $tempArray = $this->db::select( 'CHECKSUM TABLE '. implode( ",", array_keys($this->tablesArr) ) );
+		    // for ($i=0; $i < count($tempArray); $i++) {
+		    //   $data['checksum'][$tempArray[$i]->Table]=$tempArray[$i]->Checksum;
+		    // }
+				// $data['server_list_response'] = $ha->sendConfigurationApply([ 'checksum'=>$data['checksum']]);
 			}
 
 			///LOGGING//start//
@@ -326,6 +337,46 @@ class TACConfigCtrl extends Controller
 		}
 	}
 	//////////////CREATE CONFIGURATION////END//
+	public function postApplySlaveCfg($req,$res)
+	{
+		//INITIAL CODE////START//
+		$data=array();
+		$data=$this->initialData([
+			'type' => 'post',
+			'object' => 'config',
+			'action' => 'slave apply',
+		]);
+		#check error#
+		if ($_SESSION['error']['status']){
+			$data['error']=$_SESSION['error'];
+			return $res -> withStatus(401) -> write(json_encode($data));
+		}
+		//INITIAL CODE////END//
+
+		//CHECK SHOULD I STOP THIS?//START//
+		if( $this->shouldIStopThis() )
+		{
+			$data['error'] = $this->shouldIStopThis();
+			return $res -> withStatus(400) -> write(json_encode($data));
+		}
+		//CHECK SHOULD I STOP THIS?//END//
+		//CHECK ACCESS TO THAT FUNCTION//START//
+		if(!$this->checkAccess(6))
+		{
+			return $res -> withStatus(403) -> write(json_encode($data));
+		}
+		//CHECK ACCESS TO THAT FUNCTION//END//
+
+		$ha = new HA();
+		$data['checksum'] = [];
+		$tempArray = $this->db::select( 'CHECKSUM TABLE '. implode( ",", array_keys($this->tablesArr) ) );
+		for ($i=0; $i < count($tempArray); $i++) {
+		  $data['checksum'][$tempArray[$i]->Table]=$tempArray[$i]->Checksum;
+		}
+		$data['server_response'] = $ha->sendConfigurationApply([ 'checksum'=>$data['checksum'], 'sid' => $req->getParam('sid')]);
+
+		return $res -> withStatus(200) -> write(json_encode($data));
+	}
 	public function postConfigGen($req,$res)
 	{
 		//INITIAL CODE////START//

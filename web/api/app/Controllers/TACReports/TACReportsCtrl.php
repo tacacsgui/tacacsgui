@@ -4,6 +4,8 @@ namespace tgui\Controllers\TACReports;
 
 use Illuminate\Support\Facades\DB as DB;
 
+use tgui\Services\CMDRun\CMDRun as CMDRun;
+
 use tgui\Models\TACDevices;
 use tgui\Models\TACUsers;
 use tgui\Models\Accounting;
@@ -32,13 +34,6 @@ class TACReportsCtrl extends Controller
 		}
 		//INITIAL CODE////END//
 
-		//$data['22']=Authentication::select()->distinct(['action'])->get()->toArray();
-
-		// $data['numberOfDevices']=TACDevices::select()->get()->count();
-		// $data['numberOfDevicesDisables']=TACDevices::select()->where([['disabled','=','1']])->get()->count();
-		// $data['numberOfUsers']=TACUsers::select()->get()->count();
-		// $data['numberOfUsersDisables']=TACUsers::select()->where([['disabled','=','1']])->get()->count();
-		//$data['update_check'] = APISettings::find(1)->update_signin;
 		$weekTimeRange=array(
 			date('Y-m-d H:i:s', strtotime( trim( shell_exec(TAC_ROOT_PATH . "/main.sh ntp get-time") ))-(60*60*24*7+1)),
 			trim( shell_exec(TAC_ROOT_PATH . "/main.sh ntp get-time") )
@@ -72,25 +67,9 @@ class TACReportsCtrl extends Controller
 			$data['error']=$_SESSION['error'];
 			return $res -> withStatus(401) -> write(json_encode($data));
 		}
-		$data['server_time'] = trim( shell_exec(TAC_ROOT_PATH . "/main.sh ntp get-time") );
 		$data['time_range'] = [];
-		$data['charts'] = [
-			'authorization' => [
-				'data' => [
-					'success' => [],
-					'fail' => []
-				]
-			],
-			'authentication' => [
-				'data' => [
-					'success' => [],
-					'fail' => []
-				]
-			],
 
-		];
-
-		$now = $startDate = date('Y-m-d', strtotime( trim( shell_exec(TAC_ROOT_PATH . "/main.sh ntp get-time") ) ) );
+		$now = $startDate = date('Y-m-d', strtotime( trim( trim( CMDRun::init()->setCmd(MAINSCRIPT)->setAttr(['ntp','get-time'])->get() ) ) ) );
 		$days = 7;
 		$dateArray = [];
 		for ($i=0; $i < $days ; $i++) {
@@ -111,7 +90,7 @@ class TACReportsCtrl extends Controller
 			"select date_,if(action='permit',count,0) autho_s,if(action='deny',count,0) autho_f from".
 			"(select date_format(date,'%Y-%m-%d') date_,action, count(*) count from tgui_log.tac_log_authorization where date between '".$startDate."' and '".$now."' group by date_,action) autho".
 			") test group by date_ ") );
-		
+
 		$data['authe']['arr'] = [];
 		$data['autho']['arr'] = [];
 		for ($i=0; $i < count($data['authe']['db']); $i++) {
@@ -178,15 +157,6 @@ class TACReportsCtrl extends Controller
 		if ($allParams['usersReload']){
 			//////////Top users///start//
 			$data['topUsers'] = Authentication::select('username as label', $this->db::raw('COUNT(1) as count') )->where('action', 'LIKE', '%succeeded')->whereBetween('date', $weekTimeRange)->groupBy('username')->orderBy('count','desc')->limit($allParams['users'])->get();
-			/*$activeUserslist=Authentication::where('action', 'NOT LIKE', '%fail%')->whereBetween('date', $weekTimeRange)->distinct()->limit($allParams['users'])->get(['username']);
-			$data['topUsers']=array();
-			for ($i=0; $i < count($activeUserslist); $i++)
-			{
-				if ($activeUserslist[$i]['username']=='') continue;
-				$data['topUsers'][$activeUserslist[$i]['username']]=Authentication::whereBetween('date', $weekTimeRange)->where([['username','=',$activeUserslist[$i]['username']]])->get()->count();
-			}
-			//arsort($data['topUsers']);
-			$data['topUsers'] = $data['topUsers'];*/
 			//////////Top users///end//
 		}
 		//////////////////////////////
@@ -194,25 +164,6 @@ class TACReportsCtrl extends Controller
 		if ($allParams['devicesReload']){
 
 			$data['topDevices'] = $this->db::select( $this->db::raw("select IFNULL(dev.name, log.nas) label, log.count from (select nas, COUNT(1) as count from `tgui_log`.`tac_log_authentication`  where `tac_log_authentication`.`action` LIKE '%succeeded' and `tac_log_authentication`.`date` between '".$weekTimeRange[0]."' and '".$weekTimeRange[1]."' group by `nas` order by count desc limit ".$allParams['users'].") as log left join `tgui`.`tac_devices` as `dev` on log.`nas` = `dev`.`ipaddr` order by log.count desc;") );
-			//$data['topDevices'] = Authentication::select( $this->db::raw('IFNULL(dev.name, nas) label'), $this->db::raw('COUNT(1) as count') )->leftJoin('tgui.tac_devices', 'tac_log_authentication.nas = tgui.tac_devices.ipaddr')->where('tac_log_authentication.action', 'NOT LIKE', '%fail%')->whereBetween('tac_log_authentication.date', $weekTimeRange)->limit($allParams['users'])->groupBy('label')->get();
-			// $activeDeviceslist=Authentication::whereBetween('date', $weekTimeRange)->distinct()->limit($allParams['devices'])->get(['NAS']);
-			// $data['activeDevices']=array();
-			// for ($i=0; $i < count($activeDeviceslist); $i++)
-			// {
-			// 	if ($activeDeviceslist[$i]['NAS']=='') continue;
-			// 	$data['activeDevices'][$activeDeviceslist[$i]['NAS']]=Authentication::whereBetween('date', $weekTimeRange)->where([['NAS','=',$activeDeviceslist[$i]['NAS']]])->get()->count();
-			// }
-			// arsort($data['activeDevices']);
-			// $data['topDevices'] = $data['activeDevices'];
-			// $data['nameOfDevices']=TACDevices::whereIn('ipaddr',array_keys($data['topDevices']))->get(['name', 'ipaddr']);
-			// $data['topDevicesNamed']=array();
-			// foreach ($data['topDevices'] as $ipaddress => $numberOfAuth)
-			// {
-			// 	for ($y=0; $y < count($data['nameOfDevices']);$y++)
-			// 	{
-			// 		if ($data['nameOfDevices'][$y]['ipaddr']==$ipaddress) $data['topDevicesNamed'][$data['nameOfDevices'][$y]['name']] = $numberOfAuth;
-			// 	}
-			// }
 		}
 		//////////Top Devices///end//
 		return $res -> withStatus(200) -> write(json_encode($data));

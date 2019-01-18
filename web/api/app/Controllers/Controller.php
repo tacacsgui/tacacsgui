@@ -139,7 +139,7 @@ class Controller
 	}
 	////////////////////////////////////////
 	////////////////////////////////////////
-  public function serverTime()
+  public static function serverTime()
   {
   	return trim( shell_exec(TAC_ROOT_PATH . "/main.sh ntp get-time") );
   }

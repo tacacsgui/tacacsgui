@@ -14,6 +14,7 @@
           </select>
           <input type="hidden" name="role_native" value="">
           <input type="hidden" name="rootpw" value="" data-type="input" data-pickup="true">
+          <input type="hidden" name="slave_id" value="" data-type="input" data-pickup="true">
         </div>
       </div>
       <div class="ha_conf ha_conf_master">
@@ -84,7 +85,7 @@
     </form>
     <div class="row ha_save_log_div">
       <div class="col-xs-12">
-        <button class="btn btn-flat btn-warning" onclick="tgui_apiHA.status()">Status</button>
+        <button class="btn btn-flat btn-warning ladda-button" data-style="expand-right" onclick="tgui_apiHA.status(this)"><span class="ladda-label">Status</span></button>
         <button class="btn btn-flat btn-success" onclick="tgui_apiHA.save()">Save Settings</button>
       </div>
     </div>
