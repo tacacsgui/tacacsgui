@@ -6,6 +6,8 @@ use tgui\Models\APINotification;
 use tgui\Models\PostLog;
 use Respect\Validation\Validator as v;
 
+use tgui\Services\CMDRun\CMDRun as CMDRun;
+
 class APINotificationCtrl extends Controller
 {
   public function getSettings($req,$res)
@@ -80,6 +82,14 @@ class APINotificationCtrl extends Controller
     if ( isset($allParams['bad_authorization_email_list']) ) $allParams['bad_authorization_email_list'] = implode('; ',$allParams['bad_authorization_email_list']);
 
     $data['save'] = APINotification::where([['id','=',1]])->update($allParams);
+
+    if ( $data['save'] ) {
+      try {
+        $data['del_settings'] = CMDRun::init()->setSudo()->setCmd(MAINSCRIPT)->setAttr(['delete', 'temp-file', 'notification-settings'])->get();
+      } catch (\Exception $e) {
+        $data['del_settings'] = $e->getMessage();
+      }
+    }
 
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}

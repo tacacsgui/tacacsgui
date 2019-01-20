@@ -56,7 +56,7 @@ var tgui_apiHA = {
         if (list.slave.hasOwnProperty(sid)) {
           el = list.slave[sid];
           var button = '<td><button class="btn btn-flat btn-sm btn-danger ladda-button" data-style="expand-right" onclick="tgui_apiHA.slave.del(this, '+"'"+el.slave_id+'\')"><span class="ladda-label">Del</span></button></td>';
-          $('table[name="ha_list"]').append('<tr><td>Slave ('+el.slave_id+')</td><td>' + el.ipaddr + '</td><td>' + el.location + '</td><td>' + el.status + '</td><td>' + el.lastchk + '</td>'+ ( (role == 'master') ? button : '' ) +'</tr>');
+          $('table[name="ha_list"]').append('<tr><td>Slave ('+sid+')</td><td>' + el.ipaddr + '</td><td>' + el.location + '</td><td>' + el.status + '</td><td>' + el.lastchk + '</td>'+ ( (role == 'master') ? button : '' ) +'</tr>');
         }
       }
     }

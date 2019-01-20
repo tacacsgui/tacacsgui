@@ -69,13 +69,13 @@ require __DIR__ . '/templates/body_start.php';
 		<div class="form-group">
 			<p><label>System Activation Status:</label> <span class="activated"></span></p>
 			<label>Update Key</label>
-			<!-- <div class="input-group margin"> -->
-				<!-- <span class="input-group-addon activated"></span> -->
-        <textarea type="text" class="form-control" name="update_key" data-type="input" data-default="" data-pickup="true" disabled></textarea>
-        <!-- <span class="input-group-btn">
-          <button type="button" class="btn btn-warning btn-flat" onclick="tgui_apiUpdate.newKey()">Generate New</button>
-        </span> -->
-			<!-- </div> -->
+			<div class="input-group margin">
+				<span class="input-group-btn">
+					<button type="button" class="btn btn-primary btn-flat" onclick="tgui_apiUpdate.copyKey()">Copy Key</button>
+				</span>
+        <input type="text" class="form-control" name="update_key" data-type="input" data-default="" data-pickup="true" disabled></input>
+      </div>
+
 			<p class="help-block"> add that key to your <a href="https://tacacsgui.com/profile/" target="_blank">tacacsgui.com</a> profile</p>
 		</div>
 	</div>
@@ -105,7 +105,7 @@ require __DIR__ . '/templates/body_start.php';
 	</div>
 	<!-- /.box-body -->
 
-	<div class="box-footer upgrade text-center" style="display:none">
+<div class="box-footer upgrade text-center" style="display:none">
 		<button class="btn btn-success btn-flat" onclick="tgui_apiUpdate.upgrade()">Update</button>
 	</div>
 	<div class="overlay update_output" style="display:none;">
@@ -114,17 +114,9 @@ require __DIR__ . '/templates/body_start.php';
 </div>
 <div class="box box-solid ha_slave_update" style="display:none;">
 	<div class="box-body">
-		<h4>List of Slaves</h4>
+		<h4>High Availability role: <u>Master</u>. List of Slaves</h4>
 		<div class="table-responsive">
-			<table class="table table-striped ha_slave_table">
-				<tr>
-					<td>IP Address</td>
-					<td>API Version</td>
-					<td>Last Check</td>
-					<td>Status</td>
-					<td>Action</td>
-				</tr>
-			</table>
+			
 		</div>
 	</div>
 </div>

@@ -22,15 +22,28 @@ var tgui_apiUpdate = {
           $('[name="update_signin"]').on('ifChanged', function(){
             self.autoCheck()
           })
-          if(resp.slaves && resp.slaves.length){
-            console.log(resp.slaves);
-            for (var i = 0, len = resp.slaves.length; i < len; i++) {
-              var slave = resp.slaves[i];
-              var slave_info = {id: i, ip: slave.ipaddr, unique_id:slave.unique_id };
-              $('table.ha_slave_table').append('<tr><td>'+slave.ipaddr+'</td><td>'+slave.api_version+'</td><td>'+slave.lastchk+'</td><td>'+slave.status+'</td><td><a class="btn btn-flat btn-info btn-sm" onclick="tgui_apiUpdate.getInfoSlave(this)" data-slave_id="'+i+'" data-ip="'+slave.ipaddr+'" data-unique_id="'+slave.unique_id+'">Get Info</a></td></tr>')
-            }
+          if (resp.ha_role == 'master') {
             $('div.ha_slave_update').show();
+            //$('table.ha_slave_table').remove()
+            $('div.ha_slave_update div.table-responsive').empty();
+            console.log(jQuery.isEmptyObject(resp.slaves),resp.slaves);
+            if ( jQuery.isEmptyObject(resp.slaves) ){
+              $('div.ha_slave_update div.table-responsive').append('<div class="alert alert-warning alert-dismissible"><h4><i class="icon fa fa-warning"></i> There are no slaves!</h4></div>');
+              //l.stop();
+              return;
+            } ///no slaves. Exit!
+            $('div.ha_slave_update div.table-responsive').append('<table class="table table-striped ha_slave_table"><tr><td>IP Address</td><td>API Version</td><td>Last Check</td><td>Status</td><td>Action</td></tr></table>');
+            for (var sid in resp.slaves) {
+              if (resp.slaves.hasOwnProperty(sid)) {
+                var slave = resp.slaves[sid];
+                var slave_info = {id: sid, ip: slave.ipaddr, unique_id:slave.unique_id };
+                $('table.ha_slave_table').append('<tr><td>'+slave.ipaddr+' (Slave ID: '+sid+')</td><td>'+slave.api_version+'</td><td>'+slave.lastchk+'</td><td>'+slave.status+'</td><td><a class="btn btn-flat btn-info btn-sm" onclick="tgui_apiUpdate.getInfoSlave(this)" data-slave_id="'+sid+'" data-ip="'+slave.ipaddr+'" data-unique_id="'+slave.unique_id+'">Get Info</a></td></tr>')
+              }
+            }
           }
+
+          //resolve(true);
+
         }).fail(function(err){
           tgui_error.getStatus(err, ajaxProps)
         })
@@ -58,6 +71,14 @@ var tgui_apiUpdate = {
     }).fail(function(err){
       tgui_error.getStatus(err, ajaxProps)
     })
+  },
+  copyKey: function(){
+    var $temp = $("<input>");
+    $("body").append($temp);
+    $temp.val($('[name="update_key"]').val()).select();
+    document.execCommand("copy");
+    $temp.remove();
+    tgui_error.local.show({type:'success', message: "You have copied update key"})
   },
   // newKey: function() {
   //   var self = this;

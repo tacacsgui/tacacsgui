@@ -179,23 +179,23 @@ var tgui_configEngine = {
       return true;
     }
     messageBody.empty().append('<pre>'+text+'</pre>');
-    if (slaves.length)
-    {
-      console.log(slaves);
-      messageBody.append('<h4>Apply Configuration for Slave</h4><table class="table table-striped tableSlavesHa"><tr><td>Address</td><td>Status</td><td>API Check</td><td>DB Check</td><td>Apply Status</td></tr></table>');
-      for (var i = 0, len = slaves.length; i < len; i++) {
-        slaves[i].response = slaves[i].response || [];
-        if ( ! slaves[i].response[0] ) slaves[i].response[0] = { applyStatus: {} };
-        if ( ! slaves[i].response[0].applyStatus ) slaves[i].response[0].applyStatus = { error: undefined };
-        $('table.tableSlavesHa').append(
-          '<tr><td>'+slaves[i].ip+'</td><td>'+
-          ((slaves[i].response[1]) ? slaves[i].response[1] : 'Unreachable!!') +'</td><td><b>'+
-          ((slaves[i].response[0].version_check) ? '<text class="text-success">Ok':'<text class="text-danger">Error')+'</text></b></td><td><b>'+
-          ((slaves[i].response[0].db_check) ? '<text class="text-success">Ok':'<text class="text-danger">Error')+'</text></b></td><td><b>'+
-          ((slaves[i].response[0].applyStatus.error!=undefined && !slaves[i].response[0].applyStatus.error) ? '<text class="text-success">Ok':'<text class="text-danger">Error')+'</text></b></td></tr>');
-      }
-
-    }
+    // if (slaves.length)
+    // {
+    //   console.log(slaves);
+    //   messageBody.append('<h4>Apply Configuration for Slave</h4><table class="table table-striped tableSlavesHa"><tr><td>Address</td><td>Status</td><td>API Check</td><td>DB Check</td><td>Apply Status</td></tr></table>');
+    //   for (var i = 0, len = slaves.length; i < len; i++) {
+    //     slaves[i].response = slaves[i].response || [];
+    //     if ( ! slaves[i].response[0] ) slaves[i].response[0] = { applyStatus: {} };
+    //     if ( ! slaves[i].response[0].applyStatus ) slaves[i].response[0].applyStatus = { error: undefined };
+    //     $('table.tableSlavesHa').append(
+    //       '<tr><td>'+slaves[i].ip+'</td><td>'+
+    //       ((slaves[i].response[1]) ? slaves[i].response[1] : 'Unreachable!!') +'</td><td><b>'+
+    //       ((slaves[i].response[0].version_check) ? '<text class="text-success">Ok':'<text class="text-danger">Error')+'</text></b></td><td><b>'+
+    //       ((slaves[i].response[0].db_check) ? '<text class="text-success">Ok':'<text class="text-danger">Error')+'</text></b></td><td><b>'+
+    //       ((slaves[i].response[0].applyStatus.error!=undefined && !slaves[i].response[0].applyStatus.error) ? '<text class="text-success">Ok':'<text class="text-danger">Error')+'</text></b></td></tr>');
+    //   }
+    //
+    // }
     if (status == 'success')
     {
       mainIcon.addClass('bg-green fa-save')

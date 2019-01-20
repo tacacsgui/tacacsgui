@@ -215,11 +215,15 @@ class HA
         }
         break;
       case 'disabled':
+        $output['log'] = [ 'messages' => [], 'error' => false, 'disableOnError' => true ];
         $this->ha_data = [];
         self::saveConfg ( [] );
+        $output['log']['messages'][] = "Erase configuration...Done";
         $output['ha_status_disabled'] = CMDRun::init()->setSudo()->setCmd(MAINSCRIPT)->setAttr(['ha','disable'])->get();
+        $output['log']['messages'][] = "Erase my.cnf...Done";
         //trim( shell_exec( "sudo /opt/tacacsgui/main.sh ha disable 2>&1 ") );
         $output['status'] = '';
+        $output['log']['messages'][] = "High Availability was disabled.";
         $output['stop'] = true;
         break;
       default:
@@ -646,7 +650,7 @@ class HA
   {
 
     if ( ! file_exists('/opt/tgui_data/ha/ha.yaml') ) file_put_contents('/opt/tgui_data/ha/ha.yaml', '{ }');
-    if ( ! file_exists('/opt/tgui_data/ha/ha.php') ) file_put_contents('/opt/tgui_data/ha/ha.php', '<?php return array();');
+    //if ( ! file_exists('/opt/tgui_data/ha/ha.php') ) file_put_contents('/opt/tgui_data/ha/ha.php', '<?php return array();');
 
     return Yaml::parseFile('/opt/tgui_data/ha/ha.yaml');
     //if ( (isset($this) && get_class($this) == __CLASS__) ) $this->ha_data = include '/opt/tgui_data/ha/ha.php';

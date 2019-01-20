@@ -34,7 +34,8 @@ class PostEngine extends Controller
   }
   private function authAlertEnabled()
   {
-    return $this->db->connection('api_settings')->table('api_notification')->select('bad_authentication_enable', 'bad_authorization_enable')->first();
+    return $this->notificationSettings();
+    //return $this->db->connection('api_settings')->table('api_notification')->select('bad_authentication_enable', 'bad_authorization_enable')->first();
   }
   private function emailList_support($type='')
   {
@@ -71,7 +72,7 @@ class PostEngine extends Controller
     if ( isset($params['type']) ){
       $check = $this->authAlertEnabled();
       $type_enable = $params['type'] . '_enable';
-      if ( ! $check->$type_enable ) return false;
+      if ( ! $check[$type_enable] ) return false;
     }
     $settings = $this->getSmtpSettings();
     if (!$settings) return false;

@@ -1,4 +1,10 @@
 ##############################
+Version_0.9.59 20190120
+	* Improved queries for widgets (thank for Raj, @rajjaisur)
+	* More Stable High Availability feature
+	* Improved Parser Notification settings
+	* Some bug fixed
+##############################
 Version_0.9.58 20181230
 	* You can predefine LDAP user.
 	* Enable or PAP password for LDAP user will be the same as login.

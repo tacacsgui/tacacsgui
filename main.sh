@@ -56,12 +56,25 @@ case $1 in
 	;;
 	delete)
 		#find $ROOT_PATH/$3 -mmin +15 -exec rm -f {} \;
-		DIRECTORY=$2;
-		if [[ $DIRECTORY = "temp" ]]; then
-			find $ROOT_PATH/temp/ ! -name '.gitkeep' -mmin +15 -type f -exec rm -f {} \;
-			echo -n 0;
-		else echo 'non ';
-		fi
+		case $2 in
+			temp)
+				find $ROOT_PATH/temp/ ! -name '.gitkeep' -mmin +15 -type f -exec rm -f {} \;
+				echo -n 0;
+			;;
+			temp-file)
+				case $3 in
+					notification-settings)
+						rm /opt/tgui_data/tmp_notification_settings.yaml
+					;;
+				esac
+			;;
+		esac
+		# DIRECTORY=$2;
+		# if [[ $DIRECTORY = "temp" ]]; then
+		# 	find $ROOT_PATH/temp/ ! -name '.gitkeep' -mmin +15 -type f -exec rm -f {} \;
+		# 	echo -n 0;
+		# else echo 'non ';
+		# fi
 	;;
 	network)
 		if [[ ! -z $2 ]] && [[ $2 -eq 'save' ]]; then
