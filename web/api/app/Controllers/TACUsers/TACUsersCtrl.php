@@ -230,7 +230,7 @@ class TACUsersCtrl extends Controller
 					passwdPolicySpecial($policy['tac_pw_special'])->
 					passwdPolicyNumbers($policy['tac_pw_numbers'])->
 					desRestriction($req->getParam('login_flag'))->setName('Login') ),
-			'login_flag' => v::when( v::nullType() , v::alwaysValid(), v::oneOf( v::equals('1'), v::equals('0'), v::equals('3') ) ),
+			'login_flag' => v::when( v::nullType() , v::alwaysValid(), v::oneOf( v::equals('1'), v::equals('0'), v::equals('3'), v::equals('10'), v::equals('20'), v::equals('30') ) ),
 			'pap' => v::when( v::oneOf( v::nullType(), v::equals(''), v::loginClone( $req->getParam('pap_flag') ) ) , v::alwaysValid(), v::noWhitespace()->notContainChars()->
 				length($policy['tac_pw_length'], 64)->
 				notEmpty()->

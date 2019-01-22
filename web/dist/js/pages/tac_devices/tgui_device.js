@@ -165,6 +165,8 @@ var tgui_device = {
       data: formData
     };//ajaxProps END
 
+    if ( $(self.formSelector_edit + ' input[name="prefix"]').slider('getValue') != $(self.formSelector_edit + ' [name="prefix_native"]').val() ) formData.prefix = $(self.formSelector_edit + ' input[name="prefix"]').slider('getValue');
+
     if ( ! tgui_supplier.checkChanges(ajaxProps.data, ['id']) ) return false;
 
     if ( formData.enable ) {
