@@ -62,8 +62,8 @@ require __DIR__ . '/templates/body_start.php';
 				<div class="row">
 				<div class="col-md-3">
 					<div class="form-group text-center">
-						<button class="btn btn-lg bg-green btn-flat ladda-button" data-style="slide-left" style="min-width:100px; margin: 5px;" onclick="tgui_configEngine.testConf(this).catch(function(error) {console.log(error);});"><span class="ladda-label"><i class="fa fa-gears"></i> Test</span></button>
-						<button class="btn btn-lg bg-orange btn-flat ladda-button" data-style="slide-left" style="min-width:100px; margin: 5px;" onclick="tgui_configEngine.applyConf(this)"><span class="ladda-label"><i class="fa fa-save"></i> Apply</span></button>
+						<a class="btn btn-lg bg-green btn-flat ladda-button" data-style="slide-left" style="min-width:100px; margin: 5px;" onclick="tgui_configEngine.testConf(this).catch(function(error) {console.log(error);});"><span class="ladda-label"><i class="fa fa-gears"></i> Test</span></a>
+						<a class="btn btn-lg bg-orange btn-flat ladda-button" data-style="slide-left" style="min-width:100px; margin: 5px;" onclick="tgui_configEngine.applyConf(this)"><span class="ladda-label"><i class="fa fa-save"></i> Apply</span></a>
 					</div>
 					</br>
 					<div class="form-group icheck">
