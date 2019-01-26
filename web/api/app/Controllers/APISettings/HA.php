@@ -668,19 +668,19 @@ class HA
   public static function getServerRole()
   {
     $ha_data = self::getFullConfiguration();
-    if ( ! is_array( $ha_data ) OR ! is_array($ha_data['server'] ) ) return 'none';
+    if ( ! is_array( $ha_data ) OR ! is_array(@$ha_data['server'] ) ) return 'none';
     return  $ha_data['server']['role'];
   }
   public static function isMaster()
   {
     $ha_data = self::getFullConfiguration();
-    if ( ! is_array( $ha_data ) OR ! is_array($ha_data['server'] ) ) return false;
+    if ( ! is_array( $ha_data ) OR ! is_array(@$ha_data['server'] ) ) return false;
     return $ha_data['server']['role'] == 'master';
   }
   public static function isSlave()
   {
     $ha_data = self::getFullConfiguration();
-    if ( ! is_array( $ha_data ) OR ! is_array($ha_data['server'] ) ) return false;
+    if ( ! is_array( $ha_data ) OR ! is_array(@$ha_data['server'] ) ) return false;
     return  $ha_data['server']['role'] == 'slave';
   }
   public static function slavePsk()

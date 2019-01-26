@@ -64,7 +64,7 @@ class TACUsersCtrl extends Controller
 		}
 		//CHECK ACCESS TO THAT FUNCTION//END//
 		//$enable_flag_test = $req->getParam('enable_flag');
-		$data['test01'] = v::numeric()->validate($req->getParam('enable_flag'));
+		$allParams = $req->getParams();
 		$policy = APIPWPolicy::select()->first(1);
 		$validation = $this->validator->validate($req, [
 			'username' => v::noWhitespace()->notEmpty()->userTacAvailable(0),
@@ -91,10 +91,10 @@ class TACUsersCtrl extends Controller
 					notContainChars()->
 					length($policy['tac_pw_length'], 64)->
 					notEmpty()->
-					passwdPolicyUppercase($policy['tac_pw_uppercase'])->
-					passwdPolicyLowercase($policy['tac_pw_lowercase'])->
-					passwdPolicySpecial($policy['tac_pw_special'])->
-					passwdPolicyNumbers($policy['tac_pw_numbers'])->
+					passwdPolicyUppercase($policy['tac_pw_uppercase'], $allParams['login_flag'])->
+					passwdPolicyLowercase($policy['tac_pw_lowercase'], $allParams['login_flag'])->
+					passwdPolicySpecial($policy['tac_pw_special'], $allParams['login_flag'])->
+					passwdPolicyNumbers($policy['tac_pw_numbers'], $allParams['login_flag'])->
 					desRestriction($req->getParam('login_flag')),
 			'login_flag' => v::noWhitespace()->numeric()->oneOf( v::equals('1'), v::equals('0'), v::equals('3'), v::equals('10'), v::equals('20'), v::equals('30') ),
 			'valid_from' => v::when( v::nullType() , v::alwaysValid(), v::date('Y-m-d HH:mm')->setName('Valid From') ),
@@ -106,8 +106,6 @@ class TACUsersCtrl extends Controller
 			$data['error']['validation']=$validation->error_messages;
 			return $res -> withStatus(200) -> write(json_encode($data));
 		}
-
-		$allParams = $req->getParams();
 
 		if ( ! empty( $allParams['enable'] ) )
 		{
@@ -208,6 +206,8 @@ class TACUsersCtrl extends Controller
 		}
 		//CHECK ACCESS TO THAT FUNCTION//END//
 
+		$allParams = $req->getParams();
+
 		$policy = APIPWPolicy::select()->first(1);
 		$validation = $this->validator->validate($req, [
 			'username' => v::noWhitespace()->when( v::nullType() , v::alwaysValid(), v::notEmpty()->userTacAvailable($req->getParam('id'))),
@@ -225,10 +225,10 @@ class TACUsersCtrl extends Controller
 					notContainChars()->
 					length($policy['tac_pw_length'], 64)->
 					notEmpty()->
-					passwdPolicyUppercase($policy['tac_pw_uppercase'])->
-					passwdPolicyLowercase($policy['tac_pw_lowercase'])->
-					passwdPolicySpecial($policy['tac_pw_special'])->
-					passwdPolicyNumbers($policy['tac_pw_numbers'])->
+					passwdPolicyUppercase($policy['tac_pw_uppercase'], $allParams['login_flag'])->
+					passwdPolicyLowercase($policy['tac_pw_lowercase'], $allParams['login_flag'])->
+					passwdPolicySpecial($policy['tac_pw_special'], $allParams['login_flag'])->
+					passwdPolicyNumbers($policy['tac_pw_numbers'], $allParams['login_flag'])->
 					desRestriction($req->getParam('login_flag'))->setName('Login') ),
 			'login_flag' => v::when( v::nullType() , v::alwaysValid(), v::oneOf( v::equals('1'), v::equals('0'), v::equals('3'), v::equals('10'), v::equals('20'), v::equals('30') ) ),
 			'pap' => v::when( v::oneOf( v::nullType(), v::equals(''), v::loginClone( $req->getParam('pap_flag') ) ) , v::alwaysValid(), v::noWhitespace()->notContainChars()->
@@ -249,8 +249,6 @@ class TACUsersCtrl extends Controller
 			$data['error']['validation']=$validation->error_messages;
 			return $res -> withStatus(200) -> write(json_encode($data));
 		}
-
-		$allParams = $req->getParams();
 
 		if ( ! empty( $allParams['enable'] ) )
 		{
