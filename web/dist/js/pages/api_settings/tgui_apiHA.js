@@ -51,7 +51,7 @@ var tgui_apiHA = {
     if (list.master) {
       $('table[name="ha_list"]').append('<tr><td>Master</td><td>' + list.master.ipaddr + '</td><td>' + list.master.location + '</td><td>' + list.master.status + '</td><td>' + list.master.lastchk + '</td></tr>');
     }
-    if ( Object.keys(list.slave).length !== 0 ) {
+    if ( list && Object.keys(list.slave).length !== 0 ) {
       for (var sid in list.slave) {
         if (list.slave.hasOwnProperty(sid)) {
           el = list.slave[sid];
