@@ -224,6 +224,13 @@ case $1 in
 	;;
 	replication) #$2 rootpw $3 psk $4 debug
 		# replication_user_create $2 $3;
+		if [[ $(check_mysql_root $2) -ne 0 ]]
+		then
+			echo "Root password Success";
+		else
+			echo "Incorrect Root Password!";
+			exit 1;
+		fi
 		echo -n "$(date_)Check Replication user..."
 		if [[ $(check_mysql_replication_user $2) -eq 0 ]]; then
 			echo "Not Exist"
