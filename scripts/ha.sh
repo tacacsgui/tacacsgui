@@ -281,8 +281,9 @@ case $1 in
 	;;
 	dump)
 		rm /opt/tacacsgui/temp/tgui_dump.sql
-		PASSWD=$(sinitize_passwd $3);
-		mysqldump -u $2 -p$PASSWD tgui | grep -v "Using a password" > /opt/tacacsgui/temp/tgui_dump.sql
+		#PASSWD=$(sinitize_passwd $3);
+		COMMAND="mysqldump -u$2 -p'$3' tgui"
+		eval $COMMAND | grep -v "Using a password" > /opt/tacacsgui/temp/tgui_dump.sql
 		echo "mysqldump -u $2 -p$PASSWD tgui | grep -v 'Using a password' > /opt/tacacsgui/temp/tgui_dump.sql 2>&1";
 		if [ -f /opt/tacacsgui/temp/tgui_dump.sql ]; then
 			echo -n 1
@@ -292,11 +293,12 @@ case $1 in
 		exit 0
 	;;
 	dump-deploy)
-		PASSWD=$(sinitize_passwd $2);
+		#PASSWD=$(sinitize_passwd $2);
 		#mysqldump -u $2 -p$PASSWD tgui | grep -v "Using a password" > /opt/tacacsgui/temp/tgui_dump.sql
 		#echo "mysqldump -u $2 -p$PASSWD tgui | grep -v 'Using a password' > /opt/tacacsgui/temp/tgui_dump.sql 2>&1";
 		if [ -f /opt/tacacsgui/temp/dumpForSlave.sql ]; then
-			mysql -u tgui_user -p$PASSWD tgui < /opt/tacacsgui/temp/dumpForSlave.sql 2>/dev/null
+			COMMAND=$(mysql_query $2 'tgui_user')" tgui < /opt/tacacsgui/temp/dumpForSlave.sql 2>/dev/null";
+			eval $COMMAND;
 			echo 1
 			rm /opt/tacacsgui/temp/dumpForSlave.sql 2>&1
 			exit 0

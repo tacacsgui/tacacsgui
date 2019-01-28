@@ -2,13 +2,20 @@
 ####  FUNCTIONS ####
 function sinitize_passwd () {
   #echo $(echo "\"$1\"");
-  echo $1;
+  echo "'"$1"'";
+  return;
+}
+function mysql_query() {
+  local USERNAME='root'
+  if [[ ! -z $2 ]]; then
+    USERNAME=$2;
+  fi
+  echo "mysql -u${USERNAME} -p'${1}' 2>/dev/null";
   return;
 }
 function check_mysql_root () {
-  PASSWD=$(sinitize_passwd $1);
-  echo \""$1"\"
-  echo $( echo "SHOW DATABASES;" | mysql -uroot -p"${PASSWD}" 2>/dev/null | grep base | wc -l );
+  mysql=$(mysql_query $1);
+  echo $( echo "SHOW DATABASES;" | eval $mysql | grep base | wc -l );
   return;
 }
 ###### MY.CNF FUNCTIONS ##############
@@ -57,13 +64,13 @@ binlog_do_db = tgui
   return;
 }
 function master_status() {
-  PASSWD=$(sinitize_passwd $1);
-  #PASSWD=$1;
+  mysql=$(mysql_query $1 'tgui_replication');
+  #echo $mysql;
   if [[ -z $2 ]]; then
-    echo "SHOW MASTER STATUS;" | mysql -utgui_replication -p"${PASSWD}" 2>/dev/null | awk '{print $1" " $2}' | grep -v File;
+    echo "SHOW MASTER STATUS;" | eval $mysql | awk '{print $1" " $2}' | grep -v File;
     return;
   fi
-  echo "SHOW MASTER STATUS\G;" | mysql -utgui_replication -p"${PASSWD}" 2>/dev/null | sed -n '1!p' | awk '{print $1$2}';
+  echo "SHOW MASTER STATUS\G;" | eval $mysql | sed -n '1!p' | awk '{print $1$2}';
   return;
 }
 function mycfg_master() {
@@ -91,28 +98,28 @@ binlog_do_db = tgui
   return;
 }
 function start_slave () {
-  PASSWD=$(sinitize_passwd $1);
+  mysql=$(mysql_query $1);
   #echo "STOP SLAVE; RESET SLAVE; CHANGE MASTER TO MASTER_HOST='$2',MASTER_USER='tgui_replication', MASTER_PASSWORD='$3', MASTER_LOG_FILE='$4', MASTER_LOG_POS=$5; START SLAVE;";
   echo -n "$(date_)STOP, RESET, CHANGE, START SLAVE...";
-  echo "STOP SLAVE; RESET SLAVE; CHANGE MASTER TO MASTER_HOST='$2',MASTER_USER='tgui_replication', MASTER_PASSWORD='$3', MASTER_LOG_FILE='$4', MASTER_LOG_POS=$5; START SLAVE;" | mysql -uroot -p"${PASSWD}" 2>/dev/null;
+  echo "STOP SLAVE; RESET SLAVE; CHANGE MASTER TO MASTER_HOST='$2',MASTER_USER='tgui_replication', MASTER_PASSWORD='$3', MASTER_LOG_FILE='$4', MASTER_LOG_POS=$5; START SLAVE;" | eval $mysql;
   echo "Done.";
   return;
 }
 function stop_slave () {
-  PASSWD=$(sinitize_passwd $1);
-  echo $( echo "STOP SLAVE;" | mysql -uroot -p"${PASSWD}" 2>/dev/null | wc -l );
+  mysql=$(mysql_query $1);
+  echo $( echo "STOP SLAVE;" | eval $mysql | wc -l );
   return;
 }
 function slave_restore() {
-  PASSWD=$(sinitize_passwd $1);
-  COMMAND="mysql -u tgui_user --password='"${PASSWD}"' tgui < /opt/tacacsgui/temp/dumpForSlave.sql"
+  mysql=$(mysql_query $1 'tgui_user');
+  COMMAND=$mysql" tgui < /opt/tacacsgui/temp/dumpForSlave.sql"
   echo $COMMAND;
-  mysql -u tgui_user --password=\'$1\' tgui < /opt/tacacsgui/temp/dumpForSlave.sql
+  eval $COMMAND;
   return;
 }
 function slave_status() {
-  PASSWD=$(sinitize_passwd $1);
-  echo "SHOW SLAVE STATUS\G;" | mysql -utgui_replication -p"${PASSWD}" 2>/dev/null;
+  mysql=$(mysql_query $1 'tgui_replication');
+  echo "SHOW SLAVE STATUS\G;" | eval $mysql;
   return;
 }
 function mycfg_slave() {
@@ -134,33 +141,34 @@ function ha_disable_mycnf () {
   return;
 }
 function tgui_read_only_user () {
-  PASSWD=$(sinitize_passwd $1);
-  echo "GRANT SELECT ON tgui.* TO 'tgui_ro'@'%' IDENTIFIED BY '$2'; FLUSH PRIVILEGES;" | mysql -uroot -p"${PASSWD}" 2>/dev/null;
-  echo "GRANT SELECT ON tgui_log.* TO 'tgui_ro'@'%' IDENTIFIED BY '$2'; FLUSH PRIVILEGES;" | mysql -uroot -p"${PASSWD}" 2>/dev/null;
+  mysql=$(mysql_query $1);
+  echo "GRANT SELECT ON tgui.* TO 'tgui_ro'@'%' IDENTIFIED BY '$2'; FLUSH PRIVILEGES;" | eval $mysql;
+  echo "GRANT SELECT ON tgui_log.* TO 'tgui_ro'@'%' IDENTIFIED BY '$2'; FLUSH PRIVILEGES;" | eval $mysql;
   echo "$(date_) Read-only user tgui_ro was created"
   return;
 }
 function check_mysql_replication_user () {
   case $1 in
     exist)
-      PASSWD=$(sinitize_passwd $2);
-      echo $( echo "show grants;" | mysql -utgui_replication -p"${PASSWD}" 2>/dev/null | grep 'SLAVE, REPLICATION CLIENT' | wc -l );
+      mysql=$(mysql_query $2 'tgui_replication');
+      echo $( echo "show grants;" | eval $mysql | grep 'SLAVE, REPLICATION CLIENT' | wc -l );
     ;;
     *)
-      PASSWD=$(sinitize_passwd $1);
-      echo $( echo "select User from mysql.user;" | mysql -uroot -p"${PASSWD}" 2>/dev/null | grep tgui_replication | wc -l );
+      mysql=$(mysql_query $1);
+      echo $( echo "select User from mysql.user;" | eval $mysql | grep tgui_replication | wc -l );
     ;;
   esac
   return;
 }
 function replication_user_new_passwd() {
-  PASSWD=$(sinitize_passwd $1);
-  #echo "use mysql; ALTER USER 'tgui_replication'@'%' IDENTIFIED BY '$2'; FLUSH PRIVILEGES;" | mysql -uroot -p$1 2>/dev/null;
-  echo "GRANT REPLICATION SLAVE, REPLICATION CLIENT ON *.* TO 'tgui_replication'@'%' IDENTIFIED BY '$2'; FLUSH PRIVILEGES;" | mysql -uroot -p"${PASSWD}" 2>/dev/null;
+  mysql=$(mysql_query $1);
+  #echo "use mysql; ALTER USER 'tgui_replication'@'%' IDENTIFIED BY '$2'; FLUSH PRIVILEGES;" | eval $mysql;
+  #echo "GRANT REPLICATION SLAVE, REPLICATION CLIENT ON *.* TO 'tgui_replication'@'%' IDENTIFIED BY '$2'; FLUSH PRIVILEGES; | "$mysql;
+  echo "GRANT REPLICATION SLAVE, REPLICATION CLIENT ON *.* TO 'tgui_replication'@'%' IDENTIFIED BY '$2'; FLUSH PRIVILEGES;" | eval $mysql;
   return;
 }
 function replication_user_create() {
-  PASSWD=$(sinitize_passwd $1);
-  echo "GRANT REPLICATION SLAVE, REPLICATION CLIENT ON *.* TO 'tgui_replication'@'%' IDENTIFIED BY '$2'; FLUSH PRIVILEGES;" | mysql -uroot -p"${PASSWD}" 2>/dev/null;
+  mysql=$(mysql_query $1);
+  echo "GRANT REPLICATION SLAVE, REPLICATION CLIENT ON *.* TO 'tgui_replication'@'%' IDENTIFIED BY '$2'; FLUSH PRIVILEGES;" | eval $mysql;
   return;
 }
