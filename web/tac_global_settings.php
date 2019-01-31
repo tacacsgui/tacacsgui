@@ -48,7 +48,7 @@ require __DIR__ . '/templates/body_start.php';
 	<div class="col-xs-12">
 		<div class="box box-success">
 			<div class="box-header">
-				<h3 class="box-title">Start/Stop/Reload Tacacs Deamon</h3>
+				<h3 class="box-title">Start/Stop/Reload Tacacs Daemon</h3>
 			</div>
 			<!-- /.box-header -->
 			<div class="box-body">
@@ -72,7 +72,7 @@ require __DIR__ . '/templates/body_start.php';
 					<div class="col-xs-12">
 						<div class="form-group">
 							<label>Current Status</label>
-							<input type="text" class="form-control" name="deamon_status" disabled placeholder="Loading...">
+							<input type="text" class="form-control" name="daemon_status" disabled placeholder="Loading...">
 						</div>
 					</div>
 				</div>

@@ -33,18 +33,18 @@ var tgui_tacGlobal = {
     return this;
   },
   daemon: function(action) {
-    $('input[name="deamon_status"]').val('Loading...');
+    $('input[name="daemon_status"]').val('Loading...');
     var self = this;
     action = action || '';
 
     var ajaxProps = {
-      url: API_LINK+"tacacs/config/deamon/",
+      url: API_LINK+"tacacs/config/daemon/",
       type: 'POST',
       data: {action: action}
     };//ajaxProps END
 
     ajaxRequest.send(ajaxProps).then(function(resp) {
-      $('input[name="deamon_status"]').val(resp.tacacsStatusMessage);
+      $('input[name="daemon_status"]').val(resp.tacacsStatusMessage);
     }).fail(function(err){
       tgui_error.getStatus(err, ajaxProps)
     })

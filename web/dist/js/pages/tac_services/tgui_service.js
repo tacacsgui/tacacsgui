@@ -186,7 +186,7 @@ var tgui_service = {
       formData.cisco_rs_cmd = tgui_device_patterns.pattern.cisco.rs.cmd.get(self.formSelector_edit)
     }
     if ( tgui_device_patterns.pattern.cisco.rs.autocmd.diff(tgui_sortable.get( self.formSelector_edit).separate.autocmd, self.formSelector_edit) ){
-      formData.cisco_rs_autocmd = tgui_sortable.get( self.formSelector_edit).separate.autocmd.join(';;');
+      formData.cisco_rs_autocmd = ( tgui_sortable.get( self.formSelector_edit).separate.autocmd ) ? tgui_sortable.get( self.formSelector_edit).separate.autocmd.join(';;') : '';
     }
     if ( tgui_device_patterns.pattern.h3c.general.cmd.diff(self.formSelector_edit) ){
       //console.log(tgui_device_patterns.pattern.cisco.rs.cmd.get(self.formSelector_edit));

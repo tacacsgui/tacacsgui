@@ -140,7 +140,7 @@ class TACConfigCtrl extends Controller
 			$someOutput = shell_exec('sudo '. TAC_ROOT_PATH .'/main.sh tac_plus status brief');
 			if(preg_match('/.+(active\s+.+running).+/',$someOutput))
 			{
-				return array('error' => false, 'message' => 'Deamon was disabled. Success. '.$someOutput, 'errorLine' => 0);
+				return array('error' => false, 'message' => 'Daemon was disabled. Success. '.$someOutput, 'errorLine' => 0);
 			}
 			return array('error' => true, 'message' => 'Some inside error. '.$someOutput, 'errorLine' => 0);
 		}
@@ -149,7 +149,7 @@ class TACConfigCtrl extends Controller
 		{
 			$tryToReload=shell_exec('sudo '. TAC_ROOT_PATH .'/main.sh tac_plus restart');
 			$someOutput = shell_exec('sudo '. TAC_ROOT_PATH .'/main.sh tac_plus status brief');
-			return array('error' => false, 'message' => 'Deamon was Reloaded. Success. '."\n".$someOutput, 'errorLine' => 0);
+			return array('error' => false, 'message' => 'Daemon was Reloaded. Success. '."\n".$someOutput, 'errorLine' => 0);
 		}
 
 
@@ -616,14 +616,14 @@ class TACConfigCtrl extends Controller
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
 	///////////////////////////////////////////////
-	////////POST DEAMON CONFIG//////////////
-	public function postDeamonConfig($req,$res)
+	////////POST Daemon CONFIG//////////////
+	public function postDaemonConfig($req,$res)
 	{
 		//INITIAL CODE////START//
 		$data=array();
 		$data=$this->initialData([
 			'type' => 'post',
-			'object' => 'deamon',
+			'object' => 'Daemon',
 			'action' => 'config',
 		]);
 		#check error#

@@ -134,7 +134,7 @@ $app->get('/tacacs/config/apply/', 'TACConfigCtrl:getConfigGenFile');
 $app->post('/tacacs/config/apply/slave/', 'TACConfigCtrl:postApplySlaveCfg');
 $app->get('/tacacs/config/generate/', 'TACConfigCtrl:getConfigGen');
 $app->post('/tacacs/config/generate/', 'TACConfigCtrl:postConfigGen');
-$app->post('/tacacs/config/deamon/', 'TACConfigCtrl:postDeamonConfig');
+$app->post('/tacacs/config/daemon/', 'TACConfigCtrl:postDaemonConfig');
 $app->get('/tacacs/config/global/edit/', 'TACConfigCtrl:getEditConfigGlobal');
 $app->post('/tacacs/config/global/edit/', 'TACConfigCtrl:postEditConfigGlobal');
 $app->post('/tacacs/config/part/', 'TACConfigCtrl:postConfPart');

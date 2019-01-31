@@ -98,7 +98,7 @@ require __DIR__ . '/templates/body_start.php';
 		</div>
 		<div class="form-group">
 <pre class="update_log">
-<p class="text-center">Info will appeared here</p>
+<p class="text-center">Info will appear here</p>
 </pre>
 		</div>
 <p>The last 6 updates list you can find <a href="https://tacacsgui.com/updates/" target="_blank">here</a></p>
@@ -116,7 +116,7 @@ require __DIR__ . '/templates/body_start.php';
 	<div class="box-body">
 		<h4>High Availability role: <u>Master</u>. List of Slaves</h4>
 		<div class="table-responsive">
-			
+
 		</div>
 	</div>
 </div>
