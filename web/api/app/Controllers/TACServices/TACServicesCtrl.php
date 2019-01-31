@@ -434,6 +434,7 @@ class TACServicesCtrl extends Controller
 				if ($service['junos_enable']) $service['patterns'] .= '<p class="empty-paragraph">JunOS</p>';
 				if ($service['fortios_enable']) $service['patterns'] .= '<p class="empty-paragraph">FortiOS</p>';
 				if ($service['paloalto_enable']) $service['patterns'] .= '<p class="empty-paragraph">Palo Alto</p>';
+				if ($service['silverpeak_enable']) $service['patterns'] .= '<p class="empty-paragraph">Silver Peak</p>';
 			} else $service['patterns'] .= '<p class="empty-paragraph">Manual ONLY</p>';
 
 			array_push($data['data'],$service);

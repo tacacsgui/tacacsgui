@@ -36,6 +36,7 @@ var tgui_device_patterns = {
     if ( data.paloalto_enable ) this.show($(formId).find('[data-pattern="paloalto"]'), formId)
     if ( data.fortios_enable ) this.show($(formId).find('[data-pattern="fortios"]'), formId)
     if ( data.junos_enable ) this.show($(formId).find('[data-pattern="juniper"]'), formId)
+    if ( data.silverpeak_enable ) this.show($(formId).find('[data-pattern="silverpeak"]'), formId)
   },
   pattern: {
     cisco: {

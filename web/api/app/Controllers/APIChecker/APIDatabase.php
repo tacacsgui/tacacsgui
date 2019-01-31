@@ -89,6 +89,8 @@ class APIDatabase
   		'accounting' => ['string', 'accounting_log'],
   		'authorization' => ['string', 'authorization_log'],
   		'authentication' => ['string', 'authentication_log'],
+  		'syslog_ip' => ['string', ''],
+  		'syslog_port' => ['integer', 514],
   		'connection_timeout' => ['integer', 600],
   		'context_timeout' => ['integer', 3600],
   		'separation_tag' => ['string', '*'],
@@ -260,6 +262,10 @@ class APIDatabase
         'paloalto_panorama_admin_domain' => ['string', ''],
         'paloalto_user_group' => ['string', ''],
         'paloalto_manual' => ['text', '_'],
+        //Silver Peak//
+        'silverpeak_enable' => ['integer', '0'],
+        'silverpeak_role' => ['string', 'admin'],
+        'silverpeak_manual' => ['text', '_'],
       //END Pattern List
   		'manual' => ['text', '_'],
   		'manual_conf_only' => ['integer', '0'],

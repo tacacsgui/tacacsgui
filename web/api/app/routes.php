@@ -224,6 +224,11 @@ $app->post('/ha/update/check/', 'APIHACtrl:postCheckUpdate');
 $app->post('/ha/update/setup/', 'APIHACtrl:postSetupUpdate');
 #####################################################
 
+###API HA##################################################
+$app->post('/confmanager/toggle/', 'ConfManager:postToggle');
+$app->get('/confmanager/info/', 'ConfManager:getInfo');
+#####################################################
+
 ###API Developer##################################################
 $app->get('/dev/inc/js/dev.js', 'APIDevCtrl:getDevJS');
 #####################################################

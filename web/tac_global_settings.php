@@ -197,6 +197,49 @@ require __DIR__ . '/templates/body_start.php';
 					</div>
 				</div>
 				</div>
+				<hr>
+				<h4>Syslog Settings</h4>
+				<div class="row">
+					<div class="col-sm-4">
+						<div class="form-group syslog_ip">
+							<label>IP Address of Syslog server</label>
+							<input type="text" class="form-control" name="syslog_ip" data-type="input" data-default="" data-pickup="true" placeholder="Enter Syslog IP Address">
+							<p class="help-block"></p>
+							<input type="hidden" name="syslog_ip_native" value="">
+						</div>
+					</div>
+					<div class="col-sm-4">
+						<div class="form-group syslog_port">
+							<label>Port</label>
+							<input type="number" class="form-control" name="syslog_port" data-type="input" data-default="514" data-pickup="true" min="1" max="65535" placeholder="Enter Syslog Port">
+							<p class="help-block">udp port of syslog server, default 514</p>
+							<input type="hidden" name="syslog_port_native" value="">
+						</div>
+					</div>
+				</div>
+				<!-- <div class="row">
+				<div class="col-sm-3">
+					<div class="form-group">
+			      <label>Authentication</label><p class="empty-paragraph"></p>
+			      <input class="bootstrap-toggle" name="syslog_authe" data-type="checkbox" data-default="checked" data-pickup="true" data-width="100" data-toggle="toggle" type="checkbox" data-on="<i class='fa fa-check'></i> On" data-off="<i class='fa fa-close'></i> Off" data-onstyle="success" checked>
+						<input type="hidden" name="syslog_authe_native">
+			    </div>
+				</div>
+				<div class="col-sm-3">
+					<div class="form-group">
+			      <label>Authorization</label><p class="empty-paragraph"></p>
+			      <input class="bootstrap-toggle" name="syslog_autho" data-type="checkbox" data-default="checked" data-pickup="true" data-width="100" data-toggle="toggle" type="checkbox" data-on="<i class='fa fa-check'></i> On" data-off="<i class='fa fa-close'></i> Off" data-onstyle="success" checked>
+						<input type="hidden" name="syslog_autho_native">
+			    </div>
+				</div>
+				<div class="col-sm-3">
+					<div class="form-group">
+			      <label>Accounting</label><p class="empty-paragraph"></p>
+			      <input class="bootstrap-toggle" name="syslog_account" data-type="checkbox" data-default="checked" data-pickup="true" data-width="100" data-toggle="toggle" type="checkbox" data-on="<i class='fa fa-check'></i> On" data-off="<i class='fa fa-close'></i> Off" data-onstyle="success" checked>
+						<input type="hidden" name="syslog_account_native">
+			    </div>
+				</div>
+				</div> -->
 				<!--<div class="row">
 				<div class="col-sm-4">
 					<div class="form-group">

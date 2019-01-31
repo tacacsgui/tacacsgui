@@ -60,6 +60,10 @@ class TACServices extends Model
 			'paloalto_panorama_admin_domain',
 			'paloalto_user_group',
 			'paloalto_manual',
+			//Silver Peak//
+			'silverpeak_enable',
+			'silverpeak_role',
+			'silverpeak_manual',
 		//END Pattern List
 	];
 }

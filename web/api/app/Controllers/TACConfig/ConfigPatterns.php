@@ -127,6 +127,24 @@ class ConfigPatterns
 			($html) ? $sp->put() . self::$html_tags['attr'][0] . 'authorization log' . self::$html_tags['attr'][1] . ' = ' .self::$html_tags['val'][0] . $globalVariables['authorization'] . self::$html_tags['val'][1]
 			:
 			$sp->put() . 'authorization log = '.$globalVariables['authorization']);
+      ///Syslog Settings///
+      if ( !empty($globalVariables['syslog_ip']) ) {
+        array_push($outputGeneralConf[1], ($html) ? $sp->put() . self::$html_tags['comment'][0] . '###Syslog Settings###' . self::$html_tags['comment'][1]
+				:
+				$sp->put() . '###Syslog Settings###');
+        array_push($outputGeneralConf[1],
+  			($html) ? $sp->put() . self::$html_tags['attr'][0] . 'authentication log' . self::$html_tags['attr'][1] . ' = ' .self::$html_tags['val'][0] . $globalVariables['syslog_ip'].':'.$globalVariables['syslog_port'] . self::$html_tags['val'][1]
+  			:
+  			$sp->put() . 'authentication log = '.$globalVariables['syslog_ip'].':'.$globalVariables['syslog_port']);
+        array_push($outputGeneralConf[1],
+  			($html) ? $sp->put() . self::$html_tags['attr'][0] . 'authorization log' . self::$html_tags['attr'][1] . ' = ' .self::$html_tags['val'][0] . $globalVariables['syslog_ip'].':'.$globalVariables['syslog_port'] . self::$html_tags['val'][1]
+  			:
+  			$sp->put() . 'authorization log = '.$globalVariables['syslog_ip'].':'.$globalVariables['syslog_port']);
+        array_push($outputGeneralConf[1],
+  			($html) ? $sp->put() . self::$html_tags['attr'][0] . 'accounting log' . self::$html_tags['attr'][1] . ' = ' .self::$html_tags['val'][0] . $globalVariables['syslog_ip'].':'.$globalVariables['syslog_port'] . self::$html_tags['val'][1]
+  			:
+  			$sp->put() . 'accounting log = '.$globalVariables['syslog_ip'].':'.$globalVariables['syslog_port']);
+      }
 			///CONNECTION TIMEOUT TO NAS///
 			array_push($outputGeneralConf[1],
 			($html) ? $sp->put() . self::$html_tags['attr'][0] . 'connection timeout' . self::$html_tags['attr'][1] . ' = ' .self::$html_tags['val'][0] . $globalVariables['connection_timeout'] . self::$html_tags['val'][1]
@@ -584,7 +602,7 @@ class ConfigPatterns
 			$login = '';
 			if ( !in_array( $user['login_flag'], [1, 0] ) ) {
         $login = 'mavis ' . self::$crypto_flag[$user['login_flag']];
-      } else $login = self::$crypto_flag[$user['login_flag']].' '. $user['login'];
+      } else $login = self::$crypto_flag[$user['login_flag']].' "'. $user['login'].'"';
 			//$login = self::$crypto_flag[$user['login_flag']].' '. ( ($user['login_flag'] != 3 ) ? $user['login'] : '#local' );
 			if ($user['mavis_otp_enabled'] == 1 OR $user['mavis_sms_enabled'] == 1) $login = 'mavis';
 			array_push($outputUsers[$user['id']],
@@ -1105,6 +1123,38 @@ class ConfigPatterns
     			$sp->put('d').'} #END OF PaloAlto Service');
         }
         ///PaloAlto///END///
+        ///Silver Peak///START///
+        if ( $service['silverpeak_enable'] ) {
+          //start//
+          array_push($outputService[$service['id']],
+    			($html) ? $sp->put().self::$html_tags['attr'][0] . "service " . self::$html_tags['attr'][1] . ' = ' . self::$html_tags['object'][0]. 'silverpeak' . self::$html_tags['object'][1] . ' {'
+    			:
+    			$sp->put().'service = silverpeak {');
+          if ( @$service['silverpeak_role'] == 'admin') {
+            array_push($outputService[$service['id']],
+      			($html) ? $sp->put('a').self::$html_tags['param'][0] . "set priv-lvl" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . '7' . self::$html_tags['val'][1]
+      			:
+      			$sp->put('a').'set priv-lvl = 7');
+          } else {
+            array_push($outputService[$service['id']],
+      			($html) ? $sp->put('a').self::$html_tags['param'][0] . "set priv-lvl" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . '0' . self::$html_tags['val'][1]
+      			:
+      			$sp->put('a').'set priv-lvl = 0');
+          }
+          array_push($outputService[$service['id']],
+    			($html) ? $sp->put().self::$html_tags['param'][0] . "set role" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . $service['silverpeak_role'] . self::$html_tags['val'][1]
+    			:
+    			$sp->put().'set role = '.$service['silverpeak_role']);
+
+          $outputService[$service['id']] = array_merge( $outputService[$service['id']],  self::manualConfigPrint($service['fortios_manual'], $html) );
+
+          //end//
+          array_push($outputService[$service['id']],
+    			($html) ? $sp->put('d').'} ' . self::$html_tags['comment'][0] . '#END OF Silver Peak Service'. self::$html_tags['comment'][1]
+    			:
+    			$sp->put('d').'} #END OF Silver Peak Service');
+        }
+        ///Silver Peak///END///
       }
 
 

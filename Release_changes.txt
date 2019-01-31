@@ -1,4 +1,9 @@
 ##############################
+Version_0.9.60 20190131
+	* Added Silver Peak Service pattern
+	* Added Syslog Settings for AAA of tac_plus
+	* Some bug fixed
+##############################
 Version_0.9.59 20190120
 	* Improved queries for widgets (thank for Raj, @rajjaisur)
 	* More Stable High Availability feature

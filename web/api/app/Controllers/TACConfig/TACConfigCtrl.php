@@ -455,6 +455,8 @@ class TACConfigCtrl extends Controller
 			'authentication' => v::when( v::nullType() , v::alwaysValid(), v::notEmpty()),
 			'authorization' => v::when( v::nullType() , v::alwaysValid(), v::notEmpty()),
 			'accounting' => v::when( v::nullType() , v::alwaysValid(), v::notEmpty()),
+			'syslog_ip' => v::when( v::nullType() , v::alwaysValid(), v::oneOf( v::ip(), v::equals('') )->setName('IP Address') ),
+			'syslog_port' => v::when( v::nullType() , v::alwaysValid(), v::positive()->min(1,true)->intVal()->setName('Port')),
 		]);
 
 		if ($validation->failed()){

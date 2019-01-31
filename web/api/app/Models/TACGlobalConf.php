@@ -13,6 +13,8 @@ class TACGlobalConf extends Model
 		'accounting',
 		'authorization',
 		'authentication',
+		'syslog_ip',
+		'syslog_port',
 		'connection_timeout',
 		'context_timeout',
 		'skip_conflicting_groups',

@@ -38,6 +38,7 @@
 							<li><a href="#" data-pattern="huawei" data-disabled="1" onclick="tgui_device_patterns.switch(this)"><i class="fa fa-square-o"></i> Huawei</a></li>
 							<li><a href="#" data-pattern="paloalto" data-disabled="1" onclick="tgui_device_patterns.switch(this)"><i class="fa fa-square-o"></i> Palo Alto</a></li>
 							<li><a href="#" data-pattern="fortios" data-disabled="1" onclick="tgui_device_patterns.switch(this)"><i class="fa fa-square-o"></i> FortiOS</a></li>
+							<li><a href="#" data-pattern="silverpeak" data-disabled="1" onclick="tgui_device_patterns.switch(this)"><i class="fa fa-square-o"></i> Silver Peak</a></li>
 						</ul>
 					</li>
 					<li class="active"><a href="#general_info_edit" data-toggle="tab" aria-expanded="true">General</a></li>
@@ -48,6 +49,7 @@
 					<li class="device-pattern device-pattern-hidden huawei"><a href="#huawei_edit" data-toggle="tab" aria-expanded="true">Huawei</a></li>
 					<li class="device-pattern device-pattern-hidden paloalto"><a href="#paloalto_edit" data-toggle="tab" aria-expanded="true">Palo Alto</a></li>
 					<li class="device-pattern device-pattern-hidden fortios"><a href="#fortios_edit" data-toggle="tab" aria-expanded="true">FortiOS</a></li>
+					<li class="device-pattern device-pattern-hidden silverpeak"><a href="#silverpeak_edit" data-toggle="tab" aria-expanded="true">Silver Peak</a></li>
 					<li class="pull-right"><a href="#manual_edit" data-toggle="tab" aria-expanded="false" class="text-muted"><i class="fa fa-gear"></i></a></li>
 				</ul>
 				<div class="tab-content">
@@ -81,6 +83,10 @@
 					<!-- /.tab-pane -->
 					<div class="tab-pane" id="fortios_edit">
 						<?php include __DIR__ . '/tabFortiOS.php';?>
+					</div>
+					<!-- /.tab-pane -->
+					<div class="tab-pane" id="silverpeak_edit">
+						<?php include __DIR__ . '/tabSilverpeak.php';?>
 					</div>
 					<!-- /.tab-pane -->
 					<div class="tab-pane" id="manual_edit">
