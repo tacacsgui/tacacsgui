@@ -223,6 +223,10 @@ var tgui_cmd = {
         return false;
       }
 
+      regex = /^\/.*\/\s{0,}$/;
+      console.log(text);
+      text = ( text && !regex.test( text ) ) ? '/'+text+'/' : text
+
       var element = '<div data-action="'+action+'" data-attr="'+text+'"><span class="text-'+ ( (action == 'permit') ? 'success' : 'danger' ) +' text-muted">' + action + '</span> <b>'+text+'</b></div>'
       var new_el = {
         class: action,
@@ -235,7 +239,7 @@ var tgui_cmd = {
         return false;
       }
 
-      tgui_sortable.add(new_el);
+      tgui_sortable.add(new_el, 'filter_cmd');
 
       $( formId + ' .cmd-attr-creator-val' ).val('');
 
