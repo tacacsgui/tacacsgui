@@ -88,7 +88,7 @@ class LDAP extends Controller
 
     $this->mavis->debugIn( $this->dPrefix() . ( ($this->mavis->getVariable(AV_A_TACTYPE) == 'AUTH') ? 'Auth Success!' : 'Auth via INFO!') );
 
-    $usr = $this->db->table('tac_users')->select('login_flag')->where([['username', $this->mavis->getUsername()],['login_flag', 20]]);
+    $usr = $this->db->table('tac_users')->select('login_flag')->whereRaw("BINARY `username`='{$this->mavis->getUsername()}'")->where('login_flag', 20);
     $usr_local = $usr->count();
 
     $this->mavis->debugIn( $this->dPrefix() .'Does it locally predefined? '. ( ( $usr_local ) ? 'Yes' : 'No') );

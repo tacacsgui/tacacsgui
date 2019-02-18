@@ -26,7 +26,7 @@ class OTP extends Controller
       $this->mavis->debugIn( $this->dPrefix() . 'Check Status: TACTYPE '.$this->mavis->getVariable(AV_A_TACTYPE).' Unsupported. Exit' );
       return false;
     }
-    $this->user = $this->db->table('tac_users')->select('mavis_otp_secret','mavis_otp_period','mavis_otp_digits','mavis_otp_digest','group')->where([['username', $this->mavis->getUsername()],['mavis_otp_enabled', 1],['mavis_sms_enabled', 0]]);
+    $this->user = $this->db->table('tac_users')->select('mavis_otp_secret','mavis_otp_period','mavis_otp_digits','mavis_otp_digest','group')->whereRaw("BINARY `username`='{$this->mavis->getUsername()}'")->where([ ['mavis_otp_enabled', 1],['mavis_sms_enabled', 0] ]);
     $this->mavis->debugIn( $this->dPrefix() . 'Check Status: ' . ( ($this->user->count()) ? 'User Found. Run' : 'User Not Found. Exit' ) );
     return $this->user->count();
   }
