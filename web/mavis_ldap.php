@@ -104,7 +104,7 @@ require __DIR__ . '/templates/body_start.php';
 					<p class="help-block">if you don't know what to choose leave it as default (first value)</p>
                 </div>
 			</div> -->
-			<!-- <div class="col-sm-4">
+			<div class="col-sm-4">
 				<div class="form-group">
 					<label>TLS Support</label>
 					<div class="checkbox icheck">
@@ -115,7 +115,7 @@ require __DIR__ . '/templates/body_start.php';
 					</div>
 					<p class="help-block">by default unchecked</p>
                 </div>
-			</div> -->
+			</div>
 		</div>
 		<div class="row">
 			<div class="col-sm-12">
