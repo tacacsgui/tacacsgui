@@ -184,7 +184,7 @@ for query in list(data_loaded['queries']):
         }
 	group = query.get('group','')
 	if group: group += '/'
-	if not os.path.exists(data_loaded['git']['path']+'/'+group+query['name']):
+	if not args.test_queries and os.path.exists(data_loaded['git']['path']+'/'+group+query['name']):
 		dir_ok = True
 		if not os.path.exists(os.path.dirname(data_loaded['git']['path']+'/'+group+query['name'])):
 			try:
