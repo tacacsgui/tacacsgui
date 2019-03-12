@@ -287,6 +287,16 @@ var tguiInit = {
 -
 */
 var tgui_supplier = { //Tacacs Supplier Object
+  keyupDelay: function(callback, ms) {
+    var timer = 0;
+    return function() {
+      var context = this, args = arguments;
+      clearTimeout(timer);
+      timer = setTimeout(function () {
+        callback.apply(context, args);
+      }, ms || 0);
+    };
+  },
   getFormData: function(form, reference) {
     reference = reference || false;
     form = form || '';
@@ -319,10 +329,11 @@ var tgui_supplier = { //Tacacs Supplier Object
           break;
         case 'select':
           if (reference) {
-            obj[$(el).attr('name')] = ( $(el).val() );
+            var element_val = (!!$(el).val()) ? $(el).val() : '';
+            obj[$(el).attr('name')] = ( element_val );
             tgui_error.debug({},$(el).attr('name')+': ' + obj[$(el).attr('name')]);
             if ( $(form + '[name="'+$(el).attr('name') + '_native'+'"]').length ){
-              if ($(form + '[name="'+$(el).attr('name') + '_native'+'"]').val() == $(el).val()){
+              if ($(form + '[name="'+$(el).attr('name') + '_native'+'"]').val() == element_val){
                 tgui_error.debug({},$(el).attr('name')+' was deleted');
                 delete obj[$(el).attr('name')];
                 delete obj[$(el).attr('name')+'_native'];
@@ -404,6 +415,14 @@ var tgui_supplier = { //Tacacs Supplier Object
       switch (element.attr('data-type')) {
         case 'input':
           element.val(element.attr('data-default'))
+          if ( element.attr('name') == 'disabled' ){
+            var button = element.closest('.input-group-btn').find('button')
+            if ( button.length){
+              if ( element.attr('data-default') == '0'){
+                $(button[0]).removeClass('btn-warning').addClass('btn-success').text('Enabled')
+              } else $(button[0]).removeClass('btn-success').addClass('btn-warning').text('Disabled')
+            }
+          }
           break;
         case 'select':
           if (element.hasClass('select2')) {
@@ -448,6 +467,14 @@ var tgui_supplier = { //Tacacs Supplier Object
               el.val(obj[param]);
               //console.log(el, obj[param]);
               if (el_n.length) el_n.val(obj[param]);
+              if ( el.attr('name') == 'disabled' ){
+                var button = el.closest('.input-group-btn').find('button')
+                if ( button.length){
+                  if ( obj[param] == '0'){
+                    $(button[0]).removeClass('btn-warning').addClass('btn-success').text('Enabled')
+                  } else $(button[0]).removeClass('btn-success').addClass('btn-warning').text('Disabled')
+                }
+              }
               break;
             case 'select':
               el.val(obj[param]);
@@ -686,6 +713,20 @@ var tgui_supplier = { //Tacacs Supplier Object
       return true;
     }
     return false;
+  },
+  getUrlParameter: function(sParam) {
+    var sPageURL = window.location.search.substring(1),
+        sURLVariables = sPageURL.split('&'),
+        sParameterName,
+        i;
+
+    for (i = 0; i < sURLVariables.length; i++) {
+        sParameterName = sURLVariables[i].split('=');
+
+        if (sParameterName[0] === sParam) {
+            return sParameterName[1] === undefined ? true : decodeURIComponent(sParameterName[1]);
+        }
+    }
   }
 }//Tacacs Supplier Object//end
 

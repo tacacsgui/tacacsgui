@@ -19,6 +19,8 @@ var tgui_select2 = function(o)
       var self = this;
       return {
         containerCssClass : "error",
+        placeholder: o.placeholder || '',
+        allowClear: (!!o.allowClear) ? o.allowClear : false,
       	ajax:{
       		url: this.ajaxUrl,
           delay: 250,

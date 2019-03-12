@@ -1,0 +1,73 @@
+.expectation-form {
+  background-color: #eee;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  margin-bottom: 5px;
+}
+.edit-mode {
+  background-color: #c0914780;
+}
+ul.expectations {
+  list-style-type: none;
+  padding-inline-start: 0px;
+}
+ul.expectations > li {
+  border-bottom: 1px solid #ccc;
+  padding: 7px;
+  font-size: 16px;
+}
+ul.expectations > li:nth-child(2) {
+  background-color: #eeeeee61;
+}
+ul.expectations > li:last-child {
+  border-bottom: 0px;
+}
+ul.expectations > li > span.value {
+  padding-left: 5px;
+  padding-right: 5px;
+  border-right: 1px solid #aaa;
+}
+div.expe-value {
+  width: 34%;
+  overflow: hidden;
+  white-space: nowrap;
+  display: inline-block;
+}
+div.expe-action {
+  width: 19%;
+  overflow: hidden;
+  white-space: nowrap;
+  display: inline-block;
+}
+div.expe-write {
+  width: 10%;
+  overflow: hidden;
+  white-space: nowrap;
+  display: inline-block;
+}
+span.btn-span {
+  padding: 3px 7px;
+  cursor: pointer;
+  margin-right: 3px;
+}
+span.btn-span.btn-move {
+  background-color: #ccc;
+}
+span.btn-span.btn-edit {
+  background-color: #f39c12;
+}
+pre.yaml-export {
+  min-height: 400px;
+  max-height: 450px;
+}
+#export_edit,
+#export {
+  position: relative;
+}
+#export > a.btn,
+#export_edit > a.btn {
+  position: absolute;
+  z-index: 23;
+  right: 0px;
+  float: right;
+}

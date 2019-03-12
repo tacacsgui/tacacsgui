@@ -1,4 +1,8 @@
 ##############################
+Version_0.9.61 20190312
+	* Configuration Manager (Alpha)
+	* Some bug fixed
+##############################
 Version_0.9.60 20190131
 	* Added Silver Peak Service pattern
 	* Added Syslog Settings for AAA of tac_plus

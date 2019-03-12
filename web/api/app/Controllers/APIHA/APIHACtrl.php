@@ -6,8 +6,6 @@ use tgui\Controllers\APISettings\HA;
 use tgui\Models\APISettings;
 use tgui\Controllers\APIUpdate\APIUpdateCtrl;
 
-use tgui\Services\CMDRun\CMDRun as CMDRun;
-
 class APIHACtrl extends Controller
 {
   ####HA Sync####

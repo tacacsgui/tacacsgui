@@ -336,6 +336,79 @@ class APIDatabase
   		'status' => ['string', ''],
   	],
 
+  	'confM_models' =>
+  	[
+  		'name' => ['string', ''],
+  		'prompt' => ['string', '']
+  	],
+  	'confM_devices' =>
+  	[
+  		'name' => ['string', ''],
+  		'ip' => ['string', ''],
+  		'prompt' => ['string', ''],
+  		'protocol' => ['string', 'ssh'],
+  		'port' => ['integer', '22'],
+  	],
+  	'confM_queries' =>
+  	[
+  		'name' => ['string', ''],
+  		'disabled' => ['integer', '0'],
+  		'f_group' => ['string', ''],
+  		'omit_lines' => ['string', ''],
+  	],
+  	'confM_credentials' =>
+  	[
+  		'name' => ['string', ''],
+  		'username' => ['string', '_'],
+  		'password' => ['string', '_'],
+  	],
+    'confM_bind_query_model' =>
+    [
+      'unsetId' => true,
+      'unsetTimestamp' => true,
+      'query_id' => ['foreign', ['references'=>'id', 'on'=>'confM_queries', 'onDelete'=>'cascade'] ],
+      'model_id' => ['foreign', ['references'=>'id', 'on'=>'confM_models',  'onDelete'=>'cascade'] ],
+    ],
+    'confM_bind_query_devices' =>
+    [
+      'unsetId' => true,
+      'unsetTimestamp' => true,
+      'query_id' => ['foreign', ['references'=>'id', 'on'=>'confM_queries', 'onDelete'=>'cascade'] ],
+      'device_id' => ['foreign', ['references'=>'id', 'on'=>'confM_devices', 'onDelete'=>'cascade'] ],
+    ],
+    'confM_bind_query_creden' =>
+    [
+      'unsetId' => true,
+      'unsetTimestamp' => true,
+      'query_id' => ['foreign', ['references'=>'id', 'on'=>'confM_queries', 'onDelete'=>'cascade'] ],
+      'creden_id' => ['foreign', ['references'=>'id', 'on'=>'confM_credentials', 'onDelete'=>'cascade'] ],
+    ],
+    'confM_bind_devices_creden' =>
+    [
+      'unsetId' => true,
+      'unsetTimestamp' => true,
+      'creden_id' => ['foreign', ['references'=>'id', 'on'=>'confM_credentials', 'onDelete'=>'cascade'] ],
+      'device_id' => ['foreign', ['references'=>'id', 'on'=>'confM_devices', 'onDelete'=>'cascade'] ],
+    ],
+    'confM_bind_model_expect' =>
+    [
+      'unsetId' => true,
+      'unsetTimestamp' => true,
+      'model_id' => ['foreign', ['references'=>'id', 'on'=>'confM_models', 'onDelete'=>'cascade'] ],
+      'hidden' => ['integer', '0'],
+      'order' => ['integer', '0'],
+  		'write' => ['integer', '0'],
+  		'expect' => ['string', '_'],
+  		'send' => ['string', ''],
+    ],
+    'confM_bind_cmdev_tacdev' =>
+    [
+      'unsetId' => true,
+      'unsetTimestamp' => true,
+      'tac_dev' => ['foreign', ['references'=>'id', 'on'=>'tac_devices', 'onDelete'=>'cascade'] ],
+      'cm_dev' => ['foreign', ['references'=>'id', 'on'=>'confM_devices',  'onDelete'=>'cascade'] ],
+    ],
+
   );
 
   	public $tablesArr_log = array(
@@ -415,6 +488,23 @@ class APIDatabase
   			'user_ipaddr' => ['string', '_'],
   			'device_ipaddr' => ['string', '_'],
   			'count' => ['string', '_'],
-  		]
+  		],
+      'cm_log' =>
+    	[
+    		'date' => ['timestamp', ''],
+    		'timestamp' => ['integer', '0'],
+    		'device_id' => ['integer', '0'],
+    		'device_name' => ['string', '_'],
+    		'query_id' => ['integer', '0'],
+    		'query_name' => ['string', '_'],
+    		'ip' => ['string', '_'],
+    		'protocol' => ['string', '_'],
+    		'port' => ['integer', '_'],
+    		'uname_type' => ['string', '_'],
+    		'uname' => ['string', '_'],
+    		'group' => ['string', '_'],
+    		'status' => ['string', '_'],
+    		'message' => ['text', '_'],
+    	],
   	);
 }

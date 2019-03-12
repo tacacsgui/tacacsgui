@@ -1,0 +1,29 @@
+pre.preview_resp {
+  background-color: #444;
+  color: #eee;
+  counter-reset: line;
+  max-height: 500px;
+  padding: 0px;
+  border: 0px;
+  border-radius: 0px;
+  padding: 5px 0px 5px 0px;
+}
+
+pre.preview_resp > span {
+   display: block;
+   line-height: 1.5rem;
+   padding: 0px 5px 0px 5px;
+}
+pre.preview_resp > span:nth-child(even) {
+  background-color: #4a4a4a;
+}
+pre.preview_resp > span:before {
+   counter-increment: line;
+   content: counter(line);
+   display: inline-block;
+   border-right: 1px solid #333;
+   padding: 0 .5em;
+   margin-right: .5em;
+   color: #888;
+   min-width: 40px;
+}

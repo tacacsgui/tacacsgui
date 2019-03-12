@@ -38,7 +38,10 @@ class APICheckerCtrl extends Controller
 	private function createTable($database = 'default', $tableName, $tableColumns)
 	{
 		$this->db::connection($database)->getSchemaBuilder()->create($tableName, function($table) use ($tableColumns){
-			$table->increments('id');
+			if ( ! @$tableColumns['unsetId'] ) $table->increments('id');
+			else unset($tableColumns['unsetId']);
+			$timestamp = ( @$tableColumns['unsetTimestamp'] ) ? false : true;
+			unset($tableColumns['unsetTimestamp']);
 			foreach($tableColumns as $columnName => $columnAttr){
 				switch ($columnAttr[0]) {
 					case 'string':
@@ -53,6 +56,10 @@ class APICheckerCtrl extends Controller
 					case 'timestamp':
 						$columnObj = $table->timestamp($columnName);
 						break;
+					case 'foreign':
+						$table->unsignedInteger($columnName);
+    				$table->foreign($columnName)->references($columnAttr[1]['references'])->on($columnAttr[1]['on'])->onDelete('cascade');
+						break;
 				}
 				if( //(isset($columnAttr[1]) )//OR $columnAttr[1] == 0)  AND
 					($columnAttr[0]=='integer' AND $columnAttr[1] != '_')
@@ -64,12 +71,12 @@ class APICheckerCtrl extends Controller
 				{
 					$columnObj->default($columnAttr[1]);
 				}
-				else
+				elseif( $columnAttr[0] != 'foreign')
 				{
 					$columnObj -> nullable();
 				}
 			}
-			$table->timestamps();
+			if( $timestamp ) $table->timestamps();
 		});
 	}
 
@@ -169,18 +176,18 @@ class APICheckerCtrl extends Controller
 				]);
 				break;
 			case 'tac_device_groups':
-				/*$this->db::connection($database)->table($tableName)->insert([
+				$this->db::connection($database)->table($tableName)->insert([
 					'name' => 'defaultGroup',
-					'enable' => 'cisco123',
-					'key' => 'tguiKey',
-					'enable_flag' => 0,
+					// 'enable' => 'cisco123',
+					// 'key' => 'tguiKey',
+					// 'enable_flag' => 0,
 					'banner_welcome' => 'Unauthorized access is prohibited!',
 					'banner_failed' => 'Go away! Unauthorized access is prohibited!',
 					'banner_motd' => 'Today is a perfect day! Have a nice day!',
 					'default_flag' => 1,
 					'created_at' => date('Y-m-d H:i:s', time()),
 					'updated_at' => date('Y-m-d H:i:s', time())
-				]);*/
+				]);
 				break;
 			case 'mavis_ldap':
 				$this->db::connection($database)->table($tableName)->insert([
@@ -257,12 +264,17 @@ class APICheckerCtrl extends Controller
 				//IF TABLE ALREADY EXIST CHECK COLUMNS//
 				else if(!$this->db::connection($database)->getSchemaBuilder()->hasColumns($tableName,array_keys($tableColumns)))
 				{
-					$preColumnName='id';//IN EVERY TABLE THE FIRST COLUMN IS id//
+					$preColumnName = ($this->db::connection($database)->getSchemaBuilder()->hasColumn($tableName,'id')) ? 'id' : '';
+					if ( @$tableColumns['unsetId'] ) unset($tableColumns['unsetId']);
+					$timestamp = ( @$tableColumns['unsetTimestamp'] ) ? false : true;
+					unset($tableColumns['unsetTimestamp']);
+					//IN EVERY TABLE THE FIRST COLUMN IS id//
 					//ADD COLUMNS CHECK//
 					foreach($tableColumns as $columnName => $columnType)
 					{
 						if(!$this->db::connection($database)->getSchemaBuilder()->hasColumn($tableName,$columnName))
 						{
+							//var_dump($tableName);var_dump($columnName);die();
 							$data["messages"][count($data["messages"])]="Column ".$columnName." in the table ".$tableName." created";
 							if ($updateFlag) {
 								$databaseFix = $this->databaseFix();
@@ -286,10 +298,14 @@ class APICheckerCtrl extends Controller
 											break;
 										case 'timestamp':
 											$columnObj = $table->timestamp($columnName);
-										break;
+											break;
+										case 'foreign':
+											$table->unsignedInteger($columnName);
+					    				$table->foreign($columnName)->references($tableColumns[$columnName][1]['references'])->on($tableColumns[$columnName][1]['on']);
+											break;
 									}
 
-									$columnObj -> after($preColumnName);
+									if ($preColumnName) $columnObj -> after($preColumnName); else  $columnObj -> first();
 									if(isset($tableColumns[$columnName][1])
 										AND
 										($tableColumns[$columnName][0]=='integer' AND $tableColumns[$columnName][1]!= '_' )
@@ -301,7 +317,7 @@ class APICheckerCtrl extends Controller
 									{
 										$columnObj -> default($tableColumns[$columnName][1]);//ADD DEFAULT VALUE IF SET////
 									}
-									else
+									elseif ( $tableColumns[$columnName][0] != 'foreign')
 									{
 										$columnObj -> nullable();
 									}

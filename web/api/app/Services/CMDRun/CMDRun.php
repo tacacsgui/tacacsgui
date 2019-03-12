@@ -11,6 +11,7 @@ class CMDRun
   private $stdOut_parameter = '';
   private $sudo = '';
   private $grep = '';
+  private $back = '';
 
   public function __cunstruct($params = [])
   {
@@ -50,6 +51,12 @@ class CMDRun
     return $this;
   }
 
+  public function toBackground($value = '')
+  {
+    $this->back = ' > /dev/null 2>/dev/null & ';
+    return $this;
+  }
+
   public function setStdOut($parameter = '')
   {
     switch ( $parameter ) {
@@ -66,12 +73,13 @@ class CMDRun
 
   public function get($trim = true)
   {
+    #$output = shell_exec( $this->showCmd() );
     $output = shell_exec( $this->showCmd() );
 
     if ( preg_match('/^error:\n/', $output) ) {
       throw new \Exception( trim( preg_replace('/^error:\n/', '', $output) ) );
     }
-    
+
     return ($trim) ? trim(  $output ) : $output;
   }
 
@@ -81,6 +89,6 @@ class CMDRun
     for ($i=0; $i < count($this->attr); $i++) {
       $attr_list .= $this->attr[$i] . ' ';
     }
-    return $this->sudo .' '.$this->cmd.' '.$attr_list .' '. $this->stdOut_parameter . ( ( empty($this->grep) ) ? '' : ' | grep '. $this->grep);
+    return $this->sudo .' '.$this->cmd.' '.$attr_list .' '. $this->stdOut_parameter . ( ( empty($this->grep) ) ? '' : ' | grep '. $this->grep) . $this->back;
   }
 }

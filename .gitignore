@@ -4,5 +4,6 @@ web/api/composer.lock
 tac_plus.cfg*
 tacTestOutput.txt
 temp/*
-
+plugins/ConfigManager/src/__pycache__/*
+plugins/ConfigManager/src/Models/__pycache__/*
 !temp/.gitkeep

@@ -440,6 +440,127 @@ $MAIN_MENU = array(
 		'submenu' => [],
 	],
 
+	'plugins' => [
+	'name' => 'Plugins',
+	'li-class' => 'text-center',
+	'icon' => '',
+	'icon-class' => '',
+	'type' => 1, //type 0 used for linked menu item, type 1 user for header in menu
+	],
+
+	'confManager' => [
+		'id' => 1300,
+		'name' => 'Configuration Manager',
+		'href' => '#',
+		'li-class' => '',
+		'icon' => 'fa fa-copy',
+		'icon-class' => 'text-green',
+		'type' => 0, //type 0 used for linked menu item, type 1 user for header in menu
+		'submenuFlag' => 1,
+		'submenu' => [
+			'confList' => [
+				'id' => 1310,
+				'name' => 'Configuration List',
+				'href' => 'confM_main.php',
+				'li-class' => '',
+				'icon' => 'fa fa-circle-o',
+				'icon-class' => '',
+				'type' => 0, //type 0 used for linked menu item, type 1 user for header in menu
+				'submenuFlag' => 0,
+				'submenu' => [],//.submenu
+			],
+			'settings' => [
+				'id' => 1320,
+				'name' => 'Settings',
+				'href' => '#',
+				'li-class' => '',
+				'icon' => 'fa fa-circle-o',
+				'icon-class' => '',
+				'type' => 0, //type 0 used for linked menu item, type 1 user for header in menu
+				'submenuFlag' => 1,
+				'submenu' => [
+						[
+							'id' => 1323,
+							'name' => 'Queries',
+							'href' => 'confM_queries.php',
+							'li-class' => '',
+							'icon' => 'fa fa-circle-o',
+							'icon-class' => '',
+							'type' => 0, //type 0 used for linked menu item, type 1 user for header in menu
+							'submenuFlag' => 0,
+							'submenu' => [],//.submenu
+						],//.submenu
+						[
+							'id' => 1324,
+							'name' => 'Device List',
+							'href' => 'confM_devices.php',
+							'li-class' => '',
+							'icon' => 'fa fa-circle-o',
+							'icon-class' => '',
+							'type' => 0, //type 0 used for linked menu item, type 1 user for header in menu
+							'submenuFlag' => 0,
+							'submenu' => [],//.submenu
+						],//.submenu
+						[
+							'id' => 1325,
+							'name' => 'Models',
+							'href' => 'confM_models.php',
+							'li-class' => '',
+							'icon' => 'fa fa-circle-o',
+							'icon-class' => '',
+							'type' => 0, //type 0 used for linked menu item, type 1 user for header in menu
+							'submenuFlag' => 0,
+							'submenu' => [],//.submenu
+						],//.submenu
+						[
+							'id' => 1326,
+							'name' => 'Credentials',
+							'href' => 'confM_credentials.php',
+							'li-class' => '',
+							'icon' => 'fa fa-circle-o',
+							'icon-class' => '',
+							'type' => 0, //type 0 used for linked menu item, type 1 user for header in menu
+							'submenuFlag' => 0,
+							'submenu' => [],//.submenu
+						],//.submenu
+						[
+							'id' => 1327,
+							'name' => 'File Groups',
+							'href' => 'confM_fGroup.php',
+							'li-class' => '',
+							'icon' => 'fa fa-circle-o',
+							'icon-class' => '',
+							'type' => 0, //type 0 used for linked menu item, type 1 user for header in menu
+							'submenuFlag' => 0,
+							'submenu' => [],//.submenu
+						],//.submenu
+						[
+							'id' => 1328,
+							'name' => 'Settings',
+							'href' => 'confM_settings.php',
+							'li-class' => '',
+							'icon' => 'fa fa-circle-o',
+							'icon-class' => '',
+							'type' => 0, //type 0 used for linked menu item, type 1 user for header in menu
+							'submenuFlag' => 0,
+							'submenu' => [],//.submenu
+						],//.submenu
+					],//.submenu
+				],
+				'confMLog' => [
+					'id' => 1330,
+					'name' => 'Logging',
+					'href' => 'confM_log.php',
+					'li-class' => '',
+					'icon' => 'fa fa-circle-o',
+					'icon-class' => '',
+					'type' => 0, //type 0 used for linked menu item, type 1 user for header in menu
+					'submenuFlag' => 0,
+					'submenu' => [],//.submenu
+				],
+			],//.submenu
+		],
+
 /*	'end' => [
 	'name' => 'END',
 	'li-class' => '',

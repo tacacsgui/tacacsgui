@@ -155,6 +155,25 @@ $container['MAVISSMS'] = function($container) {
 	return new \tgui\Controllers\MAVISSMS\MAVISSMSCtrl($container);
 };
 
+$container['ConfManager'] = function($container) {
+	return new \tgui\Controllers\ConfManager\ConfManager($container);
+};
+$container['ConfModels'] = function($container) {
+	return new \tgui\Controllers\ConfManager\ConfModels($container);
+};
+$container['ConfDevices'] = function($container) {
+	return new \tgui\Controllers\ConfManager\ConfDevices($container);
+};
+$container['ConfGroups'] = function($container) {
+	return new \tgui\Controllers\ConfManager\ConfGroups($container);
+};
+$container['ConfigCredentials'] = function($container) {
+	return new \tgui\Controllers\ConfManager\ConfigCredentials($container);
+};
+$container['ConfQueries'] = function($container) {
+	return new \tgui\Controllers\ConfManager\ConfQueries($container);
+};
+
 /*$container['csrf'] = function($container) {
 	return new \Slim\Csrf\Guard;
 };*/

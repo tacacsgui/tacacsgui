@@ -227,6 +227,54 @@ $app->post('/ha/update/setup/', 'APIHACtrl:postSetupUpdate');
 ###API HA##################################################
 $app->post('/confmanager/toggle/', 'ConfManager:postToggle');
 $app->get('/confmanager/info/', 'ConfManager:getInfo');
+$app->get('/confmanager/settings/preview/', 'ConfManager:getPreview');
+$app->get('/confmanager/settings/cron/', 'ConfManager:getCron');
+$app->post('/confmanager/settings/cron/', 'ConfManager:postCron');
+$app->post('/confmanager/datatables/', 'ConfManager:postDatatables');
+$app->post('/confmanager/log/datatables/', 'ConfManager:postLogDatatables');
+$app->post('/confmanager/get/more/', 'ConfManager:postMore');
+$app->post('/confmanager/file/delete/', 'ConfManager:postDel');
+$app->get('/confmanager/file/download/', 'APIDownloadCtrl:getDlCm');
+$app->get('/confmanager/file/download/hash/', 'APIDownloadCtrl:getCmHash');
+$app->post('/confmanager/diff/info/', 'ConfManager:postDiffInfo');
+$app->post('/confmanager/diff/brief/', 'ConfManager:postDiffBrief');
+$app->post('/confmanager/diff/', 'ConfManager:postDiff');
+$app->post('/confmanager/diff/tacgui/', 'ConfManager:postTacgui');
+//Models
+$app->post('/confmanager/models/datatables/', 'ConfModels:postDatatables');
+$app->post('/confmanager/models/add/', 'ConfModels:postAdd');
+$app->get('/confmanager/models/edit/', 'ConfModels:getEdit');
+$app->post('/confmanager/models/edit/', 'ConfModels:postEdit');
+$app->post('/confmanager/models/delete/', 'ConfModels:postDel');
+$app->get('/confmanager/models/list/', 'ConfModels:getList');
+//Devices
+$app->post('/confmanager/devices/datatables/', 'ConfDevices:postDatatables');
+$app->post('/confmanager/devices/add/', 'ConfDevices:postAdd');
+$app->get('/confmanager/devices/edit/', 'ConfDevices:getEdit');
+$app->post('/confmanager/devices/edit/', 'ConfDevices:postEdit');
+$app->post('/confmanager/devices/delete/', 'ConfDevices:postDel');
+$app->get('/confmanager/devices/list/', 'ConfDevices:getList');
+//Groups
+$app->post('/confmanager/groups/datatables/', 'ConfGroups:postDatatables');
+$app->post('/confmanager/groups/add/', 'ConfGroups:postAdd');
+$app->get('/confmanager/groups/edit/', 'ConfGroups:getEdit');
+$app->post('/confmanager/groups/edit/', 'ConfGroups:postEdit');
+$app->post('/confmanager/groups/delete/', 'ConfGroups:postDel');
+$app->get('/confmanager/groups/list/', 'ConfGroups:getList');
+//Credentials
+$app->post('/confmanager/credentials/datatables/', 'ConfigCredentials:postDatatables');
+$app->post('/confmanager/credentials/add/', 'ConfigCredentials:postAdd');
+$app->get('/confmanager/credentials/edit/', 'ConfigCredentials:getEdit');
+$app->post('/confmanager/credentials/edit/', 'ConfigCredentials:postEdit');
+$app->post('/confmanager/credentials/delete/', 'ConfigCredentials:postDel');
+$app->get('/confmanager/credentials/list/', 'ConfigCredentials:getList');
+//Queries
+$app->post('/confmanager/queries/datatables/', 'ConfQueries:postDatatables');
+$app->post('/confmanager/queries/add/', 'ConfQueries:postAdd');
+$app->get('/confmanager/queries/edit/', 'ConfQueries:getEdit');
+$app->post('/confmanager/queries/edit/', 'ConfQueries:postEdit');
+$app->post('/confmanager/queries/delete/', 'ConfQueries:postDel');
+$app->post('/confmanager/queries/preview/', 'ConfQueries:postPreview');
 #####################################################
 
 ###API Developer##################################################

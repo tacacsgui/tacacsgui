@@ -307,7 +307,7 @@ case $1 in
 			COMMAND=$(mysql_query $2 'tgui_user')" tgui < /opt/tacacsgui/temp/dumpForSlave.sql 2>/dev/null";
 			eval $COMMAND;
 			echo 1
-			rm /opt/tacacsgui/temp/dumpForSlave.sql 2>&1
+			#rm /opt/tacacsgui/temp/dumpForSlave.sql 2>&1
 			exit 0
 		fi
 		error_ "Dump file not found!"

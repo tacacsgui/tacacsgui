@@ -10,7 +10,7 @@ var tgui_datatables = function(data){
   data.column.select = data.column.select || false;
   data.column.preview = data.column.preview || false;
 	data.sort = data.sort || {};
-	data.sort.column = data.sort.column || 3;
+	data.sort.column = data.sort.column || 0;
 	data.sort.order = data.sort.order || 'asc';
 
 	var columns = [];
@@ -104,6 +104,7 @@ var tgui_datatables = function(data){
 			o.colFilterBtnId = o.colFilterBtnId || 'columnsFilter';
 	 		this.initialData = this.initialData || {};
 	 		var i = (data.column.select && data.column.preview) ? 2 : 1;
+			if ( !data.column.select && !data.column.preview ) i = 0;
 
 	 		for (var rowName in this.initialData.columns) {
 	 			if (this.initialData.columns.hasOwnProperty(rowName)) {
@@ -124,11 +125,12 @@ var tgui_datatables = function(data){
 	 	    $( event.target ).blur();
 	 	    return false;
 	 		})
-	 		$(document).on('keyup change', '#filterRequest', function(){
+	 		$(document).on('keyup change', '#filterRequest', tgui_supplier.keyupDelay( function(){
 	 			var v =$(this).val();  // getting search input value
 	 			if (!v) { $('#filterRequest').removeClass('filter-input-success filter-input-error'); return; }
+				console.log(v);
 	 			dataTable_o.table.search(v).draw();
-	 		} );
+	 		}, 500) );
 	 	},
 	 	filter: function() {
 	 		if ($("div.datatable-filter").css('display') != 'none')	$("div.datatable-filter").hide("slow");
