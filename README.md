@@ -14,7 +14,7 @@ Please use [Installation Script](https://github.com/tacacsgui/tgui_install). Onl
   <img src="https://tacacsgui.com/wp-content/uploads/2018/12/main_pattern-1.gif" width="30%">
 </p>
 
-1. **Local Database**. All password stored as a hash, the main advantage of this type is the user can change your password via gui or via device cli (not all devices supported).
+1. **Local Database**. All password stored as a hash, the main advantage of this type is a user can change his/her password via gui or via device cli (not all devices supported).
 2. **LDAP Server**. Based on [Adldap2](https://github.com/Adldap2/Adldap2). Work with Windows AD and OpenLDAP.
 3. **One-Time Password** (OTP). Based on [Spomky-Labs/otphp](https://github.com/Spomky-Labs/otphp). Authentication with OTP by using Google Authenticator, for example.
 
