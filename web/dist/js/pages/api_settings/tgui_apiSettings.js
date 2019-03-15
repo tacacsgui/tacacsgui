@@ -313,9 +313,11 @@ var tgui_apiSettings = {
           ajaxRequest.send(ajaxProps).then(function(resp) {
             switch (o.section) {
               case 'ha':
+                $('[name="interf_ip"]').empty();
                 $.each(resp.list, function(key, value) {
                   var temp = value.split("-");
-                  $('[name="interf_ip"]').empty().append($("<option></option>").attr("value",value).attr("data-interf",temp[0]).text(value));
+                  console.log(value);
+                  $('[name="interf_ip"]').append($("<option></option>").attr("value",value).attr("data-interf",temp[0]).text(value));
                 });
                 break;
               default:
