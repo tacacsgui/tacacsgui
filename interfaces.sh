@@ -7,9 +7,7 @@ function interface_list () {
   ip link | grep -Po '(?<=[0-9]: )[a-z0-9]+(?=:)' | sed "s/^/${TABSPACE}/";
 }
 function interface_list_ip () {
-  ip addr | awk '/^[0-9]+:/ { sub(/:/,"",$2); iface=$2 } /^[[:space:]]*inet / {
-    split($2, a, "/")
-    print iface"-"a[1] }'
+  ip addr | awk '/^[0-9]+:/ { sub(/:/,"",$2); iface=$2 } /\s*inet / { split($2, a, "/"); print iface"-"a[1]}'
 }
 
 function interface_existance () {
