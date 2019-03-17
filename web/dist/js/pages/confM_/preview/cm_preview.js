@@ -69,6 +69,17 @@ var cm_preview = {
             templateSelection: self.templateSelect2
           })
           if ( resp.list[1] && resp.list[1].id ) $(".select2.select_b").val(resp.list[1].id).trigger('change');
+
+          name = tgui_supplier.getUrlParameter('name');
+          group = tgui_supplier.getUrlParameter('group');
+          hash_a = $(".select2.select_a").select2('data')[0].hash;
+          hash_b = $(".select2.select_b").select2('data')[0].hash;
+          filename_a = $(".select2.select_a").select2('data')[0].filename;
+          filename_b = $(".select2.select_b").select2('data')[0].filename;
+
+          $('.file_a_download').attr("href","/api/confmanager/file/download/hash/?show="+filename_a+"&name="+name+'&hash='+hash_a)
+          $('.file_b_download').attr("href","/api/confmanager/file/download/hash/?show="+filename_b+"&name="+name+'&hash='+hash_b)
+
           resolve(true)
 
         }).fail(function(err){

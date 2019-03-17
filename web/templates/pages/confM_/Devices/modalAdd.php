@@ -18,7 +18,7 @@
 						<?php include __DIR__ . '/tabGeneralInfo.php';?>
 					</div>
 					<!-- /.tab-pane -->
-					<div class="tab-pane active" id="tacgui">
+					<div class="tab-pane" id="tacgui">
 						<?php include __DIR__ . '/tabTacGUI.php';?>
 					</div>
 					<!-- /.tab-pane -->
