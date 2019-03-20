@@ -1,4 +1,12 @@
 ##############################
+Version_0.9.62 20190320
+	* Configuration Manager (now Beta)
+	* Schema of Database changed!!! Some data in Configuration Manager can gone, sorry.
+	* Added integration between Tacacs AAA and Configuration Manager
+	* Added fast device import from TacacsGUI to Configuration Manager
+	* Improved CM Python script
+	* Some bug fixed
+##############################
 Version_0.9.61 20190312
 	* Configuration Manager (Alpha)
 	* Some bug fixed

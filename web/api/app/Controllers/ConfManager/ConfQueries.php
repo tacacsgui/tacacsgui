@@ -60,16 +60,14 @@ class ConfQueries extends Controller
 		}
 
 		$allParams = $req->getParams();
-		$model = $allParams['model'];
+
+		if ( empty($allParams['credential']) ) unset($allParams['credential']);
+
 		$devices = $allParams['devices'];
-		$creden = (empty($allParams['creden'])) ? false : $allParams['creden'];
-		unset($allParams['model']);
 		unset($allParams['devices']);
-		unset($allParams['creden']);
 
 		$query = Conf_Queries::create($allParams);
-		if ($creden) $this->db::table('confM_bind_query_creden')->insert(['query_id' => $query->id, 'creden_id' => $creden]);
-		$this->db::table('confM_bind_query_model')->insert(['query_id' => $query->id, 'model_id' => $model]);
+
 		$devices_bind = [];
 		foreach ($devices as $device) {
 			$devices_bind[] = ['query_id' => $query->id, 'device_id' => $device];
@@ -124,9 +122,7 @@ class ConfQueries extends Controller
 		}
 		//$data['test333'] = $this->ConfManager->createConfig();
 
-		$data['query'] = Conf_Queries::leftJoin('confM_bind_query_model as qm', 'confM_queries.id', '=', 'qm.query_id')->
-		leftJoin('confM_bind_query_creden as qc', 'confM_queries.id', '=', 'qc.query_id')->
-		select('confM_queries.*','model_id as model','creden_id as creden')->where('id', $req->getParam('id'))->first();
+		$data['query'] = Conf_Queries::select()->where('id', $req->getParam('id'))->first();
 		$data['query']['devices'] = $this->db::table('confM_bind_query_devices')->select("device_id")->where('query_id', $req->getParam('id'))->pluck('device_id')->toArray();
 
 		return $res -> withStatus(200) -> write(json_encode($data));
@@ -176,12 +172,10 @@ class ConfQueries extends Controller
 
 		$allParams = $req->getParams();
 
-		$model = isset($allParams['model']) ? $allParams['model'] : false ;
+		if ( isset($allParams['credential']) AND $allParams['credential'] == '') $allParams['credential'] = null;
+
 		$devices = isset($allParams['devices']) ? $allParams['devices'] : false ;
-		$creden = isset($allParams['creden']) ? $allParams['creden'] : false ;
-		unset( $allParams['model'] );
 		unset( $allParams['devices'] );
-		unset( $allParams['creden'] );
 		$old_group = '_';
 		if ( isset($allParams['f_group']) ){
 			$old_group = Conf_Queries::select('f_group')->where( 'id', $req->getParam('id') )->first()->f_group;
@@ -189,14 +183,6 @@ class ConfQueries extends Controller
 
 		$cmd = Conf_Queries::where( 'id', $req->getParam('id') )->update($allParams);
 
-		if ($model){
-			$this->db::table('confM_bind_query_model')->where( 'query_id', $req->getParam('id') )->delete();
-			$this->db::table('confM_bind_query_model')->insert(['query_id' => $req->getParam('id'), 'model_id' => $model]);
-		}
-		if ( $creden !== false ){
-			$this->db::table('confM_bind_query_creden')->where( 'query_id', $req->getParam('id') )->delete();
-			if ( !empty($creden) ) $this->db::table('confM_bind_query_creden')->insert(['query_id' => $req->getParam('id'), 'creden_id' => $creden]);
-		}
 		if ($devices){
 			$devices_bind = [];
 			$this->db::table('confM_bind_query_devices')->where('query_id', $req->getParam('id'))->delete();
@@ -313,7 +299,8 @@ class ConfQueries extends Controller
 
     $columns = $this->APICheckerCtrl->getTableTitles('confM_queries'); //Array of all columnes that will used
     array_unshift( $columns, 'id' );
-    array_push( $columns, 'created_at', 'updated_at', 'models.name as model' );
+    array_push( $columns, 'created_at', 'updated_at',
+			'models.name as model', 'cre.name as creden_name', $this->db::raw('count(*) as devices') );
 		$columns[array_search('name', $columns)] = 'confM_queries.name AS name';
 		$columns[array_search('id', $columns)] = 'confM_queries.id AS id';
 		$columns[array_search('created_at', $columns)] = 'confM_queries.created_at AS created_at';
@@ -334,8 +321,10 @@ class ConfQueries extends Controller
     //Filter end
     $data['recordsTotal'] = Conf_Queries::count();
     //Get temp data for Datatables with Fliter and some other parameters
-    $tempData = Conf_Queries::leftJoin('confM_bind_query_model as qm', 'confM_queries.id', '=', 'query_id')->
-			leftJoin('confM_models as models', 'qm.model_id', '=', 'models.id')->
+    $tempData = Conf_Queries::leftJoin('confM_models as models', 'models.id', '=', 'confM_queries.model')->
+			leftJoin('confM_credentials as cre', 'cre.id', '=', 'confM_queries.credential')->
+			leftJoin('confM_bind_query_devices as qd', 'qd.query_id', '=', 'confM_queries.id')->
+			groupBy('confM_queries.id')->
 			select($columns)->
       when( !empty($queries),
         function($query) use ($queries)
@@ -390,7 +379,9 @@ class ConfQueries extends Controller
   		//Creating correct array of answer to Datatables
   		$data['data']=array();
   		foreach($tempData as $query){
-  			$buttons='<button class="btn btn-warning btn-xs btn-flat" onclick="cm_queries.get(\''.$query['id'].'\',\''.$query['name'].'\')">Edit</button> <button class="btn btn-danger btn-xs btn-flat" onclick="cm_queries.del(\''.$query['id'].'\',\''.$query['name'].'\')">Del</button>';
+  			$buttons='<button class="btn btn-warning btn-xs btn-flat" onclick="cm_queries.get(\''.$query['id'].'\',\''.$query['name'].'\')">Edit</button> '.
+				'<button class="btn btn-info btn-xs btn-flat" disabled ><i class="fa fa-refresh"></i></button> '.
+				'<button class="btn btn-danger btn-xs btn-flat" onclick="cm_queries.del(\''.$query['id'].'\',\''.$query['name'].'\')">Del</button>';
   			$query['buttons'] = $buttons;
   			array_push($data['data'],$query);
   		}
@@ -437,11 +428,10 @@ class ConfQueries extends Controller
 			$data['error']['validation']['cm'] = !$testCm;
 			return $res -> withStatus(200) -> write(json_encode($data));
 		}
-		$creden = ( $req->getParam('credentials') ) ? $req->getParam('credentials') : 0;
+		$creden = ( $req->getParam('credential') ) ? $req->getParam('credential') : 0;
 		$model = Conf_Models::select()->where('id', $req->getParam('model'))->first();
 		$device = $this->db::table('confM_devices as d')->
-			leftJoin('confM_bind_devices_creden as de_cr', 'de_cr.device_id', '=', 'd.id')->
-			leftJoin('confM_credentials as cd', 'cd.id', '=', 'de_cr.creden_id')->
+			leftJoin('confM_credentials as cd', 'cd.id', '=', 'd.credential')->
 			leftJoin('confM_credentials as cq', 'cq.id', '=', $this->db::raw($creden) )->
 			select([
 				'd.name as name',

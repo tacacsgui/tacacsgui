@@ -12,8 +12,7 @@
           <input type="hidden" data-type="input" data-default="" name="disabled_native">
         </div>
       </div>
-      <p class="help-block">file will have name <i>device_name</i>_<i>query_name</i></p>
-      <p class="text-danger">beware, name changing will change filename!</p>
+      <p class="help-block">file will have name &lt;<i>device_name</i>&gt;__&lt;<i>device_id</i>&gt;_&lt;<i>query_id</i>&gt;</p>
     </div>
   </div>
   <div class="col-sm-6">
@@ -47,10 +46,10 @@
 </div>
 <div class="row">
   <div class="col-sm-6">
-    <div class="form-group creden">
+    <div class="form-group credential">
       <label for="Name">Credential</label>
-      <input type="hidden"  data-type="input" data-default="" name="creden_native">
-      <select class="form-control select2 select_creden"  name="creden" data-type="select" data-default="" data-pickup="true" style="width:100%"></select>
+      <input type="hidden"  data-type="input" data-default="" name="credential_native">
+      <select class="form-control select2 select_creden"  name="credential" data-type="select" data-default="" data-pickup="true" style="width:100%"></select>
       <p class="help-block"></p>
     </div>
   </div>
@@ -59,7 +58,7 @@
       <label for="Name">Omit lines</label>
       <input type="hidden"  data-type="input" data-default="" name="omit_lines_native">
       <input type="text" class="form-control" name="omit_lines" data-type="input" data-default="" data-pickup="true" placeholder="Enter Prompt List" autocomplete="off">
-      <p class="help-block"></p>
+      <p class="help-block"><b>0</b> - the first line, <b>-1</b> - the last one, <b>-2</b> - before the last line and so on. 2-10 - range of lines </p>
     </div>
   </div>
 </div>

@@ -32,11 +32,7 @@ class ConfManager extends Controller
 		}
 		//INITIAL CODE////END//
 
-		$info = CMDRun::init()->
-			setCmd(MAINSCRIPT)->
-			setAttr(
-				['run','cmd', '/opt/tacacsgui/plugins/ConfigManager/cm.py', '-c', '/opt/tgui_data/confManager/config.yaml', '--status'])->
-			get();
+		$info = Helper::CmInfoStatus();
 		$data['response'] = $info;
 		$info = explode(' ', $info);
 		$message = '';
@@ -81,6 +77,7 @@ class ConfManager extends Controller
 
 		switch ($req->getParam('action')) {
 			case 'start':
+				$data['info'] = Helper::CmInfoStatus();
 				$this->createConfig();
 				$data['status'] = $this->startCron([],true);
 				break;
@@ -148,6 +145,140 @@ class ConfManager extends Controller
 		$data['result'] = CMDRun::init()->
 			setCmd(MAINSCRIPT)->
 			setAttr(['run', 'cmd', $this->GIT_PATH, $request_attr])->get();
+
+		return $res -> withStatus(200) -> write(json_encode($data));
+	}
+	public function postTacgui($req,$res)
+	{
+		//INITIAL CODE////START//
+		$data=array();
+		$data=$this->initialData([
+			'type' => 'post',
+			'object' => 'confManager',
+			'action' => 'tacgui users',
+		]);
+		#check error#
+		if ($_SESSION['error']['status']){
+			$data['error']=$_SESSION['error'];
+			return $res -> withStatus(401) -> write(json_encode($data));
+		}
+		//INITIAL CODE////END//
+		//CHECK ACCESS TO THAT FUNCTION//START//
+		if(!$this->checkAccess(1))
+		{
+			return $res -> withStatus(403) -> write(json_encode($data));
+		}
+		//CHECK ACCESS TO THAT FUNCTION//END//
+		$validation = $this->validator->validate($req, [
+			'ip' => v::NotEmpty()->ip(),
+			'date_a' => v::NotEmpty()->date(),
+			'date_b' => v::NotEmpty()->date(),
+		]);
+
+		if ($validation->failed()){
+			$data['error']['status']=true;
+			$data['error']['validation']=$validation->error_messages;
+			return $res -> withStatus(200) -> write(json_encode($data));
+		}
+
+		$ip = $req->getParam('ip');
+		$date_start = date('Y-m-d H:i:s', min( strtotime($req->getParam('date_a')), strtotime($req->getParam('date_b')) ) );
+		$date_end = date('Y-m-d H:i:s', max( strtotime($req->getParam('date_a')), strtotime($req->getParam('date_b')) ) );
+
+		$data['users'] = $this->db::connection('logging')->select( $this->db::raw("
+			SELECT username, sum(authe) as authe, sum(autho) as autho, sum(acc) as acc FROM (
+				SELECT username, COUNT(*) AS authe, 0 AS autho, 0 AS acc
+				FROM tgui_log.tac_log_authentication AS tae
+				WHERE tae.nas='".$ip."' AND action LIKE '%succeeded' AND
+					tae.date BETWEEN '".$date_start."' AND '".$date_end."'
+				GROUP BY tae.username
+				UNION ALL
+				SELECT username, 0 AS authe, COUNT(*) AS autho, 0 AS acc
+				FROM tgui_log.tac_log_authorization AS tao
+				WHERE tao.nas='".$ip."' AND action='permit' AND
+					tao.date BETWEEN '".$date_start."' AND '".$date_end."'
+				GROUP BY tao.username
+				UNION ALL
+				SELECT username, 0 AS authe, 0 AS autho, COUNT(*) AS acc
+				FROM tgui_log.tac_log_accounting AS tac
+				WHERE tac.nas='".$ip."' AND cmd IS NOT NULL AND
+					tac.date BETWEEN '".$date_start."' AND '".$date_end."'
+				GROUP BY tac.username
+			) AS total_u GROUP BY username
+		"));
+
+		return $res -> withStatus(200) -> write(json_encode($data));
+	}
+	public function postTacguiAAA($req,$res)
+	{
+		//INITIAL CODE////START//
+		$data=array();
+		$data=$this->initialData([
+			'type' => 'post',
+			'object' => 'confManager',
+			'action' => 'tacgui aaa',
+		]);
+		#check error#
+		if ($_SESSION['error']['status']){
+			$data['error']=$_SESSION['error'];
+			return $res -> withStatus(401) -> write(json_encode($data));
+		}
+		//INITIAL CODE////END//
+		//CHECK ACCESS TO THAT FUNCTION//START//
+		if(!$this->checkAccess(1))
+		{
+			return $res -> withStatus(403) -> write(json_encode($data));
+		}
+		//CHECK ACCESS TO THAT FUNCTION//END//
+		$validation = $this->validator->validate($req, [
+			'ip' => v::NotEmpty()->ip(),
+			'date_a' => v::NotEmpty()->date(),
+			'date_b' => v::NotEmpty()->date(),
+			'section' => v::oneOf( v::equals('authentication'), v::equals('authorization'), v::equals('accounting') ),
+		]);
+
+		if ($validation->failed()){
+			$data['error']['status']=true;
+			$data['error']['validation']=$validation->error_messages;
+			return $res -> withStatus(200) -> write(json_encode($data));
+		}
+
+		$ip = $req->getParam('ip');
+		$uname = $req->getParam('username');
+		if ($uname == 'undefined') $uname = '';
+		$section = $req->getParam('section');
+		$date_start = date('Y-m-d H:i:s', min( strtotime($req->getParam('date_a')), strtotime($req->getParam('date_b')) ) );
+		$date_end = date('Y-m-d H:i:s', max( strtotime($req->getParam('date_a')), strtotime($req->getParam('date_b')) ) );
+
+		$table = 'tac_log_authentication';
+		$select = ['nac','date','action'];
+		$data['log'] = [];
+
+		switch ($section) {
+			case 'authentication':
+				$data['log'] = $this->db::connection('logging')->table($table)->select($select)->
+					where([['username',$uname],['nas',$ip]])->
+					where('action', 'like', '%succeeded')->
+					whereBetween('date', [$date_start, $date_end])->get();
+				break;
+			case 'authorization':
+				$table = 'tac_log_authorization';
+				$select = ['nac','date','cmd'];
+				$data['log'] = $this->db::connection('logging')->table($table)->select($select)->
+					where([['username',$uname],['nas',$ip],['action','permit']])->
+					whereBetween('date', [$date_start, $date_end])->get();
+				break;
+			case 'accounting':
+				$table = 'tac_log_accounting';
+				$select = ['nac','date','cmd'];
+				$data['log'] = $this->db::connection('logging')->table($table)->select($select)->
+					where([['username',$uname],['nas',$ip]])->
+					whereNotNull('cmd')->
+					whereBetween('date', [$date_start, $date_end]);
+				$data['sql'] = $data['log']->toSql();
+				$data['log'] = $data['log']->get();
+				break;
+		}
 
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
@@ -220,6 +351,8 @@ class ConfManager extends Controller
 			'--full-file='. ( ($req->getParam('type') == 'full') ? '1' : '0' ),
 			'--diff='.$req->getParam('hash_b').':'.$req->getParam('hash_a').':'.$req->getParam('filename_a')
 		];
+		//$req->getParam('filename_a');
+
 		$diff_cmd = CMDRun::init()->
 			setCmd(MAINSCRIPT)->
 			setAttr($request);
@@ -254,7 +387,12 @@ class ConfManager extends Controller
 		$chunck_trigger = false;
 		$chunck_current_a = '';
 		$chunck_current_b = '';
+		$ommitLines = 0;
 		for ($i=0; $i < count($diff_full); $i++) {
+			if ($ommitLines) {
+				$ommitLines--;
+				continue;
+			}
 			$diff_full[$i] = trim($diff_full[$i]);
 			if ( preg_match('/(^@@.*@@.*)/', $diff_full[$i]) ){
 				// if ( $chunck_trigger ){
@@ -312,9 +450,47 @@ class ConfManager extends Controller
 					$data['diff']['file_b'][] = '<span class="empty"> </span>';
 				}
 				if ( preg_match('/^\-.*$/', $diff_full[$i]) ) {
-					if ( preg_match('/^\+.*$/', $diff_full[$i+1]) ){
+					if ( preg_match('/^\+.*$/', $diff_full[$i+1] ) ){
 						$data['diff']['file_a'][] = sprintf('<span class="addition %s">%s</span>', $chunck_current_a, preg_replace('/^\+/', '', trim( $diff_full[$i+1] ) ) );
 						$data['diff']['file_b'][] = sprintf('<span class="subtract %s">%s</span>', $chunck_current_b, preg_replace('/^-/', '', $diff_full[$i]) );
+					} elseif ( preg_match('/^\-.*$/', $diff_full[$i+1] ) ) {
+						//$ommitLines = 0;
+						$deletions = 0;
+						$additions = 0;
+						while (true) {
+							$ommitLines++;
+							$deletions++;
+							if ( ! preg_match('/^\-.*$/', $diff_full[$i+$ommitLines]) ) break;
+						}
+						if ( preg_match('/^\+.*$/', $diff_full[$i+$ommitLines]) ){
+							while (true) {
+								$ommitLines++;
+								$additions++;
+								if ( ! preg_match('/^\+.*$/', $diff_full[$i+$ommitLines]) ) break;
+							}
+							$additions_i = $additions;
+							$deletions_i = $deletions;
+							for ($io=0; $io < $ommitLines; $io++) {
+								if (!$deletions AND !$additions) continue;
+								if ($deletions){
+									$data['diff']['file_b'][] = sprintf('<span class="subtract %s">%s</span>', $chunck_current_b, preg_replace('/^-/', '', $diff_full[$i+$io]) );
+									$deletions--;
+								} else {
+									$data['diff']['file_b'][] = '<span class="empty"> </span>';
+								}
+								if ($additions){
+									$data['diff']['file_a'][] = sprintf('<span class="addition %s">%s</span>', $chunck_current_a, preg_replace('/^\+/', '', trim( $diff_full[$i+$io+$deletions_i] ) ) );
+									$additions--;
+								} else {
+									$data['diff']['file_a'][] = '<span class="empty"> </span>';
+								}
+							}
+						} else {
+							for ($io=0; $io < $ommitLines; $io++) {
+								$data['diff']['file_b'][] = sprintf('<span class="subtract %s">%s</span>', $chunck_current_b, preg_replace('/^-/', '', $diff_full[$i+$io]) );
+								$data['diff']['file_a'][] = '<span class="empty"> </span>';
+							}
+						}
 					} else {
 						$data['diff']['file_b'][] = sprintf('<span class="subtract %s">%s</span>', $chunck_current_b, preg_replace('/^-/', '', $diff_full[$i]) );
 						$data['diff']['file_a'][] = '<span class="empty"> </span>';
@@ -354,7 +530,7 @@ class ConfManager extends Controller
 		//CHECK ACCESS TO THAT FUNCTION//END//
 		$cmd = CMDRun::init()->
 			setCmd(MAINSCRIPT)->
-			setAttr(['run', 'cmd', $this->GIT_PATH, '--commit-list='.$req->getParam('name')]);
+			setAttr(['run', 'cmd', $this->GIT_PATH, '--commit-start=1', '--commit-end=2','--commit-list='.$req->getParam('name')]);
 		$data['cmd'] = $cmd->showCMD();
 		$data['list'] = [];
 		$commit_list = $cmd->get();
@@ -363,12 +539,76 @@ class ConfManager extends Controller
 		for ($i=0; $i < count($commit_list); $i++) {
 			$commit_list[$i] = explode(' ', $commit_list[$i]);
 			$data['list'][] = [
-					'id' => $i,
+					'id' => $commit_list[$i][1],
 					'text' => date( 'Y-m-d H:i:s', $commit_list[$i][0]),
 					'hash' =>$commit_list[$i][1],
 					'filename' =>$commit_list[$i][2]
 				];
 		}
+		if ( count($data['list']) == 1 ) $data['list'][] = $data['list'][0];
+		$data['device_info'] = [];
+		//$data['cm_device_id']=preg_match('/(__\d_\d)/', $req->getParam('shortname'));
+		if ( preg_match('/__\d+_\d+$/', $req->getParam('shortname')) ){
+			preg_match('/__(\d+)_(\d+)$/', $req->getParam('shortname'), $match);
+			$data['cm_device_id'] = $match[1];
+			$data['device_info'] = $this->db::table('confM_devices as cd')->
+					select(['td.name AS d_name', 'td.ipaddr AS d_ip', 'td.id AS d_id'])->
+					leftJoin('tac_devices as td', 'td.id', '=', 'cd.tac_device')->
+					where('cd.id', $match[1])->first();
+			//$data['device_ip'] = $this->db::table('tac_devices')->select()->where('id', $match[1])->first();
+			if ($deviceMatch){
+				$data['device_ip'] = $deviceMatch->ipaddr;
+			}
+			$data['cm_device_id'] = $match[2];
+		}
+
+		return $res -> withStatus(200) -> write(json_encode($data));
+}
+	public function getDiffList($req,$res)
+	{
+		//INITIAL CODE////START//
+		$data=array();
+		$data=$this->initialData([
+			'type' => 'post',
+			'object' => 'confManager',
+			'action' => 'diff info',
+		]);
+		#check error#
+		if ($_SESSION['error']['status']){
+			$data['error']=$_SESSION['error'];
+			return $res -> withStatus(401) -> write(json_encode($data));
+		}
+		//INITIAL CODE////END//
+		//CHECK ACCESS TO THAT FUNCTION//START//
+		if(!$this->checkAccess(1))
+		{
+			return $res -> withStatus(403) -> write(json_encode($data));
+		}
+		//CHECK ACCESS TO THAT FUNCTION//END//
+		$data['results'] = [];
+		$page = $req->getParam('page');
+		$start = 1 + ( ($page - 1) * 10 );
+		$end = $page * 10;
+
+		$cmd = CMDRun::init()->
+			setCmd(MAINSCRIPT)->
+			setAttr(['run', 'cmd', $this->GIT_PATH, '--commit-start='.$start, '--commit-end='.$end,'--commit-list='.$req->getParam('extra')['filename']]);
+		$data['cmd'] = $cmd->showCMD();
+
+		$commit_list = $cmd->get();
+
+		$commit_list = explode(PHP_EOL, $commit_list);
+		for ($i=0; $i < count($commit_list); $i++) {
+			$commit_list[$i] = explode(' ', $commit_list[$i]);
+			$data['results'][] = [
+					'id' => $commit_list[$i][1],
+					'text' => date( 'Y-m-d H:i:s', $commit_list[$i][0]),
+					'hash' =>$commit_list[$i][1],
+					'filename' =>$commit_list[$i][2]
+				];
+		}
+
+		$data['pagination'] = ['more'=> count($data['results']) == 10];
 
 		return $res -> withStatus(200) -> write(json_encode($data));
 }
@@ -555,8 +795,8 @@ public function postDatatables($req,$res)
 	$d_q_id = [];
 	foreach ($table_data as $row) {
 		$columns = preg_split('/\s+/', $row);
-		if ( !preg_match_all('/.*__(\d)_(\d)$/', $columns[2]) ) continue;
-		preg_match_all( '/.*__(\d)_(\d)$/', $columns[2], $match );
+		if ( !preg_match_all('/.*__(\d+)_(\d+)/', $columns[2]) ) continue;
+		preg_match_all( '/.*__(\d+)_(\d+)/', $columns[2], $match );
 		$d_q_id[] = [ 'd_id' => $match[1][0], 'q_id' => $match[2][0]];
 	}
 
@@ -581,18 +821,19 @@ public function postDatatables($req,$res)
 	$data['data'] = [];
 	foreach ($table_data as $row) {
 		$columns = preg_split('/\s+/', $row);
-		preg_match_all( '/.*__(\d)_(\d)$/', $columns[2], $match );
+		preg_match_all( '/.*__(\d+)_(\d+)$/', $columns[2], $match );
 		$dev_id = (isset($match[1]) AND isset($match[1][0])) ? $match[1][0] : 0;
 		$que_id = (isset($match[2]) AND isset($match[2][0])) ? $match[2][0] : 0;
-		
+
 		$buttons='<a class="btn btn-xs btn-default btn-flat" title="download latest version" href="/api/confmanager/file/download/?group='.preg_replace("/[\/]?$columns[2]/", '', $columns[3]).'&name='.$columns[2].'" target="_blank"><i class="fa fa-cloud-download"></i></a>'.
+		' <a class="btn btn-info btn-xs btn-flat"  title="quick refresh" disabled><i class="fa fa-refresh"></i></a>'.
 		' <a class="btn btn-warning btn-xs btn-flat" href="/confM_preview.php?group='.preg_replace("/[\/]?$columns[2]/", '', $columns[3]).'&name='.$columns[2].'">diff</a>'.
 		' <button class="btn btn-danger btn-xs btn-flat" onclick="cm_list.del(\''.preg_replace("/[\/]?$columns[2]/", '', $columns[3]).'\',\''.$columns[2].'\')">Del</button>';
 
 		$data['data'][] = [
 			'name' => $columns[2],
-			'device_name' => (preg_match_all('/.*__(\d)_(\d)$/',
-		    $columns[2])) ?  preg_replace('/__(\d)_(\d)$/', '', $columns[2]) : $columns[2],
+			'device_name' => (preg_match_all('/.*__(\d+)_(\d+)$/',
+		    $columns[2])) ?  preg_replace('/__(\d+)_(\d+)$/', '', $columns[2]) : $columns[2],
 			'query_name' => ( isset($queries_data[$que_id]) ) ? $queries_data[$que_id]->name : '',
 			'device_id' => $dev_id,
 			'query_id' => $que_id,
@@ -758,13 +999,13 @@ public function getPreview($req,$res)
 
 		$output = $this->db::table('confM_queries as q')->
 			leftJoin('confM_bind_query_devices as qu_de', 'qu_de.query_id', '=', 'q.id')->
-			leftJoin('confM_bind_query_model as qu_mo', 'qu_mo.query_id', '=', 'q.id')->
-			leftJoin('confM_bind_query_creden as qu_cr', 'qu_cr.query_id', '=', 'q.id')->
-			leftJoin('confM_credentials as cq', 'cq.id', '=', 'qu_cr.creden_id')->
-			leftJoin('confM_devices as d', 'd.id', '=', 'device_id')->
-			leftJoin('confM_bind_devices_creden as de_cr', 'de_cr.device_id', '=', 'd.id')->
-			leftJoin('confM_credentials as cd', 'cd.id', '=', 'de_cr.creden_id')->
-			leftJoin('confM_models as m', 'm.id', '=', 'model_id')->
+			// leftJoin('confM_bind_query_model as qu_mo', 'qu_mo.query_id', '=', 'q.id')->
+			// leftJoin('confM_bind_query_creden as qu_cr', 'qu_cr.query_id', '=', 'q.id')->
+			leftJoin('confM_credentials as cq', 'cq.id', '=', 'q.credential')->
+			leftJoin('confM_devices as d', 'd.id', '=', 'qu_de.device_id')->
+			// leftJoin('confM_bind_devices_creden as de_cr', 'de_cr.device_id', '=', 'd.id')->
+			leftJoin('confM_credentials as cd', 'cd.id', '=', 'd.credential')->
+			leftJoin('confM_models as m', 'm.id', '=', 'q.model')->
 			select([
 				'q.id as q_id',
 				'q.name as q_name',
@@ -773,7 +1014,7 @@ public function getPreview($req,$res)
 				'q.f_group as group',
 				'q.omit_lines as omitLines',
 				'qu_de.device_id as d_id',
-				'qu_mo.model_id as m_id',
+				'm.id as m_id',
 				'd.name as d_name',
 				'm.name as m_name',
 				'm.prompt as m_prompt',

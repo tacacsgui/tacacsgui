@@ -226,8 +226,14 @@ class ConfigCredentials extends Controller
     $params = $req->getParams(); //Get ALL parameters form Datatables
 
     $columns = $this->APICheckerCtrl->getTableTitles('confM_credentials'); //Array of all columnes that will used
-    array_unshift( $columns, 'id' );
-    array_push( $columns, 'created_at', 'updated_at' );
+    array_unshift( $columns, 'confM_credentials.id as id' );
+    array_push( $columns, 'confM_credentials.created_at as created_at', 'confM_credentials.updated_at as updated_at',
+	 	$this->db::raw('(SELECT COUNT(*) FROM confM_queries WHERE credential = confM_credentials.id) as ref_d'),
+	 	$this->db::raw('(SELECT COUNT(*) FROM confM_devices WHERE credential = confM_credentials.id) as ref_q') );
+		if (($key = array_search('name', $columns)) !== false) {
+    	unset($columns[$key]);
+			array_push( $columns, 'confM_credentials.name as name');
+		}
     $data['columns'] = $columns;
     $queries = [];
     $data['filter'] = [];
@@ -245,6 +251,9 @@ class ConfigCredentials extends Controller
     $data['recordsTotal'] = Conf_Credentials::count();
     //Get temp data for Datatables with Fliter and some other parameters
     $tempData = Conf_Credentials::select($columns)->
+			leftJoin('confM_queries as q', 'q.credential', '=', 'confM_credentials.id')->
+			leftJoin('confM_devices as d', 'd.credential', '=', 'confM_credentials.id')->
+			groupBy('confM_credentials.id')->
       when( !empty($queries),
         function($query) use ($queries)
         {

@@ -559,7 +559,7 @@ public function postDeviceCsv($req,$res)
 		$offset = 10 * ($req->getParam('page') - 1);
 		$data['take'] = $take;
 		$data['offset'] = $offset;
-		$tempData = TACDevices::select(['id','name AS text','key','enable', 'disabled'])->
+		$tempData = TACDevices::select(['id','name AS text','key','enable', 'disabled', 'ipaddr', 'prefix'])->
 			when( !empty($search), function($query) use ($search)
 			{
 				$query->where('name','LIKE', '%'.$search.'%');

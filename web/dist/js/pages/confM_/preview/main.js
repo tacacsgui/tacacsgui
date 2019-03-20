@@ -6,6 +6,7 @@ $('document').ready(function(){
       tgui_status.fulfill(resp);
 			//MAIN CODE//Start
 			cm_preview.init();
+			//cm_tgui.init();
 			//MAIN CODE//END
 			$('div.loading').hide();/*---*/
     }).catch(function(err){

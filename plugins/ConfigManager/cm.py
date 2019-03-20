@@ -92,10 +92,10 @@ if args.status:
     stdout, stderr = subprocess.Popen([ "crontab", "-l"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True).communicate()
     cronstatus = 'Planned' if '#### TGUI CM ####' in stdout else 'Not Planned'
     if os.path.isfile(pid_path):
-        if args.debug: deb.cm_debug.show(message='Old pid file found')
+        if args.debug: deb.cm_debug.show(message='Pid file found')
         with open(pid_path, 'r') as pid_old_file:
             pid_old = pid_old_file.read()
-        if args.debug: deb.cm_debug.show(message='Old PID: ' + str(pid_old))
+        if args.debug: deb.cm_debug.show(message='PID in file: ' + str(pid_old))
         if git.check_pid(pid_old):
             if args.debug: deb.cm_debug.show(message='Process already running. Exit')
             print('running '+pid_old+' ' + str(os.path.getmtime(pid_path)) +' '+cronstatus, end='\n')
@@ -152,10 +152,10 @@ if not args.test_queries:
     git.check()
     #old pid
     if os.path.isfile(pid_path):
-        if args.debug: deb.cm_debug.show(message='Old pid file found')
+        if args.debug: deb.cm_debug.show(message='Pid file found')
         with open(pid_path, 'r') as pid_old_file:
             pid_old = pid_old_file.read()
-        if args.debug: deb.cm_debug.show(message='Old PID: ' + str(pid_old))
+        if args.debug: deb.cm_debug.show(message='PID from file: ' + str(pid_old))
         if git.check_pid(pid_old):
             if args.debug: deb.cm_debug.show(message='Process already running. Exit')
             print('running ' + str(os.path.getmtime(pid_path)), end='\n')
@@ -196,6 +196,7 @@ for query in list(data_loaded['queries']):
 			open(data_loaded['git']['path']+'/'+group+query['name'], 'a').close()
 	try:
 		deviceFile = engine.run(**query)
+		#if args.debug: deb.cm_debug.show( message = "From engine: "+ deviceFile)
 		if args.anchors:
 			deviceFile = 'START_ ' + deviceFile + ' END_';
 		if args.test_queries:
@@ -216,4 +217,4 @@ if args.debug: deb.cm_debug.show( message = 'End of Quering loop' )
 if not args.test_queries:
     with open(pid_path, "w") as pid_file:
         pid_file.write('')
-if not args.anchors: git.check()
+    if not args.anchors: git.check()

@@ -77,8 +77,8 @@ var cm_devices = {
 
     ajaxRequest.send(ajaxProps).then(function(resp) {
       tgui_supplier.fulfillForm(resp.device, self.formSelector_edit);
-      if (resp.device.creden) self.credenSelect2.preSelection(resp.device.creden, 'edit');
-      if (resp.device.tac_dev) self.tacDevSelect2.preSelection(resp.device.tac_dev, 'edit');
+      if (resp.device.credential) self.credenSelect2.preSelection(resp.device.credential, 'edit');
+      if (resp.device.tac_device) self.tacDevSelect2.preSelection(resp.device.tac_device, 'edit');
       $('#editDevice').modal('show')
     }).fail(function(err){
       tgui_error.getStatus(err, ajaxProps)

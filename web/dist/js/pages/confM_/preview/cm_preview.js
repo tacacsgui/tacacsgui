@@ -6,7 +6,26 @@ var cm_preview = {
     console.log(folder);
     this.name = ((folder && folder != '') ? folder+'/': '') + tgui_supplier.getUrlParameter('name');
     $('div.box div.box-header elName').text(this.name)
+
+    /*Select2 List of Diffs*/
+    this.file_aSelect2 = new tgui_select2({
+      ajaxUrl : API_LINK+"confmanager/diff/list/",
+      template: this.templateSelect2,
+      extra: { filename: this.name},
+      add: ".select2.select_a",
+    });
+    $(".select2.select_a").select2(this.file_aSelect2.select2Data());
+
+    this.file_bSelect2 = new tgui_select2({
+      ajaxUrl : API_LINK+"confmanager/diff/list/",
+      template: this.templateSelect2,
+      extra: { filename: this.name},
+      add: ".select2.select_b",
+    });
+    $(".select2.select_b").select2(this.file_bSelect2.select2Data());
+
     Promise.resolve( this.get(this.name) ).then( function() {
+
       $('input[name="diffType"]').prop('disabled', false);
       $('input[name="context"]').on('change', function() {
         if ( $('input[name="diffType"]:checked').val() == 'brief'){
@@ -28,16 +47,34 @@ var cm_preview = {
         group = tgui_supplier.getUrlParameter('group');
         hash = $(this).select2('data')[0].hash;
         filename = $(this).select2('data')[0].filename;
-        console.log($(this).select2('data')[0]);
+        //console.log($(this).select2('data')[0]);
         file_link = 'file_a_download';
         if( $(this).hasClass('select_b') ) file_link = 'file_b_download';
         $('.'+file_link).attr("href","/api/confmanager/file/download/hash/?show="+filename+"&name="+name+'&hash='+hash)
 
+        $('[name="tgui_date_a"]').val($(".select2.select_a").select2('data')[0].text)
+        $('[name="tgui_date_b"]').val($(".select2.select_b").select2('data')[0].text)
+        $('period').text($(".select2.select_a").select2('data')[0].text+' - '+$(".select2.select_b").select2('data')[0].text)
+        //console.log( $('[name="tgui_date_a"]').val() , $('[name="tgui_date_b"]').val() );
+        if ( $('[name="tgui_date_a"]').val() != $('[name="tgui_date_b"]').val() && $('input[name="diffType"]:checked').val() != 'preview'){
+          cm_preview.tgui_log();
+        } else {
+          if ( $('input[name="diffType"]:checked').val() != 'preview') {
+            cm_tgui.clear()
+            $('div.message h3').show().text('Preview Mode');
+          } else $('div.message h3').show().text('The same date used.');
+        }
+
       });
       self.diff.brief();
+
     });
-    //this.get(name)
+
     $('input[name="diffType"]').on('change', function(e) {
+      if ( $('input[name="diffType"]:checked').val() == 'preview' ){
+        cm_tgui.clear()
+        $('div.message h3').show().text('Preview Mode');
+      }
       self.diff[$(this).val()]();
     })
   },
@@ -48,26 +85,28 @@ var cm_preview = {
       url: API_LINK+"confmanager/diff/info/",
       data: {
         "name": name,
+        "shortname": tgui_supplier.getUrlParameter('name'),
       }
     };//ajaxProps END
     return new Promise(
       function (resolve, reject) {
         ajaxRequest.send(ajaxProps).then(function(resp) {
-          //console.log(resp);
-          $(".select2.select_a").select2({
-            placeholder: "File A",
-            data: resp.list,
-            escapeMarkup: function (markup) { return markup; }, // let our custom formatter work
-            templateResult: self.templateSelect2,
-            templateSelection: self.templateSelect2
-          })
-          $(".select2.select_b").select2({
-            placeholder: "File B",
-            data: resp.list,
-            escapeMarkup: function (markup) { return markup; }, // let our custom formatter work
-            templateResult: self.templateSelect2,
-            templateSelection: self.templateSelect2
-          })
+          console.log(resp);
+
+          var option_a = new Option('', resp.list[0].id, true, true);
+          var option_b = new Option('', resp.list[1].id, true, true);
+          $(option_a).data(resp.list[0]);
+          $(option_b).data(resp.list[1]);
+          //console.log(temp);//
+          $(".select2.select_a").append(option_a).trigger('change');
+          $(".select2.select_b").append(option_b).trigger('change');
+          $('.select2.select_a').select2('data')[0].hash = resp.list[0].hash;
+          $('.select2.select_b').select2('data')[0].hash = resp.list[1].hash;
+          $('.select2.select_a').select2('data')[0].filename = resp.list[0].filename;
+          $('.select2.select_b').select2('data')[0].filename = resp.list[1].filename;
+          $('.select2.select_a').select2('data')[0].text = resp.list[0].text;
+          $('.select2.select_b').select2('data')[0].text = resp.list[1].text;
+
           if ( resp.list[1] && resp.list[1].id ) $(".select2.select_b").val(resp.list[1].id).trigger('change');
 
           name = tgui_supplier.getUrlParameter('name');
@@ -79,6 +118,28 @@ var cm_preview = {
 
           $('.file_a_download').attr("href","/api/confmanager/file/download/hash/?show="+filename_a+"&name="+name+'&hash='+hash_a)
           $('.file_b_download').attr("href","/api/confmanager/file/download/hash/?show="+filename_b+"&name="+name+'&hash='+hash_b)
+
+          $('.match-found').hide()
+          $('[name="tgui_device_ip"]').val('')
+          $('[name="tgui_device_id"]').val('')
+          if (resp.device_info){
+            $('.match-found').show()
+            if (resp.device_info.d_name && resp.device_info.d_ip){
+              $('deviceInfo').text(resp.device_info.d_name+' ('+resp.device_info.d_ip+')')
+            } else {
+              $('deviceInfo').text('not set')
+            }
+
+            $('[name="tgui_device_ip"]').val(resp.device_info.d_ip)
+            $('[name="tgui_device_id"]').val(resp.device_info.d_id)
+          }
+
+          $('[name="tgui_date_a"]').val($(".select2.select_a").select2('data')[0].text)
+          $('[name="tgui_date_b"]').val($(".select2.select_b").select2('data')[0].text)
+          $('period').text($(".select2.select_a").select2('data')[0].text+' - '+$(".select2.select_b").select2('data')[0].text)
+          if ( $('[name="tgui_date_a"]').val() != $('[name="tgui_date_b"]').val() )
+            cm_preview.tgui_log();
+          else $('div.message h3').show().text('The same date used.');
 
           resolve(true)
 
@@ -109,8 +170,10 @@ var cm_preview = {
 
       ajaxRequest.send(ajaxProps).then(function(resp) {
         //console.log(resp);
+
         $('pre.preview.file_a').empty()
         $('pre.preview.file_b').empty()
+
         if (type == 'native'){
           $('div.file_b_column .preview').hide();
           $('div.file_a_column').removeClass('col-sm-6').addClass('col-sm-12');
@@ -188,14 +251,22 @@ var cm_preview = {
       return output;
     }
   },
-  download: function(select) {
-    var select = select || 'select_a'
-
-    console.log($('.select2.'+select).select2('data'),this.name);
+  tgui_log: function() {
+    cm_tgui.get_user_list()
   },
   templateSelect2: function(data){
+    text = data.text;
+    hash = data.hash;
+    filename = data.filename;
+    //console.log(data);
+    if (data.element){
+      new_data = $(data.element).data();
+      text = data.text || new_data.text;
+      hash = data.hash || new_data.hash;
+      filename = data.filename || new_data.filename;
+    }
     var output='<div class="selectModelOption">';
-      output += '<text>'+data.text+' <small class="text-muted">('+data.hash+','+data.filename+')</small></text>';
+      output += '<text>'+text+' <small class="text-muted">('+hash+','+filename+')</small></text>';
       output += '</div>'
     return output;
   },

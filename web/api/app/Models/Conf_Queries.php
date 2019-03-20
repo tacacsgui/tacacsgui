@@ -13,5 +13,7 @@ class Conf_Queries extends Model
     'f_group',
     'disabled',
     'omit_lines',
+    'credential',
+    'model',
 	];
 }

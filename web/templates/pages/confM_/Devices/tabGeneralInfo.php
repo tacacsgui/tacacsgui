@@ -6,6 +6,7 @@
       <input type="hidden"  data-type="input" data-default="" data-pickup="true" name="id">
       <input type="text" class="form-control" name="name" data-type="input" data-default="" data-pickup="true" placeholder="Enter Device Name" autocomplete="off">
       <p class="help-block">it should be unique, but you can change it later</p>
+      <p class="text-danger">beware, name changing will change filename!</p>
     </div>
   </div>
   <div class="col-sm-4">
@@ -48,10 +49,10 @@
     </div>
   </div>
   <div class="col-sm-6">
-    <div class="form-group creden">
+    <div class="form-group credential">
       <label for="Name">Credential (Optional)</label>
-      <input type="hidden"  data-type="input" data-default="" name="creden_native">
-      <select class="form-control select2 select_creden"  name="creden" data-type="select" data-default="" data-pickup="true" style="width:100%"></select>
+      <input type="hidden"  data-type="input" data-default="" name="credential_native">
+      <select class="form-control select2 select_creden"  name="credential" data-type="select" data-default="" data-pickup="true" style="width:100%"></select>
       <p class="help-block">if set, Query settings will be ignored</p>
     </div>
   </div>

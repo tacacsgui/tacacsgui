@@ -9,6 +9,8 @@ var initialData =
 	{
 		id: {title: "ID", data : "id", orderable: true, visible: false,},
 		name: {title: "Name", data : "name", visible: true, orderable: true},
+		prompt: {title: "Default Prompt", data : "prompt", visible: true, orderable: false},
+		ref: {title: "Ref", data : "ref", visible: false, orderable: false},
 		buttons: {title: "Action", data : "buttons", visible: true, orderable: false},
 	},
   column:

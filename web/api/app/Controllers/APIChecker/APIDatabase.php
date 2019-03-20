@@ -348,6 +348,8 @@ class APIDatabase
   		'prompt' => ['string', ''],
   		'protocol' => ['string', 'ssh'],
   		'port' => ['integer', '22'],
+      'tac_device' => ['foreign-null', ['references'=>'id', 'on'=>'tac_devices', 'onDelete'=>'cascade'] ],
+      'credential' => ['foreign-null', ['references'=>'id', 'on'=>'confM_credentials', 'onDelete'=>'cascade'] ]
   	],
   	'confM_queries' =>
   	[
@@ -355,6 +357,8 @@ class APIDatabase
   		'disabled' => ['integer', '0'],
   		'f_group' => ['string', ''],
   		'omit_lines' => ['string', ''],
+      'credential' => ['foreign-null', ['references'=>'id', 'on'=>'confM_credentials', 'onDelete'=>'cascade'] ],
+      'model' => ['foreign-null', ['references'=>'id', 'on'=>'confM_models', 'onDelete'=>'cascade'] ],
   	],
   	'confM_credentials' =>
   	[
@@ -362,13 +366,13 @@ class APIDatabase
   		'username' => ['string', '_'],
   		'password' => ['string', '_'],
   	],
-    'confM_bind_query_model' =>
-    [
-      'unsetId' => true,
-      'unsetTimestamp' => true,
-      'query_id' => ['foreign', ['references'=>'id', 'on'=>'confM_queries', 'onDelete'=>'cascade'] ],
-      'model_id' => ['foreign', ['references'=>'id', 'on'=>'confM_models',  'onDelete'=>'cascade'] ],
-    ],
+    // 'confM_bind_query_model' =>
+    // [
+    //   'unsetId' => true,
+    //   'unsetTimestamp' => true,
+    //   'query_id' => ['foreign', ['references'=>'id', 'on'=>'confM_queries', 'onDelete'=>'cascade'] ],
+    //   'model_id' => ['foreign', ['references'=>'id', 'on'=>'confM_models',  'onDelete'=>'cascade'] ],
+    // ],
     'confM_bind_query_devices' =>
     [
       'unsetId' => true,
@@ -376,20 +380,20 @@ class APIDatabase
       'query_id' => ['foreign', ['references'=>'id', 'on'=>'confM_queries', 'onDelete'=>'cascade'] ],
       'device_id' => ['foreign', ['references'=>'id', 'on'=>'confM_devices', 'onDelete'=>'cascade'] ],
     ],
-    'confM_bind_query_creden' =>
-    [
-      'unsetId' => true,
-      'unsetTimestamp' => true,
-      'query_id' => ['foreign', ['references'=>'id', 'on'=>'confM_queries', 'onDelete'=>'cascade'] ],
-      'creden_id' => ['foreign', ['references'=>'id', 'on'=>'confM_credentials', 'onDelete'=>'cascade'] ],
-    ],
-    'confM_bind_devices_creden' =>
-    [
-      'unsetId' => true,
-      'unsetTimestamp' => true,
-      'creden_id' => ['foreign', ['references'=>'id', 'on'=>'confM_credentials', 'onDelete'=>'cascade'] ],
-      'device_id' => ['foreign', ['references'=>'id', 'on'=>'confM_devices', 'onDelete'=>'cascade'] ],
-    ],
+    // 'confM_bind_query_creden' =>
+    // [
+    //   'unsetId' => true,
+    //   'unsetTimestamp' => true,
+    //   'query_id' => ['foreign', ['references'=>'id', 'on'=>'confM_queries', 'onDelete'=>'cascade'] ],
+    //   'creden_id' => ['foreign', ['references'=>'id', 'on'=>'confM_credentials', 'onDelete'=>'cascade'] ],
+    // ],
+    // 'confM_bind_devices_creden' =>
+    // [
+    //   'unsetId' => true,
+    //   'unsetTimestamp' => true,
+    //   'creden_id' => ['foreign', ['references'=>'id', 'on'=>'confM_credentials', 'onDelete'=>'cascade'] ],
+    //   'device_id' => ['foreign', ['references'=>'id', 'on'=>'confM_devices', 'onDelete'=>'cascade'] ],
+    // ],
     'confM_bind_model_expect' =>
     [
       'unsetId' => true,
@@ -401,13 +405,13 @@ class APIDatabase
   		'expect' => ['string', '_'],
   		'send' => ['string', ''],
     ],
-    'confM_bind_cmdev_tacdev' =>
-    [
-      'unsetId' => true,
-      'unsetTimestamp' => true,
-      'tac_dev' => ['foreign', ['references'=>'id', 'on'=>'tac_devices', 'onDelete'=>'cascade'] ],
-      'cm_dev' => ['foreign', ['references'=>'id', 'on'=>'confM_devices',  'onDelete'=>'cascade'] ],
-    ],
+    // 'confM_bind_cmdev_tacdev' =>
+    // [
+    //   'unsetId' => true,
+    //   'unsetTimestamp' => true,
+    //   'tac_dev' => ['foreign', ['references'=>'id', 'on'=>'tac_devices', 'onDelete'=>'cascade'] ],
+    //   'cm_dev' => ['foreign', ['references'=>'id', 'on'=>'confM_devices',  'onDelete'=>'cascade'] ],
+    // ],
 
   );
 

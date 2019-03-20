@@ -237,9 +237,11 @@ $app->post('/confmanager/file/delete/', 'ConfManager:postDel');
 $app->get('/confmanager/file/download/', 'APIDownloadCtrl:getDlCm');
 $app->get('/confmanager/file/download/hash/', 'APIDownloadCtrl:getCmHash');
 $app->post('/confmanager/diff/info/', 'ConfManager:postDiffInfo');
+$app->get('/confmanager/diff/list/', 'ConfManager:getDiffList');
 $app->post('/confmanager/diff/brief/', 'ConfManager:postDiffBrief');
 $app->post('/confmanager/diff/', 'ConfManager:postDiff');
-$app->post('/confmanager/diff/tacgui/', 'ConfManager:postTacgui');
+$app->post('/confmanager/diff/tacgui/users/', 'ConfManager:postTacgui');
+$app->post('/confmanager/diff/tacgui/aaa/', 'ConfManager:postTacguiAAA');
 //Models
 $app->post('/confmanager/models/datatables/', 'ConfModels:postDatatables');
 $app->post('/confmanager/models/add/', 'ConfModels:postAdd');

@@ -149,6 +149,7 @@ var tgui_datatables = function(data){
 	 		var rowData = {};
 	 		for (var i = 0; i < selectedCount; i++) {
 	 			rowData = dataTable.table.row( $(data.tableSelector + ' tr.selected')[i] ).data();
+				console.log(data.deleteItems);
 	 			data.deleteItems(rowData.id, rowData.name || rowData.username, false);
 	 		}
 	 	},

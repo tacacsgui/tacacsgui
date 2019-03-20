@@ -254,8 +254,14 @@ class ConfModels extends Controller
     $params = $req->getParams(); //Get ALL parameters form Datatables
 
     $columns = $this->APICheckerCtrl->getTableTitles('confM_models'); //Array of all columnes that will used
-    array_unshift( $columns, 'id' );
-    array_push( $columns, 'created_at', 'updated_at' );
+    array_unshift( $columns, 'confM_models.id as id' );
+    array_push( $columns, 'confM_models.created_at as created_at',
+			'confM_models.updated_at as updated_at',
+			$this->db::raw('(SELECT COUNT(*) FROM confM_queries WHERE model = confM_models.id) as ref') );
+		if (($key = array_search('name', $columns)) !== false) {
+    	unset($columns[$key]);
+			array_push( $columns, 'confM_models.name as name');
+		}
     $data['columns'] = $columns;
     $queries = [];
     $data['filter'] = [];
@@ -273,6 +279,8 @@ class ConfModels extends Controller
     $data['recordsTotal'] = Conf_Models::count();
     //Get temp data for Datatables with Fliter and some other parameters
     $tempData = Conf_Models::select($columns)->
+			leftJoin('confM_queries as q', 'q.model', '=', 'confM_models.id')->
+			groupBy('confM_models.id')->
       when( !empty($queries),
         function($query) use ($queries)
         {

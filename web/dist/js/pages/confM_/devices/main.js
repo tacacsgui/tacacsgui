@@ -6,6 +6,7 @@ $('document').ready(function(){
       tgui_status.fulfill(resp);
 			//MAIN CODE//Start
 			dataTable.init();
+			fastImport.init();
 			cm_devices.init();
 			//MAIN CODE//END
 			$('div.loading').hide();/*---*/

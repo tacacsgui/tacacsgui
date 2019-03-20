@@ -41,3 +41,30 @@ pre.preview span.empty {
   content: '';
   background-color: #eee;
 }
+ul.tgui_user_list {
+  list-style-type: none;
+  border: 1px solid #eee;
+  padding: 10px;
+}
+ul.tgui_user_list > li > aaa > span.label {
+  margin-left: 7px;
+}
+ul.tgui_user_list > li {
+  padding: 10px;
+  cursor: pointer;
+  border-bottom: 1px solid #eee;
+}
+ul.tgui_user_list > li:last-child {
+  padding: 10px;
+  border-bottom: 0px solid #eee;
+}
+ul.tgui_user_list > li:hover {
+  background-color: #eee;
+}
+ul.tgui_user_list > li.selected:hover,
+ul.tgui_user_list > li.selected {
+  background-color: #add;
+}
+div.aaa-report {
+  min-height: 400px;
+}

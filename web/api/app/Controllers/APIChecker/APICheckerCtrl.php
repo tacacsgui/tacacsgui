@@ -56,6 +56,10 @@ class APICheckerCtrl extends Controller
 					case 'timestamp':
 						$columnObj = $table->timestamp($columnName);
 						break;
+					case 'foreign-null':
+						$table->integer($columnName)->nullable()->unsigned();
+    				$table->foreign($columnName)->references($columnAttr[1]['references'])->on($columnAttr[1]['on'])->onDelete('cascade');
+						break;
 					case 'foreign':
 						$table->unsignedInteger($columnName);
     				$table->foreign($columnName)->references($columnAttr[1]['references'])->on($columnAttr[1]['on'])->onDelete('cascade');
@@ -278,12 +282,14 @@ class APICheckerCtrl extends Controller
 							$data["messages"][count($data["messages"])]="Column ".$columnName." in the table ".$tableName." created";
 							if ($updateFlag) {
 								$databaseFix = $this->databaseFix();
+								//var_dump($this->db::getSchemaBuilder()->hasColumn('confM_bind_cmdev_tacdev','tac_dev'));die();
 								if ($databaseFix['status']){
 									$data["messages"][0]=$databaseFix['message'];
-									$data['test1'] = $this->db::connection($database)->getSchemaBuilder()->getColumnListing('api_logging');
+									//$data['test1'] = $this->db::connection($database)->getSchemaBuilder()->getColumnListing('api_logging');
 									sleep(1); return $res -> withStatus(200) -> write(json_encode($data));
 								}
 								//ADD COLUMN//
+								$this->db::getSchemaBuilder()->disableForeignKeyConstraints();
 								$this->db::connection($database)->getSchemaBuilder()->table($tableName, function(Blueprint $table) use ($columnName,$preColumnName,$tableColumns)
 								{
 									switch ($tableColumns[$columnName][0]) {
@@ -299,12 +305,18 @@ class APICheckerCtrl extends Controller
 										case 'timestamp':
 											$columnObj = $table->timestamp($columnName);
 											break;
+										case 'foreign-null':
+											$columnObj = $table->integer($columnName)->nullable()->unsigned();
+					    				$table->foreign($columnName)->references($tableColumns[$columnName][1]['references'])->
+												on($tableColumns[$columnName][1]['on'])->onDelete('cascade');
+											break;
 										case 'foreign':
-											$table->unsignedInteger($columnName);
-					    				$table->foreign($columnName)->references($tableColumns[$columnName][1]['references'])->on($tableColumns[$columnName][1]['on']);
+											$columnObj = $table->unsignedInteger($columnName);
+					    				$table->foreign($columnName)->references($tableColumns[$columnName][1]['references'])->
+												on($tableColumns[$columnName][1]['on']);
 											break;
 									}
-
+									//var_dump($preColumnName);die();
 									if ($preColumnName) $columnObj -> after($preColumnName); else  $columnObj -> first();
 									if(isset($tableColumns[$columnName][1])
 										AND
@@ -389,6 +401,49 @@ class APICheckerCtrl extends Controller
 			});
 
 			$response['message'] = 'Table fix for tac_users';
+		}
+
+		if ( $this->db::getSchemaBuilder()->hasColumn('confM_bind_cmdev_tacdev','tac_dev') )
+		{
+			$this->db::getSchemaBuilder()->table('confM_bind_cmdev_tacdev', function (Blueprint $table) {
+        $table->dropForeign('confm_bind_cmdev_tacdev_cm_dev_foreign');
+				$table->dropForeign('confm_bind_cmdev_tacdev_tac_dev_foreign');
+				$table->dropIndex('confm_bind_cmdev_tacdev_cm_dev_foreign');
+				$table->dropIndex('confm_bind_cmdev_tacdev_tac_dev_foreign');
+      });
+			$this->db::connection('default')->getSchemaBuilder()->dropIfExists('confM_bind_cmdev_tacdev');
+			$response['message'] = 'Table confM_bind_cmdev_tacdev deleted';
+		}
+
+		if ( $this->db::getSchemaBuilder()->hasColumn('confM_bind_devices_creden','device_id') )
+		{
+			$this->db::getSchemaBuilder()->table('confM_bind_devices_creden', function (Blueprint $table) {
+        $table->dropForeign('confm_bind_devices_creden_creden_id_foreign');
+				$table->dropForeign('confm_bind_devices_creden_device_id_foreign');
+				$table->dropIndex('confm_bind_devices_creden_creden_id_foreign');
+				$table->dropIndex('confm_bind_devices_creden_device_id_foreign');
+      });
+			$this->db::connection('default')->getSchemaBuilder()->dropIfExists('confM_bind_devices_creden');
+			$response['message'] = 'Table confM_bind_devices_creden deleted';
+		}
+
+		if ( $this->db::getSchemaBuilder()->hasColumn('confM_bind_query_model','model_id') )
+		{
+			$this->db::getSchemaBuilder()->table('confM_bind_query_model', function (Blueprint $table) {
+        $table->dropForeign('confm_bind_query_model_model_id_foreign');
+				$table->dropForeign('confm_bind_query_model_query_id_foreign');
+				$table->dropIndex('confm_bind_query_model_model_id_foreign');
+				$table->dropIndex('confm_bind_query_model_query_id_foreign');
+      });
+			$this->db::connection('default')->getSchemaBuilder()->dropIfExists('confM_bind_query_model');
+			$this->db::getSchemaBuilder()->table('confM_bind_query_creden', function (Blueprint $table) {
+        $table->dropForeign('confm_bind_query_creden_creden_id_foreign');
+				$table->dropForeign('confm_bind_query_creden_query_id_foreign');
+				$table->dropIndex('confm_bind_query_creden_creden_id_foreign');
+				$table->dropIndex('confm_bind_query_creden_query_id_foreign');
+      });
+			$this->db::connection('default')->getSchemaBuilder()->dropIfExists('confM_bind_query_creden');
+			$response['message'] = 'Table confM_bind_query_model and confM_bind_query_creden deleted';
 		}
 
 		if ( array_search('userName', $this->db::connection('logging')->getSchemaBuilder()->getColumnListing('api_logging')) )

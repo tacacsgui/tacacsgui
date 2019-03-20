@@ -24,7 +24,7 @@ class cm_writer():
         if self.debug: deb.cm_debug.show( marker='debW', message = 'Write to file {}'.format(parms['path']+'/'+group+parms['name']) )
 
         try:
-            with open(parms['path']+'/'+group+parms['name'], "w") as config_file:
+            with open(parms['path']+'/'+group+parms['name'], "w+") as config_file:
                 config_file.write(parms['data'])
         except Exception as e:
             if self.debug: deb.cm_debug.show( marker='debW', message = 'Write error {}'.format(e) )
@@ -40,20 +40,26 @@ class cm_writer():
             omitLines = self.omitLSanitize(omitLines)
         finalData = data.split("\n")
         for ln in omitLines:
-            if int(ln-1) <= len(finalData):
+            if int(ln) <= len(finalData):
                 if marker:
-                    finalData[ln-1] = marker + finalData[ln-1]
+                    finalData[ln] = marker + finalData[ln]
                 else:
-                    del finalData[ln-1]
+                    if self.debug: deb.cm_debug.show( marker='debW', message = 'Delete {} line: {}'.format(str(ln), finalData[ln]) )
+                    del finalData[ln]
         return "\n".join(finalData)
 
     def omitLSanitize(self, omitLines):
+        import re
         sanitizedList = []
+        if self.debug: deb.cm_debug.show( marker='debW', message = 'OmitLines Sanitize: '+str(omitLines) )
         for oL in omitLines:
-            if (str(oL)).isdigit():
+            oL = re.sub("\s+", "", str(oL).strip())
+            if oL.lstrip('-').isdigit():
                 sanitizedList += [int(oL)]
                 continue
-            if ( len( (str(oL)).split('-') ) == 2 ):
-                sanitizedList += list( range( int(sorted( (str(oL)).split('-') )[0]),int(sorted( (str(oL)).split('-') )[1]) + 1 ) )
+            if ( re.match('^\d-\d', oL) and len( (oL).split('-') ) == 2 ):
+                if self.debug: deb.cm_debug.show( marker='debW', message = 'OmitLines Sanitize Range: '+str( (oL).split('-') ) )
+                sanitizedList += list( range( int(sorted( (oL).split('-'), key=int )[0]), int(sorted( (oL).split('-'), key=int )[1]) + 1 ) )
                 continue
+        if self.debug: deb.cm_debug.show( marker='debW', message = 'OmitLines Sanitize Result: '+str(sorted( list( set( sanitizedList ) ), reverse=True )) )
         return sorted( list( set( sanitizedList ) ), reverse=True )

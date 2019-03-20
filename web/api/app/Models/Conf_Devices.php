@@ -10,6 +10,11 @@ class Conf_Devices extends Model
 
 	protected $fillable = [
     'name',
+    'prompt',
+    'protocol',
+    'port',
+    'tac_device',
+    'credential',
     'ip'
 	];
 }

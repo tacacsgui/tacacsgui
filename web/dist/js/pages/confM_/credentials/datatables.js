@@ -10,6 +10,8 @@ var initialData =
 		id: {title: "ID", data : "id", orderable: true, visible: false,},
 		name: {title: "Name", data : "name", visible: true, orderable: true},
 		username: {title: "Username", data : "username", visible: true, orderable: true},
+		ref_d: {title: "Ref. Devices", data : "ref_d", visible: false, orderable: false},
+		ref_q: {title: "Ref. Queries", data : "ref_q", visible: false, orderable: false},
 		buttons: {title: "Action", data : "buttons", visible: true, orderable: false},
 	},
   column:

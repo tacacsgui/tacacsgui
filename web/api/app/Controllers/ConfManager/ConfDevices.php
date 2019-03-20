@@ -54,15 +54,10 @@ class ConfDevices extends Controller
 		}
 
 		$allParams = $req->getParams();
-		$creden = (empty( $allParams['creden'] )) ? false : $allParams['creden'];
-		$tac_dev = (empty( $allParams['tac_dev'] )) ? false : $allParams['tac_dev'];
-		unset($allParams['creden']);
-		unset($allParams['tac_dev']);
+		if ( empty($allParams['credential']) ) unset($allParams['credential']);
+		if ( empty($allParams['tac_device']) ) unset($allParams['tac_device']);
 
 		$device = Conf_Devices::create($allParams);
-
-		if ($creden) $this->db::table('confM_bind_devices_creden')->insert(['device_id' => $device->id, 'creden_id' => $creden]);
-		if ($tac_dev) $this->db::table('confM_bind_cmdev_tacdev')->insert(['cm_dev' => $device->id, 'tac_dev' => $tac_dev]);
 
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
@@ -107,9 +102,7 @@ class ConfDevices extends Controller
 			return $res -> withStatus(200) -> write(json_encode($data));
 		}
 
-		$data['device'] = Conf_Devices::leftJoin('confM_bind_devices_creden as dc', 'confM_devices.id', '=', 'device_id')->
-		leftJoin('confM_bind_cmdev_tacdev as ct', 'confM_devices.id', '=', 'ct.cm_dev')->
-		select('confM_devices.*','creden_id as creden','ct.tac_dev as tac_dev')->where('id', $req->getParam('id'))->first();
+		$data['device'] = Conf_Devices::select()->where('id', $req->getParam('id'))->first();
 
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
@@ -163,21 +156,11 @@ class ConfDevices extends Controller
 			$name_old = $allParams['name_old'];
 			unset($allParams['name_old']);
 		}
-		$creden = ( !isset( $allParams['creden'] ) ) ? false : $allParams['creden'];
-		$tac_dev = ( !isset( $allParams['tac_dev'] ) ) ? false : $allParams['tac_dev'];
-		unset($allParams['creden']);
-		unset($allParams['tac_dev']);
+
+		if ( isset($allParams['credential']) AND $allParams['credential'] == '') $allParams['credential'] = null;
+		if ( isset($allParams['tac_device']) AND $allParams['tac_device'] == '' ) $allParams['tac_device'] = null;
 
 		$cmd = Conf_Devices::where( 'id', $req->getParam('id') )->update($allParams);
-
-		if ( $creden !== false ){
-			$this->db::table('confM_bind_devices_creden')->where( 'device_id', $req->getParam('id') )->delete();
-			if ($creden != '') $this->db::table('confM_bind_devices_creden')->insert(['device_id' => $req->getParam('id'), 'creden_id' => $creden]);
-		}
-		if ( $tac_dev !== false ){
-			$this->db::table('confM_bind_cmdev_tacdev')->where( 'cm_dev', $req->getParam('id') )->delete();
-			if ($tac_dev != '') $this->db::table('confM_bind_cmdev_tacdev')->insert(['cm_dev' => $req->getParam('id'), 'tac_dev' => $tac_dev]);
-		}
 
 		if ($name_old AND $allParams['name']) {
 			$data['rename']=Helper::deviceRename($name_old, $allParams['name']);
@@ -269,8 +252,15 @@ class ConfDevices extends Controller
     $params = $req->getParams(); //Get ALL parameters form Datatables
 
     $columns = $this->APICheckerCtrl->getTableTitles('confM_devices'); //Array of all columnes that will used
-    array_unshift( $columns, 'id' );
-    array_push( $columns, 'created_at', 'updated_at', 'ct.tac_dev as tacdev_id', 'dc.creden_id as creden_id' );
+    array_unshift( $columns, 'confM_devices.id as id' );
+    array_push( $columns, 'confM_devices.created_at as created_at',
+			'confM_devices.updated_at as updated_at', 'cre.name as creden_name',
+		 	'td.name as tgui_device',
+			$this->db::raw('(SELECT COUNT(*) FROM confM_bind_query_devices WHERE device_id = qd.device_id) as ref') );
+		if (($key = array_search('name', $columns)) !== false) {
+    	unset($columns[$key]);
+			array_push( $columns, 'confM_devices.name as name');
+		}
     $data['columns'] = $columns;
     $queries = [];
     $data['filter'] = [];
@@ -288,8 +278,10 @@ class ConfDevices extends Controller
     $data['recordsTotal'] = Conf_Devices::count();
     //Get temp data for Datatables with Fliter and some other parameters
     $tempData = Conf_Devices::select($columns)->
-			leftJoin('confM_bind_cmdev_tacdev as ct', 'confM_devices.id', '=', 'ct.cm_dev')->
-			leftJoin('confM_bind_devices_creden as dc', 'confM_devices.id', '=', 'dc.device_id')->
+			leftJoin('tac_devices as td', 'td.id', '=', 'confM_devices.tac_device')->
+			leftJoin('confM_credentials as cre', 'cre.id', '=', 'confM_devices.credential')->
+			leftJoin('confM_bind_query_devices as qd', 'qd.device_id', '=', 'confM_devices.id')->
+			groupBy('confM_devices.id')->
       when( !empty($queries),
         function($query) use ($queries)
         {
@@ -335,6 +327,8 @@ class ConfDevices extends Controller
   			take($params['length'])->
   			offset($params['start'])->
   			get()->toArray();
+  			//toSql();
+			//var_dump($tempData);die();
   		//Creating correct array of answer to Datatables
   		$data['data']=array();
   		foreach($tempData as $device){

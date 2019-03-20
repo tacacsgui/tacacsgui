@@ -83,6 +83,16 @@ var confM_set = {
 
     ajaxRequest.send(ajaxProps).then(function(resp) {
       console.log(resp);
+      if (action == 'start') if ( /^ready.*\d+\sPlanned|^running.*\d+\sPlanned/.test(resp.info)){
+        tgui_error.local.show({type:'warning', message: "Already Planned"})
+      } else if (resp.status == 'done') {
+        tgui_error.local.show({type:'success', message: "Successfully Planned"})
+      } else {
+        tgui_error.local.show({type:'error', message: "Something is going wrong"})
+      }
+      if (action == 'stop' && resp.status == 'done') tgui_error.local.show({type:'success', message: "Unplanned"})
+      if (action == 'force' && resp.status == '') tgui_error.local.show({type:'success', message: 'Force Start <i class="fa fa-rocket"></i> Activated!'})
+
       lui.stop(); //button loading stop
       self.info()
     }).fail(function(err){

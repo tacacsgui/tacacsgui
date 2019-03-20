@@ -121,7 +121,7 @@ var cm_queries = {
       if (resp.query.model) self.modelsSelect2.preSelection(resp.query.model, 'edit');
       if (resp.query.devices) self.devicesSelect2.preSelection(resp.query.devices, 'edit');
       if (resp.query.f_group) self.groupsSelect2.preSelection(resp.query.f_group, 'edit');
-      if (resp.query.creden) self.credenSelect2.preSelection(resp.query.creden, 'edit');
+      if (resp.query.credential) self.credenSelect2.preSelection(resp.query.credential, 'edit');
 
       if(resp.query.disabled == 1) tgui_supplier.toggle('disabled');
 
@@ -139,7 +139,7 @@ var cm_queries = {
     //console.log(dev_list_native);
     var dev_list = self.devicesSelect2.getData(self.devicesSelect2.edit, { formId: self.formSelector_edit });
     //console.log(dev_list);
-    dev_list = ( dev_list.attr && dev_list.attr.id && dev_list.attr.id.length ) ? dev_list.attr.id.join(';;') : '';
+    dev_list = ( dev_list.attr && dev_list.attr.id && dev_list.attr.id.length ) ? dev_list.attr.id.join(',') : '';
     if ( dev_list != dev_list_native ) formData.devices = self.devicesSelect2.getData(self.devicesSelect2.edit, { formId: self.formSelector_edit }).attr.id;
 
     var ajaxProps = {
@@ -147,6 +147,7 @@ var cm_queries = {
       data: formData
     };//ajaxProps END
 
+    // console.log(dev_list_native);
     // console.log(formData);
     // return false
 
@@ -246,12 +247,13 @@ var cm_queries = {
         data: {
           'device': $(formId + '[name="device_preview"]').val(),
           'model': $(formId + 'model').attr('data-id'),
-          'credentials': $(formId + '[name="creden"]').val(),
+          'credential': $(formId + '[name="credential"]').val(),
           'omitLines': $(formId + '[name="omit_lines"]').val(),
           'debug': +$(formId + '[name="preview_debug"]').prop('checked'),
         }
       };//ajaxProps END
       ajaxRequest.send(ajaxProps).then(function(resp) {
+        console.log(resp.preview);
         $('pre.preview_resp').empty();
         if (resp.error && resp.error.status){
           if (resp.error.validation && resp.error.validation.device){

@@ -48,5 +48,12 @@ class ConfManagerHelper
     self::forceCommit();
     return true;
   }
-
+  public static function CmInfoStatus()
+  {
+     return CMDRun::init()->
+      setCmd(MAINSCRIPT)->
+      setAttr(
+        ['run','cmd', '/opt/tacacsgui/plugins/ConfigManager/cm.py', '-c', '/opt/tgui_data/confManager/config.yaml', '--status'])->
+      get();
+  }
 }//END OF CLASS//

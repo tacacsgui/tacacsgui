@@ -10,6 +10,8 @@ FILE_B=''
 NEW_DIR_NAME=''
 OLD_FILENAME_NAME=''
 FILENAME_EXPORT=''
+COMM_START='0'
+COMM_END='0'
 
 function usage()
 {
@@ -52,16 +54,27 @@ while [ "$1" != "" ]; do
             echo -n $( getInfo $VALUE )
             exit
             ;;
+        --commit-start)
+            COMM_START=$VALUE
+            ;;
+        --commit-end)
+            COMM_END=$VALUE
+            ;;
         --commit-list)
             count='0';
             #echo "git -C ${GIT_REPO_PATH} log --follow --format='%ct %h' --name-only -- ${VALUE}"
-            echo -n "$(git -C ${GIT_REPO_PATH} log --follow --format="%ct %h" --name-only -- ${VALUE} | sed -r '/^\s*$/d' | while read commits; do
+            FINAL_LIST="$(git -C ${GIT_REPO_PATH} log --follow --format="%ct %h" --name-only -- ${VALUE} | cat | sed -r '/^\s*$/d' | while read commits; do
                 count=$((count+1))
                 if [[ $((count % 2)) -eq 1 ]]; then
                 echo -n "${commits} "
                 else echo "${commits}"
                 fi
               done)"
+            if [[ $COMM_END != '0' ]]; then
+              echo "$FINAL_LIST" | sed $COMM_START','$COMM_END'!d'
+            else
+              echo "$FINAL_LIST";
+            fi
             exit
             ;;
         --show)
