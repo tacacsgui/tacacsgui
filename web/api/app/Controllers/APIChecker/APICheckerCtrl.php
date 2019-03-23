@@ -42,6 +42,7 @@ class APICheckerCtrl extends Controller
 			else unset($tableColumns['unsetId']);
 			$timestamp = ( @$tableColumns['unsetTimestamp'] ) ? false : true;
 			unset($tableColumns['unsetTimestamp']);
+			$this->db::getSchemaBuilder()->disableForeignKeyConstraints();
 			foreach($tableColumns as $columnName => $columnAttr){
 				switch ($columnAttr[0]) {
 					case 'string':

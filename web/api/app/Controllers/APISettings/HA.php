@@ -167,7 +167,7 @@ class HA
     foreach ($this->ha_data['server_list']['slave'] as $value) {
       if ($value['ipaddr'] == $ip) return true;
     }
-    return true;
+    return false;
   }
 
   public function save($params)
