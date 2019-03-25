@@ -75,6 +75,8 @@ class APIUpdateCtrl extends Controller
     ];
 		$data['gclient'] = false;
     $master_response = HA::sendRequest($session_params);
+		$data['code'] = $master_response[1];
+		$data['slave_ip'] = $allParams['ipaddr'];
 		if ($master_response[1] !== 200) return $res -> withStatus(200) -> write(json_encode($data));
 		HA::slaveTimeUpdate($allParams['ipaddr']);
 		$data['gclient'] = json_decode($master_response[0], true );

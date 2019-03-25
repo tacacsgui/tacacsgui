@@ -77,7 +77,10 @@ class APIHACtrl extends Controller
     $ha = new HA();
     $allParams = $req->getParams();
 
-    if ( ! $this->checkServerAccess( $allParams, ( (HA::isSlave() ? 'slave' : 'master') ) ) ) return $res -> withStatus(403);// -> write('Access Restricted!');
+    if ( ! $this->checkServerAccess( $allParams, ( (HA::isSlave() ? 'slave' : 'master') ) ) ){
+      $data['apiver'] = '';
+      return $res -> withStatus(403) -> write(json_encode($data));
+    }
 
     $data['access'] = true;
 

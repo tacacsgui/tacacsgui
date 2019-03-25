@@ -163,10 +163,13 @@ class HA
       $testArray = explode( ',', $this->ha_data['server']['slaves_ip'] );
       return in_array($ip, $testArray);
     }
-    if ( isset($this->ha_data['server_list']) AND  isset($this->ha_data['server_list']['slave']) AND count($this->ha_data['server_list']['slave']) )
-    foreach ($this->ha_data['server_list']['slave'] as $value) {
-      if ($value['ipaddr'] == $ip) return true;
-    }
+    if ( isset($this->ha_data['server_list'])
+          AND
+        isset($this->ha_data['server_list']['master'])
+          AND
+        $this->ha_data['server_list']['master']['ipaddr'] == $ip
+    ) return true;
+      
     return false;
   }
 
