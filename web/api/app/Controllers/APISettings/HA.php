@@ -169,7 +169,7 @@ class HA
           AND
         $this->ha_data['server_list']['master']['ipaddr'] == $ip
     ) return true;
-      
+
     return false;
   }
 

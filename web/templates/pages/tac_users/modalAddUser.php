@@ -66,7 +66,9 @@
 		</div>
 		<div class="modal-footer">
 			<button type="button" class="btn btn-flat pull-left" data-dismiss="modal">Close</button>
-			<button type="button" class="btn btn-flat btn-success ladda-button" data-style="expand-right" onclick="tgui_tacUser.add(this)"><span class="ladda-label">Add User</span></button>
+			<button type="button" class="btn btn-flat btn-success ladda-button" data-style="expand-right" onclick="tgui_tacUser.add(this)">
+				<span class="ladda-label">Add User</span>
+			</button>
 		</div>
 	</div>
 	</div>

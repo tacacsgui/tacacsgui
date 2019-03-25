@@ -28,10 +28,12 @@ var tgui_acl = {
     }
     return a;
   },
-  add: function() {
+  add: function(o) {
     if ( this.ace.editor() ) { return; }
     console.log('Adding new ACL');
     var self = this;
+    var l = Ladda.create(o)
+    l.start(); //button loading start
     var formData = tgui_supplier.getFormData(self.formSelector_add);
     	  formData.ACEs = this.tableToObject(dataTable_add_acl.rows().data(), formData.name);
     var ajaxProps = {
@@ -40,6 +42,7 @@ var tgui_acl = {
     };//ajaxProps END
 
     ajaxRequest.send(ajaxProps).then(function(resp) {
+      l.stop(); //button loading start
       if (tgui_supplier.checkResponse(resp.error, self.formSelector_add)){
         return;
       }
@@ -72,6 +75,8 @@ var tgui_acl = {
     if ( this.ace.editor() ) { return; }
     console.log('Edit ACL');
     var self = this;
+    var l = Ladda.create(o)
+    l.start(); //button loading start
     var formData = tgui_supplier.getFormData(self.formSelector_edit);
         formData.ACEs = this.tableToObject(dataTable_edit_acl.rows().data(), formData.name);
         if (this.ace.deleted_aces) formData.deleted_aces = this.ace.deleted_aces;
@@ -81,9 +86,13 @@ var tgui_acl = {
       data: formData
     };//ajaxProps END
 
-    if ( ! tgui_supplier.checkChanges(ajaxProps.data, ['id']) ) return false;
+    if ( ! tgui_supplier.checkChanges(ajaxProps.data, ['id']) ) {
+      l.stop()
+      return false;
+    }
 
     ajaxRequest.send(ajaxProps).then(function(resp) {
+      l.stop()
       if (tgui_supplier.checkResponse(resp.error, self.formSelector_edit)){
         return;
       }

@@ -25,7 +25,9 @@
 		</div>
 		<div class="modal-footer">
 			<button type="button" class="btn btn-flat pull-left" data-dismiss="modal">Close</button>
-			<button type="button" class="btn btn-flat btn-success" onclick="tgui_acl.add()">Add ACL</button>
+			<button type="button" class="btn btn-flat btn-success ladda-button" data-style="expand-right" onclick="tgui_acl.add(this)">
+				<span class="ladda-label">Add ACL</span>
+			</button>
 		</div>
 	</div>
 	</div>
