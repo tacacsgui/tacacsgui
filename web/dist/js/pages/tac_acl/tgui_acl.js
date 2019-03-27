@@ -71,7 +71,7 @@ var tgui_acl = {
       $("#editACL").modal("show");
     });
   },
-  edit: function() {
+  edit: function(o) {
     if ( this.ace.editor() ) { return; }
     console.log('Edit ACL');
     var self = this;
