@@ -8,8 +8,7 @@ use tgui\Models\APISMTP;
 use tgui\Models\APISettings;
 use tgui\Controllers\Controller;
 use Respect\Validation\Validator as v;
-// use Webmozart\Json\JsonEncoder as jsone;
-// use Webmozart\Json\JsonDecoder as jsond;
+use tgui\Services\CMDRun\CMDRun as CMDRun;
 use tgui\Controllers\APISettings\HA;
 
 class APISettingsCtrl extends Controller
@@ -460,8 +459,10 @@ public function getInterfaceSettings($req,$res)
   if ( empty($allParams['interface']) ){
     return $res -> withStatus(400) -> write(json_encode($data));
   }
-
-  $interfaceSettings = trim( shell_exec(TAC_ROOT_PATH . '/interfaces.sh get '.$allParams['interface'].' skip 3') );
+  $cmd = CMDRun::init()->setCmd(TAC_ROOT_PATH . '/interfaces.py')->setAttr(['-i',$allParams['interface'],'--netplan']);
+  $data['cmd'] = $cmd->showCmd();
+  // $interfaceSettings = trim( shell_exec(TAC_ROOT_PATH . '/interfaces.sh get '.$allParams['interface'].' skip 3') );
+  $interfaceSettings = $cmd->get();
 
   $settingsLine=explode(PHP_EOL, $interfaceSettings);
 
@@ -475,20 +476,19 @@ public function getInterfaceSettings($req,$res)
   ];
 
   for ($i=0; $i < count($settingsLine); $i++) {
-    $parameters = preg_split('/\s+/', $settingsLine[$i]);
+    $parameters = preg_split('/:\s+/', $settingsLine[$i]);
     switch ($parameters[0]) {
-      case 'address':
-        $data['interface']['network_address'] = $parameters[1];
+      case 'ip address':
+        list($data['interface']['network_address'], $data['interface']['network_mask'] ) = explode('/', $parameters[1]);
+        //$data['interface']['network_address'] = $parameters[1];
         break;
-      case 'netmask':
-        $data['interface']['network_mask'] = $parameters[1];
-        break;
-      case 'gateway':
+      case 'defaultgw':
         $data['interface']['network_gateway'] = $parameters[1];
         break;
-      case 'dns-nameservers':
-        $data['interface']['network_dns1'] = $parameters[1];
-        if (!empty($parameters[2])) $data['interface']['network_dns2'] = $parameters[2];
+      case 'nameservers':
+        list($data['interface']['network_dns1'], $data['interface']['network_dns2']) = explode(' ', $parameters[1]);
+        // $data['interface']['network_dns1'] = $parameters[1];
+        // if (!empty($parameters[2])) $data['interface']['network_dns2'] = $parameters[2];
         break;
       default:
         $data['interface']['network_more'] .= (!empty($parameters[0])) ? $settingsLine[$i]."\n" : '';
@@ -544,26 +544,47 @@ public function postInterfaceSettings($req,$res)
 
   $allParams = $req->getParams();
 
-  $interface = preg_replace( '/[^a-zA-Z0-9]/', '', $allParams['network_interface'] );
-
-  if ( !empty($interface) ){
-
-    $cfgFile = fopen(TAC_ROOT_PATH ."/temp/".$interface.".cfg", "w");
-
-    $txt = "auto ".$interface."\n".
-            "iface ".$interface." inet static\n";
-    $txt .= "address " . $allParams['network_address'] . "\n";
-    $txt .= "netmask " . $allParams['network_mask'] . "\n";
-    $txt .= ( !empty($allParams['network_gateway']) ) ? "gateway " . $allParams['network_gateway'] . "\n" : '';
-    $txt .= ( !empty($allParams['network_dns1']) ) ? "dns-nameservers " . $allParams['network_dns1'] : '';
-    $txt .= ( !empty($allParams['network_dns2']) ) ? " " . $allParams['network_dns2'] . "\n" : "\n";
-    $txt .= ( !empty($allParams['network_more']) ) ? $allParams['network_more'] . "\n" : '';
-
-    fwrite($cfgFile, $txt);
-    fclose($cfgFile);
+  // $interface = preg_replace( '/[^a-zA-Z0-9]/', '', $allParams['network_interface'] );
+  //
+  // if ( !empty($interface) ){
+  //
+  //   $cfgFile = fopen(TAC_ROOT_PATH ."/temp/".$interface.".cfg", "w");
+  //
+  //   $txt = "auto ".$interface."\n".
+  //           "iface ".$interface." inet static\n";
+  //   $txt .= "address " . $allParams['network_address'] . "\n";
+  //   $txt .= "netmask " . $allParams['network_mask'] . "\n";
+  //   $txt .= ( !empty($allParams['network_gateway']) ) ? "gateway " . $allParams['network_gateway'] . "\n" : '';
+  //   $txt .= ( !empty($allParams['network_dns1']) ) ? "dns-nameservers " . $allParams['network_dns1'] : '';
+  //   $txt .= ( !empty($allParams['network_dns2']) ) ? " " . $allParams['network_dns2'] . "\n" : "\n";
+  //   $txt .= ( !empty($allParams['network_more']) ) ? $allParams['network_more'] . "\n" : '';
+  //
+  //   fwrite($cfgFile, $txt);
+  //   fclose($cfgFile);
+  // }
+  $attrs = [
+    'network','save',
+    $allParams['network_interface'],
+    $allParams['network_address'],
+    $allParams['network_mask']
+  ];
+  if ( !empty($allParams['network_gateway']) ) {
+    $attrs[] = '--gateway';
+    $attrs[] = $allParams['network_gateway'];
+  }
+  if ( !empty($allParams['network_dns1']) ) {
+    $attrs[] = '-nm';
+    $attrs[] = $allParams['network_dns1'];
+    if ( !empty($allParams['network_dns2']) ) {
+      $attrs[] = $allParams['network_dns2'];
+    }
   }
 
-  $data['result'] = trim( shell_exec('sudo ' . TAC_ROOT_PATH . '/main.sh network save '. $interface) );
+  $cmd = CMDRun::init()->setSudo()->setCmd(MAINSCRIPT)->
+    setAttr($attrs)->setAttr('-y');
+  $data['cmd'] = $cmd->showCmd();
+  $data['result'] = $cmd->get();
+  //$data['result'] = trim( shell_exec('sudo ' . TAC_ROOT_PATH . '/main.sh network save '. $interface) );
 
   return $res -> withStatus(200) -> write(json_encode($data));
 }
@@ -589,9 +610,12 @@ public function getInterfaceList($req,$res)
     return $res -> withStatus(403) -> write(json_encode($data));
   }
   //CHECK ACCESS TO THAT FUNCTION//END//
-  $ip = '';
-  if ( $req->getParam('ip') == 1 ) $ip = 'ip';
+
+  $cmd = CMDRun::init()->setCmd(TAC_ROOT_PATH . '/interfaces.py')->setAttr('-l');
+  if ( $req->getParam('ip') == 1 ) $cmd->setAttr('--ip');
   $output = trim( shell_exec(TAC_ROOT_PATH . '/interfaces.sh list '. $ip) );
+  $output = $cmd->get();
+  $data['cmd'] = $cmd->showCmd();
   $data['list'] = explode(PHP_EOL, $output);
   $key = array_search('lo', $data['list']);
   if (!$key) unset($data['list'][$key]);

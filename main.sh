@@ -78,13 +78,15 @@ case $1 in
 	;;
 	network)
 		if [[ ! -z $2 ]] && [[ $2 -eq 'save' ]]; then
+			/opt/tacacsgui/interfaces.py -s ${@:3}
+			#echo "/opt/tacacsgui/interfaces.py -s ${@:3}"
 			#ls -l  $ROOT_PATH/temp/$3.cfg
-			if [[ ! -z $3 ]] && [ -f $ROOT_PATH/temp/$3.cfg ]; then
-					cp $ROOT_PATH/temp/$3.cfg /etc/network/interfaces.d/$3.cfg
-					sudo $ROOT_PATH/interfaces.sh restart $3
-					echo -n 1;
-					exit 0;
-			fi
+			# if [[ ! -z $3 ]] && [ -f $ROOT_PATH/temp/$3.cfg ]; then
+			# 		cp $ROOT_PATH/temp/$3.cfg /etc/network/interfaces.d/$3.cfg
+			# 		sudo $ROOT_PATH/interfaces.sh restart $3
+			# 		echo -n 1;
+			# 		exit 0;
+			# fi
 		fi
 	;;
 	tac_plus)

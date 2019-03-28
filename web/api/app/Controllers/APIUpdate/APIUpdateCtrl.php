@@ -69,6 +69,7 @@ class APIUpdateCtrl extends Controller
 				'psk' => $ha->psk(),
 				'action' => 'update_info',
 				'api_version' => APIVER,
+				'revision' => APIREVISION,
 				'unique_id' => $allParams['unique_id'],
 				'sha1_attrs' => ['action', 'psk', 'api_version', 'unique_id']
 			]
@@ -110,6 +111,7 @@ class APIUpdateCtrl extends Controller
 				'psk' => $ha->psk(),
 				'action' => 'update',
 				'api_version' => APIVER,
+				'revision' => APIREVISION,
 				'unique_id' => $allParams['unique_id'],
 				'sha1_attrs' => ['action', 'psk', 'api_version', 'unique_id']
 			]
@@ -224,6 +226,7 @@ class APIUpdateCtrl extends Controller
 				[
 					'key'=> $this->uuid_hash(),
 					'version' => APIVER,
+					'revision' => APIREVISION,
 				]
 			]
 		];

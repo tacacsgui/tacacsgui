@@ -1,4 +1,7 @@
 ##############################
+Version_0.9.63 20190328
+	* Hello Ubuntu 18.04
+##############################
 Version_0.9.62 20190320
 	* Configuration Manager (now Beta)
 	* Schema of Database changed!!! Some data in Configuration Manager can gone, sorry.

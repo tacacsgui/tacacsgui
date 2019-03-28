@@ -5,6 +5,7 @@ namespace tgui\Controllers\APIBackup;
 use tgui\Controllers\Controller;
 use tgui\Models\TACGlobalConf;
 use tgui\Models\APIBackup;
+use tgui\Services\CMDRun\CMDRun as CMDRun;
 
 class APIBackupCtrl extends Controller
 {
@@ -240,8 +241,8 @@ private $listOfTacacsReportsTables = '--tables tac_log_accounting tac_log_author
 		}
 		//CHECK ACCESS TO THAT FUNCTION//END//
 		$type = $req->getParam('type');
-
-		$data['result'] = trim(shell_exec(TAC_ROOT_PATH . '/backup.sh restore '. DB_USER . ' ' . DB_PASSWORD . ' '. DB_NAME. ' '. $req->getParam('name')));
+		$data['cmd'] = CMDRun::init()->setCmd(TAC_ROOT_PATH . '/backup.sh')->setAttr(['restore',DB_USER,DB_PASSWORD, DB_NAME, $req->getParam('name')])->showCmd();
+		$data['result'] = CMDRun::init()->setCmd(TAC_ROOT_PATH . '/backup.sh')->setAttr(['restore',DB_USER,DB_PASSWORD, DB_NAME, $req->getParam('name')])->get();
 
 		if ( !empty($type) AND $type != 'apicfg' ) $data['changeConfiguration']=$this->changeConfigurationFlag(['unset' => 0]);
 
@@ -322,6 +323,10 @@ private $listOfTacacsReportsTables = '--tables tac_log_accounting tac_log_author
 
 		$uploaddir = '/opt/tgui_data/backups/database/';
 
+		if (!file_exists($uploaddir)) {
+		   mkdir($uploaddir, 0777, true);
+		}
+
 		$action = $req->getParam('action');
 		if ($action == 'check') {
 			if ( file_exists($uploaddir. $req->getParam('name')) ) {
@@ -347,12 +352,13 @@ private $listOfTacacsReportsTables = '--tables tac_log_accounting tac_log_author
     {
 			$fileName = $data['name'] = $file['name'];
 			$fileTempLoc = $data['path'] = $file['tmp_name'];
-      if(move_uploaded_file($file['tmp_name'], $uploaddir .basename($file['name'])))
+      if(move_uploaded_file($file['tmp_name'], $uploaddir . basename($file['name'])))
       {
           $data['result'] = 'File ' . $file['name'] . ' was uploaded';
       }
       else
       {
+					$data['file'] = $_FILES;
           $data['error']['status'] = true;
           $data['error']['message'] = 'move_uploaded_file function broken';
       }
