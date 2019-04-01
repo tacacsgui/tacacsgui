@@ -25,7 +25,7 @@ class cm_git():
         if self.debug: deb.cm_debug.show( marker='debGit', message = 'Git short status request: {}'.format(stdout.strip()))
         if stdout and re.match('^fatal:', stdout):
             if self.debug: deb.cm_debug.show( marker='debGit', message = 'Git met error: {}'.format(stdout))
-            if re.match('.*\sNot a git repository', stdout):
+            if re.match('.*\s[Nn]ot a git repository', stdout):
                 if self.debug: deb.cm_debug.show( marker='debGit', message = 'Try to initiate git repo')
                 stdout, stderr = subprocess.Popen([ "git", "-C", self.path , "init"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True).communicate()
                 if self.debug: deb.cm_debug.show( marker='debGit', message = 'Initiate output: {}'.format(stdout))
