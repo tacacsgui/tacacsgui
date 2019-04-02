@@ -223,6 +223,7 @@ class LDAP extends Controller
           $this->mavis->debugIn( $this->dPrefix() .'shadowExpire set: '. ( $this->adUser->getAttribute('shadowexpire', 0) * 86400 ) );
           $this->mavis->debugIn( $this->dPrefix() .'Now: '. time() );
           $this->mavis->debugIn( $this->dPrefix() .'Password expired! Exit.');
+          $this->mavis->setVariable(AV_A_USER_RESPONSE, 'Password has expired' );
           return false;
       }
     return true;

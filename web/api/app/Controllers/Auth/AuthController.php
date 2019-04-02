@@ -29,6 +29,8 @@ class AuthController extends Controller
 		}
 		//INITIAL CODE////END//
 
+		$data['user']=APIUsers::where('id',$_SESSION['uid'])->first();
+
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
 
@@ -112,6 +114,7 @@ class AuthController extends Controller
 			return $res -> withStatus(401) -> write(json_encode($data));
 		}
 
+		$data['user']=APIUsers::where('id',$_SESSION['uid'])->first();
 		$data['info']['user']['id']=(isset($_SESSION['uid'])) ? $_SESSION['uid'] : 'empty';
 		$data['info']['user']['username']=(isset($_SESSION['uname'])) ? $_SESSION['uname'] : 'empty';
 
