@@ -6,20 +6,21 @@ use tgui\Models\APIUsers;
 use tgui\Models\APIPWPolicy;
 use tgui\Controllers\Controller;
 use Respect\Validation\Validator as v;
+use Firebase\JWT\JWT;
 
 class AuthController extends Controller
 {
 ################################################
-########	SING IN	###############START###########
-	#########	GET SING IN	#########
-	public function getSingIn($req,$res,$arg)
+########	Sign IN	###############START###########
+	#########	GET Sign IN	#########
+	public function getSignIn($req,$res,$arg)
 	{
 		//INITIAL CODE////START//
 		$data=array();
 		$data=$this->initialData([
 			'type' => 'get',
 			'object' => 'auth',
-			'action' => 'singin',
+			'action' => 'Signin',
 		]);
 		#check error#
 		$data['tacacs'] = ( $this->db::getSchemaBuilder()->hasTable('mavis_local') ) ? $this->MAVISLocal->change_passwd_gui() : 0;
@@ -34,15 +35,15 @@ class AuthController extends Controller
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
 
-	#########	POST SING IN	#########
-	public function postSingIn($req,$res)
+	#########	POST Sign IN	#########
+	public function postSignIn($req,$res)
 	{
 		//INITIAL CODE////START//
 		$data=array();
 		$data=$this->initialData([
 			'type' => 'post',
 			'object' => 'auth',
-			'action' => 'singin',
+			'action' => 'Signin',
 		]);
 		//INITIAL CODE////END//
 
@@ -59,14 +60,14 @@ class AuthController extends Controller
 			$_SESSION['blockTime'] = time();
 			///LOGGING//start//
 			$username = $req->getParam('username');
-			$logEntry = array('username' => empty($username) ? '' : $username, 'uid' => 0, 'action' => 'singin', 'section' => 'api auth', 'message' => 104);
+			$logEntry = array('username' => empty($username) ? '' : $username, 'uid' => 0, 'action' => 'Signin', 'section' => 'api auth', 'message' => 104);
 			$this->APILoggingCtrl->makeLogEntry($logEntry);
 			///LOGGING//end//
 			$data['error']=$_SESSION['error'];
 			return $res -> withStatus(401) -> write(json_encode($data));
 		}
 
-		$data['test']=$_SESSION;
+		//$data['test']=$_SESSION;
 
 		if (!empty($_SESSION['blockTime']))
 		{
@@ -108,7 +109,7 @@ class AuthController extends Controller
 		if ($_SESSION['error']['status']){
 			$data['error']=$_SESSION['error'];
 			///LOGGING//start//
-			$logEntry = array('username' => $req->getParam('username'), 'uid' => 0, 'action' => 'singin', 'section' => 'api auth', 'message' => 103);
+			$logEntry = array('username' => $req->getParam('username'), 'uid' => 0, 'action' => 'Signin', 'section' => 'api auth', 'message' => 103);
 			$this->APILoggingCtrl->makeLogEntry($logEntry);
 			///LOGGING//end//
 			return $res -> withStatus(401) -> write(json_encode($data));
@@ -119,16 +120,19 @@ class AuthController extends Controller
 		$data['info']['user']['username']=(isset($_SESSION['uname'])) ? $_SESSION['uname'] : 'empty';
 
 		///LOGGING//start//
-		$logEntry = array('action' => 'singin', 'section' => 'api auth', 'message' => 101);
+		$logEntry = array('action' => 'Signin', 'section' => 'api auth', 'message' => 101);
 		$this->APILoggingCtrl->makeLogEntry($logEntry);
 		///LOGGING//end//
 
 		$data['authorised']=$this->auth->check();
 		$data['info']['user']['changePasswd'] = (isset($_SESSION['changePasswd'])) ? $_SESSION['changePasswd'] : 'empty';
+
+    $data['token'] = JWT::encode(['id' => $data['user']->id, 'username' => $data['user']->username], "supersecretkeyyoushouldnotcommittogithub", "HS256");
+
 		//$data['error']='authorised'; //$this->message->getError(false, 6, 0);
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
-########	SING IN	###############END###########
+########	Sign IN	###############END###########
 ################################################
 	#########	POST CHANGE PASSWORD	#########
 	public function postChangePassword($req,$res)
@@ -194,9 +198,9 @@ class AuthController extends Controller
 	}
 ########	CHANGE PASSWORD	###############END###########
 ################################################
-########	SING OUT	###############START###########
-	#########	GET SING OUT	#########
-	public function getSingOut($req,$res)
+########	Sign OUT	###############START###########
+	#########	GET Sign OUT	#########
+	public function getSignOut($req,$res)
 	{
 		//INITIAL CODE////START//
 		$data=array();
@@ -222,8 +226,8 @@ class AuthController extends Controller
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
 
-	#########	POST SING OUT	#########
-	public function postSingOut($req,$res)
+	#########	POST Sign OUT	#########
+	public function postSignOut($req,$res)
 	{
 
 		//INITIAL CODE////START//
@@ -244,6 +248,6 @@ class AuthController extends Controller
 		$data['authorised']=$this->auth->check();
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
-########	SING OUT	###############END###########
+########	Sign OUT	###############END###########
 ################################################
 }//END OF CLASS//

@@ -150,6 +150,7 @@ if not args.test_queries:
     loggin = cml.cm_logging( debug=args.debug, **data_loaded['log'] )
     git = cmg.cm_git( **data_loaded['git'], debug=args.debug )
     git.check()
+    #quit()
     #old pid
     if os.path.isfile(pid_path):
         if args.debug: deb.cm_debug.show(message='Pid file found')
@@ -180,20 +181,20 @@ for query in list(data_loaded['queries']):
         'query_name': query.get('query_name', ''),
         'uname_type': creden.get('type', ''),
         'uname': creden.get('username', ''),
-        'group': query.get('group', ''),
+        'path': query.get('path', ''),
         }
-	group = query.get('group','')
-	if group: group += '/'
-	if not args.test_queries and os.path.exists(data_loaded['git']['path']+'/'+group+query['name']):
+	path = query.get('path','')
+	if not path: path += '/'
+	if not args.test_queries and os.path.exists(data_loaded['git']['path']+path+query['name']):
 		dir_ok = True
-		if not os.path.exists(os.path.dirname(data_loaded['git']['path']+'/'+group+query['name'])):
+		if not os.path.exists(os.path.dirname(data_loaded['git']['path']+path+query['name'])):
 			try:
-				os.makedirs(os.path.dirname(data_loaded['git']['path']+'/'+group+query['name']))
+				os.makedirs(os.path.dirname(data_loaded['git']['path']+path+query['name']))
 			except Exception as e:
-				if args.debug: deb.cm_debug.show( message = "Can't creat directory: "+group)
+				if args.debug: deb.cm_debug.show( message = "Can't creat directory: "+path)
 				dir_ok = False
 		if dir_ok:
-			open(data_loaded['git']['path']+'/'+group+query['name'], 'a').close()
+			open(data_loaded['git']['path']+path+query['name'], 'a').close()
 	try:
 		deviceFile = engine.run(**query)
 		#if args.debug: deb.cm_debug.show( message = "From engine: "+ deviceFile)
@@ -202,11 +203,11 @@ for query in list(data_loaded['queries']):
 		if args.test_queries:
 			print( writer.preview( data=deviceFile, omitLines=query['omitLines'], marker=' '.join(args.marker) ) )
 		else:
-			if args.debug: deb.cm_debug.show( message = "Writer params: omit_lines: {}, path: {}, group: {}".format(query['omitLines'], data_loaded['git']['path'], query['group']))
+			if args.debug: deb.cm_debug.show( message = "Writer params: omit_lines: {}, path: {}".format(query['omitLines'], data_loaded['git']['path'] + query['path']))
 			preview = writer.preview( data=deviceFile, omitLines=query['omitLines'] )
-			if args.debug: deb.cm_debug.show( message = "### OUTPUT PREVIEW START ###\n" + preview)
-			if args.debug: deb.cm_debug.show( message = '### OUTPUT PREVIEW END ###')
-			writer.write( data=preview, path=data_loaded['git']['path'], name=query['name'], group=query['group'] )
+			# if args.debug: deb.cm_debug.show( message = "### OUTPUT PREVIEW START ###\n" + preview)
+			# if args.debug: deb.cm_debug.show( message = '### OUTPUT PREVIEW END ###')
+			writer.write( data=preview, path=data_loaded['git']['path'] + path, name=query['name'] )
 			loggin.add(**log_data, status='success')
 	except Exception as e:
 		if args.debug: deb.cm_debug.show( message = "Engine Error:\n{}".format( e ) )

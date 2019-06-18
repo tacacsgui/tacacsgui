@@ -49,77 +49,30 @@ class APILoggingCtrl extends Controller
 
 		$columns = $this->APICheckerCtrl->getTableTitles('api_logging', 'logging'); //Array of all columnes that will used
 		array_unshift( $columns, 'id' );
-
+		array_push( $columns, 'created_at');
 		$data['columns'] = $columns;
-		$queries = [];
-		$data['filter'] = [];
-		$data['filter']['error'] = false;
-		$data['filter']['message'] = '';
-		//Filter start
-		$searchString = ( empty($params['search']['value']) ) ? '' : $params['search']['value'];
-		$temp = $this->queriesMaker($columns, $searchString);
-		$queries = $temp['queries'];
-		$data['filter'] = $temp['filter'];
-
-		$data['queries'] = $queries;
-		$data['columns'] = $columns;
+		$queries = (empty($params['searchTerm'])) ? [] : $params['searchTerm'];
+		$size = $params['pageSize'];
+		$start = $params['pageSize'] * ($params['page'] - 1);
 		//Filter end
 		$data['recordsTotal'] = APILogging::count();
-
 		//Get temp data for Datatables with Fliter and some other parameters
-		$tempData = APILogging::select()->
-			when( !empty($queries),
-				function($query) use ($queries)
-				{
-					foreach ($queries as $condition => $attr) {
-						switch ($condition) {
-							case '!==':
-								foreach ($attr as $column => $value) {
-									$query->whereNotIn($column, $value);
-								}
-								break;
-							case '==':
-								foreach ($attr as $column => $value) {
-									$query->whereIn($column, $value);
-								}
-								break;
-							case '!=':
-								foreach ($attr as $column => $valueArr) {
-									for ($i=0; $i < count($valueArr); $i++) {
-										if ($i == 0) $query->where($column,'NOT LIKE', '%'.$valueArr[$i].'%');
-										$query->where($column,'NOT LIKE', '%'.$valueArr[$i].'%');
-									}
-								}
-								break;
-							case '=':
-								foreach ($attr as $column => $valueArr) {
-									for ($i=0; $i < count($valueArr); $i++) {
-										if ($i == 0) $query->where($column,'LIKE', '%'.$valueArr[$i].'%');
-										$query->where($column,'LIKE', '%'.$valueArr[$i].'%');
-									}
-								}
-								break;
-							default:
-								//return $query;
-								break;
-						}
-					}
-					return $query;
-				});
-			$data['recordsFiltered'] = $tempData->count();
-			$tempData = $tempData->
-			orderBy($params['columns'][$params['order'][0]['column']]['data'],$params['order'][0]['dir'])->
-			take($params['length'])->
-			offset($params['start'])->
-			get()->toArray();
-			$data['data'] = [];
-		foreach($tempData as $loggingEntry){
-			$loggingEntry['username'] .= ($loggingEntry['uid'] !== '') ? ' ('.$loggingEntry['uid'].')' : '';
-			$loggingEntry['obj_name'] .= ($loggingEntry['obj_id'] !== '') ? ' ('.$loggingEntry['obj_id'].')' : '';
-			array_push($data['data'],$loggingEntry);
-		}
-		//Some additional parameters for Datatables
-		$data['draw']=intval( $params['draw'] );
+		$tempData = APILogging::select($columns)->
+		when( !empty($queries),
+			function($query) use ($queries)
+			{
+				$query->where('username','LIKE', '%'.$queries.'%');
+				$query->orWhere('user_ip','LIKE', '%'.$queries.'%');
+				return $query;
+			})->
+		take($size)->
+		offset($start);
+		$data['total'] = $tempData->count();
+
+		if (!empty($params['sortColumn']) and !empty($params['sortDirection']))
+				$tempData = $tempData->orderBy($params['sortColumn'],$params['sortDirection']);
+
+		$data['data'] = $tempData->get()->toArray();
 
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
@@ -146,7 +99,6 @@ class APILoggingCtrl extends Controller
 			return $res -> withStatus(403) -> write(json_encode($data));
 		}
 		//CHECK ACCESS TO THAT FUNCTION//END//
-
 		$allParams = $req->getParams();
 		$period = '';
 		if (!preg_match('/^[0-9]\s(year[s]{0,1}|month[s]{0,1})', $allParams['period']))
@@ -158,7 +110,7 @@ class APILoggingCtrl extends Controller
 		if ($allParams['period'] == 'all') $period = 'all';
 
 		if (empty($period)){
-			$data['error']=true;
+			$data['error']['status']=true;
 			return $res -> withStatus(200) -> write(json_encode($data));
 		}
 		$data['period'] = $period;

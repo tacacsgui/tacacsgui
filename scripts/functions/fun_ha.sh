@@ -103,6 +103,7 @@ function start_slave () {
   echo -n "$(date_)STOP, RESET, CHANGE, START SLAVE...";
   echo "STOP SLAVE; RESET SLAVE; CHANGE MASTER TO MASTER_HOST='$2',MASTER_USER='tgui_replication', MASTER_PASSWORD='$3', MASTER_LOG_FILE='$4', MASTER_LOG_POS=$5; START SLAVE;" | eval $mysql;
   echo "Done.";
+  echo "STOP SLAVE; RESET SLAVE; CHANGE MASTER TO MASTER_HOST='$2',MASTER_USER='tgui_replication', MASTER_PASSWORD='$3', MASTER_LOG_FILE='$4', MASTER_LOG_POS=$5; START SLAVE;"
   return;
 }
 function stop_slave () {

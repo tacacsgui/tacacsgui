@@ -6,6 +6,8 @@ use Illuminate\Database\Connection;
 use Illuminate\Database\Schema\Blueprint;
 use tgui\Models\TACGlobalConf;
 
+use tgui\Services\CMDRun\CMDRun as CMDRun;
+
 class APICheckerCtrl extends Controller
 {
 
@@ -59,11 +61,11 @@ class APICheckerCtrl extends Controller
 						break;
 					case 'foreign-null':
 						$table->integer($columnName)->nullable()->unsigned();
-    				$table->foreign($columnName)->references($columnAttr[1]['references'])->on($columnAttr[1]['on'])->onDelete('cascade');
+    				$table->foreign($columnName)->references($columnAttr[1]['references'])->on($columnAttr[1]['on'])->onDelete($columnAttr[1]['onDelete']);
 						break;
 					case 'foreign':
 						$table->unsignedInteger($columnName);
-    				$table->foreign($columnName)->references($columnAttr[1]['references'])->on($columnAttr[1]['on'])->onDelete('cascade');
+    				$table->foreign($columnName)->references($columnAttr[1]['references'])->on($columnAttr[1]['on'])->onDelete($columnAttr[1]['onDelete']);
 						break;
 				}
 				if( //(isset($columnAttr[1]) )//OR $columnAttr[1] == 0)  AND
@@ -76,7 +78,7 @@ class APICheckerCtrl extends Controller
 				{
 					$columnObj->default($columnAttr[1]);
 				}
-				elseif( $columnAttr[0] != 'foreign')
+				elseif( $columnAttr[0] != 'foreign' AND $columnAttr[0] != 'foreign-null')
 				{
 					$columnObj -> nullable();
 				}
@@ -242,6 +244,7 @@ class APICheckerCtrl extends Controller
 		//var_dump( $this->db::getSchemaBuilder()->getColumnType('tac_users', 'username') ); die;
 		//var_dump($req->getParam('update'));die();
 		$data['messages'] = array( );
+
 		foreach ($this->databases as $database) {
 			switch ($database) {
 				case 'logging':
@@ -252,17 +255,19 @@ class APICheckerCtrl extends Controller
 					$tablesArr = $this->tablesArr;
 					break;
 			}
+
 			foreach($tablesArr as $tableName => $tableColumns){
+				$data["debug"] = json_encode($tableName);
 				if(!$this->db::connection($database)->getSchemaBuilder()->hasTable($tableName))
 				{
 					$data["messages"][count($data["messages"])] = "Table ".$tableName." created";
 					if ($updateFlag) {
-						$this->databaseFix();
 						//CREATE TABLE//
 						$this->createTable($database, $tableName, $tableColumns);
 						////////////DEFAULT VALUES/////////
 						$this->setDefaultValues($database, $tableName);
 						///////////////////////////////////
+						//$this->databaseFix();
 						sleep(1); return $res -> withStatus(200) -> write(json_encode($data));
 					}
 				}
@@ -277,12 +282,13 @@ class APICheckerCtrl extends Controller
 					//ADD COLUMNS CHECK//
 					foreach($tableColumns as $columnName => $columnType)
 					{
+
 						if(!$this->db::connection($database)->getSchemaBuilder()->hasColumn($tableName,$columnName))
 						{
 							//var_dump($tableName);var_dump($columnName);die();
 							$data["messages"][count($data["messages"])]="Column ".$columnName." in the table ".$tableName." created";
 							if ($updateFlag) {
-								$databaseFix = $this->databaseFix();
+								//$databaseFix = $this->databaseFix();
 								//var_dump($this->db::getSchemaBuilder()->hasColumn('confM_bind_cmdev_tacdev','tac_dev'));die();
 								if ($databaseFix['status']){
 									$data["messages"][0]=$databaseFix['message'];
@@ -309,12 +315,12 @@ class APICheckerCtrl extends Controller
 										case 'foreign-null':
 											$columnObj = $table->integer($columnName)->nullable()->unsigned();
 					    				$table->foreign($columnName)->references($tableColumns[$columnName][1]['references'])->
-												on($tableColumns[$columnName][1]['on'])->onDelete('cascade');
+												on($tableColumns[$columnName][1]['on'])->onDelete($tableColumns[$columnName][1]['onDelete']);
 											break;
 										case 'foreign':
 											$columnObj = $table->unsignedInteger($columnName);
 					    				$table->foreign($columnName)->references($tableColumns[$columnName][1]['references'])->
-												on($tableColumns[$columnName][1]['on']);
+												on($tableColumns[$columnName][1]['on'])->onDelete($tableColumns[$columnName][1]['onDelete']);
 											break;
 									}
 									//var_dump($preColumnName);die();
@@ -335,13 +341,21 @@ class APICheckerCtrl extends Controller
 										$columnObj -> nullable();
 									}
 								});
+
 								sleep(1); return $res -> withStatus(200) -> write(json_encode($data));
 							}//if $updateFlag end
 						}
 						$preColumnName=$columnName;
 					}
 				}
-			}
+			}// for end
+			//HERE
+		} //end of for each database
+		if ($updateFlag) {
+			//SOME FIX
+			$data['fix'] = $this->databaseFix();
+			if ($data['fix']['message'] !== '') $data['messages'][] = $data['fix']['message'];
+			sleep(1); return $res -> withStatus(200) -> write(json_encode($data));
 		}
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
@@ -386,6 +400,8 @@ class APICheckerCtrl extends Controller
 		//INITIAL CODE////END//
 
 		$data['time']=$this->serverTime();
+		$data['epoch']=time();
+		$data['timezone']=CMDRun::init()->setCmd('cat')->setAttr('/etc/timezone')->get();
 
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
@@ -394,15 +410,15 @@ class APICheckerCtrl extends Controller
 	{
 		$response = ['status' => false, 'message' => ''];
 
-		if ( $this->db::connection('default')->getSchemaBuilder()->hasTable('tac_users') AND $this->db::connection('default')->getSchemaBuilder()->getColumnType('tac_users', 'group') == 'integer' ) {
-			$response['status'] = true;
-			$this->db::connection('default')->getSchemaBuilder()->table('tac_users', function (Blueprint $table) {
-			    $table->string('group')->nullable()->change();
-					//$table->renameColumn('group', 'groups');
-			});
-
-			$response['message'] = 'Table fix for tac_users';
-		}
+		// if ( $this->db::connection('default')->getSchemaBuilder()->hasTable('tac_users') AND $this->db::connection('default')->getSchemaBuilder()->getColumnType('tac_users', 'group') == 'integer' ) {
+		// 	$response['status'] = true;
+		// 	$this->db::connection('default')->getSchemaBuilder()->table('tac_users', function (Blueprint $table) {
+		// 	    $table->string('group')->nullable()->change();
+		// 			//$table->renameColumn('group', 'groups');
+		// 	});
+		//
+		// 	$response['message'] = 'Table fix for tac_users';
+		// }
 
 		if ( $this->db::getSchemaBuilder()->hasColumn('confM_bind_cmdev_tacdev','tac_dev') )
 		{
@@ -446,6 +462,343 @@ class APICheckerCtrl extends Controller
 			$this->db::connection('default')->getSchemaBuilder()->dropIfExists('confM_bind_query_creden');
 			$response['message'] = 'Table confM_bind_query_model and confM_bind_query_creden deleted';
 		}
+////////////////////////////////////////
+////////////////////////////////////////
+////////////////////////////////////////
+		///BIG UPGRADE///
+		if ( array_search('prefix', $this->db::connection('default')->getSchemaBuilder()->getColumnListing('tac_devices')) ){
+			$response['status'] = true;
+			$this->db::getSchemaBuilder()->disableForeignKeyConstraints();
+			$tempData = $this->db::table('tac_devices')->select(['id','name','ipaddr','prefix'])->get();
+			foreach ($tempData as $device) {
+				$addr = $this->db::table('obj_addresses')->insertGetId([
+					'name' => $device->name,
+					'address' => $device->ipaddr.'/'.$device->prefix,
+					'created_at' => date('Y-m-d H:i:s', time()),
+					'updated_at' => date('Y-m-d H:i:s', time())
+				]);
+				$this->db::table('tac_devices')->where('id',$device->id)->update(['address' => $addr]);
+			}
+			$this->db::getSchemaBuilder()->disableForeignKeyConstraints();
+			/////////////////
+			///TACACS DEVICE FIX
+			////////////////
+			$this->db::connection('default')->getSchemaBuilder()->table('tac_devices', function(Blueprint $table) {
+            $table->dropColumn(['prefix', 'ipaddr']);
+						$table->integer('connection_timeout')->nullable()->default(null)->change();
+						$table->integer('group')->nullable()->unsigned()->default(null)->change();
+						$table->foreign('group')->references('id')->
+							on('tac_device_groups')->onDelete('restrict');
+						$table->integer('acl')->nullable()->unsigned()->default(null)->change();
+						$table->foreign('acl')->references('id')->
+							on('tac_acl')->onDelete('restrict');
+						$table->integer('user_group')->nullable()->unsigned()->default(null)->change();
+						$table->foreign('user_group')->references('id')->
+							on('tac_user_groups')->onDelete('restrict');
+      });
+			/////////////////
+			///TACACS DEVICE GROUP FIX
+			////////////////
+			$this->db::connection('default')->getSchemaBuilder()->table('tac_device_groups', function(Blueprint $table) {
+						$table->integer('connection_timeout')->nullable()->default(null)->change();
+						$table->integer('acl')->nullable()->unsigned()->default(null)->change();
+						$table->foreign('acl')->references('id')->
+							on('tac_acl')->onDelete('restrict');
+						$table->integer('user_group')->nullable()->unsigned()->default(null)->change();
+						$table->foreign('user_group')->references('id')->
+							on('tac_user_groups')->onDelete('restrict');
+      });
+			/////////////////
+			///TACACS USER FIX
+			////////////////
+			$this->db::connection('default')->getSchemaBuilder()->table('tac_users', function(Blueprint $table) {
+
+				$tempData = $this->db::table('tac_users')->select(['id','group','device_list','device_group_list'])->get();
+				foreach ($tempData as $user) {
+					$groups = explode(';;', $user->group);
+					for ($i=0; $i < count($groups); $i++) {
+						if (empty($groups[$i])) continue;
+						$addr = $this->db::table('tac_bind_usrGrp')->insert([
+							'user_id' => $user->id,
+							'group_id' => $groups[$i],
+							'order' => $i,
+						]);
+					}
+					$devs = explode(';;', $user->device_list);
+					foreach ($devs as $dev) {
+						if (empty($dev)) continue;
+						$addr = $this->db::table('tac_bind_dev')->insert([
+							'user_id' => $user->id,
+							'device_id' => $dev
+						]);
+					}
+					$devGrps = explode(';;', $user->device_group_list);
+					foreach ($devGrps as $devGrp) {
+						if (empty($devGrp)) continue;
+						$addr = $this->db::table('tac_bind_devGrp')->insert([
+							'user_id' => $user->id,
+							'devGroup_id' => $devGrp
+						]);
+					}
+				}
+
+				if ($this->db::getSchemaBuilder()->hasColumn('tac_users', 'group')) $table->dropColumn('group');
+				if ($this->db::getSchemaBuilder()->hasColumn('tac_users', 'device_list')) $table->dropColumn('device_list');
+				if ($this->db::getSchemaBuilder()->hasColumn('tac_users', 'device_group_list')) $table->dropColumn('device_group_list');
+				if ($this->db::getSchemaBuilder()->hasColumn('tac_users', 'priv-lvl')) $table->dropColumn('priv-lvl');
+				if ($this->db::getSchemaBuilder()->hasColumn('tac_users', 'test1')) $table->dropColumn('test1');
+				if ($this->db::getSchemaBuilder()->hasColumn('tac_users', 'client_ip')) $table->dropColumn('client_ip');
+				if ($this->db::getSchemaBuilder()->hasColumn('tac_users', 'server_ip')) $table->dropColumn('server_ip');
+				if ($this->db::getSchemaBuilder()->hasColumn('tac_users', 'mavis_otp_enabled')) $table->dropColumn('mavis_otp_enabled');
+				if ($this->db::getSchemaBuilder()->hasColumn('tac_users', 'mavis_otp_period')) $table->dropColumn('mavis_otp_period');
+				if ($this->db::getSchemaBuilder()->hasColumn('tac_users', 'mavis_otp_digits')) $table->dropColumn('mavis_otp_digits');
+				if ($this->db::getSchemaBuilder()->hasColumn('tac_users', 'mavis_otp_digest')) $table->dropColumn('mavis_otp_digest');
+				if ($this->db::getSchemaBuilder()->hasColumn('tac_users', 'mavis_sms_enabled')) $table->dropColumn('mavis_sms_enabled');
+				if ($this->db::getSchemaBuilder()->hasColumn('tac_users', 'manual_beginning')) $table->dropColumn('manual_beginning');
+				if ($this->db::getSchemaBuilder()->hasColumn('tac_users', 'ms-chap')) $table->dropColumn('ms-chap');
+
+				$table->integer('acl')->nullable()->unsigned()->default(null)->change();
+				$table->foreign('acl')->references('id')->
+					on('tac_acl')->onDelete('restrict');
+
+				$table->integer('service')->nullable()->unsigned()->default(null)->change();
+				$table->foreign('service')->references('id')->
+					on('tac_services')->onDelete('restrict');
+				// $table->dropColumn(['priv-lvl', 'test1', 'client_ip','server_ip',
+				// 	'mavis_otp_enabled','mavis_otp_period','mavis_otp_digits','mavis_otp_digest','manual_beginning']);
+      });
+			/////////////////
+			///TACACS USER GROUP FIX
+			////////////////
+			$this->db::connection('default')->getSchemaBuilder()->table('tac_user_groups', function(Blueprint $table) {
+
+				$tempData = $this->db::table('tac_user_groups')->select(['id','device_list','device_group_list','ldap_groups'])->get();
+				foreach ($tempData as $group) {
+					$devs = explode(';;', $group->device_list);
+					foreach ($devs as $dev) {
+						if (empty($dev)) continue;
+						$addr = $this->db::table('tac_bind_dev')->insert([
+							'group_id' => $group->id,
+							'device_id' => $dev
+						]);
+					}
+					$devGrps = explode(';;', $group->device_group_list);
+					foreach ($devGrps as $devGrp) {
+						if (empty($devGrp)) continue;
+						$addr = $this->db::table('tac_bind_devGrp')->insert([
+							'group_id' => $group->id,
+							'devGroup_id' => $devGrp
+						]);
+					}
+					$ldapGrps = explode(';;', $group->ldap_groups);
+					foreach ($ldapGrps as $ldapGrp) {
+						$group_parse = explode(',', $ldapGrp);
+
+						if (empty($ldapGrp)) continue;
+						$id = 0;
+						$ldapTest = $this->db::table('ldap_groups')->select('id')->where('cn', $group_parse[0])->first();
+						if ( !$ldapTest )
+							$id = $this->db::table('ldap_groups')->insertGetId([
+								'cn' => $group_parse[0],
+								'dn' => $ldapGrp,
+								'created_at' => date('Y-m-d H:i:s', time()),
+								'updated_at' => date('Y-m-d H:i:s', time())
+							]);
+						else $id = $ldapTest->id;
+						$this->db::table('ldap_bind')->insert([
+							'ldap_id' => $id,
+							'tac_grp_id' => $group->id
+						]);
+
+					}
+				}
+
+				if ($this->db::getSchemaBuilder()->hasColumn('tac_user_groups', 'ldap_groups')) $table->dropColumn('ldap_groups');
+				if ($this->db::getSchemaBuilder()->hasColumn('tac_user_groups', 'device_list')) $table->dropColumn('device_list');
+				if ($this->db::getSchemaBuilder()->hasColumn('tac_user_groups', 'device_group_list')) $table->dropColumn('device_group_list');
+				if ($this->db::getSchemaBuilder()->hasColumn('tac_user_groups', 'priv-lvl')) $table->dropColumn('priv-lvl');
+				if ($this->db::getSchemaBuilder()->hasColumn('tac_user_groups', 'client_ip')) $table->dropColumn('client_ip');
+				if ($this->db::getSchemaBuilder()->hasColumn('tac_user_groups', 'server_ip')) $table->dropColumn('server_ip');
+				if ($this->db::getSchemaBuilder()->hasColumn('tac_user_groups', 'manual_beginning')) $table->dropColumn('manual_beginning');
+
+				$table->integer('acl')->nullable()->unsigned()->default(null)->change();
+				$table->foreign('acl')->references('id')->
+					on('tac_acl')->onDelete('restrict');
+
+				$table->integer('service')->nullable()->unsigned()->default(null)->change();
+				$table->foreign('service')->references('id')->
+					on('tac_services')->onDelete('restrict');
+      });
+			/////////////////
+			///TACACS ACL FIX
+			////////////////
+			$this->db::connection('default')->getSchemaBuilder()->table('tac_acl', function(Blueprint $table) {
+
+				$tempData = $this->db::table('tac_acl')->where('line_number', 0)->select(['id','name'])->get();
+				foreach ($tempData as $acl) {
+					$tempData_ace = $this->db::table('tac_acl')->where('line_number','<>', 0)->where('name',$acl->name)->select(['action','nac','nas','line_number'])->get();
+					foreach ($tempData_ace as $ace) {
+						$nas = null;
+						$nac = null;
+						// $ipAddr_nas = explode('/', $ace->nas);
+						// $ipAddr_nac = explode('/', $ace->nac);
+						// if (empty($ipAddr_nas[1])) $ipAddr_nas[1] = 32;
+						$searchNas = $this->db::table('obj_addresses')->where('name', $ace->nas)->first();
+						if ($searchNas) {
+							$nas = $searchNas->id;
+						} else {
+							$nas = $this->db::table('obj_addresses')->insertGetId([
+								'name' => $ace->nas,
+								'address' => $ace->nas,
+								// 'prefix' => $ipAddr_nas[1],
+								'created_at' => date('Y-m-d H:i:s', time()),
+								'updated_at' => date('Y-m-d H:i:s', time())
+							]);
+						}
+						$searchNac = $this->db::table('obj_addresses')->where('name', $ace->nac)->first();
+						if ($searchNac) {
+							$nac = $searchNac->id;
+						} else {
+							$nac = $this->db::table('obj_addresses')->insertGetId([
+								'name' => $ace->nac,
+								'address' => $ace->nac,
+								// 'prefix' => $ipAddr_nac[1],
+								'created_at' => date('Y-m-d H:i:s', time()),
+								'updated_at' => date('Y-m-d H:i:s', time())
+							]);
+						}
+
+						$this->db::table('tac_acl_ace')->insert([
+							'acl_id' => $acl->id,
+				      'action' => ($ace->action == 'permit') ? 1 : 0,
+				      'order' => $ace->line_number,
+				      'nac' => $nac,
+				  		'nas' => $nas,
+						]);
+					}
+				}
+
+				$this->db::table('tac_acl')->where('line_number','<>', 0)->delete();
+				$table->dropColumn('line_number');
+				$table->dropColumn('nas');
+				$table->dropColumn('nac');
+				$table->dropColumn('action');
+				$table->dropColumn('timerange');
+      });
+			/////////////////
+			///TACACS CMD FIX
+			////////////////
+			$this->db::connection('default')->getSchemaBuilder()->table('tac_cmd', function(Blueprint $table) {
+
+				$tempData = $this->db::table('tac_cmd')->select(['id','cmd_attr','type'])->get();
+				foreach ($tempData as $cmd) {
+					if ($cmd->type == 'junos'){
+						$this->db::table('tac_cmd')->where('id',$cmd->id)->update([
+							'type' => 1,
+							'junos' => implode(',', explode(';;', $cmd->cmd_attr))
+						]);
+					} else {
+						$this->db::table('tac_cmd')->where('id',$cmd->id)->update([
+							'type' => 0,
+						]);
+						$args = explode(';;', $cmd->cmd_attr);
+
+						for ($i=0; $i < count($args); $i++) {
+							$action = ( preg_match( '/(^permit )/', $args[$i] ) ) ? 1 : 0;
+							$args[$i] = preg_replace('/(^permit )/', '', $args[$i]);
+							$args[$i] = preg_replace('/(^deny )/', '', $args[$i]);
+
+							if (!trim($args[$i])) continue;
+
+							$this->db::table('tac_cmd_arg')->insert([
+								'tac_cmd_id' => $cmd->id,
+					      'action' => $action,
+					      'order' => $i,
+					      'arg' => trim($args[$i]),
+							]);
+						}
+					}
+				}
+
+				$table->dropColumn('cmd_attr');
+
+      });
+			/////////////////
+			///TACACS Service FIX
+			////////////////
+			$this->db::connection('default')->getSchemaBuilder()->table('tac_services', function(Blueprint $table) {
+
+				$tempData = $this->db::table('tac_services')->select()->get();
+
+				function filter_cmd($e) {
+				    return !empty($e['service_id']) AND !empty($e['cmd_id']) AND !empty($e['section']);
+				};
+
+				foreach ($tempData as $service) {
+					$service_cmd = [];
+					$tempId = $service->id;
+					$cisco_rs_cmd = explode(';;', $service->cisco_rs_cmd);
+					$h3c_cmd = explode(';;', $service->h3c_cmd);
+					$junos_cmd_ao = explode(';;', $service->junos_cmd_ao);
+					$junos_cmd_do = explode(';;', $service->junos_cmd_do);
+					$junos_cmd_ac = explode(';;', $service->junos_cmd_ac);
+					$junos_cmd_dc = explode(';;', $service->junos_cmd_dc);
+
+					foreach ($cisco_rs_cmd as $value) {
+						if (empty($value)) continue;
+						$service_cmd[] = [ 'service_id' => $tempId, 'cmd_id' => $value, 'section' => 'cisco_rs_cmd'];
+					}
+					foreach ($h3c_cmd as $value) {
+						if (empty($value)) continue;
+						$service_cmd[] = [ 'service_id' => $tempId, 'cmd_id' => $value, 'section' => 'h3c_cmd'];
+					}
+					foreach ($junos_cmd_ao as $value) {
+						if (empty($value)) continue;
+						$service_cmd[] = [ 'service_id' => $tempId, 'cmd_id' => $value, 'section' => 'junos_cmd_ao'];
+					}
+					foreach ($junos_cmd_do as $value) {
+						if (empty($value)) continue;
+						$service_cmd[] = [ 'service_id' => $tempId, 'cmd_id' => $value, 'section' => 'junos_cmd_do'];
+					}
+					foreach ($junos_cmd_ac as $value) {
+						if (empty($value)) continue;
+						$service_cmd[] = [ 'service_id' => $tempId, 'cmd_id' => $value, 'section' => 'junos_cmd_ac'];
+					}
+					foreach ($junos_cmd_dc as $value) {
+						if (empty($value)) continue;
+						$service_cmd[] = [ 'service_id' => $tempId, 'cmd_id' => $value, 'section' => 'junos_cmd_dc'];
+					}
+
+					if (count($service_cmd)) $this->db::table('bind_service_cmd')->insert($service_cmd);
+				}
+
+				$table->dropColumn('cisco_rs_cmd');
+				$table->dropColumn('h3c_cmd');
+				$table->dropColumn('junos_cmd_ao');
+				$table->dropColumn('junos_cmd_do');
+				$table->dropColumn('junos_cmd_ac');
+				$table->dropColumn('junos_cmd_dc');
+				$table->dropColumn('priv-lvl');
+				$table->dropColumn('default_cmd');
+
+      });
+			/////////////////
+			///API USER FIX
+			////////////////
+			$this->db::connection('default')->getSchemaBuilder()->table('api_users', function(Blueprint $table) {
+						$table->integer('group')->nullable()->unsigned()->default(null)->change();
+						$table->foreign('group')->references('id')->
+							on('api_user_groups')->onDelete('restrict');
+			});
+			////////////////////////////////////////
+			////////////////////////////////////////
+			////////////////////////////////////////
+			///END OF BIG UPDATE
+			////////////////////////////////////////
+			////////////////////////////////////////
+			////////////////////////////////////////
+			$response['message'] = 'Table tac_devices rebuild';
+		}
 
 		if ( array_search('userName', $this->db::connection('logging')->getSchemaBuilder()->getColumnListing('api_logging')) )
 		{
@@ -460,7 +813,9 @@ class APICheckerCtrl extends Controller
 			$response['message'] = 'Table fix for api_logging';
 			//$this->db::connection('logging')->getSchemaBuilder()->table('api_logging')->renameColumn('userName', 'username');
 		}
-
+////////////////////////////////////////
+////////////////////////////////////////
+////////////////////////////////////////
 		if ( array_search('NAS', $this->db::connection('logging')->getSchemaBuilder()->getColumnListing('tac_log_authentication')) )
 		{
 			$response['status'] = true;

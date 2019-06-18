@@ -11,7 +11,7 @@ class TACCMD extends Model
 	protected $fillable = [
     'name',
     'cmd',
-    'cmd_attr',
+    'junos',
     'cmd_permit_end',
     'type',
     'manual',

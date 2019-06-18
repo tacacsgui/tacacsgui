@@ -26,7 +26,10 @@ class OTP extends Controller
       $this->mavis->debugIn( $this->dPrefix() . 'Check Status: TACTYPE '.$this->mavis->getVariable(AV_A_TACTYPE).' Unsupported. Exit' );
       return false;
     }
-    $this->user = $this->db->table('tac_users')->select('mavis_otp_secret','mavis_otp_period','mavis_otp_digits','mavis_otp_digest','group')->whereRaw("BINARY `username`='{$this->mavis->getUsername()}'")->where([ ['mavis_otp_enabled', 1],['mavis_sms_enabled', 0] ]);
+    $this->user = $this->db->table('tac_users')->
+        select('mavis_otp_secret','id')->
+        // leftJoin('tac_bind_usrGrp as tb', 'tb.user_id', '=', 'tu.id')->
+        whereRaw("BINARY `username`='{$this->mavis->getUsername()}'")->where('login_flag', 10);
     $this->mavis->debugIn( $this->dPrefix() . 'Check Status: ' . ( ($this->user->count()) ? 'User Found. Run' : 'User Not Found. Exit' ) );
     return $this->user->count();
   }
@@ -40,11 +43,12 @@ class OTP extends Controller
       $this->mavis->debugIn( $this->dPrefix() . 'Only AUTH allowed! Exit' );
       return false;
     }
+    $this->mavis->debugIn( $this->dPrefix() .'Global OTP: '.json_encode ( $this->otp_settings ));
 		$otp = TOTP::create(
 				$this->user->mavis_otp_secret,
-				$this->user->mavis_otp_period, // The period (30 seconds)
-				$this->user->mavis_otp_digest, // The digest algorithm
-				$this->user->mavis_otp_digits
+				$this->otp_settings->period,//$this->user->mavis_otp_period, // The period (30 seconds)
+				$this->otp_settings->digest,//$this->user->mavis_otp_digest, // The digest algorithm
+				$this->otp_settings->digits//$this->user->mavis_otp_digits
 		);
 		$verification = $otp->verify( $this->mavis->getPassword() );
 		$this->mavis->debugIn( $this->dPrefix() .'Verification status: ' . ( ( $verification ) ? 'allow' : 'deny' ) );

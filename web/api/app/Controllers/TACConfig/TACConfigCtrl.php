@@ -36,14 +36,14 @@ class TACConfigCtrl extends Controller
 
 		$html = (empty($req->getParam('html'))) ? false : true;
 
-		$data['mavisGeneralConfig']=array_values(ConfigPatterns::tacMavisGeneralGen($html));
-		$data['devicesConfig']=array_values(ConfigPatterns::tacDevicesPartGen($html));
-		$data['deviceGroupsConfig']=array_values(ConfigPatterns::tacDeviceGroupsPartGen($html));
-		$data['userGroupsConfig']=array_values(ConfigPatterns::tacUserGroupsPartGen($html));
-		$data['usersConfig']=array_values(ConfigPatterns::tacUsersPartGen($html));
-		$data['spawndConfig']=array_values(ConfigPatterns::tacSpawndPartGen($html));
-		$data['tacGeneralConfig']=array_values(ConfigPatterns::tacGeneralPartGen($html));
-		$data['tacACL']=array_values(ConfigPatterns::tacACLPartGen($html));
+		$data['tac_mavis']=array_values(ConfigPatterns::tacMavisGeneralGen($html));
+		$data['tac_devices']=array_values(ConfigPatterns::tacDevicesPartGen($html));
+		$data['tac_devGrps']=array_values(ConfigPatterns::tacDeviceGroupsPartGen($html));
+		$data['tac_usrGrps']=array_values(ConfigPatterns::tacUserGroupsPartGen($html));
+		$data['tac_users']=array_values(ConfigPatterns::tacUsersPartGen($html));
+		$data['spawnd']=array_values(ConfigPatterns::tacSpawndPartGen($html));
+		$data['tac_general']=array_values(ConfigPatterns::tacGeneralPartGen($html));
+		$data['tac_acl']=array_values(ConfigPatterns::tacACLPartGen($html));
 
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
@@ -169,45 +169,54 @@ class TACConfigCtrl extends Controller
 		$tempGlobalConfArray=ConfigPatterns::tacGeneralPartGen(false);
 		$tempACL=ConfigPatterns::tacACLPartGen(false);
 
-		$output="";
+		$output = implode("\n", array_merge (
+			ConfigPatterns::tacSpawndPartGen(false),
+			ConfigPatterns::tacGeneralPartGen(false),
+			ConfigPatterns::tacMavisGeneralGen(false),
+			ConfigPatterns::tacACLPartGen(false),
+			ConfigPatterns::tacDeviceGroupsPartGen(false),
+			ConfigPatterns::tacDevicesPartGen(false),
+			ConfigPatterns::tacUserGroupsPartGen(false),
+			ConfigPatterns::tacUsersPartGen(false)
+		));
 
 		////////////////////////////////////
 		//SPAWND CONFIGURATION//START//
-		$output.="id = spawnd {".$lineSeparator;
-		$output.=$this->arrayParserToText($tempSpawndConfArray,$lineSeparator);
-		$output.="} ##END OF SPAWND".$lineSeparator;
+		// $output.="id = spawnd {".$lineSeparator;
+		// $output.=$this->arrayParserToText($tempSpawndConfArray,$lineSeparator);
+		// $output.="} ##END OF SPAWND".$lineSeparator;
 		//SPAWND CONFIGURATION//END//
 		////////////////////////////////////
 		//GLOBAL CONFIGURATION//START//
-		$output.="id = tac_plus { ##START GLOBAL CONFIGURATION".$lineSeparator;
-		$output.=$this->arrayParserToText($tempGlobalConfArray,$lineSeparator);
+		// $output.="id = tac_plus { ##START GLOBAL CONFIGURATION".$lineSeparator;
+		// $output.=$this->arrayParserToText($tempGlobalConfArray,$lineSeparator);
 		//GLOBAL CONFIGURATION//END//
 		////////////////////////////////////
 		//MAVIS GENERAL CONFIGURATION//START//
-		$output.=$this->arrayParserToText($tempMavisGeneralArray,$lineSeparator);
+		// $output.=$this->arrayParserToText($tempMavisGeneralArray,$lineSeparator);
 		//MAVIS GENERAL CONFIGURATION//END//
 		////////////////////////////////////
 		//ACL LIST CONFIGURATION//START//
-		$output.=$this->arrayParserToText($tempACL,$lineSeparator);
+		// $output.=$this->arrayParserToText($tempACL,$lineSeparator);
 		//ACL LIST CONFIGURATION//END//
 		////////////////////////////////////
 		//DEVICE GROUP LIST CONFIGURATION//START//
-		$output.=$this->arrayParserToText($tempDeviceGroupArray,$lineSeparator);
+		// $output.=$this->arrayParserToText($tempDeviceGroupArray,$lineSeparator);
 		//DEVICE GROUP LIST CONFIGURATION//END//
 		////////////////////////////////////
 		//DEVICE LIST CONFIGURATION//START//
-		$output.=$this->arrayParserToText($tempDeviceArray,$lineSeparator);
+		// $output.=$this->arrayParserToText($tempDeviceArray,$lineSeparator);
 		//DEVICE LIST CONFIGURATION//END//
 		//////////////////////////////////
 		//USER GROUP LIST CONFIGURATION//START//
-		$output.=$this->arrayParserToText($tempUserGroupArray,$lineSeparator);
+		// $output.=$this->arrayParserToText($tempUserGroupArray,$lineSeparator);
 		//USER GROUP LIST CONFIGURATION//END//
 		//////////////////////////////////
 		//USER LIST CONFIGURATION//START//
-		$output.=$this->arrayParserToText($tempUserArray,$lineSeparator);
+		// $output.=$this->arrayParserToText($tempUserArray,$lineSeparator);
 		//USER LIST CONFIGURATION//END//
 		//////////////////////////////////
-		$output.="}##END GLOBAL CONFIGURATION".$lineSeparator;
+		$output.="\n}##END GLOBAL CONFIGURATION".$lineSeparator;
 		//////////////////////////////////
 
 		return $output;
@@ -280,8 +289,8 @@ class TACConfigCtrl extends Controller
 			//$newSlaveAvailable = HA::isThereNewSlaves();
 			//$data['unstoppable'] = $unstoppable = ( HA::isMAster() AND HA::unconfiguredSlaves() );
 			//$data['test01']= $newSlaveAvailable;
-			$doBackup=$req->getParam('doBackup');
-		if ( $doBackup == 'true' /*OR $unstoppable*/ ) {
+			$doBackup = $req->getParam('doBackup');
+		if ( $doBackup /*OR $unstoppable*/ ) {
 				$data['backup'] = $doBackup = $this->APIBackupCtrl->makeBackup(['make' => 'tcfg']);
 			if ( !$doBackup['status'] /*AND ! $unstoppable */) {
 					$data['applyStatus'] = ['error' => true, 'message' => $doBackup['message'], 'errorLine' => 0];

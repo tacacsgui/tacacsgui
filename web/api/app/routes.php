@@ -4,10 +4,14 @@ $app->get('/', 'HomeController:getHome'); //->add($container->get('csrf'));// We
 $app->post('/', 'HomeController:postHome'); //->add($container->get('csrf'));
 
 ###Authentication Routes#############################
-$app->get('/auth/singin/', 'AuthController:getSingIn');
-$app->post('/auth/singin/', 'AuthController:postSingIn');
-$app->post('/auth/singin/changePassword/', 'AuthController:postChangePassword');
-$app->get('/auth/singout/', 'AuthController:getSingOut');
+$app->get('/auth/singin/', 'AuthController:getSignIn'); //please delete me
+$app->get('/auth/signin/', 'AuthController:getSignIn');
+$app->post('/auth/singin/', 'AuthController:postSignIn'); //please delete me
+$app->post('/auth/signin/', 'AuthController:postSignIn');
+$app->post('/auth/singin/changePassword/', 'AuthController:postChangePassword'); //please delete me
+$app->post('/auth/signin/changePassword/', 'AuthController:postChangePassword');
+$app->get('/auth/singout/', 'AuthController:getSignOut'); //please delete me
+$app->get('/auth/signout/', 'AuthController:getSignOut');
 #####################################################
 ###User Routes#######################################
 $app->post('/user/datatables/', 'APIUsersCtrl:postUserDatatables');
@@ -47,6 +51,16 @@ $app->get('/settings/ha/', 'APISettingsCtrl:getHASettings');
 $app->post('/settings/ha/', 'APISettingsCtrl:postHASettings');
 $app->post('/settings/ha/status/', 'APISettingsCtrl:postHAStatus');
 $app->post('/settings/ha/slave/delete/', 'APISettingsCtrl:postHASlaveDel');
+$app->post('/settings/ha/slave/list/', 'APISettingsCtrl:postHASlaveList');
+#####################################################
+###Tacacs Devices Routes#######################################
+$app->post('/obj/address/datatables/', 'ObjAddress:postDatatables');
+$app->post('/obj/address/add/', 'ObjAddress:postAdd');
+$app->get('/obj/address/edit/', 'ObjAddress:getEdit');
+$app->post('/obj/address/edit/', 'ObjAddress:postEdit');
+$app->post('/obj/address/delete/', 'ObjAddress:postDel');
+$app->post('/obj/address/csv/', 'ObjAddress:postCsv');
+$app->get('/obj/address/list/', 'ObjAddress:getList');
 #####################################################
 ###Tacacs Devices Routes#######################################
 $app->post('/tacacs/device/datatables/', 'TACDevicesCtrl:postDeviceDatatables');
@@ -107,27 +121,28 @@ $app->get('/tacacs/acl/list/', 'TACACLCtrl:getAclList');
 $app->post('/tacacs/acl/csv/', 'TACACLCtrl:postACLCsv');
 #####################################################
 ###Tacacs ACL Routes#######################################
-$app->post('/tacacs/services/datatables/', 'TACServicesCtrl:postServiceDatatables');
-$app->get('/tacacs/services/add/', 'TACServicesCtrl:getServiceAdd');
-$app->post('/tacacs/services/add/', 'TACServicesCtrl:postServiceAdd');
-$app->get('/tacacs/services/edit/', 'TACServicesCtrl:getServiceEdit');
-$app->post('/tacacs/services/edit/', 'TACServicesCtrl:postServiceEdit');
-$app->get('/tacacs/services/delete/', 'TACServicesCtrl:getServiceDelete');
-$app->post('/tacacs/services/delete/', 'TACServicesCtrl:postServiceDelete');
-$app->get('/tacacs/services/list/', 'TACServicesCtrl:getServiceList');
-$app->post('/tacacs/services/csv/', 'TACServicesCtrl:postServiceCsv');
+$app->post('/tacacs/service/datatables/', 'TACServicesCtrl:postServiceDatatables');
+$app->get('/tacacs/service/add/', 'TACServicesCtrl:getServiceAdd');
+$app->post('/tacacs/service/add/', 'TACServicesCtrl:postServiceAdd');
+$app->get('/tacacs/service/edit/', 'TACServicesCtrl:getServiceEdit');
+$app->post('/tacacs/service/edit/', 'TACServicesCtrl:postServiceEdit');
+$app->get('/tacacs/service/delete/', 'TACServicesCtrl:getServiceDelete');
+$app->post('/tacacs/service/delete/', 'TACServicesCtrl:postServiceDelete');
+$app->get('/tacacs/service/list/', 'TACServicesCtrl:getServiceList');
+$app->post('/tacacs/service/csv/', 'TACServicesCtrl:postServiceCsv');
 #####################################################
 ###Tacacs CMD Routes#######################################
-$app->post('/tacacs/cmd/datatables/', 'TACCMDCtrl:postDatatables');
-$app->get('/tacacs/cmd/add/', 'TACCMDCtrl:getAdd');
-$app->post('/tacacs/cmd/add/', 'TACCMDCtrl:postAdd');
-$app->get('/tacacs/cmd/edit/', 'TACCMDCtrl:getEdit');
-$app->post('/tacacs/cmd/edit/', 'TACCMDCtrl:postEdit');
-$app->post('/tacacs/cmd/edit/type/', 'TACCMDCtrl:postEditType');
-$app->get('/tacacs/cmd/delete/', 'TACCMDCtrl:getDelete');
-$app->post('/tacacs/cmd/delete/', 'TACCMDCtrl:postDelete');
-$app->get('/tacacs/cmd/list/', 'TACCMDCtrl:getList');
-$app->post('/tacacs/cmd/csv/', 'TACCMDCtrl:postCsv');
+$app->post('/obj/cmd/datatables/', 'TACCMDCtrl:postDatatables');
+$app->get('/obj/cmd/add/', 'TACCMDCtrl:getAdd');
+$app->post('/obj/cmd/add/', 'TACCMDCtrl:postAdd');
+$app->get('/obj/cmd/edit/', 'TACCMDCtrl:getEdit');
+$app->post('/obj/cmd/edit/', 'TACCMDCtrl:postEdit');
+$app->post('/obj/cmd/edit/type/', 'TACCMDCtrl:postEditType');
+$app->get('/obj/cmd/delete/', 'TACCMDCtrl:getDelete');
+$app->post('/obj/cmd/delete/', 'TACCMDCtrl:postDelete');
+$app->get('/obj/cmd/list/', 'TACCMDCtrl:getList');
+$app->get('/obj/cmd/list/junos/', 'TACCMDCtrl:getListJunos');
+$app->post('/obj/cmd/csv/', 'TACCMDCtrl:postCsv');
 #####################################################
 ###Tacacs Configuration Generator Routes#######################################
 $app->get('/tacacs/config/apply/', 'TACConfigCtrl:getConfigGenFile');
@@ -182,6 +197,10 @@ $app->post('/update/upgrade/', 'APIUpdateCtrl:postUpgrade');
 ###MAVIS Routes#######################################
 $app->get('/mavis/ldap/', 'MAVISLDAP:getLDAPParams');
 $app->post('/mavis/ldap/', 'MAVISLDAP:postLDAPParams');
+$app->post('/mavis/ldap/group/search/', 'MAVISLDAP:postLdapSearch');
+$app->get('/mavis/ldap/group/list/', 'MAVISLDAP:getLdapList');
+$app->post('/mavis/ldap/group/bind/', 'MAVISLDAP:postLdapBind');
+$app->post('/mavis/ldap/group/bind/table/', 'MAVISLDAP:postBindTable');
 $app->post('/mavis/ldap/check/', 'MAVISLDAP:postLDAPCheck');
 $app->post('/mavis/ldap/test/', 'MAVISLDAP:postTest');
 $app->post('/mavis/otp/generate/secret/', 'MAVISOTP:postOTPSecret');
@@ -232,16 +251,21 @@ $app->get('/confmanager/settings/cron/', 'ConfManager:getCron');
 $app->post('/confmanager/settings/cron/', 'ConfManager:postCron');
 $app->post('/confmanager/datatables/', 'ConfManager:postDatatables');
 $app->post('/confmanager/log/datatables/', 'ConfManager:postLogDatatables');
+$app->get('/confmanager/dir/', 'ConfManager:getDir');
+$app->get('/confmanager/dir/exploer/', 'ConfManager:getDirExploer');
+$app->post('/confmanager/dir/add/', 'ConfManager:postDirAdd');
+$app->post('/confmanager/dir/delete/', 'ConfManager:postDirDel');
+$app->post('/confmanager/dir/mv/', 'ConfManager:postDirMove');
 $app->post('/confmanager/get/more/', 'ConfManager:postMore');
 $app->post('/confmanager/file/delete/', 'ConfManager:postDel');
 $app->get('/confmanager/file/download/', 'APIDownloadCtrl:getDlCm');
 $app->get('/confmanager/file/download/hash/', 'APIDownloadCtrl:getCmHash');
-$app->post('/confmanager/diff/info/', 'ConfManager:postDiffInfo');
+$app->post('/confmanager/tacacs/', 'ConfManager:postTacacs');
 $app->get('/confmanager/diff/list/', 'ConfManager:getDiffList');
 $app->post('/confmanager/diff/brief/', 'ConfManager:postDiffBrief');
 $app->post('/confmanager/diff/', 'ConfManager:postDiff');
-$app->post('/confmanager/diff/tacgui/users/', 'ConfManager:postTacgui');
-$app->post('/confmanager/diff/tacgui/aaa/', 'ConfManager:postTacguiAAA');
+// $app->post('/confmanager/diff/tacgui/users/', 'ConfManager:postTacgui');
+$app->post('/confmanager/tacacs/aaa/', 'ConfManager:postTacguiAAA');
 //Models
 $app->post('/confmanager/models/datatables/', 'ConfModels:postDatatables');
 $app->post('/confmanager/models/add/', 'ConfModels:postAdd');

@@ -78,6 +78,8 @@ class ConfQueries extends Controller
 			$this->ConfManager->createConfig();
 		}
 
+		$data['query'] = 1;
+
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
 
@@ -122,8 +124,22 @@ class ConfQueries extends Controller
 		}
 		//$data['test333'] = $this->ConfManager->createConfig();
 
-		$data['query'] = Conf_Queries::select()->where('id', $req->getParam('id'))->first();
-		$data['query']['devices'] = $this->db::table('confM_bind_query_devices')->select("device_id")->where('query_id', $req->getParam('id'))->pluck('device_id')->toArray();
+		$data['query'] = Conf_Queries::leftJoin('confM_models as cm', 'cm.id', '=', 'confM_queries.model')->
+		leftJoin('confM_credentials as cc', 'cc.id', '=', 'confM_queries.credential')->
+		select(['confM_queries.*','cm.name as model_name', 'cc.name as credo_name'])->where('confM_queries.id', $req->getParam('id'))->first();
+
+		$data['query']['f_group'] = (empty($data['query']['f_group'])) ?
+			[] : [[ 'id' => $data['query']['f_group'], 'text' => $data['query']['f_group']]];
+		$data['query']['model'] = (empty($data['query']['model_name'])) ?
+			[] : [[ 'id' => $data['query']['model'], 'text' => $data['query']['model_name']]];
+		unset($data['query']['model_name']);
+		$data['query']['credential'] = (empty($data['query']['credo_name'])) ?
+			[] : [[ 'id' => $data['query']['credential'], 'text' => $data['query']['credo_name']]];
+		unset($data['query']['credo_name']);
+
+		$data['query']['devices'] = $this->db::table('confM_bind_query_devices')->
+		leftJoin('confM_devices as cd', 'cd.id', '=', 'device_id')->
+		select(["device_id as id", 'cd.name as text'])->where('query_id', $req->getParam('id'))->get();
 
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
@@ -159,9 +175,9 @@ class ConfQueries extends Controller
 		//CHECK ACCESS TO THAT FUNCTION//END//
 
     $validation = $this->validator->validate($req, [
-			'name' => v::when( v::nullType() , v::alwaysValid(), v::noWhitespace()->notEmpty()->alnum()->theSameNameUsed( '\tgui\Models\Conf_Queries' )->setName('Name') ),
-			'model' => v::when( v::nullType() , v::alwaysValid(), v::numeric()->noWhitespace()->notEmpty()->setName('Model') ),
-			'devices' => v::when( v::nullType() , v::alwaysValid(), v::notEmpty()->arrayType()->each( v::numeric() )->setName('Devices') ),
+			'name' => v::noWhitespace()->notEmpty()->alnum()->theSameNameUsed( '\tgui\Models\Conf_Queries', $req->getParam('id') )->setName('Name'),
+			'model' => v::numeric()->noWhitespace()->notEmpty()->setName('Model'),
+			'devices' => v::notEmpty()->arrayType()->each( v::numeric()->setName('Devices') )->setName('Devices'),
 		]);
 
 		if ($validation->failed()){
@@ -215,6 +231,8 @@ class ConfQueries extends Controller
 		}
 
 		$this->ConfManager->createConfig();
+
+		$data['save'] = 1;
 
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
@@ -305,90 +323,116 @@ class ConfQueries extends Controller
 		$columns[array_search('id', $columns)] = 'confM_queries.id AS id';
 		$columns[array_search('created_at', $columns)] = 'confM_queries.created_at AS created_at';
 		$columns[array_search('updated_at', $columns)] = 'confM_queries.updated_at AS updated_at';
-    $data['columns'] = $columns;
-    $queries = [];
-    $data['filter'] = [];
-    $data['filter']['error'] = false;
-    $data['filter']['message'] = '';
-    //Filter start
-    $searchString = ( empty($params['search']['value']) ) ? '' : $params['search']['value'];
-    $temp = $this->queriesMaker($columns, $searchString);
-    $queries = $temp['queries'];
-    $data['filter'] = $temp['filter'];
 
-    $data['queries'] = $queries;
-    $data['columns'] = $columns;
-    //Filter end
-    $data['recordsTotal'] = Conf_Queries::count();
-    //Get temp data for Datatables with Fliter and some other parameters
-    $tempData = Conf_Queries::leftJoin('confM_models as models', 'models.id', '=', 'confM_queries.model')->
+		$data['columns'] = $columns;
+		$queries = (empty($params['searchTerm'])) ? [] : $params['searchTerm'];
+
+		//Filter end
+		$data['recordsTotal'] = Conf_Queries::count();
+		//Get temp data for Datatables with Fliter and some other parameters
+		$tempData = Conf_Queries::leftJoin('confM_models as models', 'models.id', '=', 'confM_queries.model')->
 			leftJoin('confM_credentials as cre', 'cre.id', '=', 'confM_queries.credential')->
 			leftJoin('confM_bind_query_devices as qd', 'qd.query_id', '=', 'confM_queries.id')->
 			groupBy('confM_queries.id')->
-			select($columns)->
-      when( !empty($queries),
-        function($query) use ($queries)
-        {
-          foreach ($queries as $condition => $attr) {
-            switch ($condition) {
-              case '!==':
-                foreach ($attr as $column => $value) {
-                  $query->whereNotIn($column, $value);
-                }
-                break;
-              case '==':
-                foreach ($attr as $column => $value) {
-                  $query->whereIn($column, $value);
-                }
-                break;
-              case '!=':
-                foreach ($attr as $column => $valueArr) {
-                  for ($i=0; $i < count($valueArr); $i++) {
-                    if ($i == 0) $query->where($column,'NOT LIKE', '%'.$valueArr[$i].'%');
-                    $query->where($column,'NOT LIKE', '%'.$valueArr[$i].'%');
-                  }
-                }
-                break;
-              case '=':
-                foreach ($attr as $column => $valueArr) {
-                  for ($i=0; $i < count($valueArr); $i++) {
-                    if ($i == 0) $query->where($column,'LIKE', '%'.$valueArr[$i].'%');
-                    $query->where($column,'LIKE', '%'.$valueArr[$i].'%');
-                  }
-                }
-                break;
-              default:
-                //return $query;
-                break;
-            }
-          }
-          return $query;
-        });
-        $data['recordsFiltered'] = $tempData->count();
+			select($columns);
+		// when( !empty($queries),
+		// 	function($query) use ($queries)
+		// 	{
+		// 		$query->where('username','LIKE', '%'.$queries.'%');
+		// 		return $query;
+		// 	});
+		$data['recordsFiltered'] = $tempData->count();
 
-				// $data['test_23'] = $tempData->
-  			// orderBy($params['columns'][$params['order'][0]['column']]['data'],$params['order'][0]['dir'])->
-  			// take($params['length'])->
-  			// offset($params['start'])->toSql();
+		if (!empty($params['sortColumn']) and !empty($params['sortDirection']))
+				$tempData = $tempData->orderBy($params['sortColumn'],$params['sortDirection']);
 
-  			$tempData = $tempData->
-  			orderBy($params['columns'][$params['order'][0]['column']]['data'],$params['order'][0]['dir'])->
-  			take($params['length'])->
-  			offset($params['start'])->
-  			get()->toArray();
-  		//Creating correct array of answer to Datatables
-  		$data['data']=array();
-  		foreach($tempData as $query){
-  			$buttons='<button class="btn btn-warning btn-xs btn-flat" onclick="cm_queries.get(\''.$query['id'].'\',\''.$query['name'].'\')">Edit</button> '.
-				'<button class="btn btn-info btn-xs btn-flat" disabled ><i class="fa fa-refresh"></i></button> '.
-				'<button class="btn btn-danger btn-xs btn-flat" onclick="cm_queries.del(\''.$query['id'].'\',\''.$query['name'].'\')">Del</button>';
-  			$query['buttons'] = $buttons;
-  			array_push($data['data'],$query);
-  		}
-  		//Some additional parameters for Datatables
-  		$data['draw']=intval( $params['draw'] );
+		$data['data'] = $tempData->get()->toArray();
 
-  		return $res -> withStatus(200) -> write(json_encode($data));
+		return $res -> withStatus(200) -> write(json_encode($data));
+    // $data['columns'] = $columns;
+    // $queries = [];
+    // $data['filter'] = [];
+    // $data['filter']['error'] = false;
+    // $data['filter']['message'] = '';
+    // //Filter start
+    // $searchString = ( empty($params['search']['value']) ) ? '' : $params['search']['value'];
+    // $temp = $this->queriesMaker($columns, $searchString);
+    // $queries = $temp['queries'];
+    // $data['filter'] = $temp['filter'];
+		//
+    // $data['queries'] = $queries;
+    // $data['columns'] = $columns;
+    // //Filter end
+    // $data['recordsTotal'] = Conf_Queries::count();
+    // //Get temp data for Datatables with Fliter and some other parameters
+    // $tempData = Conf_Queries::leftJoin('confM_models as models', 'models.id', '=', 'confM_queries.model')->
+		// 	leftJoin('confM_credentials as cre', 'cre.id', '=', 'confM_queries.credential')->
+		// 	leftJoin('confM_bind_query_devices as qd', 'qd.query_id', '=', 'confM_queries.id')->
+		// 	groupBy('confM_queries.id')->
+		// 	select($columns)->
+    //   when( !empty($queries),
+    //     function($query) use ($queries)
+    //     {
+    //       foreach ($queries as $condition => $attr) {
+    //         switch ($condition) {
+    //           case '!==':
+    //             foreach ($attr as $column => $value) {
+    //               $query->whereNotIn($column, $value);
+    //             }
+    //             break;
+    //           case '==':
+    //             foreach ($attr as $column => $value) {
+    //               $query->whereIn($column, $value);
+    //             }
+    //             break;
+    //           case '!=':
+    //             foreach ($attr as $column => $valueArr) {
+    //               for ($i=0; $i < count($valueArr); $i++) {
+    //                 if ($i == 0) $query->where($column,'NOT LIKE', '%'.$valueArr[$i].'%');
+    //                 $query->where($column,'NOT LIKE', '%'.$valueArr[$i].'%');
+    //               }
+    //             }
+    //             break;
+    //           case '=':
+    //             foreach ($attr as $column => $valueArr) {
+    //               for ($i=0; $i < count($valueArr); $i++) {
+    //                 if ($i == 0) $query->where($column,'LIKE', '%'.$valueArr[$i].'%');
+    //                 $query->where($column,'LIKE', '%'.$valueArr[$i].'%');
+    //               }
+    //             }
+    //             break;
+    //           default:
+    //             //return $query;
+    //             break;
+    //         }
+    //       }
+    //       return $query;
+    //     });
+    //     $data['recordsFiltered'] = $tempData->count();
+		//
+		// 		// $data['test_23'] = $tempData->
+  	// 		// orderBy($params['columns'][$params['order'][0]['column']]['data'],$params['order'][0]['dir'])->
+  	// 		// take($params['length'])->
+  	// 		// offset($params['start'])->toSql();
+		//
+  	// 		$tempData = $tempData->
+  	// 		orderBy($params['columns'][$params['order'][0]['column']]['data'],$params['order'][0]['dir'])->
+  	// 		take($params['length'])->
+  	// 		offset($params['start'])->
+  	// 		get()->toArray();
+  	// 	//Creating correct array of answer to Datatables
+  	// 	$data['data']=array();
+  	// 	foreach($tempData as $query){
+  	// 		$buttons='<button class="btn btn-warning btn-xs btn-flat" onclick="cm_queries.get(\''.$query['id'].'\',\''.$query['name'].'\')">Edit</button> '.
+		// 		'<button class="btn btn-info btn-xs btn-flat" disabled ><i class="fa fa-refresh"></i></button> '.
+		// 		'<button class="btn btn-danger btn-xs btn-flat" onclick="cm_queries.del(\''.$query['id'].'\',\''.$query['name'].'\')">Del</button>';
+  	// 		$query['buttons'] = $buttons;
+  	// 		array_push($data['data'],$query);
+  	// 	}
+  	// 	//Some additional parameters for Datatables
+  	// 	$data['draw']=intval( $params['draw'] );
+		//
+  	// 	return $res -> withStatus(200) -> write(json_encode($data));
   }
 
 	public function postPreview($req,$res)
@@ -432,10 +476,12 @@ class ConfQueries extends Controller
 		$model = Conf_Models::select()->where('id', $req->getParam('model'))->first();
 		$device = $this->db::table('confM_devices as d')->
 			leftJoin('confM_credentials as cd', 'cd.id', '=', 'd.credential')->
+			leftJoin('obj_addresses as addr', 'addr.id', '=', 'd.address')->
 			leftJoin('confM_credentials as cq', 'cq.id', '=', $this->db::raw($creden) )->
 			select([
 				'd.name as name',
-				'd.ip as ip',
+				$this->db::raw("substring_index(addr.address,'/',1) as ip"),
+				//"substring_index(`addr.address`,'/',1) as ip",
 				'd.protocol as protocol',
 				'd.port as port',
 				'cd.username as d_username',

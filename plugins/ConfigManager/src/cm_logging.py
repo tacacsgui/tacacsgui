@@ -38,7 +38,7 @@ class cm_logging():
                       Column('port', Integer),
                       Column('uname_type', String(64)),
                       Column('uname', String(255)),
-                      Column('group', String(255)),
+                      Column('path', String(255)),
                       Column('status', String(64)),
                       Column('message', Text())
                       )

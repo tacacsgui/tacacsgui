@@ -64,6 +64,8 @@ class ConfModels extends Controller
 		}
 		$this->db::table('confM_bind_model_expect')->insert($expectations_bind);
 
+		$data['model'] = 1;
+
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
 
@@ -148,8 +150,8 @@ class ConfModels extends Controller
 
 		$validation = $this->validator->validate($req, [
 			'id' => v::numeric(),
-			'name' => v::when( v::nullType() , v::alwaysValid(), v::noWhitespace()->notEmpty()->theSameNameUsed( '\tgui\Models\Conf_Models', $req->getParam('id') ) ),
-			'expectations' => v::when( v::nullType() , v::alwaysValid(), v::arrayType()->notEmpty()->setName('Expectation list') )
+			'name' => v::noWhitespace()->notEmpty()->theSameNameUsed( '\tgui\Models\Conf_Models', $req->getParam('id') ),
+			'expectations' => v::arrayType()->notEmpty()->setName('Expectation list')
 		]);
 
 		if ($validation->failed()){
@@ -173,6 +175,8 @@ class ConfModels extends Controller
 			$this->db::table('confM_bind_model_expect')->insert($expectations_bind);
 		}
 		$cmd = Conf_Models::where( 'id', $req->getParam('id') )->update($allParams);
+
+		$data['save'] = 1;
 
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
@@ -253,90 +257,111 @@ class ConfModels extends Controller
 
     $params = $req->getParams(); //Get ALL parameters form Datatables
 
-    $columns = $this->APICheckerCtrl->getTableTitles('confM_models'); //Array of all columnes that will used
-    array_unshift( $columns, 'confM_models.id as id' );
-    array_push( $columns, 'confM_models.created_at as created_at',
-			'confM_models.updated_at as updated_at',
+    $columns = []; //$this->APICheckerCtrl->getTableTitles('confM_models'); //Array of all columnes that will used
+    array_unshift( $columns, 'confM_models.*' );
+    array_push( $columns,
 			$this->db::raw('(SELECT COUNT(*) FROM confM_queries WHERE model = confM_models.id) as ref') );
-		if (($key = array_search('name', $columns)) !== false) {
-    	unset($columns[$key]);
-			array_push( $columns, 'confM_models.name as name');
-		}
-    $data['columns'] = $columns;
-    $queries = [];
-    $data['filter'] = [];
-    $data['filter']['error'] = false;
-    $data['filter']['message'] = '';
-    //Filter start
-    $searchString = ( empty($params['search']['value']) ) ? '' : $params['search']['value'];
-    $temp = $this->queriesMaker($columns, $searchString);
-    $queries = $temp['queries'];
-    $data['filter'] = $temp['filter'];
 
-    $data['queries'] = $queries;
-    $data['columns'] = $columns;
-    //Filter end
-    $data['recordsTotal'] = Conf_Models::count();
-    //Get temp data for Datatables with Fliter and some other parameters
-    $tempData = Conf_Models::select($columns)->
+		$data['columns'] = $columns;
+		$queries = (empty($params['searchTerm'])) ? [] : $params['searchTerm'];
+
+		//Filter end
+		$data['recordsTotal'] = Conf_Models::count();
+		//Get temp data for Datatables with Fliter and some other parameters
+		$tempData = Conf_Models::select($columns)->
 			leftJoin('confM_queries as q', 'q.model', '=', 'confM_models.id')->
 			groupBy('confM_models.id')->
-      when( !empty($queries),
-        function($query) use ($queries)
-        {
-          foreach ($queries as $condition => $attr) {
-            switch ($condition) {
-              case '!==':
-                foreach ($attr as $column => $value) {
-                  $query->whereNotIn($column, $value);
-                }
-                break;
-              case '==':
-                foreach ($attr as $column => $value) {
-                  $query->whereIn($column, $value);
-                }
-                break;
-              case '!=':
-                foreach ($attr as $column => $valueArr) {
-                  for ($i=0; $i < count($valueArr); $i++) {
-                    if ($i == 0) $query->where($column,'NOT LIKE', '%'.$valueArr[$i].'%');
-                    $query->where($column,'NOT LIKE', '%'.$valueArr[$i].'%');
-                  }
-                }
-                break;
-              case '=':
-                foreach ($attr as $column => $valueArr) {
-                  for ($i=0; $i < count($valueArr); $i++) {
-                    if ($i == 0) $query->where($column,'LIKE', '%'.$valueArr[$i].'%');
-                    $query->where($column,'LIKE', '%'.$valueArr[$i].'%');
-                  }
-                }
-                break;
-              default:
-                //return $query;
-                break;
-            }
-          }
-          return $query;
-        });
-        $data['recordsFiltered'] = $tempData->count();
+			select($columns);
+		// when( !empty($queries),
+		// 	function($query) use ($queries)
+		// 	{
+		// 		$query->where('username','LIKE', '%'.$queries.'%');
+		// 		return $query;
+		// 	});
+		$data['recordsFiltered'] = $tempData->count();
 
-  			$tempData = $tempData->
-  			orderBy($params['columns'][$params['order'][0]['column']]['data'],$params['order'][0]['dir'])->
-  			take($params['length'])->
-  			offset($params['start'])->
-  			get()->toArray();
-  		//Creating correct array of answer to Datatables
-  		$data['data']=array();
-  		foreach($tempData as $model){
-  			$buttons='<button class="btn btn-warning btn-xs btn-flat" onclick="cm_models.get(\''.$model['id'].'\',\''.$model['name'].'\')">Edit</button> <button class="btn btn-danger btn-xs btn-flat" onclick="cm_models.del(\''.$model['id'].'\',\''.$model['name'].'\')">Del</button>';
-  			$model['buttons'] = $buttons;
-  			array_push($data['data'],$model);
-  		}
-  		//Some additional parameters for Datatables
-  		$data['draw']=intval( $params['draw'] );
+		if (!empty($params['sortColumn']) and !empty($params['sortDirection']))
+				$tempData = $tempData->orderBy($params['sortColumn'],$params['sortDirection']);
 
-  		return $res -> withStatus(200) -> write(json_encode($data));
+		$data['data'] = $tempData->get()->toArray();
+
+		return $res -> withStatus(200) -> write(json_encode($data));
+
+    // $data['columns'] = $columns;
+    // $queries = [];
+    // $data['filter'] = [];
+    // $data['filter']['error'] = false;
+    // $data['filter']['message'] = '';
+    // //Filter start
+    // $searchString = ( empty($params['search']['value']) ) ? '' : $params['search']['value'];
+    // $temp = $this->queriesMaker($columns, $searchString);
+    // $queries = $temp['queries'];
+    // $data['filter'] = $temp['filter'];
+		//
+    // $data['queries'] = $queries;
+    // $data['columns'] = $columns;
+    // //Filter end
+    // $data['recordsTotal'] = Conf_Models::count();
+    // //Get temp data for Datatables with Fliter and some other parameters
+    // $tempData = Conf_Models::select($columns)->
+		// 	leftJoin('confM_queries as q', 'q.model', '=', 'confM_models.id')->
+		// 	groupBy('confM_models.id')->
+    //   when( !empty($queries),
+    //     function($query) use ($queries)
+    //     {
+    //       foreach ($queries as $condition => $attr) {
+    //         switch ($condition) {
+    //           case '!==':
+    //             foreach ($attr as $column => $value) {
+    //               $query->whereNotIn($column, $value);
+    //             }
+    //             break;
+    //           case '==':
+    //             foreach ($attr as $column => $value) {
+    //               $query->whereIn($column, $value);
+    //             }
+    //             break;
+    //           case '!=':
+    //             foreach ($attr as $column => $valueArr) {
+    //               for ($i=0; $i < count($valueArr); $i++) {
+    //                 if ($i == 0) $query->where($column,'NOT LIKE', '%'.$valueArr[$i].'%');
+    //                 $query->where($column,'NOT LIKE', '%'.$valueArr[$i].'%');
+    //               }
+    //             }
+    //             break;
+    //           case '=':
+    //             foreach ($attr as $column => $valueArr) {
+    //               for ($i=0; $i < count($valueArr); $i++) {
+    //                 if ($i == 0) $query->where($column,'LIKE', '%'.$valueArr[$i].'%');
+    //                 $query->where($column,'LIKE', '%'.$valueArr[$i].'%');
+    //               }
+    //             }
+    //             break;
+    //           default:
+    //             //return $query;
+    //             break;
+    //         }
+    //       }
+    //       return $query;
+    //     });
+    //     $data['recordsFiltered'] = $tempData->count();
+		//
+  	// 		$tempData = $tempData->
+  	// 		orderBy($params['columns'][$params['order'][0]['column']]['data'],$params['order'][0]['dir'])->
+  	// 		take($params['length'])->
+  	// 		offset($params['start'])->
+  	// 		get()->toArray();
+  	// 	//Creating correct array of answer to Datatables
+  	// 	$data['data']=array();
+  	// 	foreach($tempData as $model){
+  	// 		$buttons='<button class="btn btn-warning btn-xs btn-flat" onclick="cm_models.get(\''.$model['id'].'\',\''.$model['name'].'\')">Edit</button> <button class="btn btn-danger btn-xs btn-flat" onclick="cm_models.del(\''.$model['id'].'\',\''.$model['name'].'\')">Del</button>';
+  	// 		$model['buttons'] = $buttons;
+  	// 		array_push($data['data'],$model);
+  	// 	}
+  	// 	//Some additional parameters for Datatables
+  	// 	$data['draw']=intval( $params['draw'] );
+		//
+  	// 	return $res -> withStatus(200) -> write(json_encode($data));
   }
 
 	public function getList($req,$res)
@@ -363,41 +388,25 @@ class ConfModels extends Controller
 		//CHECK ACCESS TO THAT FUNCTION//END//
 
 		///IF GROUPID SET///
-		if ($req->getParam('byId') != null){
-			$id = $req->getParam('byId');
+		if ($req->getParam('id') != null){
+			$id = explode(',', $req->getParam('id'));
 
-			$data['item'] = ( is_array($id) ) ? Conf_Models::select(['id','name AS text'])->whereIn('id', $id)->get() : Conf_Models::select(['id','name AS text'])->where('id', $req->getParam('byId') )->first();
-			//$data['item']['text'] = $data['item']['name'];
+			$data['results'] = Conf_Models::select(['id','name AS text'])->whereIn('id', $id)->get();
+			// if (  !count($data['results']) ) $data['results'] = null;
 			return $res -> withStatus(200) -> write(json_encode($data));
 		}
 		//////////////////////
 		////LIST OF GROUPS////
-		$data['incomplete_results'] = false;
-		$data['totalCount'] = Conf_Models::select(['id','name'])->count();
+		$query = Conf_Models::select(['id','name as text']);
+		$data['total'] = $query->count();
 		$search = $req->getParam('search');
-		$take = 10 * $req->getParam('page');
-		$offset = 10 * ($req->getParam('page') - 1);
-		$data['take'] = $take;
-		$data['offset'] = $offset;
-		$tempData = Conf_Models::select(['id','name AS text'])->
-			when( !empty($search), function($query) use ($search)
+
+		$query = $query->when( !empty($search), function($query) use ($search)
 			{
 				$query->where('name','LIKE', '%'.$search.'%');
-			})->
-			take($take)->
-			offset($offset);
+			});
 
-		$tempCounter = $tempData->count();
-
-		$tempData = $tempData->get()->toArray();
-		$data['results']=array();
-		$data['pagination'] = (!$tempData OR $tempCounter < 10) ? ['more' => false] : [ 'more' => true];
-		foreach($tempData as $model)
-		{
-			//$model['text'] = $model['name'];
-			//unset($model['name']);
-			array_push($data['results'],$model);
-		}
+		$data['results']=$query->get();
 
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}

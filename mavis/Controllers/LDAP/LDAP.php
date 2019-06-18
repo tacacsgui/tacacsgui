@@ -135,11 +135,13 @@ class LDAP extends Controller
       $this->mavis->debugIn( $this->dPrefix() . 'Trying to find group match...' );
       $groupList_result = [];
       if ( ! empty($groupList) ){
-      	$user_grps = $this->db->table('tac_user_groups')->select('name')->
+      	$user_grps = $this->db->table('tac_user_groups as tug')->select('name')->
+            leftJoin('ldap_bind as lb', 'lb.tac_grp_id','=','tug.id')->
+            leftJoin('ldap_groups as lg', 'lg.id','=','lb.ldap_id')->
       			where(function ($query) use ($groupList_fullNames, $groupList) {
       					for ($i=0; $i < count($groupList_fullNames) ; $i++) {
-      						if ( $i == 0 ) { $query->where('ldap_groups', 'like', '%'.$groupList_fullNames[$i].'%')->orWhere('name', $groupList[$i]); continue; }
-      						$query->orWhere('ldap_groups', 'LIKE', '%'.$groupList_fullNames[$i].'%')->orWhere('name', $groupList[$i]);
+      						if ( $i == 0 ) { $query->where('lg.dn', 'like', '%'.$groupList_fullNames[$i].'%')->orWhere('name', $groupList[$i]); continue; }
+      						$query->orWhere('lg.dn', 'LIKE', '%'.$groupList_fullNames[$i].'%')->orWhere('name', $groupList[$i]);
       					}
       	    })->get()->toArray();
       	foreach ($user_grps as $ugrp) {

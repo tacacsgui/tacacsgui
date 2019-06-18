@@ -1,5 +1,6 @@
 <?php
 ini_set('memory_limit', '1024M'); // or you could use 1G
+// date_default_timezone_set ( trim( shell_exec("timedatectl | grep 'Time zone:' | awk '{ print $3 }'")) );
 
 require __DIR__ . '/../constants.php';
 
@@ -71,7 +72,7 @@ $container['AuthController'] = function($container) {
 };
 
 $container['APIUsersCtrl'] = function($container) {
-	return new \tgui\Controllers\APIUsers\APIUsersCtrl($container);
+	return new \tgui\Controllers\API\APIUsers\APIUsersCtrl($container);
 };
 
 $container['APIUpdateCtrl'] = function($container) {
@@ -79,7 +80,7 @@ $container['APIUpdateCtrl'] = function($container) {
 };
 
 $container['APIUserGrpsCtrl'] = function($container) {
-	return new \tgui\Controllers\APIUserGrps\APIUserGrpsCtrl($container);
+	return new \tgui\Controllers\API\APIUserGrps\APIUserGrpsCtrl($container);
 };
 
 $container['APISettingsCtrl'] = function($container) {
@@ -98,35 +99,38 @@ $container['APIDevCtrl'] = function($container) {
 };
 
 $container['TACDevicesCtrl'] = function($container) {
-	return new \tgui\Controllers\TACDevices\TACDevicesCtrl($container);
+	return new \tgui\Controllers\TAC\TACDevices\TACDevicesCtrl($container);
 };
 $container['TACDeviceGrpsCtrl'] = function($container) {
-	return new \tgui\Controllers\TACDeviceGrps\TACDeviceGrpsCtrl($container);
+	return new \tgui\Controllers\TAC\TACDeviceGrps\TACDeviceGrpsCtrl($container);
 };
 $container['TACUsersCtrl'] = function($container) {
-	return new \tgui\Controllers\TACUsers\TACUsersCtrl($container);
+	return new \tgui\Controllers\TAC\TACUsers\TACUsersCtrl($container);
 };
 
 $container['TACUserGrpsCtrl'] = function($container) {
-	return new \tgui\Controllers\TACUserGrps\TACUserGrpsCtrl($container);
+	return new \tgui\Controllers\TAC\TACUserGrps\TACUserGrpsCtrl($container);
 };
 
 $container['TACACLCtrl'] = function($container) {
-	return new \tgui\Controllers\TACACL\TACACLCtrl($container);
+	return new \tgui\Controllers\TAC\TACACL\TACACLCtrl($container);
 };
 
 $container['TACServicesCtrl'] = function($container) {
-	return new \tgui\Controllers\TACServices\TACServicesCtrl($container);
+	return new \tgui\Controllers\TAC\TACServices\TACServicesCtrl($container);
 };
 
 $container['TACCMDCtrl'] = function($container) {
-	return new \tgui\Controllers\TACCMD\TACCMDCtrl($container);
+	return new \tgui\Controllers\TAC\TACCMD\TACCMDCtrl($container);
 };
 
 $container['TACConfigCtrl'] = function($container) {
 	return new \tgui\Controllers\TACConfig\TACConfigCtrl($container);
 };
 
+$container['ObjAddress'] = function($container) {
+	return new \tgui\Controllers\Obj\ObjAddress\ObjAddress($container);
+};
 $container['APICheckerCtrl'] = function($container) {
 	return new \tgui\Controllers\APIChecker\APICheckerCtrl($container);
 };
@@ -143,16 +147,16 @@ $container['APIDownloadCtrl'] = function($container) {
 	return new \tgui\Controllers\APIDownload\APIDownloadCtrl($container);
 };
 $container['MAVISLDAP'] = function($container) {
-	return new \tgui\Controllers\MAVISLDAP\MAVISLDAPCtrl($container);
+	return new \tgui\Controllers\MAVIS\MAVISLDAP\MAVISLDAPCtrl($container);
 };
 $container['MAVISLocal'] = function($container) {
-	return new \tgui\Controllers\MAVISLocal\MAVISLocalCtrl($container);
+	return new \tgui\Controllers\MAVIS\MAVISLocal\MAVISLocalCtrl($container);
 };
 $container['MAVISOTP'] = function($container) {
-	return new \tgui\Controllers\MAVISOTP\MAVISOTPCtrl($container);
+	return new \tgui\Controllers\MAVIS\MAVISOTP\MAVISOTPCtrl($container);
 };
 $container['MAVISSMS'] = function($container) {
-	return new \tgui\Controllers\MAVISSMS\MAVISSMSCtrl($container);
+	return new \tgui\Controllers\MAVIS\MAVISSMS\MAVISSMSCtrl($container);
 };
 
 $container['ConfManager'] = function($container) {
@@ -185,6 +189,22 @@ $container['auth'] = function($container) {
 //$app->add(new \tgui\Middleware\ValidationErrorsMiddleware($container));
 //$app->add(new \tgui\Middleware\OldInputMiddleware($container));
 $app->add(new \tgui\Middleware\ChangeHeaderMiddleware($container));
+
+$app->add(new Tuupola\Middleware\JwtAuthentication([
+		//"path" => "/api/auth/123",
+		"ignore" => ["/auth", "/tacacs/user/change_passwd/change/", "/backup/download/", "/backup/upload/", '/ha/'],
+		"attribute" => "decoded_token_data",
+    "secret" => "supersecretkeyyoushouldnotcommittogithub",
+		"algorithm" => ["HS256"],
+		"secure" => false,
+		"error" => function ($response, $arguments) {
+				$data["status"] = "error";
+				$data["message"] = $arguments["message"];
+				return $response
+						->withHeader("Content-Type", "application/json")
+						->write(json_encode($data, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
+		}
+]));
 
 //$app->add($container->csrf); //Turn on CSRF for all project//
 

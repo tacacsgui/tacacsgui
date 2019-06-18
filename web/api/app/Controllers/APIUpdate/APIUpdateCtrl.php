@@ -32,6 +32,7 @@ class APIUpdateCtrl extends Controller
 		$data['info']=APISettings::select('update_url', 'update_signin')->first();
 		$data['info']['update_key']=$this->uuid_hash();
 		$data['info']['update_activated']=$this->activated();
+		$data['info']['version']=APIVER;
 		$data['slaves'] = [];
 		if (HA::isMaster() AND HA::isThereSlaves()){
 			$ha_config=HA::getFullConfiguration();
@@ -307,6 +308,6 @@ class APIUpdateCtrl extends Controller
 	}
 	public static function gitPull()
 	{
-		return shell_exec('git -C '.TAC_ROOT_PATH.'/ pull origin master 2>&1');
+		return true;//shell_exec('git -C '.TAC_ROOT_PATH.'/ pull origin master 2>&1');
 	}
 } //END OF CLASS

@@ -19,10 +19,10 @@ class CM_Log(Base):
     port = Column('port', Integer, default=0)
     uname_type = Column('uname_type', String(64), default='')
     uname = Column('uname', String(255), default='')
-    group = Column('group', String(255), default='')
+    path = Column('path', String(255), default='')
     status = Column('status', String(64), default='')
     message = Column('message', Text(), default='')
 
     def __repr__(self):
-        return "<CM_Log(date='%s', device_id='%s', query='%s', ip='%s', protocol='%s', port='%s', uname_type='%s', uname='%s', group='%s', status='%s', message='%s')>" % (
-                                self.date, self.device_id, self.query, self.ip, self.protocol, self.port, self.uname_type, self.uname, self.group, self.status, self.message)
+        return "<CM_Log(date='%s', device_id='%s', query='%s', ip='%s', protocol='%s', port='%s', uname_type='%s', uname='%s', path='%s', status='%s', message='%s')>" % (
+                                self.date, self.device_id, self.query, self.ip, self.protocol, self.port, self.uname_type, self.uname, self.path, self.status, self.message)

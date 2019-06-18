@@ -65,6 +65,9 @@ class Controller
 		//$data['ha_slave'] = $data['ha_role'] == 'slave';
 		return $data;
 	}
+	public function getHaRole(){
+		return HA::getServerRole();
+	}
 	////INITIAL DATA FUNCTION////END//
 	///////////////////////////////////
 	////CHANGE CONFIGURATION STATUS////START//

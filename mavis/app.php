@@ -58,6 +58,11 @@ $container->modules = $container->db::select( $container->db::raw( "SELECT ".
 	"(SELECT COUNT(*) FROM tgui.mavis_otp where `enabled` = 1) as m_otp, ".
 	"(SELECT COUNT(*) FROM tgui.mavis_sms where `enabled` = 1) as m_sms" ) );
 
+$container->otp_settings = $container->db->table('mavis_otp')->select(['period','digest','digits'])->first();
+
+$container->mavis->debugIn( 'Debug MAVIS Start' );
+$container->mavis->debugIn( 'Modules: ' . json_encode ( $container->modules ) );
+
 while($f = fgets(STDIN)){
 	$container->mavis->in($f);
 	if ( ! preg_match("/^=$/i", trim($f) ) ) continue;

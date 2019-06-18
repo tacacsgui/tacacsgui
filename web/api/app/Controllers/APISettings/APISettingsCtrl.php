@@ -223,7 +223,7 @@ public function postSmtpTest($req,$res)
 ####TIME####
 public static function getTimeTimezoneName($params = ['id' => 0])
 {
-  if($params['id'] == 0 ) return '0 unknown';
+  if($params['id'] == 0 ) return trim( shell_exec("timedatectl | grep 'Time zone:' | awk '{ print $3 }'"));
   $id = preg_replace('/[^0-9]/', '', $params['id']);
   return trim( shell_exec("timedatectl list-timezones | nl | sed '".$id."!d'" ) );
 }
@@ -267,8 +267,11 @@ public function getTimeTimezones($req,$res)
   $take = 10 * $page;
   $offset = (10 * ($page - 1)) + 1;
 
-  $tempData = trim( shell_exec('timedatectl list-timezones | nl '.( (empty($search) ? '': '| grep -i '.$search ) ) .' | sed -n "'.$offset.','.$take.'p" ' ) );
-  $tempData = explode(PHP_EOL, $tempData);
+  // $tempData = trim( shell_exec('timedatectl list-timezones | nl '.( (empty($search) ? '': '| grep -i '.$search ) ) .' | sed -n "'.$offset.','.$take.'p" ' ) );
+  $tempData = CMDRun::init(['version'=>2])->setCmd('timedatectl')->setAttr('list-timezones')->setPipe()->setCmd('nl');
+  $tempData = ( empty($search) ) ? $tempData : $tempData->setPipe()->setCmd('grep')->setAttr(['-i',$search]);
+  $data['test2'] = $tempData->get();
+  $tempData = explode(PHP_EOL, $tempData->get());
   $tempData = ( empty($tempData[0]) ) ? [] : $tempData;
   #timedatectl list-timezones |  sed '30!d'
   //$data['test3'] = 'timedatectl list-timezones '.( (empty($search) ? '': '| grep '.$search ) ) .' | sed -n "'.$offset.','.$take.'p" ' ;
@@ -306,6 +309,8 @@ public function getTimeSettings($req,$res)
   }
   //CHECK ACCESS TO THAT FUNCTION//END//
   $data['time'] = APISettings::select(['timezone', 'ntp_list'])->find(1);
+  $timezone = preg_split('/\s+/', self::getTimeTimezoneName(['id' => $data['time']->timezone]) );
+  $data['time']->timezone = [[ 'id' => $timezone[0], 'text' =>$timezone[1] ]];
 
   return $res -> withStatus(200) -> write(json_encode($data));
 }
@@ -456,12 +461,19 @@ public function getInterfaceSettings($req,$res)
 
   $allParams = $req->getParams();
 
-  if ( empty($allParams['interface']) ){
-    return $res -> withStatus(400) -> write(json_encode($data));
-  }
-  $cmd = CMDRun::init()->setCmd(TAC_ROOT_PATH . '/interfaces.py')->setAttr(['-i',$allParams['interface'],'--netplan']);
+  $data['list'] = explode(PHP_EOL, CMDRun::init()->setCmd(TAC_ROOT_PATH . '/interfaces.py')->setAttr('-l')->get());
+  if ($data['list'][0] == 'lo') unset($data['list'][0]);
+  $data['list'] = array_values($data['list']);
+
+  $inter = (empty($allParams['interface'])) ? $data['list'][0] : $allParams['interface'];
+
+  // if ( empty($allParams['interface']) ){
+  //   return $res -> withStatus(400) -> write(json_encode($data));
+  // }
+
+  $cmd = CMDRun::init()->setCmd(TAC_ROOT_PATH . '/interfaces.py')->setAttr(['-i',$inter,'--netplan']);
   $data['cmd'] = $cmd->showCmd();
-  // $interfaceSettings = trim( shell_exec(TAC_ROOT_PATH . '/interfaces.sh get '.$allParams['interface'].' skip 3') );
+  // $interfaceSettings = trim( shell_exec(TAC_ROOT_PATH . '/interfaces.sh get '.$inter.' skip 3') );
   $interfaceSettings = $cmd->get();
 
   $settingsLine=explode(PHP_EOL, $interfaceSettings);
@@ -472,7 +484,7 @@ public function getInterfaceSettings($req,$res)
     'network_gateway' => '',
     'network_dns1' => '',
     'network_dns2' => '',
-    'network_more' => ''
+    // 'network_more' => ''
   ];
 
   for ($i=0; $i < count($settingsLine); $i++) {
@@ -490,9 +502,9 @@ public function getInterfaceSettings($req,$res)
         // $data['interface']['network_dns1'] = $parameters[1];
         // if (!empty($parameters[2])) $data['interface']['network_dns2'] = $parameters[2];
         break;
-      default:
-        $data['interface']['network_more'] .= (!empty($parameters[0])) ? $settingsLine[$i]."\n" : '';
-        break;
+      // default:
+      //   $data['interface']['network_more'] .= (!empty($parameters[0])) ? $settingsLine[$i]."\n" : '';
+      //   break;
     }
   }
 
@@ -531,9 +543,9 @@ public function postInterfaceSettings($req,$res)
   $validation = $this->validator->validate($req, [
     'network_address' => v::when( v::alwaysValid(), v::ip()->notEmpty()->setName('IP Address') ),
     'network_mask' => v::when( v::alwaysValid(), v::ip()->notEmpty()->setName('Mask') ),
-    'network_gateway' => v::when( v::nullType() , v::alwaysValid(), v::ip()->notEmpty()->setName('Gateway')),
-    'network_dns1' => v::when( v::nullType() , v::alwaysValid(), v::ip()->notEmpty()->setName('Primary DNS')),
-    'network_dns2' => v::when( v::nullType() , v::alwaysValid(), v::ip()->notEmpty()->setName('Secondary DNS')),
+    'network_gateway' => v::when( v::oneOf(v::nullType(), v::equals('')) , v::alwaysValid(), v::ip()->setName('Gateway')),
+    'network_dns1' => v::when( v::oneOf(v::nullType(), v::equals('')) , v::alwaysValid(), v::ip()->setName('Primary DNS')),
+    'network_dns2' => v::when( v::oneOf(v::nullType(), v::equals('')) , v::alwaysValid(), v::ip()->setName('Secondary DNS')),
   ]);
 
   if ($validation->failed()){
@@ -584,6 +596,7 @@ public function postInterfaceSettings($req,$res)
     setAttr($attrs)->setAttr('-y');
   $data['cmd'] = $cmd->showCmd();
   $data['result'] = $cmd->get();
+
   //$data['result'] = trim( shell_exec('sudo ' . TAC_ROOT_PATH . '/main.sh network save '. $interface) );
 
   return $res -> withStatus(200) -> write(json_encode($data));
@@ -619,6 +632,7 @@ public function getInterfaceList($req,$res)
   $data['list'] = explode(PHP_EOL, $output);
   $key = array_search('lo', $data['list']);
   if (!$key) unset($data['list'][$key]);
+  $data['list'] = array_values($data['list']);
   return $res -> withStatus(200) -> write(json_encode($data));
 }
 ####NETWORK SETTINGS######End
@@ -677,7 +691,8 @@ public function postHASettings($req,$res)
   //CHECK ACCESS TO THAT FUNCTION//END//
 
   $validation = $this->validator->validate($req, [
-    'slaves_ip' => v::when( v::haRole('master', $req->getParam('role') ), v::notEmpty()->setName('Slaves List'), v::alwaysValid() ),
+    'role' => v::oneOf( v::equals('disabled'), v::equals('master'), v::equals('slave')),
+    'slaves_ip' => v::when( v::haRole('master', $req->getParam('role') ), v::notEmpty()->arrayVal()->each(v::ip()->setName('Slaves List'))->setName('Slaves List'), v::alwaysValid() ),
     'psk_master' => v::when( v::haRole('master', $req->getParam('role') ), v::notEmpty()->length(5, null)->alnum('% $ @ # * ^ ! ? {} [] () <> : ; - _')->noWhitespace()->setName('Pre-Shared Key'), v::alwaysValid() ),
     'psk_slave' => v::when( v::haRole('slave', $req->getParam('role') ), v::notEmpty()->length(5, null)->alnum('% $ @ # * ^ ! ? {} [] () <> : ; - _')->noWhitespace()->setName('Pre-Shared Key'), v::alwaysValid() ),
     'ipaddr_master' => v::when( v::haRole('slave', $req->getParam('role') ) , v::notEmpty()->ip()->setName('Mater IP'), v::alwaysValid() ),
@@ -688,10 +703,26 @@ public function postHASettings($req,$res)
     $data['error']['validation']=$validation->error_messages;
     return $res -> withStatus(200) -> write(json_encode($data));
   }
-  $ha = new HA();
 
   $allParams = $req->getParams();
-
+  $allParams['slaves_ip'] = implode(',', $allParams['slaves_ip']);
+  $data['rootpw'] = false;
+  $data['response_e'] = '';
+  $data['response'] = [];
+  $ha = new HA();
+  if (!$this->activated()){
+    $data['response_e'] = 'Not activated version!';
+    return $res -> withStatus(200) -> write(json_encode($data));
+  }
+  if (!$ha->getRootpw($allParams['rootpw'])){
+    $data['rootpw'] = true;
+    $data['response_e'] = 'MySQL root password required!';
+    return $res -> withStatus(200) -> write(json_encode($data));
+  }
+  //$data['test2'] = $ha->getRootpw();
+  //
+  // $allParams = $req->getParams();
+  //
   $data['response'] = $ha->save( $allParams );
 
   return $res -> withStatus(200) -> write(json_encode($data));
@@ -720,7 +751,6 @@ public function postHAStatus($req,$res)
   $data['status'] = HA::getStatus();
   return $res -> withStatus(200) -> write(json_encode($data));
 }
-####High Availability SETTINGS######End
 
 public function postHASlaveDel($req,$res)
 {
@@ -754,6 +784,41 @@ public function postHASlaveDel($req,$res)
     return $res -> withStatus(200) -> write(json_encode($data));
   }
   $data['status'] = HA::delSlave($req->getParam('sid'));
+  return $res -> withStatus(200) -> write(json_encode($data));
+}
+
+public function postHASlaveList($req,$res)
+{
+  //INITIAL CODE////START//
+  $data=array();
+  $data=$this->initialData([
+    'type' => 'get',
+    'object' => 'ha',
+    'action' => 'slave list',
+  ]);
+  #check error#
+  if ($_SESSION['error']['status']){
+    $data['error']=$_SESSION['error'];
+    return $res -> withStatus(401) -> write(json_encode($data));
+  }
+  //INITIAL CODE////END//
+  //CHECK ACCESS TO THAT FUNCTION//START//
+  if(!$this->checkAccess(1, true))
+  {
+    return $res -> withStatus(403) -> write(json_encode($data));
+  }
+  //CHECK ACCESS TO THAT FUNCTION//END//
+  $validation = $this->validator->validate($req, [
+    'slaves_ip' => v::notEmpty()->arrayVal()->each(v::ip()->setName('Slaves List'))->setName('Slaves List'),
+  ]);
+
+  if ($validation->failed()){
+    $data['error']['status']=true;
+    $data['status'] = false;
+    $data['error']['validation']=$validation->error_messages;
+    return $res -> withStatus(200) -> write(json_encode($data));
+  }
+  $data['status'] = HA::updateSlave( implode(',', $req->getParam('slaves_ip')) );
   return $res -> withStatus(200) -> write(json_encode($data));
 }
 ####High Availability SETTINGS######End

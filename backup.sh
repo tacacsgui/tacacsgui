@@ -51,8 +51,8 @@ case $1 in
 		#else
 		#	NEW=$(ls -utr $ROOT_PATH/backups/database/ | grep $DBTYPE | tail -n 1);
 		# if [ $DBTYPE = "apicfg" ] || [ $DBTYPE = "full" ]; then
-		# 		REVISION=$(echo -e "$(ls -utr /opt/tacacsgui/backups/database/ | grep $DBTYPE | tail -n 1 | sed -r 's/.*_([0-9]*)\..*/\1/g')" | tr -d '[:space:]');
-		# 		OLD=$(ls -ut /opt/tacacsgui/backups/database/ | grep $DBTYPE | sed '2,1!d');
+		# 		REVISION=$(echo -e "$(ls -utr $ROOT_PATH/backups/database/ | grep $DBTYPE | tail -n 1 | sed -r 's/.*_([0-9]*)\..*/\1/g')" | tr -d '[:space:]');
+		# 		OLD=$(ls -ut $ROOT_PATH/backups/database/ | grep $DBTYPE | sed '2,1!d');
 		# 		#if [[ $REVISION = "0" ]]; then
 		# 		if [ $REVISION -eq 0 ] || [ $REVISION -gt 0 ]; then
 		# 			REVISION=$REVISION+1;
@@ -84,6 +84,8 @@ case $1 in
 	;;
 	make)
 		#$2 username $3 password $4 DBname $5 tables list $file name
+		#mysql -utgui_user -p'_I2YSwfp_mWFV0UpR15Yx{4KA4vq`IA8' -N information_schema -e "select table_name from tables where table_schema = ’tgui’ and table_name like ‘tac_%’"
+		#
 		END_OF_NAME=$5
 		REVISION=$6
 		if [ -z "$END_OF_NAME" ]; then
@@ -96,30 +98,34 @@ case $1 in
 		TYPE=""
 		if [ $TABLES = "full" ]; then
 			TYPE=$TABLES
-			REVISION=$(echo -e "$(ls -tr /opt/tacacsgui/backups/database/ | grep $TYPE | tail -n 1 | sed -r 's/.*_([0-9]*)\..*/\1/g')" | tr -d '[:space:]');
-			#FOO_NO_WHITESPACE="$(echo -e "$(ls -tr /opt/tacacsgui/backups/database/ | grep apicfg | tail -n 1 | sed -r 's/.*_([0-9]*)\..*/\1/g')" | tr -d '[:space:]')"
+			REVISION=$(echo -e "$(ls -tr $ROOT_PATH/backups/database/ | grep $TYPE | tail -n 1 | sed -r 's/.*_([0-9]*)\..*/\1/g')" | tr -d '[:space:]');
+			#FOO_NO_WHITESPACE="$(echo -e "$(ls -tr $ROOT_PATH/backups/database/ | grep apicfg | tail -n 1 | sed -r 's/.*_([0-9]*)\..*/\1/g')" | tr -d '[:space:]')"
 			if [[ $REVISION = "" ]]; then
 				REVISION=1;
 			else
 				REVISION=$((REVISION+1));
 			fi
-			TABLES="--tables mavis_ldap mavis_otp mavis_sms tac_acl tac_devices tac_device_groups tac_global_settings tac_services tac_users tac_user_groups api_users api_user_groups api_settings api_password_policy api_smtp";
+			# TABLES="--tables mavis_ldap mavis_otp mavis_sms tac_acl tac_devices tac_device_groups tac_global_settings tac_services tac_users tac_user_groups api_users api_user_groups api_settings api_password_policy api_smtp";
+			TABLES="";
 		elif [ $TABLES = "tcfg" ]; then
 			TYPE=$TABLES
-			TABLES="--tables mavis_ldap mavis_otp mavis_sms tac_acl tac_devices tac_device_groups tac_global_settings tac_services tac_users tac_user_groups"
+			TABLES="--tables "$(mysql -u $2 -p$3 -D $4 -Bse \
+	"show tables where Tables_in_tgui like 'tac\_%' or Tables_in_tgui like 'mavis\_%' \
+	or Tables_in_tgui like 'ldap\_%' or Tables_in_tgui like 'obj\_%' or Tables_in_tgui like 'bind\_%'" 2>/dev/null | xargs)
 		elif [ $TABLES = "tlog" ]; then
 			TYPE=$TABLES
 			TABLES="--tables tac_log_accounting tac_log_authorization tac_log_authentication"
 		elif [ $TABLES = "apicfg" ]; then
 			TYPE=$TABLES
-			REVISION=$(echo -e "$(ls -tr /opt/tacacsgui/backups/database/ | grep $TYPE | tail -n 1 | sed -r 's/.*_([0-9]*)\..*/\1/g')" | tr -d '[:space:]');
-			#FOO_NO_WHITESPACE="$(echo -e "$(ls -tr /opt/tacacsgui/backups/database/ | grep apicfg | tail -n 1 | sed -r 's/.*_([0-9]*)\..*/\1/g')" | tr -d '[:space:]')"
+			REVISION=$(echo -e "$(ls -tr $ROOT_PATH/backups/database/ | grep $TYPE | tail -n 1 | sed -r 's/.*_([0-9]*)\..*/\1/g')" | tr -d '[:space:]');
+			#FOO_NO_WHITESPACE="$(echo -e "$(ls -tr $ROOT_PATH/backups/database/ | grep apicfg | tail -n 1 | sed -r 's/.*_([0-9]*)\..*/\1/g')" | tr -d '[:space:]')"
 			if [[ $REVISION = "" ]]; then
 				REVISION=1;
 			else
 				REVISION=$((REVISION+1));
 			fi
-			TABLES="api_users api_user_groups api_settings api_backup api_password_policy api_smtp"
+			TABLES="--tables $(mysql -u $2 -p$3 -D $4 -Bse \
+	"show tables where Tables_in_tgui like 'api\_%'" 2>/dev/null | xargs)"
 		elif [ $TABLES = "api_log" ]; then
 			TYPE=$TABLES
 			TABLES="api_logging"
@@ -135,7 +141,8 @@ case $1 in
 	;;
 	datatables)
 
-		START=$2; LENGTH=$3; ORDER=$4; DTTYPE=$5
+		# START=$2; LENGTH=$3;
+		ORDER=$2; DTTYPE=$3
 
 		if [ -z "$DTTYPE" ]; then
 			DTTYPE='tcfg';
@@ -159,15 +166,21 @@ case $1 in
 		fi
 
 		if [ $DTTYPE = "full" ]; then
-			echo $(ls -l $ROOT_PATH/backups/database/ | grep -v apicfg | grep -v tcfg | grep -v total | wc -l)";"$(ls $ROOT_PATH/backups/database/ $ORDER | grep -v apicfg | grep -v tcfg | sed "${START},${LENGTH}!d" | grep -v total | wc -l);
-			echo $( ls $ROOT_PATH/backups/database/ -utl $ORDER | grep -v apicfg | grep -v tcfg | awk {'print $9,$5'} | sed "${START},${LENGTH}!d")
+			echo $(ls -l $ROOT_PATH/backups/database/ | \
+					grep -v apicfg | grep -v tcfg | grep -v total | \
+					wc -l)";"$(ls $ROOT_PATH/backups/database/ $ORDER | \
+					grep -v apicfg | grep -v tcfg | \ #| sed "${START},${LENGTH}!d"
+					grep -v total | wc -l);
+			echo $( ls $ROOT_PATH/backups/database/ -utl $ORDER | grep -v apicfg | grep -v tcfg | awk {'print $9,$5'} ) #| sed "${START},${LENGTH}!d"
 			echo "done";
 			exit 0;
 		fi
 
-		echo $(ls -l $ROOT_PATH/backups/database/ | grep $DTTYPE | grep -v total | wc -l)";"$(ls $ROOT_PATH/backups/database/ $ORDER | grep $DTTYPE | sed "${START},${LENGTH}!d" | grep -v total | wc -l);
+		echo $(ls -l $ROOT_PATH/backups/database/ | grep $DTTYPE | grep -v total | wc -l)\
+					";"$(ls $ROOT_PATH/backups/database/ $ORDER | grep $DTTYPE | \ #sed "${START},${LENGTH}!d" | \
+					grep -v total | wc -l);
 
-		echo $( ls $ROOT_PATH/backups/database/ -utl $ORDER | grep $DTTYPE | awk {'print $9,$5'} | sed "${START},${LENGTH}!d")
+		echo $( ls $ROOT_PATH/backups/database/ -utl $ORDER | grep $DTTYPE | awk {'print $9,$5'} ) #| sed "${START},${LENGTH}!d")
 
 		echo "done";
 	;;

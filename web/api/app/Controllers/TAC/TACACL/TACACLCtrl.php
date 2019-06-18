@@ -1,0 +1,387 @@
+<?php
+
+namespace tgui\Controllers\TAC\TACACL;
+
+use tgui\Models\TACACL;
+use tgui\Models\TACUsers;
+use tgui\Models\TACUserGrps;
+use tgui\Controllers\Controller;
+use Respect\Validation\Validator as v;
+
+class TACACLCtrl extends Controller
+{
+################################################
+	#########	POST Add New ACL	#########
+	public function postACLAdd($req,$res)
+	{
+		//INITIAL CODE////START//
+		$data=array();
+		$data=$this->initialData([
+			'type' => 'post',
+			'object' => 'acl',
+			'action' => 'add',
+		]);
+		#check error#
+		if ($_SESSION['error']['status']){
+			$data['error']=$_SESSION['error'];
+			return $res -> withStatus(401) -> write(json_encode($data));
+		}
+		//INITIAL CODE////END//
+		//CHECK SHOULD I STOP THIS?//START//
+		if( $this->shouldIStopThis() )
+		{
+			$data['error'] = $this->shouldIStopThis();
+			return $res -> withStatus(400) -> write(json_encode($data));
+		}
+		//CHECK SHOULD I STOP THIS?//END//
+		//CHECK ACCESS TO THAT FUNCTION//START//
+		if(!$this->checkAccess(12))
+		{
+			return $res -> withStatus(403) -> write(json_encode($data));
+		}
+		//CHECK ACCESS TO THAT FUNCTION//END//
+
+		$validation = $this->validator->validate($req, [
+			'name' => v::noWhitespace()->notEmpty()->aclNameAvailable(0),
+			'ace' => v::arrayVal()->length(1, null)->each(v::arrayVal()->allOf(
+				v::key('nac', v::numeric())->setName('NAC'),
+				v::key('nas', v::numeric())->setName('NAS'),
+				v::key('action', v::numeric())->setName('Action'),
+			)),
+		]);
+
+		if ( $validation->failed() ){
+			$data['error']['status']=true;
+			$data['error']['validation']=$validation->error_messages;
+			return $res -> withStatus(200) -> write(json_encode($data));
+		}
+
+		$data['acl'] = TACACL::create( ['name' => $req->getParam('name')] );
+		$tempId = $data['acl']->id;
+
+		// $data['ace'] = array_map(function($x) use ($tempId){ $x['acl_id'] = $tempId; return $x; }, $req->getParam('ace'));
+
+		$this->db->table('tac_acl_ace')->insert(array_map(function($x)use ($tempId) { $x['acl_id'] = $tempId; return $x; }, $req->getParam('ace')));
+
+		$data['changeConfiguration']=$this->changeConfigurationFlag(['unset' => 0]);
+
+		$logEntry=array('action' => 'add', 'obj_name' => $data['acl']->name, 'obj_id' => $data['acl']->id, 'section' => 'tacacs acl', 'message' => 207);
+		$data['logging']=$this->APILoggingCtrl->makeLogEntry($logEntry);
+
+		return $res -> withStatus(200) -> write(json_encode($data));
+	}
+########	Add New ACL	###############END###########
+################################################
+########	Edit ACL	###############START###########
+	#########	GET Edit ACL	#########
+	public function getACLEdit($req,$res)
+	{
+		//INITIAL CODE////START//
+		$data=array();
+		$data=$this->initialData([
+			'type' => 'get',
+			'object' => 'acl',
+			'action' => 'edit',
+		]);
+		#check error#
+		if ($_SESSION['error']['status']){
+			$data['error']=$_SESSION['error'];
+			return $res -> withStatus(401) -> write(json_encode($data));
+		}
+		//INITIAL CODE////END//
+
+		//CHECK ACCESS TO THAT FUNCTION//START//
+		if(!$this->checkAccess(12))
+		{
+			return $res -> withStatus(403) -> write(json_encode($data));
+		}
+		//CHECK ACCESS TO THAT FUNCTION//END//
+
+		$data['acl'] = TACACL::select()->where('id', $req->getParam('id'))->first();
+
+		$data['ace'] = [];
+		$aces = $this->db->table('tac_acl_ace as ace')->
+			leftJoin('obj_addresses as addr_s', 'addr_s.id', '=', 'ace.nas')->
+			leftJoin('obj_addresses as addr_c', 'addr_c.id', '=', 'ace.nac')->
+			select(['nas as nas_id', 'nac as nac_id', 'addr_s.name as nas_name', 'addr_c.name as nac_name', 'action', 'order'])->
+			orderBy('order', 'asc')->
+			where('acl_id',$req->getParam('id'))->get();
+
+		foreach ($aces as $ace) {
+			$data['ace'][] = [
+				'action' => $ace->action,
+				'order' => $ace->order,
+				'nas' => [[
+					'id' => $ace->nas_id,
+					'text' => $ace->nas_name,
+				]],
+				'nac' => [[
+					'id' => $ace->nac_id,
+					'text' => $ace->nac_name,
+				]],
+			];
+		}
+
+		$data['acl']->ace = $data['ace'];
+
+		return $res -> withStatus(200) -> write(json_encode($data));
+	}
+
+	#########	POST Edit ACL	#########
+	public function postACLEdit($req,$res)
+	{
+		//INITIAL CODE////START//
+		$data=array();
+		$data=$this->initialData([
+			'type' => 'post',
+			'object' => 'acl',
+			'action' => 'edit',
+		]);
+		#check error#
+		if ($_SESSION['error']['status']){
+			$data['error']=$_SESSION['error'];
+			return $res -> withStatus(401) -> write(json_encode($data));
+		}
+		//INITIAL CODE////END//
+		//CHECK SHOULD I STOP THIS?//START//
+		if( $this->shouldIStopThis() )
+		{
+			$data['error'] = $this->shouldIStopThis();
+			return $res -> withStatus(400) -> write(json_encode($data));
+		}
+		//CHECK SHOULD I STOP THIS?//END//
+		//CHECK ACCESS TO THAT FUNCTION//START//
+		if(!$this->checkAccess(12))
+		{
+			return $res -> withStatus(403) -> write(json_encode($data));
+		}
+		//CHECK ACCESS TO THAT FUNCTION//END//
+
+		$validation = $this->validator->validate($req, [
+			'name' => v::noWhitespace()->notEmpty()->theSameNameUsed( '\tgui\Models\TACACL', $req->getParam('id') ),
+			'ace' => v::arrayVal()->length(1, null)->each(v::arrayVal()->allOf(
+				v::key('nac', v::numeric())->setName('NAC'),
+				v::key('nas', v::numeric())->setName('NAS'),
+				v::key('action', v::numeric())->setName('Action'),
+			)),
+		]);
+
+		if ( $validation->failed() ){
+			$data['error']['status']=true;
+			$data['error']['validation']=$validation->error_messages;
+			return $res -> withStatus(200) -> write(json_encode($data));
+		}
+
+		TACACL::where('id', $req->getParam('id'))->update(['name' => $req->getParam('name')]);
+
+		$tempId = $req->getParam('id');
+		$this->db->table('tac_acl_ace')->where('acl_id',$tempId)->delete();
+		$this->db->table('tac_acl_ace')->insert(array_map(function($x)use ($tempId) { $x['acl_id'] = $tempId; return $x; }, $req->getParam('ace')));
+
+		$data['save'] = 1;
+
+		$data['changeConfiguration']=$this->changeConfigurationFlag(['unset' => 0]);
+
+		$logEntry=array('action' => 'edit', 'obj_name' => $req->getParam('name'), 'obj_id' => $req->getParam('id'), 'section' => 'tacacs acl', 'message' => 307);
+		$data['logging']=$this->APILoggingCtrl->makeLogEntry($logEntry);
+
+		return $res -> withStatus(200) -> write(json_encode($data));
+	}
+########	Edit ACL	###############END###########
+################################################
+########	Delete ACL	###############START###########
+	#########	POST Delete ACL	#########
+	public function postACLDelete($req,$res)
+	{
+		//INITIAL CODE////START//
+		$data=array();
+		$data=$this->initialData([
+			'type' => 'post',
+			'object' => 'acl',
+			'action' => 'delete',
+		]);
+		#check error#
+		if ($_SESSION['error']['status']){
+			$data['error']=$_SESSION['error'];
+			return $res -> withStatus(401) -> write(json_encode($data));
+		}
+		//INITIAL CODE////END//
+		//CHECK SHOULD I STOP THIS?//START//
+		if( $this->shouldIStopThis() )
+		{
+			$data['error'] = $this->shouldIStopThis();
+			return $res -> withStatus(400) -> write(json_encode($data));
+		}
+		//CHECK SHOULD I STOP THIS?//END//
+		//CHECK ACCESS TO THAT FUNCTION//START//
+		if(!$this->checkAccess(12))
+		{
+			return $res -> withStatus(403) -> write(json_encode($data));
+		}
+		//CHECK ACCESS TO THAT FUNCTION//END//
+
+		$data['result']=TACACL::where('id',$req->getParam('id'))->delete();
+		$data['id']=$req->getParam('id');
+		$data['name']=$req->getParam('name');
+
+		$data['changeConfiguration']=$this->changeConfigurationFlag(['unset' => 0]);
+
+		$logEntry=array('action' => 'delete', 'obj_name' => $req->getParam('name'), 'obj_id' => $req->getParam('id'), 'section' => 'tacacs acl', 'message' => 407);
+		$data['logging']=$this->APILoggingCtrl->makeLogEntry($logEntry);
+
+		$data['footprints_users']=TACUsers::where([['acl','=',$req->getParam('id')]])->update(['acl' => '0']);
+		$data['footprints_groups']=TACUserGrps::where([['acl','=',$req->getParam('id')]])->update(['acl' => '0']);
+
+		return $res -> withStatus(200) -> write(json_encode($data));
+	}
+########	Delete ACL	###############END###########
+################################################
+#########	POST CSV	#########
+	public function postACLCsv($req,$res)
+	{
+		//INITIAL CODE////START//
+		$data=array();
+		$data=$this->initialData([
+			'type' => 'post',
+			'object' => 'acl',
+			'action' => 'csv',
+		]);
+		#check error#
+		if ($_SESSION['error']['status']){
+			$data['error']=$_SESSION['error'];
+			return $res -> withStatus(401) -> write(json_encode($data));
+		}
+		//INITIAL CODE////END//
+		//CHECK ACCESS TO THAT FUNCTION//START//
+		if(!$this->checkAccess(12))
+		{
+			return $res -> withStatus(403) -> write(json_encode($data));
+		}
+		//CHECK ACCESS TO THAT FUNCTION//END//
+		$data['clear'] = shell_exec( TAC_ROOT_PATH . '/main.sh delete temp');
+		$path = TAC_ROOT_PATH . '/temp/';
+		$filename = 'tac_acl_'. $this->generateRandomString(8) .'.csv';
+
+		$columns = $this->APICheckerCtrl->getTableTitles('tac_acl');
+
+	  $f = fopen($path.$filename, 'w');
+		$idList = $req->getParam('idList');
+		$array = [];
+		$array = ( empty($idList) ) ? TACACL::select($columns)->get()->toArray() : TACACL::select($columns)->whereIn('id', $idList)->get()->toArray();
+
+		fputcsv($f, $columns /*, ',)'*/);
+	  foreach ($array as $line) {
+		fputcsv($f, $line /*, ',)'*/);
+	  }
+
+		$data['filename']=$filename;
+		sleep(3);
+		return $res -> withStatus(200) -> write(json_encode($data));
+	}
+########	CSV	###############END###########
+################################################
+########	ACL Datatables ###############START###########
+	#########	POST ACL Datatables	#########
+	public function postACLDatatables($req,$res)
+	{
+		//INITIAL CODE////START//
+		$data=array();
+		$data=$this->initialData([
+			'type' => 'post',
+			'object' => 'acl',
+			'action' => 'datatables',
+		]);
+		#check error#
+		if ($_SESSION['error']['status']){
+			$data['error']=$_SESSION['error'];
+			return $res -> withStatus(401) -> write(json_encode($data));
+		}
+		//INITIAL CODE////END//
+
+		unset($data['error']);//BEACAUSE DATATABLES USES THAT VARIABLE//
+
+		//CHECK ACCESS TO THAT FUNCTION//START//
+		if(!$this->checkAccess(12, true))
+		{
+			$data['data'] = [];
+			$data['recordsTotal'] = 0;
+			$data['recordsFiltered'] = 0;
+			return $res -> withStatus(200) -> write(json_encode($data));
+		}
+		//CHECK ACCESS TO THAT FUNCTION//END//
+
+		$params=$req->getParams(); //Get ALL parameters form Datatables
+
+		$columns = $this->APICheckerCtrl->getTableTitles('tac_acl'); //Array of all columnes that will used
+		array_unshift( $columns, 'id' );
+		array_push( $columns, 'created_at', 'updated_at' );
+		$data['columns'] = $columns;
+		$queries = (empty($params['searchTerm'])) ? [] : $params['searchTerm'];
+
+		//Filter end
+		$data['recordsTotal'] = TACACL::count();
+		//Get temp data for Datatables with Fliter and some other parameters
+		$tempData = TACACL::select($columns)->
+		when( !empty($queries),
+			function($query) use ($queries)
+			{
+				$query->where('name','LIKE', '%'.$queries.'%');
+				return $query;
+			});
+		$data['recordsFiltered'] = $tempData->count();
+
+		if (!empty($params['sortColumn']) and !empty($params['sortDirection']))
+				$tempData = $tempData->orderBy($params['sortColumn'],$params['sortDirection']);
+
+		$data['data'] = $tempData->get()->toArray();
+
+		return $res -> withStatus(200) -> write(json_encode($data));
+	}
+
+########	ACL Datatables	###############END###########
+################################################
+################################################
+########	List ACL	###############START###########
+	#########	GET List ACL#########
+	public function getAclList($req,$res)
+	{
+		//INITIAL CODE////START//
+		$data=array();
+		$data=$this->initialData([
+			'type' => 'get',
+			'object' => 'acl',
+			'action' => 'list',
+		]);
+		#check error#
+		if ($_SESSION['error']['status']){
+			$data['error']=$_SESSION['error'];
+			return $res -> withStatus(401) -> write(json_encode($data));
+		}
+		//INITIAL CODE////END//
+		///IF GROUPID SET///
+		if ($req->getParam('id') != null){
+			$id = explode(',', $req->getParam('id'));
+
+			$data['results'] = TACACL::select(['id','name AS text'])->whereIn('id', $id)->get();
+			// if (  !count($data['results']) ) $data['results'] = null;
+			return $res -> withStatus(200) -> write(json_encode($data));
+		}
+		//////////////////////
+		////LIST OF GROUPS////
+		$query = TACACL::select(['id','name as text']);
+		$data['total'] = $query->count();
+		$search = $req->getParam('search');
+
+		$query = $query->when( !empty($search), function($query) use ($search)
+			{
+				$query->where('name','LIKE', '%'.$search.'%');
+			});
+
+		$data['results']=$query->get();
+
+		return $res -> withStatus(200) -> write(json_encode($data));
+	}
+########	List ACL	###############END###########
+################################################
+
+}//END OF CLASS//

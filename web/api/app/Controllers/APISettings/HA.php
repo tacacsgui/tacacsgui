@@ -96,6 +96,7 @@ class HA
     $output=[];
     if ( !count($this->ha_data['server_list']['slave']) OR !isset( $this->ha_data['server_list']['slave'][$params['sid']] ) ) return $output;
     $slave = $this->ha_data['server_list']['slave'][$params['sid']];
+    $output['sid'] = $params['sid'];
       $session_params =
       [
         'server_ip' => $slave['ipaddr'],
@@ -237,6 +238,13 @@ class HA
     return $output;
   }
 
+  public function getRootpw($passwd = '')
+  {
+    if (! empty($passwd) )
+      return $this->check_rootpw($passwd);
+    return $this->check_rootpw(CMDRun::init()->setSudo()->setCmd(MAINSCRIPT)->setAttr(['ha','rootpw'])->get());
+  }
+
   private function master_settings( $output = [], $params )
   {
     $output['log'] = [ 'messages' => [], 'error' => false, 'disableOnError' => true ];
@@ -253,14 +261,17 @@ class HA
     //trim( shell_exec( 'sudo /opt/tacacsgui/main.sh ha rootpw' ) );
     $output['rootpw'] = true;
 
-    switch ($params['step']) {
-      case 1:
-        $output = $this->setupMasterStep1($output, $params); //prepare my.cnf//
-        return $output;
-      case 2:
-        $output = $this->setupMasterStep2($output, $params);
-        return $output;
-    }
+    $output = $this->setupMasterStep1($output, $params); //prepare my.cnf//
+    $output = $this->setupMasterStep2($output, $params);
+
+    // switch ($params['step']) {
+    //   case 1:
+    //     $output = $this->setupMasterStep1($output, $params); //prepare my.cnf//
+    //     return $output;
+    //   case 2:
+    //     $output = $this->setupMasterStep2($output, $params);
+    //     return $output;
+    // }
     $output['current_mysql'] = $this->getMysqlParams();
     //$output['test11'] = $this->ha_data;
     $output['log']['messages'][] = 'Master Status:';
@@ -313,34 +324,53 @@ class HA
     }
 
     $rootpw = $params['rootpw'];
-    //$output['test'] = CMDRun::init()->setSudo()->setCmd(MAINSCRIPT)->setAttr( [ 'ha', 'rootpw', '123123' ] )->showCmd();
+
     if ( ! $this->check_rootpw($rootpw) ){
+      $output['type'] = 'rootpw';
       $output['log']['error'] = true;
       $output['log']['messages'][] = "### Warning ###:\n MySQL root password required.";
       return $output;
     }
+
     if ( empty($params['rootpw']) ) $params['rootpw'] = CMDRun::init()->setSudo()->setCmd(MAINSCRIPT)->setAttr(['ha','rootpw'])->get();
     //trim( shell_exec( 'sudo /opt/tacacsgui/main.sh ha rootpw' ) );
     $output['rootpw'] = true;
 
-    switch ($params['step']) {
-      case 1:
-        $output = $this->setupSlaveStep1($output, $params); //check
-        return $output;
-      case 2:
-        $output = $this->setupSlaveStep2($output, $params);
-        return $output;
-      case 3:
-        $output = $this->setupSlaveStep3($output, $params);
-        return $output;
-      case 4:
-        $output = $this->setupSlaveStep4($output, $params);
-        $this->ha_data['server']['role'] = 'slave';
-        return $output;
+    $output = $this->setupSlaveStep1($output, $params); //check
+    if ($output['master_resp']['code'] != 200) {
+      $output['step1_err'] = true;
+      $this->ha_data = [];
+      self::saveConfg ( [] );
+      return $output;
     }
+    $output = $this->setupSlaveStep2($output, $params);
+    if (empty($output['master_resp']['body']['dump']) OR $output['master_resp']['body']['dump'] == '') {
+      $output['step2_err'] = true;
+      $this->ha_data = [];
+      self::saveConfg ( [] );
+      return $output;
+    }
+    $output = $this->setupSlaveStep3($output, $params);
+    $output = $this->setupSlaveStep4($output, $params);
+    // switch ($params['step']) {
+    //   case 1:
+    //     $output = $this->setupSlaveStep1($output, $params); //check
+    //     return $output;
+    //   case 2:
+    //     $output = $this->setupSlaveStep2($output, $params);
+    //     return $output;
+    //   case 3:
+    //     $output = $this->setupSlaveStep3($output, $params);
+    //     return $output;
+    //   case 4:
+    //     $output = $this->setupSlaveStep4($output, $params);
+    //     $this->ha_data['server']['role'] = 'slave';
+    //     return $output;
+    // }
     /*
     //slave
     */
+    $this->ha_data['server']['role'] = 'slave';
     $output['titles_checksum'] = implode(",",array_keys($this->tablesArr));
     $output['ha_checksum'] = [];
     $tempArray = $this->capsule::select( 'CHECKSUM TABLE '. implode(",",array_keys($this->tablesArr) ) );
@@ -467,6 +497,7 @@ class HA
     if ( $master_response[1] !== 200 ){
       $output['log']['error'] = true;
       $output['log']['messages'][] = "### Error!  ###\nIncorrect Master IP Or Master does not response";
+      $output['log']['resp'] = $master_response;
       return $output;
     }
     if ($params['debug']) $output['master_resp'] = $master_response[0];
@@ -505,17 +536,31 @@ class HA
       $this->ha_data['server']['position'] ])->get(); */
     //$output['tmp111'] = $this->ha_data['server'];
     $output['log']['messages'][] = "Create user tgui_ro";
+    // $output['log']['messages'][] = CMDRun::init()->setSudo()->setCmd(MAINSCRIPT)->setAttr([ 'ha','tgui_ro', $rootpw, $this->ha_data['server']['psk_slave'] ])->showCmd();
     $output['log']['messages'][] = CMDRun::init()->setSudo()->setCmd(MAINSCRIPT)->setAttr([ 'ha','tgui_ro', $rootpw, $this->ha_data['server']['psk_slave'] ])->get();
     //( shell_exec( "sudo /opt/tacacsgui/main.sh ha tgui_ro '".$rootpw."' '". $this->ha_data['server']['psk_slave']."'" ) ) ;
     $output['log']['messages'][] =
+    // CMDRun::init()->setSudo()->setCmd(MAINSCRIPT)->setAttr([ 'ha','replication', $rootpw, $this->ha_data['server']['psk_slave'] ])->showCmd();//trim( shell_exec( "sudo /opt/tacacsgui/main.sh ha replication '".$rootpw."' '" .$this->ha_data['server']['psk_slave']."' 2>&1" ) );
     CMDRun::init()->setSudo()->setCmd(MAINSCRIPT)->setAttr([ 'ha','replication', $rootpw, $this->ha_data['server']['psk_slave'] ])->get();//trim( shell_exec( "sudo /opt/tacacsgui/main.sh ha replication '".$rootpw."' '" .$this->ha_data['server']['psk_slave']."' 2>&1" ) );
     $output['log']['messages'][] = CMDRun::init()->setSudo()->setCmd(MAINSCRIPT)->setAttr([ 'ha', 'slave', 'start',
       $rootpw,
       $this->ha_data['server']['ipaddr_master'],
       $this->ha_data['server']['psk_slave'],
       $this->ha_data['server']['bin_file'],
+      $this->ha_data['server']['position'] ])->showCmd();
+    $output['log']['messages'][] = CMDRun::init()->setSudo()->setCmd(MAINSCRIPT)->setAttr([ 'ha', 'slave', 'start',
+      $rootpw,
+      $this->ha_data['server']['ipaddr_master'],
+      $this->ha_data['server']['psk_slave'],
+      $this->ha_data['server']['bin_file'],
       $this->ha_data['server']['position'] ])->get();
-
+    $output['log']['step3'] = [
+      $rootpw,
+      $this->ha_data['server']['ipaddr_master'],
+      $this->ha_data['server']['psk_slave'],
+      $this->ha_data['server']['bin_file'],
+      $this->ha_data['server']['position']
+    ];
     $output['status'] = '';
     $output['step'] = $params['step'];
     return $output;
@@ -578,6 +623,7 @@ class HA
     }
     $output['log']['messages'][] = "Database check is Ok";
     $output['log']['messages'][] = "Save Configuration";
+    $output['log']['step4'] = self::getStatus('slave');
 
     $ha_status = self::getStatus('slave');
     $output['log']['messages'][] = $ha_status['ha_status_brief'];
@@ -713,6 +759,7 @@ class HA
         break;
       case 'slave':
         $output['ha_status_brief'] = CMDRun::init()->setSudo()->setCmd(MAINSCRIPT)->setAttr( [ 'ha', 'status', 'slave', $ha_data['server']['psk_slave'] ] )->setGrep('Slave_IO_State')->get();
+        $output['cmd'] = CMDRun::init()->setSudo()->setCmd(MAINSCRIPT)->setAttr( [ 'ha', 'status', 'slave', $ha_data['server']['psk_slave'] ] )->setGrep('Slave_IO_State')->showCmd();
         //trim( shell_exec( "sudo /opt/tacacsgui/main.sh ha status slave '".$ha_data['server']['psk_slave']."' 2>&1 | grep Slave_IO_State" ) );
         $output['log']['messages'][] = 'Briefly: ' . ( ( strpos($output['ha_status_brief'], 'Waiting for') !== false ) ? 'Ok':'Error!' );
         $output['ha_status'] = $output['log']['messages'][] = CMDRun::init()->setSudo()->setCmd(MAINSCRIPT)->setAttr( [ 'ha', 'status', 'slave', $ha_data['server']['psk_slave'] ] )->get();
@@ -937,6 +984,13 @@ class HA
     $ha_data = self::getFullConfiguration();
     if  (! isset($ha_data['server_list']['slave'][$sid]) ) return false;
     unset($ha_data['server_list']['slave'][$sid]);
+    self::saveConfg($ha_data);
+    return true;
+  }
+  public static function updateSlave($slaves_ip='')
+  {
+    $ha_data = self::getFullConfiguration();
+    $ha_data['server']['slaves_ip'] = $slaves_ip;
     self::saveConfg($ha_data);
     return true;
   }

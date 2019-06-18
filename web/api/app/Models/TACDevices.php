@@ -9,9 +9,8 @@ class TACDevices extends Model
 	protected $table = 'tac_devices';
 
 	protected $fillable = [
-		'ipaddr',
+		'address',
 		'name',
-		'prefix',
 		'key',
 		'enable',
 		'enable_flag',

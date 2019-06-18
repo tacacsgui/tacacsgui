@@ -8,6 +8,8 @@ class Conf_Credentials extends Model
 {
 	protected $table = 'confM_credentials';
 
+	protected $hidden = ['password'];
+
 	protected $fillable = [
     'name',
     'username',

@@ -15,6 +15,6 @@ class Conf_Devices extends Model
     'port',
     'tac_device',
     'credential',
-    'ip'
+    'address'
 	];
 }

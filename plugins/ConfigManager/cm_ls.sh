@@ -24,6 +24,18 @@ function usage()
     echo ""
 }
 
+function dirList(){
+  # ls -R '/opt/tgui_data/confManager/configs' | grep ":$" | \
+  # ls '/opt/tgui_data/confManager/configs' | grep ":$" | \
+  # sed -n -e 's/^.*\/opt\/tgui_data\/confManager\/configs/root/p' | \
+  # sed -e 's/:$//' -e 's/[^-][^\/]*\//-/g' -e 's/^//'
+  ls -dl /opt/tgui_data/confManager/configs$1*/ | sed -n -e 's/^.*\/opt\/tgui_data\/confManager\/configs//p'
+}
+
+function dirExploer(){
+  ls -la /opt/tgui_data/confManager/configs$1 | awk 'NR > 3 { print $1, $9 }' | grep -v ".git"
+}
+
 while [ "$1" != "" ]; do
     PARAM=`echo $1 | awk -F= '{print $1}'`
     VALUE=`echo $1 | awk -F= '{print $2}'`
@@ -37,6 +49,14 @@ while [ "$1" != "" ]; do
             ;;
         --debug)
             DEBUG=$VALUE
+            ;;
+        --dir-list)
+            dirList $VALUE
+            exit
+            ;;
+        --dir-exploer)
+            dirExploer $VALUE
+            exit
             ;;
         --start-line)
             START_LINE=$VALUE

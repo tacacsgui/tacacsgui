@@ -62,6 +62,8 @@ class ConfGroups extends Controller
 				return $res -> withStatus(200) -> write(json_encode($data));
 			}
 
+		$data['group'] = 1;
+
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
 
@@ -95,7 +97,10 @@ class ConfGroups extends Controller
 		}
 		//CHECK ACCESS TO THAT FUNCTION//END//
 
-		$data['group'] = [ 'name' => $req->getParam('name')];
+		$data['group'] = [
+			'name' => $req->getParam('id'),
+			'name_old' => $req->getParam('id'), 
+			'id' => $req->getParam('id')];
 
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
@@ -153,6 +158,8 @@ class ConfGroups extends Controller
 		}
 
 		ConfManagerHelper::forceCommit();
+
+		$data['save'] = 1;
 
 
 		return $res -> withStatus(200) -> write(json_encode($data));
@@ -236,22 +243,15 @@ class ConfGroups extends Controller
 
     $params = $req->getParams(); //Get ALL parameters form Datatables
 
-    $start_line = $params['start'] + 1;
-    $end_line = $params['start'] + $params['length'];
-    $reverse = ( $params['order'][0]['dir'] == 'asc') ? 0 : 1;
-    $sort_colum = $params['columns'][$params['order'][0]['column']]['data'];
-    $columns = ['','name'];
+    $reverse = ( $params['sortDirection'] == 'asc') ? 0 : 1;
 
     $searchString = ( empty($params['search']['value']) ) ? '' : $params['search']['value'];
-    $temp = $this->queriesMaker($columns, $searchString);
-    $queries = $temp['queries'];
-
-    $data['filter'] = $temp['filter'];
 
     $data['queries'] = $queries;
     $data['columns'] = $columns;
 
-    $request_attr = ['--show-dir-table=1','--reverse='.$reverse,'--sort='.$sort_colum,'--start-line='.$start_line,'--end-line='.$end_line];
+    // $request_attr = ['--show-dir-table=1','--reverse='.$reverse,'--sort='.$sort_colum,'--start-line='.$start_line,'--end-line='.$end_line];
+    $request_attr = [ '--show-dir-table=1','--reverse='.$reverse,'--sort='.$params['sortColumn'] ];
 
     if ( $data['queries'] ){
       if ( $data['queries']['='] ){
@@ -279,9 +279,8 @@ class ConfGroups extends Controller
     $data['data'] = [];
     foreach ($table_data as $row) {
       $columns = preg_split('/\s+/', $row);
-      $buttons='<button class="btn btn-warning btn-xs btn-flat" onclick="cm_groups.get(0,\''.$columns[1].'\')">Edit</button>'.
-      ' <button class="btn btn-danger btn-xs btn-flat" onclick="cm_groups.del(0,\''.$columns[1].'\')">Del</button>';
       $data['data'][] = [
+        'id' => $columns[1],
         'name' => $columns[1],
         'date' => date( 'Y-m-d H:i:s', $columns[0]),
         'members' => $columns[2],
@@ -319,32 +318,34 @@ class ConfGroups extends Controller
 		//CHECK ACCESS TO THAT FUNCTION//END//
 
 		///IF GROUPID SET///
-		if ($req->getParam('byId') != null){
-			$reverse=1;
-			$sort_colum='date';
-			$start_line='1';
-			$end_line="10";
-			$data['item'] = [];
-			if ( is_dir('/opt/tgui_data/confManager/configs/'.$req->getParam('byId')) ){
-				$data['item'][] = [
-					'text' => $req->getParam('byId'),
-					'id' => $req->getParam('byId'),
+		if ($req->getParam('id') != null){
+			$id = explode(',', $req->getParam('id'));
+
+			// $data['results'] = TACCMD::select(['id','name AS text'])->where('type',1)->whereIn('id', $id)->get();
+			$data['results'] = [];
+			if ( is_dir('/opt/tgui_data/confManager/configs/'.$id) ){
+				$data['results'][] = [
+					'text' => $id,
+					'id' => $id,
 				];
 			}
-
+			// if (  !count($data['results']) ) $data['results'] = null;
 			return $res -> withStatus(200) -> write(json_encode($data));
 		}
+		//////////////////////
+		////LIST OF GROUPS////
 
 		$search = $req->getParam('search');
-		$take = 10 * $req->getParam('page');
-		$offset = (10 * ($req->getParam('page') - 1) + 1);
+		// $take = 10 * $req->getParam('page');
+		// $offset = (10 * ($req->getParam('page') - 1) + 1);
 		$data['take'] = $take;
 		$data['offset'] = $offset;
 		$reverse=1;
 		$sort_colum='date';
 		// $start_line='1';
 		// $end_line="10";
-		$request_attr = ['--show-dir-table=1','--reverse='.$reverse,'--sort='.$sort_colum,'--start-line='.$offset,'--end-line='.$take];
+		// $request_attr = ['--show-dir-table=1','--reverse='.$reverse,'--sort='.$sort_colum,'--start-line='.$offset,'--end-line='.$take];
+		$request_attr = ['--show-dir-table=1','--reverse='.$reverse,'--sort='.$sort_colum];
 		if ( ! empty($search) ) $request_attr[]='--name='.$search;
 		$data['cmd_'] = CMDRun::init()->
 			setCmd('/opt/tacacsgui/plugins/ConfigManager/cm_ls.sh')->
@@ -364,7 +365,7 @@ class ConfGroups extends Controller
 			$data['results'][] = [
 				'id' => $temp_data[1],
 				'text' => $temp_data[1],
-				'members' => $temp_data[2],
+				// 'members' => $temp_data[2],
 			];
 		}
 

@@ -34,13 +34,18 @@ private $listOfTacacsReportsTables = '--tables tac_log_accounting tac_log_author
 
 		$revision = ($attrArray['make'] == 'tcfg') ? TACGlobalConf::find(1)->revisionNum : 0;
 
-		$data['make'] = shell_exec(TAC_ROOT_PATH . '/backup.sh make '. DB_USER . ' ' . DB_PASSWORD . ' '. DB_NAME. ' '. $backupPart .' '. ($revision + 1) );//make
-		$test01= TAC_ROOT_PATH . '/backup.sh make '. DB_USER . ' ' . DB_PASSWORD . ' '. DB_NAME. ' '. $backupPart .' '. ($revision + 1) ;
-		$data['diff'] = ( $attrArray['diff'] ) ? intval( trim( shell_exec(TAC_ROOT_PATH . '/backup.sh diff ' ."'". $backupPart ."' '". $revision ."'") ) ) : 999;//diff
-		$test02 = TAC_ROOT_PATH . '/backup.sh diff ' ."'". $backupPart ."' '". $revision ."'";
+		$makeBkp = CMDRun::init()->setCmd(TAC_ROOT_PATH . '/backup.sh')->
+				setAttr(['make',DB_USER, DB_PASSWORD, DB_NAME, $backupPart]);
+
+		$data['make'] = $makeBkp->setAttr(($revision + 1))->get();//make
+		$test01= $makeBkp->setAttr(($revision + 1))->showCmd();
+		$diff = CMDRun::init()->v2()->setCmd(TAC_ROOT_PATH . '/backup.sh')->
+				setAttr(['diff', $backupPart, $revision]);
+		$data['diff'] = ( $attrArray['diff'] ) ? intval( trim( $diff->get() ) ) : 999;//diff
+		$test02 = $diff->showCmd();
 		if ( $data['diff'] == 0) {
 			shell_exec(TAC_ROOT_PATH . '/backup.sh removeLast' );
-			return ['status'=> false, 'message'=> 'Changes not found ' ];
+			return ['status'=> false, 'message'=> 'Changes not found ' , 'test' => $test02 ];
 		}
 
 		if ( $attrArray['make'] == 'tcfg' ) {
@@ -51,12 +56,13 @@ private $listOfTacacsReportsTables = '--tables tac_log_accounting tac_log_author
 			$revision->changeFlag = 0;
 			$revision->save();
 			$revision = $revision->revisionNum;
-			$data['make'] = shell_exec(TAC_ROOT_PATH . '/backup.sh make '. DB_USER . ' ' . DB_PASSWORD . ' '. DB_NAME. ' '. $backupPart .' '. $revision);//make
+			// $data['make'] = shell_exec(TAC_ROOT_PATH . '/backup.sh make '. DB_USER . ' ' . DB_PASSWORD . ' '. DB_NAME. ' '. $backupPart .' '. $revision);//make
+			$data['make'] = $makeBkp->setAttr($revision)->get();//make
 		}
 
 		$logEntry=array('action' => 'add', 'obj_name' => $backupPart, 'section' => 'api backup', 'message' => 601);
 		$this->APILoggingCtrl->makeLogEntry($logEntry);
-		return ['status'=> true, 'message'=> 'Backup added ' ] ;
+		return ['status'=> true, 'message'=> 'Backup added ', 'test' => $test02 ] ;
 	}
 	###################	MAKE Backup########END##
 	#######################################
@@ -86,14 +92,19 @@ private $listOfTacacsReportsTables = '--tables tac_log_accounting tac_log_author
 
 		$START=$params['start']+1;
 		$LENGTH=$params['length'] + $params['start'];
-		$ORDER=$params['order'][0]['dir'];
-		$TYPE=$params['type'];
+		$ORDER=$params['sortDirection'];
+		$TYPE=$params['extra']['type'];
+		$data['test222'] = $params['extra']['type'];
 
 		//$backupCommand="mysqldump -u ".DB_USER." -p".DB_PASSWORD." ".DB_NAME." > /var/www/html/backups/database/".date('Y-m-d_H:i:s', time())."_all.sql";
 
 		//$data['check'] =shell_exec("ls ".TAC_ROOT_PATH."/backups/database/ -r | sed '10,20!d' | paste -s -d ' ' "); //check
-		$data['result'] = trim(shell_exec(TAC_ROOT_PATH . '/backup.sh datatables '. $START .' '.$LENGTH.' '.$ORDER .' '.$TYPE)); //check
 
+		// $data['result'] = trim(shell_exec(TAC_ROOT_PATH . '/backup.sh datatables '.  .' '..' '. .' '.)); //check
+		$data['result'] = CMDRun::init()->setCmd(TAC_ROOT_PATH . '/backup.sh')->
+				setAttr(['datatables',$ORDER,$TYPE]);
+		$data['cmd2'] = $data['result']->showCmd();
+		$data['result'] = $data['result']->get();
 		$data['result2'] = explode("\n", $data['result'] );
 		$data['result3'] = explode(";", $data['result2'][0] );
 		$data['recordsTotal']=$data['recordsFiltered'] = $data['result3'][0];
@@ -110,11 +121,13 @@ private $listOfTacacsReportsTables = '--tables tac_log_accounting tac_log_author
 		{
 			if ($data['result4'][$i] == '') continue;
 			$tempVariable = explode( '.', explode('_',$data['result4'][$i])[2] )[0];
-			$tempArray['fileName']=$data['result4'][$i];
+			$tempArray['filename']=$data['result4'][$i];
 			$tempArray['size']=$data['result4'][$i+1].'byte';
 			$tempArray['version']=$tempVariable . ( ($tempVariable == $revision) ? ' Used Now' : '');
 			$tempArray['used']= ( ($tempVariable == $revision) ? 1 : 0 );
-			$tempArray['buttons']='<a class="btn btn-info btn-xs btn-flat" target="_blank" href="/api/backup/download/?file=\''.$data['result4'][$i].'\'"><i class="fa fa-download"></i></a> <button class="btn btn-warning btn-xs btn-flat" onclick="tgui_apiBackup.restore(\''.$data['result4'][$i].'\',\''.$TYPE.'\')">Restore</button> <button class="btn btn-danger btn-xs btn-flat" onclick="tgui_apiBackup.delete(\''.$data['result4'][$i].'\',\''.$TYPE.'\')">Del</button>';
+			$tempArray['type']= $TYPE;
+			// $tempArray['buttons']='<a class="btn btn-info btn-xs btn-flat" target="_blank" href="/api/backup/download/?file=\''.$data['result4'][$i].'\'"><i class="fa fa-download"></i></a> <button class="btn btn-warning btn-xs btn-flat" onclick="tgui_apiBackup.restore(\''.$data['result4'][$i].'\',\''.$TYPE.'\')">Restore</button> <button class="btn btn-danger btn-xs btn-flat" onclick="tgui_apiBackup.delete(\''.$data['result4'][$i].'\',\''.$TYPE.'\')">Del</button>';
+			$tempArray['href']='/api/backup/download/?file=\''.$data['result4'][$i];
 			array_push($data['data'],$tempArray);
 			$i++;
 		}
@@ -152,7 +165,9 @@ private $listOfTacacsReportsTables = '--tables tac_log_accounting tac_log_author
 		}
 		//CHECK ACCESS TO THAT FUNCTION//END//
 
-		$data['result'] = trim(shell_exec(TAC_ROOT_PATH . '/backup.sh delete '. $req->getParam('name')));
+		// $data['result'] = trim(shell_exec(TAC_ROOT_PATH . '/backup.sh delete '. $req->getParam('name')));
+		$data['result'] = CMDRun::init()->setCmd(TAC_ROOT_PATH . '/backup.sh')->
+				setAttr(['delete',$req->getParam('name')])->get();
 
 		$logEntry=array('action' => 'delete', 'obj_name' => $req->getParam('name'), 'section' => 'api backup', 'message' => 602);
 		$data['logging']=$this->APILoggingCtrl->makeLogEntry($logEntry);

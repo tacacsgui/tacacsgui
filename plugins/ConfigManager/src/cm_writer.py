@@ -14,17 +14,18 @@ class cm_writer():
         if not 'data' in parms or not parms['data']:
             if self.debug: deb.cm_debug.show( marker='debW', message = 'Data not found or empty. Return')
             return 'Warning: Data not found or empty. Return'
-        group = parms.get('group', '')
-        if group:
-            if self.debug: deb.cm_debug.show( marker='debW', message = 'Group set: {}'.format(group) )
-            if not os.path.isdir(parms['path']+'/'+group):
-                if self.debug: deb.cm_debug.show( marker='debW', message = 'Create dir: {}'.format(group) )
-                os.mkdir(path)
-            group +='/'
-        if self.debug: deb.cm_debug.show( marker='debW', message = 'Write to file {}'.format(parms['path']+'/'+group+parms['name']) )
+        # group = parms.get('group', '')
+        # if group:
+        #     if self.debug: deb.cm_debug.show( marker='debW', message = 'Group set: {}'.format(group) )
+        #     if not os.path.isdir(parms['path']+'/'+group):
+        #         if self.debug: deb.cm_debug.show( marker='debW', message = 'Create dir: {}'.format(group) )
+        #         os.mkdir(path)
+        #     group +='/'
+        if self.debug: deb.cm_debug.show( marker='debW', message = 'Write to file {}'.format(parms['path']+parms['name']) )
+        #if self.debug: deb.cm_debug.show( marker='debW', message = 'Write a file: {}'.format(parms['data']) )
 
         try:
-            with open(parms['path']+'/'+group+parms['name'], "w+") as config_file:
+            with open(parms['path']+parms['name'], "w+") as config_file:
                 config_file.write(parms['data'])
         except Exception as e:
             if self.debug: deb.cm_debug.show( marker='debW', message = 'Write error {}'.format(e) )
@@ -39,6 +40,7 @@ class cm_writer():
         if omitLines:
             omitLines = self.omitLSanitize(omitLines)
         finalData = data.split("\n")
+        if self.debug: deb.cm_debug.show( marker='debW', message = 'Line: {}'.format(omitLines) )
         for ln in omitLines:
             if int(ln) <= len(finalData):
                 if marker:
@@ -61,5 +63,9 @@ class cm_writer():
                 if self.debug: deb.cm_debug.show( marker='debW', message = 'OmitLines Sanitize Range: '+str( (oL).split('-') ) )
                 sanitizedList += list( range( int(sorted( (oL).split('-'), key=int )[0]), int(sorted( (oL).split('-'), key=int )[1]) + 1 ) )
                 continue
-        if self.debug: deb.cm_debug.show( marker='debW', message = 'OmitLines Sanitize Result: '+str(sorted( list( set( sanitizedList ) ), reverse=True )) )
-        return sorted( list( set( sanitizedList ) ), reverse=True )
+        list_final = list( set( sanitizedList ) )
+        list_final.sort()
+        # if self.debug: deb.cm_debug.show( marker='debW', message = 'OmitLines Sanitize Result: '+str(sorted( list( set( sanitizedList ) ), reverse=True )) )
+        if self.debug: deb.cm_debug.show( marker='debW', message = 'OmitLines Sanitize Result: '+str( list_final ) )
+        # return sorted( list( set( sanitizedList ) ), reverse=True )
+        return list_final

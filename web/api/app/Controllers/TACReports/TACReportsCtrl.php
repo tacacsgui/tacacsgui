@@ -48,7 +48,20 @@ class TACReportsCtrl extends Controller
   		" (SELECT COUNT(*) FROM tgui.tac_users where `disabled` = '1') as users_disabled, ".
   		' (SELECT COUNT(*) FROM tgui.tac_devices) as devices,'.
   		" (SELECT COUNT(*) FROM tgui.tac_devices where `disabled` = '1') as devices_disabled, ".
+  		" (SELECT COUNT(*) FROM tgui_log.tac_log_authentication) as authe, ".
+  		" (SELECT COUNT(*) FROM tgui_log.tac_log_authorization) as autho, ".
+  		" (SELECT COUNT(*) FROM tgui_log.tac_log_accounting) as acc, ".
   		" (SELECT COUNT(*) FROM tgui_log.tac_log_authentication where `date` between '".$weekTimeRange[0]."' and '".$weekTimeRange[1]."' and (`action` LIKE '%fail%') OR (`action` LIKE '%deny%') ) as authe_err ") );
+
+			$data['widgets'][0]->TACVER = TACVER;
+			$data['widgets'][0]->APIVER = APIVER;
+			$data['widgets'][0]->tac_status = preg_split( '/\s+/',
+					trim(
+						CMDRun::init()->setCmd('service')->setAttr(['tac_plus','status'])->setGrep('Active: ')->get()
+					)
+				)[1];
+			$data['widgets'][0]->ha = $this->getHaRole();
+
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
 	##########STATISTICS PLEASE#######END##
@@ -163,7 +176,15 @@ class TACReportsCtrl extends Controller
 		//////////Top Devices///start//
 		if ($allParams['devicesReload']){
 
-			$data['topDevices'] = $this->db::select( $this->db::raw("select IFNULL(dev.name, log.nas) label, log.count from (select nas, COUNT(1) as count from `tgui_log`.`tac_log_authentication`  where `tac_log_authentication`.`action` LIKE '%succeeded' and `tac_log_authentication`.`date` between '".$weekTimeRange[0]."' and '".$weekTimeRange[1]."' group by `nas` order by count desc limit ".$allParams['users'].") as log left join `tgui`.`tac_devices` as `dev` on log.`nas` = `dev`.`ipaddr` order by log.count desc;") );
+			$data['topDevices'] = $this->db::select(
+				$this->db::raw("select ".
+							" IFNULL(dev.name, log.nas) label, addr.id as name, ".
+							"log.count from (select nas, COUNT(1) as count from `tgui_log`.`tac_log_authentication` ".
+							"where `tac_log_authentication`.`action` LIKE '%succeeded' and ".
+							"`tac_log_authentication`.`date` between '".$weekTimeRange[0]."' and '".$weekTimeRange[1]."' ".
+							"group by `nas` order by count desc limit ".$allParams['devices'].") as log ".
+							"left join `tgui`.`obj_addresses` as `addr` on log.`nas` = `addr`.`address` ".
+							"left join `tgui`.`tac_devices` as `dev` on `addr`.`id` = `dev`.`address` order by log.count desc;") );
 		}
 		//////////Top Devices///end//
 		return $res -> withStatus(200) -> write(json_encode($data));
@@ -225,75 +246,31 @@ class TACReportsCtrl extends Controller
 		array_unshift( $columns, 'id' );
 
 		$data['columns'] = $columns;
-		$queries = [];
-		$data['filter'] = [];
-		$data['filter']['error'] = false;
-		$data['filter']['message'] = '';
-		//Filter start
-		$searchString = ( empty($params['search']['value']) ) ? '' : $params['search']['value'];
-		$temp = $this->queriesMaker($columns, $searchString);
-		$queries = $temp['queries'];
-		$data['filter'] = $temp['filter'];
-
-		$data['queries'] = $queries;
-		$data['columns'] = $columns;
+		$queries = (empty($params['searchTerm'])) ? [] : $params['searchTerm'];
+		$size = $params['pageSize'];
+		$start = $params['pageSize'] * ($params['page'] - 1);
 		//Filter end
 		$data['recordsTotal'] = Accounting::count();
-
 		//Get temp data for Datatables with Fliter and some other parameters
-		$tempData = Accounting::select()->
-			when( !empty($queries),
-				function($query) use ($queries)
-				{
-					foreach ($queries as $condition => $attr) {
-						switch ($condition) {
-							case '!==':
-								foreach ($attr as $column => $value) {
-									$query->whereNotIn($column, $value);
-								}
-								break;
-							case '==':
-								foreach ($attr as $column => $value) {
-									$query->whereIn($column, $value);
-								}
-								break;
-							case '!=':
-								foreach ($attr as $column => $valueArr) {
-									for ($i=0; $i < count($valueArr); $i++) {
-										if ($i == 0) $query->where($column,'NOT LIKE', '%'.$valueArr[$i].'%');
-										$query->where($column,'NOT LIKE', '%'.$valueArr[$i].'%');
-									}
-								}
-								break;
-							case '=':
-								foreach ($attr as $column => $valueArr) {
-									for ($i=0; $i < count($valueArr); $i++) {
-										if ($i == 0) $query->where($column,'LIKE', '%'.$valueArr[$i].'%');
-										$query->where($column,'LIKE', '%'.$valueArr[$i].'%');
-									}
-								}
-								break;
-							default:
-								//return $query;
-								break;
-						}
-					}
-					return $query;
-				});
-			$data['recordsFiltered'] = $tempData->count();
-			$tempData = $tempData->
-			orderBy($params['columns'][$params['order'][0]['column']]['data'],$params['order'][0]['dir'])->
-			take($params['length'])->
-			offset($params['start'])->
-			get()->toArray();
-		//Creating correct array of answer to Datatables
-		$data['data']=array();
+		$tempData = Accounting::select($columns)->
+		when( !empty($queries),
+			function($query) use ($queries)
+			{
+				$query->where('nas','LIKE', '%'.$queries.'%');
+				$query->orWhere('nac','LIKE', '%'.$queries.'%');
+				$query->orWhere('username','LIKE', '%'.$queries.'%');
+				$query->orWhere('date','LIKE', '%'.$queries.'%');
+				$query->orWhere('cmd','LIKE', '%'.$queries.'%');
+				return $query;
+			})->
+		take($size)->
+		offset($start);
+		$data['total'] = $tempData->count();
 
-		foreach($tempData as $device){
-			array_push($data['data'],$device);
-		}
-		//Some additional parameters for Datatables
-		$data['draw']=intval( $params['draw'] );
+		if (!empty($params['sortColumn']) and !empty($params['sortDirection']))
+				$tempData = $tempData->orderBy($params['sortColumn'],$params['sortDirection']);
+
+		$data['data'] = $tempData->get()->toArray();
 
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
@@ -327,74 +304,31 @@ class TACReportsCtrl extends Controller
 		array_unshift( $columns, 'id' );
 
 		$data['columns'] = $columns;
-		$queries = [];
-		$data['filter'] = [];
-		$data['filter']['error'] = false;
-		$data['filter']['message'] = '';
-		//Filter start
-		$searchString = ( empty($params['search']['value']) ) ? '' : $params['search']['value'];
-		$temp = $this->queriesMaker($columns, $searchString);
-		$queries = $temp['queries'];
-		$data['filter'] = $temp['filter'];
-
-		$data['queries'] = $queries;
-		$data['columns'] = $columns;
+		$queries = (empty($params['searchTerm'])) ? [] : $params['searchTerm'];
+		$size = $params['pageSize'];
+		$start = $params['pageSize'] * ($params['page'] - 1);
 		//Filter end
 		$data['recordsTotal'] = Authentication::count();
 		//Get temp data for Datatables with Fliter and some other parameters
-		$tempData = Authentication::select()->
-			when( !empty($queries),
-				function($query) use ($queries)
-				{
-					foreach ($queries as $condition => $attr) {
-						switch ($condition) {
-							case '!==':
-								foreach ($attr as $column => $value) {
-									$query->whereNotIn($column, $value);
-								}
-								break;
-							case '==':
-								foreach ($attr as $column => $value) {
-									$query->whereIn($column, $value);
-								}
-								break;
-							case '!=':
-								foreach ($attr as $column => $valueArr) {
-									for ($i=0; $i < count($valueArr); $i++) {
-										if ($i == 0) $query->where($column,'NOT LIKE', '%'.$valueArr[$i].'%');
-										$query->where($column,'NOT LIKE', '%'.$valueArr[$i].'%');
-									}
-								}
-								break;
-							case '=':
-								foreach ($attr as $column => $valueArr) {
-									for ($i=0; $i < count($valueArr); $i++) {
-										if ($i == 0) $query->where($column,'LIKE', '%'.$valueArr[$i].'%');
-										$query->where($column,'LIKE', '%'.$valueArr[$i].'%');
-									}
-								}
-								break;
-							default:
-								//return $query;
-								break;
-						}
-					}
-					return $query;
-				});
-			$data['recordsFiltered'] = $tempData->count();
-			$tempData = $tempData->
-			orderBy($params['columns'][$params['order'][0]['column']]['data'],$params['order'][0]['dir'])->
-			take($params['length'])->
-			offset($params['start'])->
-			get()->toArray();
-		//Creating correct array of answer to Datatables
-		$data['data']=array();
+		$tempData = Authentication::select($columns)->
+		when( !empty($queries),
+			function($query) use ($queries)
+			{
+				$query->where('nas','LIKE', '%'.$queries.'%');
+				$query->orWhere('nac','LIKE', '%'.$queries.'%');
+				$query->orWhere('username','LIKE', '%'.$queries.'%');
+				$query->orWhere('date','LIKE', '%'.$queries.'%');
+				$query->orWhere('action','LIKE', '%'.$queries.'%');
+				return $query;
+			})->
+		take($size)->
+		offset($start);
+		$data['total'] = $tempData->count();
 
-		foreach($tempData as $device){
-			array_push($data['data'],$device);
-		}
-		//Some additional parameters for Datatables
-		$data['draw']=intval( $params['draw'] );
+		if (!empty($params['sortColumn']) and !empty($params['sortDirection']))
+				$tempData = $tempData->orderBy($params['sortColumn'],$params['sortDirection']);
+
+		$data['data'] = $tempData->get()->toArray();
 
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
@@ -428,74 +362,32 @@ class TACReportsCtrl extends Controller
 		array_unshift( $columns, 'id' );
 
 		$data['columns'] = $columns;
-		$queries = [];
-		$data['filter'] = [];
-		$data['filter']['error'] = false;
-		$data['filter']['message'] = '';
-		//Filter start
-		$searchString = ( empty($params['search']['value']) ) ? '' : $params['search']['value'];
-		$temp = $this->queriesMaker($columns, $searchString);
-		$queries = $temp['queries'];
-		$data['filter'] = $temp['filter'];
-
-		$data['queries'] = $queries;
-		$data['columns'] = $columns;
+		$queries = (empty($params['searchTerm'])) ? [] : $params['searchTerm'];
+		$size = $params['pageSize'];
+		$start = $params['pageSize'] * ($params['page'] - 1);
 		//Filter end
 		$data['recordsTotal'] = Authorization::count();
 		//Get temp data for Datatables with Fliter and some other parameters
-		$tempData = Authorization::select()->
-			when( !empty($queries),
-				function($query) use ($queries)
-				{
-					foreach ($queries as $condition => $attr) {
-						switch ($condition) {
-							case '!==':
-								foreach ($attr as $column => $value) {
-									$query->whereNotIn($column, $value);
-								}
-								break;
-							case '==':
-								foreach ($attr as $column => $value) {
-									$query->whereIn($column, $value);
-								}
-								break;
-							case '!=':
-								foreach ($attr as $column => $valueArr) {
-									for ($i=0; $i < count($valueArr); $i++) {
-										if ($i == 0) $query->where($column,'NOT LIKE', '%'.$valueArr[$i].'%');
-										$query->where($column,'NOT LIKE', '%'.$valueArr[$i].'%');
-									}
-								}
-								break;
-							case '=':
-								foreach ($attr as $column => $valueArr) {
-									for ($i=0; $i < count($valueArr); $i++) {
-										if ($i == 0) $query->where($column,'LIKE', '%'.$valueArr[$i].'%');
-										$query->where($column,'LIKE', '%'.$valueArr[$i].'%');
-									}
-								}
-								break;
-							default:
-								//return $query;
-								break;
-						}
-					}
-					return $query;
-				});
-			$data['recordsFiltered'] = $tempData->count();
-			$tempData = $tempData->
-			orderBy($params['columns'][$params['order'][0]['column']]['data'],$params['order'][0]['dir'])->
-			take($params['length'])->
-			offset($params['start'])->
-			get()->toArray();
-		//Creating correct array of answer to Datatables
-		$data['data']=array();
+		$tempData = Authorization::select($columns)->
+		when( !empty($queries),
+			function($query) use ($queries)
+			{
+				$query->where('nas','LIKE', '%'.$queries.'%');
+				$query->orWhere('nac','LIKE', '%'.$queries.'%');
+				$query->orWhere('username','LIKE', '%'.$queries.'%');
+				$query->orWhere('date','LIKE', '%'.$queries.'%');
+				$query->orWhere('action','LIKE', '%'.$queries.'%');
+				$query->orWhere('cmd','LIKE', '%'.$queries.'%');
+				return $query;
+			})->
+		take($size)->
+		offset($start);
+		$data['total'] = $tempData->count();
 
-		foreach($tempData as $device){
-			array_push($data['data'],$device);
-		}
-		//Some additional parameters for Datatables
-		$data['draw']=intval( $params['draw'] );
+		if (!empty($params['sortColumn']) and !empty($params['sortDirection']))
+				$tempData = $tempData->orderBy($params['sortColumn'],$params['sortDirection']);
+
+		$data['data'] = $tempData->get()->toArray();
 
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
@@ -587,8 +479,10 @@ class TACReportsCtrl extends Controller
 		}
 		if ($allParams['period'] == 'all') $period = 'all';
 
-		if (empty($period) OR empty($allParams['target'])){
-			$data['error']=true;
+		if ( empty($period) OR empty($allParams['target']) ){
+			$data['test23'] = $period;
+			$data['test232'] = $allParams['target'];
+			$data['error']['status']=true;
 			return $res -> withStatus(200) -> write(json_encode($data));
 		}
 		$data['period'] = $period;

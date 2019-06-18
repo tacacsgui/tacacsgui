@@ -63,18 +63,23 @@ while [ "$1" != "" ]; do
         --commit-list)
             count='0';
             #echo "git -C ${GIT_REPO_PATH} log --follow --format='%ct %h' --name-only -- ${VALUE}"
-            FINAL_LIST="$(git -C ${GIT_REPO_PATH} log --follow --format="%ct %h" --name-only -- ${VALUE} | cat | sed -r '/^\s*$/d' | while read commits; do
-                count=$((count+1))
-                if [[ $((count % 2)) -eq 1 ]]; then
-                echo -n "${commits} "
-                else echo "${commits}"
-                fi
-              done)"
-            if [[ $COMM_END != '0' ]]; then
-              echo "$FINAL_LIST" | sed $COMM_START','$COMM_END'!d'
-            else
-              echo "$FINAL_LIST";
-            fi
+            #git log --follow --name-only --format="%% %ct %h %%" -- router_12__15_21
+            # FINAL_LIST=$(git -C ${GIT_REPO_PATH} log --follow --format="%ct %h" --name-only -- ${VALUE})
+            # echo 'git -C '${GIT_REPO_PATH}' log --format="%ct %h" --name-only -- '${VALUE}''
+            # FINAL_LIST=$(git -C ${GIT_REPO_PATH} log --format="%ct %h" --name-only -- ${VALUE} | cat | sed -r '/^\s*$/d')
+            echo "$(git -C ${GIT_REPO_PATH} log --format="%ct %h" -- ${VALUE} | cat | sed -r '/^\s*$/d')"
+             # | cat | sed -r '/^\s*$/d' | while read commits; do
+             #    count=$((count+1))
+             #    if [[ $((count % 2)) -eq 1 ]]; then
+             #    echo -n "${commits} "
+             #    else echo "${commits}"
+             #    fi
+             #  done)"
+            # if [[ $COMM_END != '0' ]]; then
+            #   echo "$FINAL_LIST" | sed $COMM_START','$COMM_END'!d'
+            # else
+            #   echo "$FINAL_LIST";
+            # fi
             exit
             ;;
         --show)

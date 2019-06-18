@@ -42,7 +42,7 @@ class ConfDevices extends Controller
 
 		$validation = $this->validator->validate($req, [
 			'name' => v::noWhitespace()->notEmpty()->theSameNameUsed( '\tgui\Models\Conf_Devices' ),
-			'ip' => v::ip()->notEmpty()->theSameNameUsed( '\tgui\Models\Conf_Devices', 0, 'ip' ),
+			'address' => v::notEmpty()->numeric(),
 			'protocol' => v::notEmpty()->oneOf( v::equals('ssh'), v::equals('telnet') ),
 			'port' => v::numeric()->notEmpty()->between(1, 65535),
 		]);
@@ -58,6 +58,8 @@ class ConfDevices extends Controller
 		if ( empty($allParams['tac_device']) ) unset($allParams['tac_device']);
 
 		$device = Conf_Devices::create($allParams);
+
+		$data['device'] = 1;
 
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
@@ -102,7 +104,17 @@ class ConfDevices extends Controller
 			return $res -> withStatus(200) -> write(json_encode($data));
 		}
 
-		$data['device'] = Conf_Devices::select()->where('id', $req->getParam('id'))->first();
+		$data['device'] = Conf_Devices::leftJoin('obj_addresses as oa','oa.id','=','confM_devices.address')->
+		leftJoin('confM_credentials as cc','cc.id','=','confM_devices.credential')->
+		select(['confM_devices.*', 'oa.name as addr_name', 'cc.name as credo_name'])->
+		where('confM_devices.id', $req->getParam('id'))->first();
+
+		$data['device']['address'] = (empty($data['device']['addr_name'])) ?
+			[] : [[ 'id' => $data['device']['address'], 'text' => $data['device']['addr_name']]];
+		unset($data['device']['addr_name']);
+		$data['device']['credential'] = (empty($data['device']['credo_name'])) ?
+			[] : [[ 'id' => $data['device']['credential'], 'text' => $data['device']['credo_name']]];
+		unset($data['device']['credo_name']);
 
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
@@ -138,10 +150,11 @@ class ConfDevices extends Controller
 		//CHECK ACCESS TO THAT FUNCTION//END//
 
     $validation = $this->validator->validate($req, [
-			'name' => v::when( v::nullType() , v::alwaysValid(), v::noWhitespace()->notEmpty()->theSameNameUsed( '\tgui\Models\Conf_Devices' )->setName('Name') ),
-			'ip' => v::when( v::nullType() , v::alwaysValid(), v::ip()->notEmpty()->theSameNameUsed( '\tgui\Models\Conf_Devices', 0, 'ip' )->setName('IP Address') ),
-			'protocol' => v::when( v::nullType() , v::alwaysValid(), v::notEmpty()->oneOf( v::equals('ssh'), v::equals('telnet') )->setName('Protocol') ),
-			'port' => v::when( v::nullType() , v::alwaysValid(), v::numeric()->notEmpty()->between(1, 65535)->setName('Port') ),
+			'name' => v::when( v::nullType() , v::alwaysValid(), v::noWhitespace()->notEmpty()->
+				theSameNameUsed( '\tgui\Models\Conf_Devices', $req->getParam('id') )->setName('Name') ),
+			'address' => v::notEmpty()->numeric(),
+			'protocol' => v::notEmpty()->oneOf( v::equals('ssh'), v::equals('telnet') )->setName('Protocol'),
+			'port' => v::numeric()->notEmpty()->between(1, 65535)->setName('Port'),
 		]);
 
 		if ($validation->failed()){
@@ -169,6 +182,8 @@ class ConfDevices extends Controller
 		if ( $this->db::table('confM_bind_query_devices')->where( 'device_id', $req->getParam('id') )->count() ){
 			$this->ConfManager->createConfig();
 		}
+
+		$data['save'] = 1;
 
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
@@ -251,95 +266,122 @@ class ConfDevices extends Controller
 
     $params = $req->getParams(); //Get ALL parameters form Datatables
 
-    $columns = $this->APICheckerCtrl->getTableTitles('confM_devices'); //Array of all columnes that will used
-    array_unshift( $columns, 'confM_devices.id as id' );
-    array_push( $columns, 'confM_devices.created_at as created_at',
-			'confM_devices.updated_at as updated_at', 'cre.name as creden_name',
+    $columns = []; //$this->APICheckerCtrl->getTableTitles('confM_devices'); //Array of all columnes that will used
+    array_unshift( $columns, 'confM_devices.*' );
+    array_push( $columns, 'cre.name as creden_name',
 		 	'td.name as tgui_device',
 			$this->db::raw('(SELECT COUNT(*) FROM confM_bind_query_devices WHERE device_id = qd.device_id) as ref') );
 		if (($key = array_search('name', $columns)) !== false) {
     	unset($columns[$key]);
 			array_push( $columns, 'confM_devices.name as name');
 		}
-    $data['columns'] = $columns;
-    $queries = [];
-    $data['filter'] = [];
-    $data['filter']['error'] = false;
-    $data['filter']['message'] = '';
-    //Filter start
-    $searchString = ( empty($params['search']['value']) ) ? '' : $params['search']['value'];
-    $temp = $this->queriesMaker($columns, $searchString);
-    $queries = $temp['queries'];
-    $data['filter'] = $temp['filter'];
 
-    $data['queries'] = $queries;
-    $data['columns'] = $columns;
-    //Filter end
-    $data['recordsTotal'] = Conf_Devices::count();
-    //Get temp data for Datatables with Fliter and some other parameters
-    $tempData = Conf_Devices::select($columns)->
+		$data['columns'] = $columns;
+		$queries = (empty($params['searchTerm'])) ? [] : $params['searchTerm'];
+
+		//Filter end
+		$data['recordsTotal'] = Conf_Devices::count();
+		//Get temp data for Datatables with Fliter and some other parameters
+		$tempData = Conf_Devices::select($columns)->
 			leftJoin('tac_devices as td', 'td.id', '=', 'confM_devices.tac_device')->
 			leftJoin('confM_credentials as cre', 'cre.id', '=', 'confM_devices.credential')->
 			leftJoin('confM_bind_query_devices as qd', 'qd.device_id', '=', 'confM_devices.id')->
 			groupBy('confM_devices.id')->
-      when( !empty($queries),
-        function($query) use ($queries)
-        {
-          foreach ($queries as $condition => $attr) {
-            switch ($condition) {
-              case '!==':
-                foreach ($attr as $column => $value) {
-                  $query->whereNotIn($column, $value);
-                }
-                break;
-              case '==':
-                foreach ($attr as $column => $value) {
-                  $query->whereIn($column, $value);
-                }
-                break;
-              case '!=':
-                foreach ($attr as $column => $valueArr) {
-                  for ($i=0; $i < count($valueArr); $i++) {
-                    if ($i == 0) $query->where($column,'NOT LIKE', '%'.$valueArr[$i].'%');
-                    $query->where($column,'NOT LIKE', '%'.$valueArr[$i].'%');
-                  }
-                }
-                break;
-              case '=':
-                foreach ($attr as $column => $valueArr) {
-                  for ($i=0; $i < count($valueArr); $i++) {
-                    if ($i == 0) $query->where($column,'LIKE', '%'.$valueArr[$i].'%');
-                    $query->where($column,'LIKE', '%'.$valueArr[$i].'%');
-                  }
-                }
-                break;
-              default:
-                //return $query;
-                break;
-            }
-          }
-          return $query;
-        });
-        $data['recordsFiltered'] = $tempData->count();
+			select($columns);
+		// when( !empty($queries),
+		// 	function($query) use ($queries)
+		// 	{
+		// 		$query->where('username','LIKE', '%'.$queries.'%');
+		// 		return $query;
+		// 	});
+		$data['recordsFiltered'] = $tempData->count();
 
-  			$tempData = $tempData->
-  			orderBy($params['columns'][$params['order'][0]['column']]['data'],$params['order'][0]['dir'])->
-  			take($params['length'])->
-  			offset($params['start'])->
-  			get()->toArray();
-  			//toSql();
-			//var_dump($tempData);die();
-  		//Creating correct array of answer to Datatables
-  		$data['data']=array();
-  		foreach($tempData as $device){
-  			$buttons='<button class="btn btn-warning btn-xs btn-flat" onclick="cm_devices.get(\''.$device['id'].'\',\''.$device['name'].'\')">Edit</button> <button class="btn btn-danger btn-xs btn-flat" onclick="cm_devices.del(\''.$device['id'].'\',\''.$device['name'].'\')">Del</button>';
-  			$device['buttons'] = $buttons;
-  			array_push($data['data'],$device);
-  		}
-  		//Some additional parameters for Datatables
-  		$data['draw']=intval( $params['draw'] );
+		if (!empty($params['sortColumn']) and !empty($params['sortDirection']))
+				$tempData = $tempData->orderBy($params['sortColumn'],$params['sortDirection']);
 
-  		return $res -> withStatus(200) -> write(json_encode($data));
+		$data['data'] = $tempData->get()->toArray();
+
+		return $res -> withStatus(200) -> write(json_encode($data));
+
+    // $data['columns'] = $columns;
+    // $queries = [];
+    // $data['filter'] = [];
+    // $data['filter']['error'] = false;
+    // $data['filter']['message'] = '';
+    // //Filter start
+    // $searchString = ( empty($params['search']['value']) ) ? '' : $params['search']['value'];
+    // $temp = $this->queriesMaker($columns, $searchString);
+    // $queries = $temp['queries'];
+    // $data['filter'] = $temp['filter'];
+		//
+    // $data['queries'] = $queries;
+    // $data['columns'] = $columns;
+    // //Filter end
+    // $data['recordsTotal'] = Conf_Devices::count();
+    // //Get temp data for Datatables with Fliter and some other parameters
+    // $tempData = Conf_Devices::select($columns)->
+		// 	leftJoin('tac_devices as td', 'td.id', '=', 'confM_devices.tac_device')->
+		// 	leftJoin('confM_credentials as cre', 'cre.id', '=', 'confM_devices.credential')->
+		// 	leftJoin('confM_bind_query_devices as qd', 'qd.device_id', '=', 'confM_devices.id')->
+		// 	groupBy('confM_devices.id')->
+    //   when( !empty($queries),
+    //     function($query) use ($queries)
+    //     {
+    //       foreach ($queries as $condition => $attr) {
+    //         switch ($condition) {
+    //           case '!==':
+    //             foreach ($attr as $column => $value) {
+    //               $query->whereNotIn($column, $value);
+    //             }
+    //             break;
+    //           case '==':
+    //             foreach ($attr as $column => $value) {
+    //               $query->whereIn($column, $value);
+    //             }
+    //             break;
+    //           case '!=':
+    //             foreach ($attr as $column => $valueArr) {
+    //               for ($i=0; $i < count($valueArr); $i++) {
+    //                 if ($i == 0) $query->where($column,'NOT LIKE', '%'.$valueArr[$i].'%');
+    //                 $query->where($column,'NOT LIKE', '%'.$valueArr[$i].'%');
+    //               }
+    //             }
+    //             break;
+    //           case '=':
+    //             foreach ($attr as $column => $valueArr) {
+    //               for ($i=0; $i < count($valueArr); $i++) {
+    //                 if ($i == 0) $query->where($column,'LIKE', '%'.$valueArr[$i].'%');
+    //                 $query->where($column,'LIKE', '%'.$valueArr[$i].'%');
+    //               }
+    //             }
+    //             break;
+    //           default:
+    //             //return $query;
+    //             break;
+    //         }
+    //       }
+    //       return $query;
+    //     });
+    //     $data['recordsFiltered'] = $tempData->count();
+		//
+  	// 		$tempData = $tempData->
+  	// 		orderBy($params['columns'][$params['order'][0]['column']]['data'],$params['order'][0]['dir'])->
+  	// 		take($params['length'])->
+  	// 		offset($params['start'])->
+  	// 		get()->toArray();
+  	// 		//toSql();
+		// 	//var_dump($tempData);die();
+  	// 	//Creating correct array of answer to Datatables
+  	// 	$data['data']=array();
+  	// 	foreach($tempData as $device){
+  	// 		$buttons='<button class="btn btn-warning btn-xs btn-flat" onclick="cm_devices.get(\''.$device['id'].'\',\''.$device['name'].'\')">Edit</button> <button class="btn btn-danger btn-xs btn-flat" onclick="cm_devices.del(\''.$device['id'].'\',\''.$device['name'].'\')">Del</button>';
+  	// 		$device['buttons'] = $buttons;
+  	// 		array_push($data['data'],$device);
+  	// 	}
+  	// 	//Some additional parameters for Datatables
+  	// 	$data['draw']=intval( $params['draw'] );
+		//
+  	// 	return $res -> withStatus(200) -> write(json_encode($data));
   }
 
 	public function getList($req,$res)
@@ -366,41 +408,25 @@ class ConfDevices extends Controller
 		//CHECK ACCESS TO THAT FUNCTION//END//
 
 		///IF GROUPID SET///
-		if ($req->getParam('byId') != null){
-			$id = $req->getParam('byId');
+		if ($req->getParam('id') != null){
+			$id = explode(',', $req->getParam('id'));
 
-			$data['item'] = ( is_array($id) ) ? Conf_Devices::select(['id','name AS text'])->whereIn('id', $id)->get() : Conf_Devices::select(['id','name AS text'])->where('id', $req->getParam('byId') )->first();
-			//$data['item']['text'] = $data['item']['name'];
+			$data['results'] = Conf_Devices::select(['id','name AS text'])->whereIn('id', $id)->get();
+			// if (  !count($data['results']) ) $data['results'] = null;
 			return $res -> withStatus(200) -> write(json_encode($data));
 		}
 		//////////////////////
 		////LIST OF GROUPS////
-		$data['incomplete_results'] = false;
-		$data['totalCount'] = Conf_Devices::select(['id','name'])->count();
+		$query = Conf_Devices::select(['id','name as text']);
+		$data['total'] = $query->count();
 		$search = $req->getParam('search');
-		$take = 10 * $req->getParam('page');
-		$offset = 10 * ($req->getParam('page') - 1);
-		$data['take'] = $take;
-		$data['offset'] = $offset;
-		$tempData = Conf_Devices::select(['id','name AS text'])->
-			when( !empty($search), function($query) use ($search)
+
+		$query = $query->when( !empty($search), function($query) use ($search)
 			{
 				$query->where('name','LIKE', '%'.$search.'%');
-			})->
-			take($take)->
-			offset($offset);
+			});
 
-		$tempCounter = $tempData->count();
-
-		$tempData = $tempData->get()->toArray();
-		$data['results']=array();
-		$data['pagination'] = (!$tempData OR $tempCounter < 10) ? ['more' => false] : [ 'more' => true];
-		foreach($tempData as $model)
-		{
-			//$model['text'] = $model['name'];
-			//unset($model['name']);
-			array_push($data['results'],$model);
-		}
+		$data['results']=$query->get();
 
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}

@@ -1,0 +1,117 @@
+@font-face {
+	font-family: 'Poppins';
+	font-style: normal;
+	font-weight: 300;
+	src:
+		local('Poppins Light'),
+		local('Poppins-Light'),
+		url('Poppins/Poppins_300.woff2') format('woff2'),
+		url('Poppins/Poppins_300.woff') format('woff'),
+		url('Poppins/Poppins_300.eot?#iefix') format('embedded-opentype'),
+		url('Poppins/Poppins_300.svg#Poppins') format('svg'),
+		url('Poppins/Poppins_300.ttf') format('truetype');
+}
+@font-face {
+	font-family: 'Poppins';
+	font-style: normal;
+	font-weight: 400;
+	src:
+		local('Poppins Regular'),
+		local('Poppins-Regular'),
+		url('Poppins/Poppins_400.woff2') format('woff2'),
+		url('Poppins/Poppins_400.woff') format('woff'),
+		url('Poppins/Poppins_400.eot?#iefix') format('embedded-opentype'),
+		url('Poppins/Poppins_400.svg#Poppins') format('svg'),
+		url('Poppins/Poppins_400.ttf') format('truetype');
+}
+@font-face {
+	font-family: 'Poppins';
+	font-style: normal;
+	font-weight: 500;
+	src:
+		local('Poppins Medium'),
+		local('Poppins-Medium'),
+		url('Poppins/Poppins_500.woff2') format('woff2'),
+		url('Poppins/Poppins_500.woff') format('woff'),
+		url('Poppins/Poppins_500.eot?#iefix') format('embedded-opentype'),
+		url('Poppins/Poppins_500.svg#Poppins') format('svg'),
+		url('Poppins/Poppins_500.ttf') format('truetype');
+}
+@font-face {
+	font-family: 'Poppins';
+	font-style: normal;
+	font-weight: 600;
+	src:
+		local('Poppins SemiBold'),
+		local('Poppins-SemiBold'),
+		url('Poppins/Poppins_600.woff2') format('woff2'),
+		url('Poppins/Poppins_600.woff') format('woff'),
+		url('Poppins/Poppins_600.eot?#iefix') format('embedded-opentype'),
+		url('Poppins/Poppins_600.svg#Poppins') format('svg'),
+		url('Poppins/Poppins_600.ttf') format('truetype');
+}
+@font-face {
+	font-family: 'Poppins';
+	font-style: normal;
+	font-weight: 700;
+	src:
+		local('Poppins Bold'),
+		local('Poppins-Bold'),
+		url('Poppins/Poppins_700.woff2') format('woff2'),
+		url('Poppins/Poppins_700.woff') format('woff'),
+		url('Poppins/Poppins_700.eot?#iefix') format('embedded-opentype'),
+		url('Poppins/Poppins_700.svg#Poppins') format('svg'),
+		url('Poppins/Poppins_700.ttf') format('truetype');
+}
+@font-face {
+	font-family: 'Roboto';
+	font-style: normal;
+	font-weight: 300;
+	src:
+		local('Roboto Light'),
+		local('Roboto-Light'),
+		url('Roboto/Roboto_300.woff2') format('woff2'),
+		url('Roboto/Roboto_300.woff') format('woff'),
+		url('Roboto/Roboto_300.eot?#iefix') format('embedded-opentype'),
+		url('Roboto/Roboto_300.svg#Roboto') format('svg'),
+		url('Roboto/Roboto_300.ttf') format('truetype');
+}
+@font-face {
+	font-family: 'Roboto';
+	font-style: normal;
+	font-weight: 400;
+	src:
+		local('Roboto'),
+		local('Roboto-Regular'),
+		url('Roboto/Roboto_400.woff2') format('woff2'),
+		url('Roboto/Roboto_400.woff') format('woff'),
+		url('Roboto/Roboto_400.eot?#iefix') format('embedded-opentype'),
+		url('Roboto/Roboto_400.svg#Roboto') format('svg'),
+		url('Roboto/Roboto_400.ttf') format('truetype');
+}
+@font-face {
+	font-family: 'Roboto';
+	font-style: normal;
+	font-weight: 500;
+	src:
+		local('Roboto Medium'),
+		local('Roboto-Medium'),
+		url('Roboto/Roboto_500.woff2') format('woff2'),
+		url('Roboto/Roboto_500.woff') format('woff'),
+		url('Roboto/Roboto_500.eot?#iefix') format('embedded-opentype'),
+		url('Roboto/Roboto_500.svg#Roboto') format('svg'),
+		url('Roboto/Roboto_500.ttf') format('truetype');
+}
+@font-face {
+	font-family: 'Roboto';
+	font-style: normal;
+	font-weight: 700;
+	src:
+		local('Roboto Bold'),
+		local('Roboto-Bold'),
+		url('Roboto/Roboto_700.woff2') format('woff2'),
+		url('Roboto/Roboto_700.woff') format('woff'),
+		url('Roboto/Roboto_700.eot?#iefix') format('embedded-opentype'),
+		url('Roboto/Roboto_700.svg#Roboto') format('svg'),
+		url('Roboto/Roboto_700.ttf') format('truetype');
+}
