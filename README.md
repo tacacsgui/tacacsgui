@@ -3,7 +3,7 @@ Free Access Control Server for Your Network Devices.
 GUI for powerful [tacacs daemon by Marc Huber](http://www.pro-bono-publico.de/projects/)
 
 ## How to install
-Please use [Installation Script](https://github.com/tacacsgui/tgui_install). Only **Ubuntu 16.04.x** supported.
+Please use [Installation Script](https://github.com/tacacsgui/tgui_install). Only **Ubuntu 18.04.x** supported.
 
 ## What it can
 > AAA - Authentication Authorization Accounting
