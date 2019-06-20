@@ -46,8 +46,8 @@ class TACACLCtrl extends Controller
 			'ace' => v::arrayVal()->length(1, null)->each(v::arrayVal()->allOf(
 				v::key('nac', v::numeric())->setName('NAC'),
 				v::key('nas', v::numeric())->setName('NAS'),
-				v::key('action', v::numeric())->setName('Action'),
-			)),
+				v::key('action', v::numeric())->setName('Action')
+			))
 		]);
 
 		if ( $validation->failed() ){
@@ -162,8 +162,8 @@ class TACACLCtrl extends Controller
 			'ace' => v::arrayVal()->length(1, null)->each(v::arrayVal()->allOf(
 				v::key('nac', v::numeric())->setName('NAC'),
 				v::key('nas', v::numeric())->setName('NAS'),
-				v::key('action', v::numeric())->setName('Action'),
-			)),
+				v::key('action', v::numeric())->setName('Action')
+			))
 		]);
 
 		if ( $validation->failed() ){
