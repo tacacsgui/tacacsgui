@@ -67,7 +67,7 @@ class TACDeviceGrpsCtrl extends Controller
 
 		if ( ! empty( $allParams['enable'] ) )
 		{
-			$allParams['enable'] = $this->encryption( $allParams['enable'], $allParams['enable_flag'],  $allParams['enable_encrypt']);
+			$allParams['enable'] = $this->encryption( $allParams['enable'], $allParams['enable_flag'], 1);
 		}
 
 		$deviceGroup = TACDeviceGrps::create($allParams);
@@ -171,7 +171,7 @@ class TACDeviceGrpsCtrl extends Controller
 
 		if ( ! empty( $allParams['enable'] ) )
 		{
-			$allParams['enable'] = $this->encryption( $allParams['enable'], $allParams['enable_flag'],  $allParams['enable_encrypt']);
+			$allParams['enable'] = $this->encryption( $allParams['enable'], $allParams['enable_flag'], 1);
 		}
 
 		$id = $allParams['id'];

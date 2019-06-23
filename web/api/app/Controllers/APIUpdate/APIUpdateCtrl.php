@@ -308,6 +308,6 @@ class APIUpdateCtrl extends Controller
 	}
 	public static function gitPull()
 	{
-		return true;//shell_exec('git -C '.TAC_ROOT_PATH.'/ pull origin master 2>&1');
+		return shell_exec('git -C '.TAC_ROOT_PATH.'/ pull origin master 2>&1');
 	}
 } //END OF CLASS

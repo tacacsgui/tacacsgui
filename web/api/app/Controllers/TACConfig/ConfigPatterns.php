@@ -224,10 +224,13 @@ class ConfigPatterns
 			:
 			$sp->put().'key = "'.$host->key.'"');
 			///DEVICE ENABLE///
-			if ($host['enable']!='')array_push($outputDevices,
-			($html) ? $sp->put().self::$html_tags['param'][0] . "enable" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] .self::$crypto_flag[$host->enable_flag] . ' '. $host->enable . self::$html_tags['val'][1]
-			:
-			$sp->put().'enable = '.self::$crypto_flag[$host->enable_flag].' '.$host->enable);
+			if ($host['enable']!=''){
+        if ($host->enable_flag == 0) $host['enable'] = '"'.$host['enable'].'"';
+        array_push($outputDevices,
+  			($html) ? $sp->put().self::$html_tags['param'][0] . "enable" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] .self::$crypto_flag[$host->enable_flag] . ' '. $host->enable . self::$html_tags['val'][1]
+  			:
+  			$sp->put().'enable = '.self::$crypto_flag[$host->enable_flag].' '.$host->enable);
+      }
       ///DEVICE ACL///
 			if ($host->acl)array_push($outputDevices,
 			($html) ? $sp->put().self::$html_tags['param'][0] . "access acl" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . $host->acl . self::$html_tags['val'][1]
@@ -322,10 +325,13 @@ class ConfigPatterns
 			:
 			$sp->put().'key = "'.$group->key .'"');
 			///GROUP ENABLE///
-			if ($group->enable)array_push($outputDeviceGroups,
-			($html) ? $sp->put().self::$html_tags['param'][0] . "enable" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . self::$crypto_flag[$group->enable_flag] . ' ' . $group->enable. self::$html_tags['val'][1]
-			:
-			$sp->put().'enable = '.self::$crypto_flag[$group->enable_flag].' '.$group->enable);
+			if ($group->enable){
+        if ($group->enable_flag == 0) $group->enable = '"'.$group->enable.'"';
+        array_push($outputDeviceGroups,
+  			($html) ? $sp->put().self::$html_tags['param'][0] . "enable" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . self::$crypto_flag[$group->enable_flag] . ' ' . $group->enable. self::$html_tags['val'][1]
+  			:
+  			$sp->put().'enable = '.self::$crypto_flag[$group->enable_flag].' '.$group->enable);
+      }
       ///DEVICE ACL///
       if ($group->acl)array_push($outputDeviceGroups,
       ($html) ? $sp->put().self::$html_tags['param'][0] . "access acl" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . $group->acl . self::$html_tags['val'][1]
@@ -484,10 +490,13 @@ class ConfigPatterns
         }
       }
 			///USER GROUP ENABLE///
-			if ($group['enable'] != '')array_push($outputUserGroup,
-			($html) ? $sp->put().self::$html_tags['param'][0] . "enable" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . self::$crypto_flag[$group['enable_flag']] .' '. $group['enable']. self::$html_tags['val'][1]
-			:
-			$sp->put().'enable = '.self::$crypto_flag[$group['enable_flag']].' '.$group['enable']);
+			if ($group['enable'] != ''){
+        if ($group['enable_flag'] == 0) $group['enable'] = '"'.$group['enable'].'"';
+        array_push($outputUserGroup,
+  			($html) ? $sp->put().self::$html_tags['param'][0] . "enable" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . self::$crypto_flag[$group['enable_flag']] .' '. $group['enable']. self::$html_tags['val'][1]
+  			:
+  			$sp->put().'enable = '.self::$crypto_flag[$group['enable_flag']].' '.$group['enable']);
+      }
 			///USER GROUP MESSAGE///
 			if ($group['message']) {
         $outputUserGroup = array_merge( $outputUserGroup,  self::messagePrint($group['message'], 'message', $html, $sp->put()) );
@@ -666,7 +675,10 @@ class ConfigPatterns
       $enable = '';
       if ( !in_array($user['enable_flag'], [1, 0]) ) {
         $enable = 'login ' . self::$crypto_flag[$user['enable_flag']];
-      } else $enable = self::$crypto_flag[$user['enable_flag']].' '. $user['enable'];
+      } else {
+        if ($user['enable_flag'] == 0) $user['enable'] = '"'.$user['enable'].'"';
+        $enable = self::$crypto_flag[$user['enable_flag']].' '. $user['enable'];
+      }
       if ( $user['enable'] != '' OR !in_array($user['enable_flag'], [1, 0]) ) array_push($outputUsers,
       ($html) ? $sp->put().self::$html_tags['param'][0] . "enable" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . $enable . self::$html_tags['val'][1]
       :

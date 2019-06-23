@@ -246,7 +246,7 @@ class TACReportsCtrl extends Controller
 		array_unshift( $columns, 'id' );
 
 		$data['columns'] = $columns;
-		$queries = (empty($params['searchTerm'])) ? [] : $params['searchTerm'];
+		$queries = (empty($params['filterTerm'])) ? [] : $params['filterTerm'];
 		$size = $params['pageSize'];
 		$start = $params['pageSize'] * ($params['page'] - 1);
 		//Filter end
@@ -254,14 +254,82 @@ class TACReportsCtrl extends Controller
 		//Get temp data for Datatables with Fliter and some other parameters
 		$tempData = Accounting::select($columns)->
 		when( !empty($queries),
-			function($query) use ($queries)
-			{
-				$query->where('nas','LIKE', '%'.$queries.'%');
-				$query->orWhere('nac','LIKE', '%'.$queries.'%');
-				$query->orWhere('username','LIKE', '%'.$queries.'%');
-				$query->orWhere('date','LIKE', '%'.$queries.'%');
-				$query->orWhere('cmd','LIKE', '%'.$queries.'%');
-				return $query;
+		function($query) use ($queries)
+		{
+			for ($bliat=0; $bliat < count($queries); $bliat++) {
+				$plezSayNot = !!preg_match("/^!/i", $queries[$bliat]['value']);
+				$queries[$bliat]['value'] = preg_replace("/^!/i",'', $queries[$bliat]['value']);
+				$splitMePlz = array_map('trim', explode(',', $queries[$bliat]['value']));
+				switch ($queries[$bliat]['queryName']) {
+					case 'date':
+						for ($bliat_1=0; $bliat_1 < count($splitMePlz); $bliat_1++) {
+							if ( $bliat_1 == 0) {
+								if ($plezSayNot)
+									$query->whereNotBetween('date', array_map('trim', explode(' - ', $splitMePlz[$bliat_1])) );
+								else
+									$query->whereBetween('date', array_map('trim', explode(' - ', $splitMePlz[$bliat_1])) );
+								continue;
+							}
+							if ($plezSayNot)
+								$query->orWhereNotBetween('date', array_map('trim', explode(' - ', $splitMePlz[$bliat_1])) );
+							else
+								$query->orWhereBetween('date', array_map('trim', explode(' - ', $splitMePlz[$bliat_1])) );
+						}
+						break;
+
+					case 'nas':
+						if ($plezSayNot)
+							$query->whereNotIn('nas', $splitMePlz);
+						else
+							$query->whereIn('nas', $splitMePlz);
+						break;
+					case 'nac':
+						if ($plezSayNot)
+							$query->whereNotIn('nac', $splitMePlz);
+						else
+							$query->whereIn('nac', $splitMePlz);
+						break;
+					case 'username':
+						if ($plezSayNot)
+							$query->whereNotIn('username', $splitMePlz);
+						else
+							$query->whereIn('username', $splitMePlz);
+						break;
+					case 'action':
+						for ($bliat_2=0; $bliat_2 < count($splitMePlz); $bliat_2++) {
+							if ( $bliat_2 == 0) {
+								if ($plezSayNot)
+									$query->where('action','NOT LIKE', '%'.$splitMePlz[$bliat_2].'%');
+								else
+									$query->where('action','LIKE', '%'.$splitMePlz[$bliat_2].'%');
+								continue;
+							}
+							if ($plezSayNot)
+								$query->orWhere('action','NOT LIKE', '%'.$splitMePlz[$bliat_2].'%');
+							else
+								$query->orWhere('action','LIKE', '%'.$splitMePlz[$bliat_2].'%');
+						}
+						break;
+					case 'cmd':
+						for ($bliat_3=0; $bliat_3 < count($splitMePlz); $bliat_3++) {
+							if ( $bliat_3 == 0) {
+								if ($plezSayNot)
+									$query->where('cmd','NOT LIKE', '%'.$splitMePlz[$bliat_3].'%');
+								else
+									$query->where('cmd','LIKE', '%'.$splitMePlz[$bliat_3].'%');
+								continue;
+							}
+							if ($plezSayNot)
+								$query->orWhere('cmd','NOT LIKE', '%'.$splitMePlz[$bliat_3].'%');
+							else
+								$query->orWhere('cmd','LIKE', '%'.$splitMePlz[$bliat_3].'%');
+						}
+						break;
+
+				}
+			}
+
+			return $query;
 			})->
 		take($size)->
 		offset($start);
@@ -304,21 +372,80 @@ class TACReportsCtrl extends Controller
 		array_unshift( $columns, 'id' );
 
 		$data['columns'] = $columns;
-		$queries = (empty($params['searchTerm'])) ? [] : $params['searchTerm'];
+		$queries = (empty($params['filterTerm'])) ? [] : $params['filterTerm'];
 		$size = $params['pageSize'];
 		$start = $params['pageSize'] * ($params['page'] - 1);
 		//Filter end
 		$data['recordsTotal'] = Authentication::count();
+		$data['test23'] = array_map('trim', explode(' - ', $queries[0]['value']));
+		$splitMePlz = [];
+		$plezSayNot = false;
 		//Get temp data for Datatables with Fliter and some other parameters
 		$tempData = Authentication::select($columns)->
 		when( !empty($queries),
 			function($query) use ($queries)
 			{
-				$query->where('nas','LIKE', '%'.$queries.'%');
-				$query->orWhere('nac','LIKE', '%'.$queries.'%');
-				$query->orWhere('username','LIKE', '%'.$queries.'%');
-				$query->orWhere('date','LIKE', '%'.$queries.'%');
-				$query->orWhere('action','LIKE', '%'.$queries.'%');
+				// var_dump($queries); die;
+				for ($bliat=0; $bliat < count($queries); $bliat++) {
+					// if ($bliat > 0 ) { var_dump($queries[$bliat]); die;}
+					$plezSayNot = !!preg_match("/^!/i", $queries[$bliat]['value']);
+					$queries[$bliat]['value'] = preg_replace("/^!/i",'', $queries[$bliat]['value']);
+					$splitMePlz = array_map('trim', explode(',', $queries[$bliat]['value']));
+					switch ($queries[$bliat]['queryName']) {
+						case 'date':
+							for ($bliat_1=0; $bliat_1 < count($splitMePlz); $bliat_1++) {
+								if ( $bliat_1 == 0) {
+									if ($plezSayNot)
+										$query->whereNotBetween('date', array_map('trim', explode(' - ', $splitMePlz[$bliat_1])) );
+									else
+										$query->whereBetween('date', array_map('trim', explode(' - ', $splitMePlz[$bliat_1])) );
+									//continue;
+								} else {
+									if ($plezSayNot)
+										$query->orWhereNotBetween('date', array_map('trim', explode(' - ', $splitMePlz[$bliat_1])) );
+									else
+										$query->orWhereBetween('date', array_map('trim', explode(' - ', $splitMePlz[$bliat_1])) );
+								}
+							}
+							break;
+
+						case 'nas':
+							if ($plezSayNot)
+								$query->whereNotIn('nas', $splitMePlz);
+							else
+								$query->whereIn('nas', $splitMePlz);
+							break;
+						case 'nac':
+							if ($plezSayNot)
+								$query->whereNotIn('nac', $splitMePlz);
+							else
+								$query->whereIn('nac', $splitMePlz);
+							break;
+						case 'username':
+							if ($plezSayNot)
+								$query->whereNotIn('username', $splitMePlz);
+							else
+								$query->whereIn('username', $splitMePlz);
+							break;
+						case 'action':
+							for ($bliat_2=0; $bliat_2 < count($splitMePlz); $bliat_2++) {
+								if ( $bliat_2 == 0) {
+									if ($plezSayNot)
+										$query->where('action','NOT LIKE', '%'.$splitMePlz[$bliat_2].'%');
+									else
+										$query->where('action','LIKE', '%'.$splitMePlz[$bliat_2].'%');
+								} else {
+									if ($plezSayNot)
+										$query->orWhere('action','NOT LIKE', '%'.$splitMePlz[$bliat_2].'%');
+									else
+										$query->orWhere('action','LIKE', '%'.$splitMePlz[$bliat_2].'%');
+								}
+							}
+							break;
+
+					}
+				}
+
 				return $query;
 			})->
 		take($size)->
@@ -327,6 +454,8 @@ class TACReportsCtrl extends Controller
 
 		if (!empty($params['sortColumn']) and !empty($params['sortDirection']))
 				$tempData = $tempData->orderBy($params['sortColumn'],$params['sortDirection']);
+
+		$data['querySql'] = count($queries); //$tempData->toSql();
 
 		$data['data'] = $tempData->get()->toArray();
 
@@ -362,7 +491,7 @@ class TACReportsCtrl extends Controller
 		array_unshift( $columns, 'id' );
 
 		$data['columns'] = $columns;
-		$queries = (empty($params['searchTerm'])) ? [] : $params['searchTerm'];
+		$queries = (empty($params['filterTerm'])) ? [] : $params['filterTerm'];
 		$size = $params['pageSize'];
 		$start = $params['pageSize'] * ($params['page'] - 1);
 		//Filter end
@@ -370,15 +499,82 @@ class TACReportsCtrl extends Controller
 		//Get temp data for Datatables with Fliter and some other parameters
 		$tempData = Authorization::select($columns)->
 		when( !empty($queries),
-			function($query) use ($queries)
-			{
-				$query->where('nas','LIKE', '%'.$queries.'%');
-				$query->orWhere('nac','LIKE', '%'.$queries.'%');
-				$query->orWhere('username','LIKE', '%'.$queries.'%');
-				$query->orWhere('date','LIKE', '%'.$queries.'%');
-				$query->orWhere('action','LIKE', '%'.$queries.'%');
-				$query->orWhere('cmd','LIKE', '%'.$queries.'%');
-				return $query;
+		function($query) use ($queries)
+		{
+			for ($bliat=0; $bliat < count($queries); $bliat++) {
+				$plezSayNot = !!preg_match("/^!/i", $queries[$bliat]['value']);
+				$queries[$bliat]['value'] = preg_replace("/^!/i",'', $queries[$bliat]['value']);
+				$splitMePlz = array_map('trim', explode(',', $queries[$bliat]['value']));
+				switch ($queries[$bliat]['queryName']) {
+					case 'date':
+						for ($bliat_1=0; $bliat_1 < count($splitMePlz); $bliat_1++) {
+							if ( $bliat_1 == 0) {
+								if ($plezSayNot)
+									$query->whereNotBetween('date', array_map('trim', explode(' - ', $splitMePlz[$bliat_1])) );
+								else
+									$query->whereBetween('date', array_map('trim', explode(' - ', $splitMePlz[$bliat_1])) );
+								continue;
+							}
+							if ($plezSayNot)
+								$query->orWhereNotBetween('date', array_map('trim', explode(' - ', $splitMePlz[$bliat_1])) );
+							else
+								$query->orWhereBetween('date', array_map('trim', explode(' - ', $splitMePlz[$bliat_1])) );
+						}
+						break;
+
+					case 'nas':
+						if ($plezSayNot)
+							$query->whereNotIn('nas', $splitMePlz);
+						else
+							$query->whereIn('nas', $splitMePlz);
+						break;
+					case 'nac':
+						if ($plezSayNot)
+							$query->whereNotIn('nac', $splitMePlz);
+						else
+							$query->whereIn('nac', $splitMePlz);
+						break;
+					case 'username':
+						if ($plezSayNot)
+							$query->whereNotIn('username', $splitMePlz);
+						else
+							$query->whereIn('username', $splitMePlz);
+						break;
+					case 'action':
+						for ($bliat_2=0; $bliat_2 < count($splitMePlz); $bliat_2++) {
+							if ( $bliat_2 == 0) {
+								if ($plezSayNot)
+									$query->where('action','NOT LIKE', '%'.$splitMePlz[$bliat_2].'%');
+								else
+									$query->where('action','LIKE', '%'.$splitMePlz[$bliat_2].'%');
+								continue;
+							}
+							if ($plezSayNot)
+								$query->orWhere('action','NOT LIKE', '%'.$splitMePlz[$bliat_2].'%');
+							else
+								$query->orWhere('action','LIKE', '%'.$splitMePlz[$bliat_2].'%');
+						}
+						break;
+					case 'cmd':
+						for ($bliat_3=0; $bliat_3 < count($splitMePlz); $bliat_3++) {
+							if ( $bliat_3 == 0) {
+								if ($plezSayNot)
+									$query->where('cmd','NOT LIKE', '%'.$splitMePlz[$bliat_3].'%');
+								else
+									$query->where('cmd','LIKE', '%'.$splitMePlz[$bliat_3].'%');
+								continue;
+							}
+							if ($plezSayNot)
+								$query->orWhere('cmd','NOT LIKE', '%'.$splitMePlz[$bliat_3].'%');
+							else
+								$query->orWhere('cmd','LIKE', '%'.$splitMePlz[$bliat_3].'%');
+						}
+						break;
+
+				}
+			}
+
+			return $query;
 			})->
 		take($size)->
 		offset($start);

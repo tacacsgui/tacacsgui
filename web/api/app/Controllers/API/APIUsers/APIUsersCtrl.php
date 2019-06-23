@@ -242,15 +242,12 @@ class APIUsersCtrl extends Controller
 			return $res -> withStatus(403) -> write(json_encode($data));
 		}
 
-		$data['result']=APIUsers::where([
-			['id','=',$req->getParam('id')],
-			['username','=',$req->getParam('username')],
-		])->delete();
+		$data['result']=APIUsers::where('id',$req->getParam('id'))->delete();
 		$data['id']=$req->getParam('id');
-		$data['username
-		']=$req->getParam('username');
+		$data['name
+		']=$req->getParam('name');
 
-		$logEntry=array('action' => 'delete', 'obj_name' => $req->getParam('username'), 'obj_id' => $req->getParam('id'), 'section' => 'api users', 'message' => 405);
+		$logEntry=array('action' => 'delete', 'obj_name' => $req->getParam('name'), 'obj_id' => $req->getParam('id'), 'section' => 'api users', 'message' => 405);
 		$data['logging']=$this->APILoggingCtrl->makeLogEntry($logEntry);
 
 		$data['backup_status'] = $this->APIBackupCtrl->apicfgSet();
