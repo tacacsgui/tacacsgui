@@ -179,6 +179,8 @@ class TACServicesCtrl extends Controller
 		$data['service']->junos_cmd_ac = $sections['junos_cmd_ac'];
 		$data['service']->junos_cmd_dc = $sections['junos_cmd_dc'];
 
+		$data['service']->acl = $this->db::table('tac_acl')->select(['id','name as text'])->where('id', $data['service']->acl)->get();
+
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
 

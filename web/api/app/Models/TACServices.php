@@ -10,8 +10,7 @@ class TACServices extends Model
 
 	protected $fillable = [
 		'name',
-		'priv-lvl',
-		'default_cmd',
+		'acl',
 		'manual',
 		'manual_conf_only',
 		//Patterns List//

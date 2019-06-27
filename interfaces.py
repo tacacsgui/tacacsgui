@@ -23,6 +23,10 @@ parser.add_argument('-s', '--set', metavar='[interface_name]', nargs='+',
                     help='set interface settings, [interface name] [ip address] [mask]')
 parser.add_argument('-gw', '--gateway', metavar='[gateway]',
                     help='set gateway, only with --set')
+parser.add_argument('-gw6', '--gateway6', metavar='[gateway6]',
+                    help='set gateway6, only with --set')
+parser.add_argument('-ipv6', metavar='[ipv6]',
+                    help='set ipv6, only with --set')
 parser.add_argument('-nm', '--nameservers', metavar='[nameservers]', nargs='+',
                     help='set nameservers, space separated, only with --set command')
 parser.add_argument('--interactive', action='store_true',
@@ -44,7 +48,7 @@ if args.test:
         import datetime
         import time
         import subprocess
-        from ipaddress import IPv4Network, IPv4Address, IPv4Interface
+        from ipaddress import IPv4Network, IPv4Address, IPv4Interface, IPv6Network, IPv6Address, IPv6Interface
         import netifaces
     except Exception as e:
         print('Error: {}'.format(e))
@@ -57,7 +61,7 @@ import os
 import datetime
 import time
 import subprocess
-from ipaddress import IPv4Network, IPv4Address, IPv4Interface
+from ipaddress import IPv4Network, IPv4Address, IPv4Interface, IPv6Network, IPv6Address, IPv6Interface
 import netifaces
 #Variables
 netplan_file=''
@@ -74,6 +78,8 @@ for r, d, f in os.walk(netplan_dir):
                 if 'network' in data_loaded and 'ethernets' in data_loaded['network']:
                     if args.debug: debug(message='Well done! File found')
                     if args.debug: debug(message='List of interface: {}'.format( str(list(data_loaded['network']['ethernets'].keys())) ) )
+                    # if args.debug: debug(message='Config: {}'.format( data_loaded['network'] ) )
+                    # quit()
                     netplan_file=file
             except Exception as e:
                 if args.debug: debug(message="Incorrect file {}. Try next one. Error: {}".format( '/'.join((r, file)), e ) )
@@ -105,16 +111,36 @@ if args.info:
             print('Interface not configured', end='\n')
             quit()
         link = data_loaded['network']['ethernets'][args.info]
-        address=', '.join(link.get('addresses',[]))
+        addresses= link.get('addresses',[])
+        address = ''
+        address6 = ''
+        for addr in addresses:
+            try:
+                address = IPv4Interface(addr)
+                continue
+            except ValueError:
+                pass
+            try:
+                address6 = IPv6Interface(addr)
+                continue
+            except ValueError:
+                pass
         if link.get('dhcp4',False):
             if link['dhcp4'] == 'yes':
                 address = 'dhcp'
+        if link.get('dhcp6',False):
+            if link['dhcp6'] == 'yes':
+                address6 = 'dhcp'
         if not (address == '' and address == 'dhcp'):
             address = IPv4Interface(address).with_netmask
         print('ip address: {}\ndefaultgw: {}\nnameservers: {}'.format(
             address, link.get('gateway4',''),
             ' '.join( link.get('nameservers',{}).get('addresses','') )
         ), end='\n')
+        if not (address == '' and address == 'dhcp'):
+            address = IPv4Interface(address).with_netmask
+        print('ip address6: {}\ndefaultgw6: {}'.format(
+            address6, link.get('gateway6','') ), end='\n')
         quit()
     if args.debug: debug(message='Get data from netifaces')
     if not netifaces.ifaddresses(args.info).get(netifaces.AF_INET, False):
@@ -184,12 +210,21 @@ Network Interface Configuration
                 network_address=IPv4Network(address, strict=False)
                 gateway=''
                 if args.gateway: gateway=IPv4Address(args.gateway)
+
+                address6 = ''
+                if args.ipv6:
+                    address6 = args.ipv6
+                gateway6=''
+                if args.gateway6: gateway6=IPv6Address(args.gateway6)
+
                 nameservers = []
                 if args.nameservers: nameservers = [ str(IPv4Address(str(x))) for x in args.nameservers ]
             else: address=args.set[1]
+
         except ValueError as e:
             print('Error: {}'.format(e))
             quit()
+
     if not args.yes:
         print('########################')
         if address != 'dhcp':
@@ -211,11 +246,16 @@ Network Interface Configuration
         data_loaded['network']['ethernets'][args.set[0]]['dhcp4'] = 'no'
         data_loaded['network']['ethernets'][args.set[0]]['dhcp6'] = 'no'
         data_loaded['network']['ethernets'][args.set[0]]['addresses'] = [address]
+        if address6:
+            data_loaded['network']['ethernets'][args.set[0]]['addresses'].append(address6)
         if gateway:
             data_loaded['network']['ethernets'][args.set[0]]['gateway4'] = str(gateway)
+        if gateway6:
+            data_loaded['network']['ethernets'][args.set[0]]['gateway6'] = str(gateway6)
         if len(nameservers):
             data_loaded['network']['ethernets'][args.set[0]]['nameservers'] = {}
             data_loaded['network']['ethernets'][args.set[0]]['nameservers']['addresses'] = nameservers
+
     with open(netplan_dir+'/'+netplan_file, 'w') as stream:
         yaml.dump(data_loaded, stream)
     subprocess.call('netplan apply', shell=True)

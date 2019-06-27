@@ -24,7 +24,13 @@ class AuthorizationController extends Controller
 					$returnData['date']=$matches[0];
 					unset($logLineArray[$x]);
 					break;
-				case ($x==1 AND preg_match('/([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})/', $logLineArray[$x])):
+				//case ($x==1 AND preg_match('/([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})/', $logLineArray[$x])):
+				case ($x==1 AND
+							(
+								filter_var($logLineArray[$x], FILTER_VALIDATE_IP, ['flags' => FILTER_FLAG_IPV6]) !== false OR
+								filter_var($logLineArray[$x], FILTER_VALIDATE_IP, ['flags' => FILTER_FLAG_IPV4]) !== false
+							)
+						):
 					$returnData['NAS']=$logLineArray[$x];
 					unset($logLineArray[$x]);
 					break;

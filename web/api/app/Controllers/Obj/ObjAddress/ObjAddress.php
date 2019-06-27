@@ -121,7 +121,7 @@ class ObjAddress extends Controller
 		//CHECK ACCESS TO THAT FUNCTION//END//
 
 		$validation = $this->validator->validate($req, [
-			'name' => v::noWhitespace()->notEmpty()->theSameNameUsed( '\tgui\Models\ObjAddress_' ),
+			'name' => v::noWhitespace()->notEmpty()->theSameNameUsed( '\tgui\Models\ObjAddress_',  $req->getParam('id')),
 			'address' => v::notEmpty()->setName('Address'),
 			'type' => v::numeric()->oneOf( v::equals(0), v::equals(1), v::equals(2)),
 			'id' => v::numeric()->notEmpty(),
@@ -274,15 +274,16 @@ class ObjAddress extends Controller
 
 		///IF GROUPID SET///
 		if ($req->getParam('id') != null){
-			$data['results'] = ( is_array($id) ) ? ObjAddress_::select(['id','name AS text'])->whereIn('id', $req->getParam('id'))->get()
+			$result = ( is_array($id) ) ? ObjAddress_::select(['id','name AS text','type','address'])->whereIn('id', $req->getParam('id'))
 			:
-			ObjAddress_::select(['id','name AS text'])->where('id', $req->getParam('id'))->get();
+			ObjAddress_::select(['id','name AS text','type','address'])->where('id', $req->getParam('id'));
+			$data['results'] = $result->orderBy('name')->get();
 			// if (  !count($data['results']) ) $data['results'] = null;
 			return $res -> withStatus(200) -> write(json_encode($data));
 		}
 		//////////////////////
 		////LIST OF GROUPS////
-		$query = ObjAddress_::select(['id','name as text']);
+		$query = ObjAddress_::select(['id','name AS text','type','address'])->orderBy('name');
 		$data['total'] = $query->count();
 		$search = $req->getParam('search');
 

@@ -116,9 +116,11 @@ class TACUsersCtrl extends Controller
 		// $allParams['mavis_otp_digits'] = $otp_default->digits;
 
 		$groups = $allParams['group'];
+		$services = $allParams['service'];
 		$devices = $allParams['device_list'];
 		$devGroups = $allParams['device_group_list'];
 		unset($allParams['group']);
+		unset($allParams['service']);
 		unset($allParams['device_group_list']);
 		unset($allParams['device_list']);
 
@@ -130,6 +132,12 @@ class TACUsersCtrl extends Controller
 			$groups_bind[] = ['user_id' => $user->id, 'group_id' => $groups[$i], 'order' => $i];
 		}
 		$this->db::table('tac_bind_usrGrp')->insert($groups_bind);
+
+		$services_bind = [];
+		for ($i=0; $i < count($services); $i++) {
+			$services_bind[] = ['tac_usr_id' => $user->id, 'service_id' => $services[$i], 'order' => $i];
+		}
+		$this->db::table('tac_bind_service')->insert($services_bind);
 
 		$devices_bind = [];
 		foreach ($devices as $device) {
@@ -180,6 +188,9 @@ class TACUsersCtrl extends Controller
 		//CHECK ACCESS TO THAT FUNCTION//END//
 
 		$data['user']=TACUsers::select()->where('id',$req->getParam('id'))->first();
+		$data['user']['service'] = $this->db::table('tac_bind_service')->
+			leftJoin('tac_services as ts','ts.id','=','service_id')->
+			select(['ts.id as id', 'ts.name as text'])->where('tac_usr_id',$req->getParam('id'))->get();
 		$data['user']['group']=$this->db::table('tac_bind_usrGrp')->select('group_id')->where('user_id',$req->getParam('id'))->pluck('group_id')->toArray();
 		$data['user']['device_list']=$this->db::table('tac_bind_dev')->select('device_id')->where('user_id',$req->getParam('id'))->pluck('device_id')->toArray();
 		$data['user']['device_group_list']=$this->db::table('tac_bind_devGrp')->select('devGroup_id')->where('user_id',$req->getParam('id'))->pluck('devGroup_id')->toArray();
@@ -296,8 +307,10 @@ class TACUsersCtrl extends Controller
 		// unset($allParams['login_encrypt']);
 		// unset($allParams['pap_encrypt']);
 		$groups = $allParams['group'];
+		$services = $allParams['service'];
 		$devices = $allParams['device_list'];
 		$devGroups = $allParams['device_group_list'];
+		unset($allParams['service']);
 		unset($allParams['group']);
 		unset($allParams['device_group_list']);
 		unset($allParams['device_list']);
@@ -312,6 +325,13 @@ class TACUsersCtrl extends Controller
 		}
 		$this->db::table('tac_bind_usrGrp')->where('user_id', $id)->delete();
 		$this->db::table('tac_bind_usrGrp')->insert($groups_bind);
+
+		$services_bind = [];
+		for ($i=0; $i < count($services); $i++) {
+			$services_bind[] = ['tac_usr_id' => $id, 'service_id' => $services[$i], 'order' => $i];
+		}
+		$this->db::table('tac_bind_service')->where('tac_usr_id', $id)->delete();
+		$this->db::table('tac_bind_service')->insert($services_bind);
 
 		$devices_bind = [];
 		foreach ($devices as $device) {

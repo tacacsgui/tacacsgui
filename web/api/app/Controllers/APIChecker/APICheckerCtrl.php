@@ -800,6 +800,46 @@ class APICheckerCtrl extends Controller
 			$response['message'] = 'Table tac_devices rebuild';
 		}
 
+		////////////////////////////////////////
+		///Version 0.9.72 Multiple service
+		////////////////////////////////////////
+		if ( array_search('service', $this->db::connection('default')->getSchemaBuilder()->getColumnListing('tac_users')) )
+		{
+			$response['status'] = true;
+
+			$this->db::getSchemaBuilder()->disableForeignKeyConstraints();
+			$services = [];
+
+			$users = $this->db::table('tac_users')->select(['id','service'])->get();
+			foreach ($users as $user) {
+				if ( empty($user->service) ) continue;
+				$services[] = ['service_id' => $user->service, 'tac_usr_id' => $user->id, 'tac_grp_id' => null];
+			}
+
+			$grps = $this->db::table('tac_user_groups')->select(['id','service'])->get();
+			foreach ($grps as $grp) {
+				if ( empty($grp->service) ) continue;
+				$services[] = ['service_id' => $grp->service, 'tac_usr_id' => null, 'tac_grp_id' => $grp->id];
+			}
+			if (! empty($services) )
+				$this->db::table('tac_bind_service')->insert($services);
+
+			$this->db::getSchemaBuilder()->table('tac_users', function (Blueprint $table) {
+        $table->dropForeign('tac_users_service_foreign');
+				$table->dropIndex('tac_users_service_foreign');
+				$table->dropColumn('service');
+      });
+			$this->db::getSchemaBuilder()->table('tac_user_groups', function (Blueprint $table) {
+        $table->dropForeign('tac_user_groups_service_foreign');
+				$table->dropIndex('tac_user_groups_service_foreign');
+				$table->dropColumn('service');
+      });
+
+			$response['message'] = 'Table fix for service';
+			//$this->db::connection('logging')->getSchemaBuilder()->table('api_logging')->renameColumn('userName', 'username');
+		}
+		/////////////////////////////////////////
+
 		if ( array_search('userName', $this->db::connection('logging')->getSchemaBuilder()->getColumnListing('api_logging')) )
 		{
 			$response['status'] = true;

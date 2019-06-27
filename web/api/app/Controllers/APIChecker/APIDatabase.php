@@ -126,7 +126,7 @@ class APIDatabase
   		// 'manual_beginning' => ['text', '_'],
   		'manual' => ['text', '_'],
   		'acl' => ['foreign-null', ['references'=>'id', 'on'=>'tac_acl', 'onDelete'=>'restrict'] ],
-  		'service' => ['foreign-null', ['references'=>'id', 'on'=>'tac_services', 'onDelete'=>'restrict'] ],
+  		// 'service' => ['foreign-null', ['references'=>'id', 'on'=>'tac_services', 'onDelete'=>'restrict'] ],
       'device_list_action' => ['integer', '0'],
   		// 'device_list' => ['string',''],
   		// 'device_group_list' => ['string',''],
@@ -209,7 +209,7 @@ class APIDatabase
   		'valid_from' => ['timestamp', '_'],
   		'valid_until' => ['timestamp', '_'],
       'acl' => ['foreign-null', ['references'=>'id', 'on'=>'tac_acl', 'onDelete'=>'restrict'] ],
-      'service' => ['foreign-null', ['references'=>'id', 'on'=>'tac_services', 'onDelete'=>'restrict'] ],
+      // 'service' => ['foreign-null', ['references'=>'id', 'on'=>'tac_services', 'onDelete'=>'restrict'] ],
   		// 'ldap_groups' => ['text', '_'],
   		//'priv-lvl' => ['integer', -1], #deprecated
   		'default_service' => ['integer', '0'],
@@ -228,6 +228,7 @@ class APIDatabase
       'tac_grp_id' => ['foreign-null', ['references'=>'id', 'on'=>'tac_user_groups', 'onDelete'=>'restrict'] ],
       'api_grp_id' => ['foreign-null', ['references'=>'id', 'on'=>'api_user_groups', 'onDelete'=>'restrict'] ],
     ],
+
     'ldap_groups' => [
       'cn' => ['string',''],
       'dn' => ['string',''],
@@ -266,9 +267,20 @@ class APIDatabase
       'nac' => ['foreign-null', ['references'=>'id', 'on'=>'obj_addresses', 'onDelete'=>'restrict'] ],
   		'nas' => ['foreign-null', ['references'=>'id', 'on'=>'obj_addresses', 'onDelete'=>'restrict'] ],
   	],
+
+    'tac_bind_service' => [
+      'unsetId' => true,
+      'unsetTimestamp' => true,
+      'order' => ['integer', '0' ],
+      'service_id' => ['foreign', ['references'=>'id', 'on'=>'tac_services', 'onDelete'=>'restrict'] ],
+      'tac_usr_id' => ['foreign-null', ['references'=>'id', 'on'=>'tac_users', 'onDelete'=>'restrict'] ],
+      'tac_grp_id' => ['foreign-null', ['references'=>'id', 'on'=>'tac_user_groups', 'onDelete'=>'restrict'] ],
+    ],
+
   	'tac_services' =>
   	[
   		'name' => ['string',''],
+  		'acl' => ['foreign-null', ['references'=>'id', 'on'=>'tac_acl', 'onDelete'=>'cascade'] ],
   		// 'priv-lvl' => ['integer', -1],
   		// 'default_cmd' => ['integer', '0'],
       //Patterns List//

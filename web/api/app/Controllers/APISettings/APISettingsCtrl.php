@@ -480,8 +480,10 @@ public function getInterfaceSettings($req,$res)
 
   $data['interface'] = [
     'network_address' => '',
+    'network_address6' => '',
     'network_mask' => '',
     'network_gateway' => '',
+    'network_gateway6' => '',
     'network_dns1' => '',
     'network_dns2' => '',
     // 'network_more' => ''
@@ -494,8 +496,15 @@ public function getInterfaceSettings($req,$res)
         list($data['interface']['network_address'], $data['interface']['network_mask'] ) = explode('/', $parameters[1]);
         //$data['interface']['network_address'] = $parameters[1];
         break;
+      case 'ip address6':
+        $data['interface']['network_address6'] = $parameters[1];
+        //$data['interface']['network_address'] = $parameters[1];
+        break;
       case 'defaultgw':
         $data['interface']['network_gateway'] = $parameters[1];
+        break;
+      case 'defaultgw6':
+        $data['interface']['network_gateway6'] = $parameters[1];
         break;
       case 'nameservers':
         list($data['interface']['network_dns1'], $data['interface']['network_dns2']) = explode(' ', $parameters[1]);
@@ -542,10 +551,17 @@ public function postInterfaceSettings($req,$res)
 
   $validation = $this->validator->validate($req, [
     'network_address' => v::when( v::alwaysValid(), v::ip()->notEmpty()->setName('IP Address') ),
+    'network_address6' => v::when( v::alwaysValid(), v::oneOf(v::ip('*', FILTER_FLAG_IPV6), v::equals(''))->setName('IP Address') ),
+    'network_prefix6' => v::when( v::alwaysValid(), v::numeric()->between(1, 128)->setName('Prefix v6') ),
     'network_mask' => v::when( v::alwaysValid(), v::ip()->notEmpty()->setName('Mask') ),
     'network_gateway' => v::when( v::oneOf(v::nullType(), v::equals('')) , v::alwaysValid(), v::ip()->setName('Gateway')),
-    'network_dns1' => v::when( v::oneOf(v::nullType(), v::equals('')) , v::alwaysValid(), v::ip()->setName('Primary DNS')),
-    'network_dns2' => v::when( v::oneOf(v::nullType(), v::equals('')) , v::alwaysValid(), v::ip()->setName('Secondary DNS')),
+    'network_gateway6' => v::when( v::oneOf(v::nullType(), v::equals('')) , v::alwaysValid(), v::ip('*', FILTER_FLAG_IPV6)->setName('Gateway6')),
+    'network_dns1' => v::when( v::oneOf(v::nullType(), v::equals('')) ,
+        v::alwaysValid(),
+        v::oneOf(v::ip(), v::ip('*', FILTER_FLAG_IPV6))->setName('Primary DNS')),
+    'network_dns2' => v::when( v::oneOf(v::nullType(), v::equals('')) ,
+        v::alwaysValid(),
+        v::oneOf(v::ip(), v::ip('*', FILTER_FLAG_IPV6))->setName('Secondary DNS')),
   ]);
 
   if ($validation->failed()){
@@ -556,39 +572,37 @@ public function postInterfaceSettings($req,$res)
 
   $allParams = $req->getParams();
 
-  // $interface = preg_replace( '/[^a-zA-Z0-9]/', '', $allParams['network_interface'] );
-  //
-  // if ( !empty($interface) ){
-  //
-  //   $cfgFile = fopen(TAC_ROOT_PATH ."/temp/".$interface.".cfg", "w");
-  //
-  //   $txt = "auto ".$interface."\n".
-  //           "iface ".$interface." inet static\n";
-  //   $txt .= "address " . $allParams['network_address'] . "\n";
-  //   $txt .= "netmask " . $allParams['network_mask'] . "\n";
-  //   $txt .= ( !empty($allParams['network_gateway']) ) ? "gateway " . $allParams['network_gateway'] . "\n" : '';
-  //   $txt .= ( !empty($allParams['network_dns1']) ) ? "dns-nameservers " . $allParams['network_dns1'] : '';
-  //   $txt .= ( !empty($allParams['network_dns2']) ) ? " " . $allParams['network_dns2'] . "\n" : "\n";
-  //   $txt .= ( !empty($allParams['network_more']) ) ? $allParams['network_more'] . "\n" : '';
-  //
-  //   fwrite($cfgFile, $txt);
-  //   fclose($cfgFile);
-  // }
+  // sudo /opt/tacacsgui/main.sh  'network' 'save' 'ens160' '10.6.20.101' '255.255.255.0' '--gateway' '10.6.20.1' '-nm' '8.8.8.8' '-y'
+
   $attrs = [
     'network','save',
     $allParams['network_interface'],
     $allParams['network_address'],
     $allParams['network_mask']
   ];
+
   if ( !empty($allParams['network_gateway']) ) {
     $attrs[] = '--gateway';
     $attrs[] = $allParams['network_gateway'];
   }
+
   if ( !empty($allParams['network_dns1']) ) {
+    $content = 'nameserver '. $allParams['network_dns1']."\n";
     $attrs[] = '-nm';
     $attrs[] = $allParams['network_dns1'];
     if ( !empty($allParams['network_dns2']) ) {
       $attrs[] = $allParams['network_dns2'];
+      $content .= "nameserver ". $allParams['network_dns2']."\n";
+    }
+    file_put_contents('/opt/tgui_data/lwresd.config', $content);
+  }
+
+  if ( !empty($allParams['network_address6']) ) {
+    $attrs[] = '-ipv6';
+    $attrs[] = $allParams['network_address6'].'/'.$allParams['network_prefix6'];
+    if ( !empty($allParams['network_gateway6']) ) {
+      $attrs[] = '--gateway6';
+      $attrs[] = $allParams['network_gateway6'];
     }
   }
 

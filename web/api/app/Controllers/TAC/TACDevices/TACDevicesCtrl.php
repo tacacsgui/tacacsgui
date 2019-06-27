@@ -160,6 +160,8 @@ class TACDevicesCtrl extends Controller
 		$data['device']=TACDevices::select()->
 			where('id',$req->getParam('id'))->
 			first();
+		$data['device']->address = $this->db->table('obj_addresses')->
+			select(['name as text','id','type','address'])->where('id',$data['device']->address)->get();
 
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}

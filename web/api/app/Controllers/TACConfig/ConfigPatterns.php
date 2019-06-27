@@ -192,7 +192,7 @@ class ConfigPatterns
 
     $outputDevices = [];
 
-    $query = TACDevices::select(['tac_devices.*', 'addr.address as address',
+    $query = TACDevices::select(['tac_devices.*', 'addr.address as address', 'addr.type as addr_type',
         'a.name as acl', 'ug.name as ugroup', 'dg.name as group'])->
       leftJoin('obj_addresses as addr', 'addr.id', '=', 'tac_devices.address')->
       leftJoin('tac_device_groups as dg', 'dg.id', '=', 'tac_devices.group')->
@@ -209,15 +209,17 @@ class ConfigPatterns
 			if ($host['disabled'] AND $id == 0) continue;
 
 			///DEVICE NAME///
+      $hostname = ($host->addr_type == 2) ? $host->address : $host->name;
 			array_push($outputDevices,
-			($html) ? $sp->put().self::$html_tags['attr'][0] . "host" . self::$html_tags['attr'][1] . ' = ' . self::$html_tags['object'][0] .$host->name. self::$html_tags['object'][1] . ' {'
+			($html) ? $sp->put().self::$html_tags['attr'][0] . "host" . self::$html_tags['attr'][1] . ' = ' . self::$html_tags['object'][0] .$hostname. self::$html_tags['object'][1] . ' {'
 			:
-			$sp->put().'host = '.$host->name.' {');
+			$sp->put().'host = '.$hostname.' {');
 			///DEVICE IP ADDRESS///
-			array_push($outputDevices,
-			($html) ? $sp->put('a').self::$html_tags['param'][0] . "address" . self::$html_tags['param'][1] . ' = "' . self::$html_tags['val'][0] .$host->address. self::$html_tags['val'][1].'"'
-			:
-			$sp->put('a').'address = "'.$host->address.'"');
+      if ($host->addr_type != 2)
+  			array_push($outputDevices,
+  			($html) ? $sp->put('a').self::$html_tags['param'][0] . "address" . self::$html_tags['param'][1] . ' = "' . self::$html_tags['val'][0] .$host->address. self::$html_tags['val'][1].'"'
+  			:
+  			$sp->put('a').'address = "'.$host->address.'"');
 			///DEVICE KEY///
 			if ($host['key']!='')array_push($outputDevices,
 			($html) ? $sp->put().self::$html_tags['param'][0] . "key" . self::$html_tags['param'][1] . ' = "' . self::$html_tags['val'][0] .$host->key. self::$html_tags['val'][1].'"'
@@ -576,16 +578,11 @@ class ConfigPatterns
 			:
 			$sp->put().'default service = '. $default_service);
 			///USER GROUP SERVICE SHELL///
-			if ( $group['service'] != 0 ) {
-
-        $outputUserGroup = array_merge( $outputUserGroup,  self::tacService($html, $group['service'], true) );
-
-			} else {
-        array_push($outputUserGroup,
-				($html) ? $sp->put().self::$html_tags['comment'][0] . "### Service no set ###" . self::$html_tags['comment'][1]
-				:
-				$sp->put().'### Service no set ###');
-			}
+      $services = TACUserGrps::from('tac_user_groups as tug')->leftJoin('tac_bind_service as ts','ts.tac_grp_id','=','tug.id')->
+        where('tug.id',$group['id'])->select('ts.service_id as serv_id')->get();
+      for ($i=0; $i < count($services); $i++) {
+        $outputUserGroup = array_merge( $outputUserGroup,  self::tacService($html, $services[$i]->serv_id, true) );
+      }
 
 			///USER GROUP MANUAL CONFIGURATION///
       $outputUserGroup = array_merge( $outputUserGroup,  self::manualConfigPrint($group['manual'], $html) );
@@ -766,26 +763,11 @@ class ConfigPatterns
       }
 
 			///USER SERVICE SHELL///
-			if ($user['service'] == 0 AND  $user['group'] == 0) {
-
-        array_push($outputUsers,
-				($html) ? $sp->put().self::$html_tags['comment'][0] . "### Service no set ###" . self::$html_tags['comment'][1]
-				:
-				$sp->put().'### Service no set ###');
-
-			}
-
-			if ($user['service'] != 0) {
-
-				$outputUsers = array_merge( $outputUsers,  self::tacService($html, $user['service'], true) );
-
-			}
-			elseif($user['group'] != 0){
-				array_push($outputUsers,
-				($html) ? $sp->put().self::$html_tags['comment'][0] . "### GET SERVICES FROM GROUP" . self::$html_tags['comment'][1]
-				:
-				$sp->put().'### GET SERVICES FROM GROUP');
-			}
+      $services = TacUsers::from('tac_users as tu')->leftJoin('tac_bind_service as ts','ts.tac_usr_id','=','tu.id')->
+        where('tu.id',$user['id'])->select('ts.service_id as serv_id')->get();
+      for ($i=0; $i < count($services); $i++) {
+        $outputUsers = array_merge( $outputUsers,  self::tacService($html, $services[$i]->serv_id, true) );
+      }
 
       ///USER MANUAL CONFIGURATION///
       $outputUsers = array_merge( $outputUsers,  self::manualConfigPrint($user['manual'], $html) );
@@ -861,6 +843,7 @@ class ConfigPatterns
     if ( $id == 0 ) return [];
     $sp = new spacer(1);
     $service = TACServices::select()->where('id', $id)->first()->toArray();
+    $acl = TACACL::select('name')->where('id',$service['acl'])->first();
 
 			///EMPTY ARRAY///
 			$outputService = array();
@@ -879,10 +862,18 @@ class ConfigPatterns
           leftJoin('bind_service_cmd as bsc', 'bsc.service_id','=', 'id')->
           select('bsc.cmd_id')->where('id', $id)->where('bsc.section','cisco_rs_cmd')->pluck('bsc.cmd_id')->toArray();
 
-          array_push($outputService,
-    			($html) ? $sp->put().self::$html_tags['attr'][0] . "service" . self::$html_tags['attr'][1] . ' = ' . self::$html_tags['object'][0]. 'shell' . self::$html_tags['object'][1] . ' {'
-    			:
-    			$sp->put().'service = shell {');
+          if ( empty($service['acl']) )
+            array_push($outputService,
+      			($html) ? $sp->put().self::$html_tags['attr'][0] . "service" . self::$html_tags['attr'][1] . ' = ' . self::$html_tags['object'][0]. 'shell' . self::$html_tags['object'][1] . ' {'
+      			:
+      			$sp->put().'service = shell {');
+          else
+            array_push($outputService,
+      			($html) ? $sp->put().self::$html_tags['attr'][0] . "service" . self::$html_tags['attr'][1] .
+              ' acl '.self::$html_tags['object'][0].$acl->name.self::$html_tags['object'][1].' = ' .
+              self::$html_tags['object'][0]. 'shell' . self::$html_tags['object'][1] . ' {'
+      			:
+      			$sp->put().'service acl '.$acl->name.' = shell {');
 
           $autoCmd = explode( ';;', $service['cisco_rs_autocmd'] );
           $sp->put('a');
@@ -959,10 +950,18 @@ class ConfigPatterns
           leftJoin('bind_service_cmd as bsc', 'bsc.service_id','=', 'id')->
           select('bsc.cmd_id')->where('id', $id)->where('bsc.section','h3c_cmd')->pluck('bsc.cmd_id')->toArray();
 
-          array_push($outputService,
-    			($html) ? $sp->put().self::$html_tags['attr'][0] . "service" . self::$html_tags['attr'][1] . ' = ' . self::$html_tags['object'][0]. 'shell' . self::$html_tags['object'][1] . ' {'
-    			:
-    			$sp->put().'service = shell {');
+          if ( empty($service['acl']) )
+            array_push($outputService,
+      			($html) ? $sp->put().self::$html_tags['attr'][0] . "service" . self::$html_tags['attr'][1] . ' = ' . self::$html_tags['object'][0]. 'shell' . self::$html_tags['object'][1] . ' {'
+      			:
+      			$sp->put().'service = shell {');
+          else
+            array_push($outputService,
+      			($html) ? $sp->put().self::$html_tags['attr'][0] . "service" . self::$html_tags['attr'][1] .
+              ' acl '.self::$html_tags['object'][0].$acl->name.self::$html_tags['object'][1].' = ' .
+              self::$html_tags['object'][0]. 'shell' . self::$html_tags['object'][1] . ' {'
+      			:
+      			$sp->put().'service acl '.$acl->name.' = shell {');
 
           if ( $service['h3c_privlvl'] != -1 ) array_push($outputService,
     			($html) ? $sp->put('a').self::$html_tags['param'][0] . "set priv-lvl" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . $service['h3c_privlvl'] . self::$html_tags['val'][1]
@@ -1015,10 +1014,18 @@ class ConfigPatterns
           leftJoin('bind_service_cmd as bsc', 'bsc.service_id','=', 'id')->
           select('bsc.cmd_id')->where('id', $id)->where('bsc.section','junos_cmd_dc')->pluck('bsc.cmd_id')->toArray();
 
-          array_push($outputService,
-          ($html) ? $sp->put().self::$html_tags['attr'][0] . "service" . self::$html_tags['attr'][1] . ' = ' . self::$html_tags['object'][0]. 'junos-exec' . self::$html_tags['object'][1] . ' {'
-          :
-          $sp->put().'service = junos-exec {');
+          if ( empty($service['acl']) )
+            array_push($outputService,
+      			($html) ? $sp->put().self::$html_tags['attr'][0] . "service" . self::$html_tags['attr'][1] . ' = ' . self::$html_tags['object'][0]. 'junos-exec' . self::$html_tags['object'][1] . ' {'
+      			:
+      			$sp->put().'service = junos-exec {');
+          else
+            array_push($outputService,
+      			($html) ? $sp->put().self::$html_tags['attr'][0] . "service" . self::$html_tags['attr'][1] .
+              ' acl '.self::$html_tags['object'][0].$acl->name.self::$html_tags['object'][1].' = ' .
+              self::$html_tags['object'][0]. 'junos-exec' . self::$html_tags['object'][1] . ' {'
+      			:
+      			$sp->put().'service acl '.$acl->name.' = junos-exec {');
 
           $sp->put('a');
 
@@ -1072,10 +1079,20 @@ class ConfigPatterns
         ///Cisco WLC///START///
         if ( $service['cisco_wlc_enable'] ) {
           //start//
-          array_push($outputService,
-    			($html) ? $sp->put('a').self::$html_tags['attr'][0] . "service " . self::$html_tags['attr'][1] . ' = ' . self::$html_tags['object'][0]. 'ciscowlc' . self::$html_tags['object'][1] . ' {'
-    			:
-    			$sp->put().'service = ciscowlc {');
+
+          if ( empty($service['acl']) )
+            array_push($outputService,
+      			($html) ? $sp->put().self::$html_tags['attr'][0] . "service" . self::$html_tags['attr'][1] . ' = ' . self::$html_tags['object'][0]. 'ciscowlc' . self::$html_tags['object'][1] . ' {'
+      			:
+      			$sp->put().'service = ciscowlc {');
+          else
+            array_push($outputService,
+      			($html) ? $sp->put().self::$html_tags['attr'][0] . "service" . self::$html_tags['attr'][1] .
+              ' acl '.self::$html_tags['object'][0].$acl->name.self::$html_tags['object'][1].' = ' .
+              self::$html_tags['object'][0]. 'ciscowlc' . self::$html_tags['object'][1] . ' {'
+      			:
+      			$sp->put().'service acl '.$acl->name.' = ciscowlc {');
+
           $sp->put('a');
           $roles = explode( ';;', $service['cisco_wlc_roles'] );
 
@@ -1100,10 +1117,20 @@ class ConfigPatterns
         ///FortiOS///START///
         if ( $service['fortios_enable'] ) {
           //start//
-          array_push($outputService,
-    			($html) ? $sp->put().self::$html_tags['attr'][0] . "service " . self::$html_tags['attr'][1] . ' = ' . self::$html_tags['object'][0]. 'fortigate' . self::$html_tags['object'][1] . ' {'
-    			:
-    			$sp->put().'service = fortigate {');
+
+          if ( empty($service['acl']) )
+            array_push($outputService,
+      			($html) ? $sp->put().self::$html_tags['attr'][0] . "service" . self::$html_tags['attr'][1] . ' = ' . self::$html_tags['object'][0]. 'fortigate' . self::$html_tags['object'][1] . ' {'
+      			:
+      			$sp->put().'service = fortigate {');
+          else
+            array_push($outputService,
+      			($html) ? $sp->put().self::$html_tags['attr'][0] . "service" . self::$html_tags['attr'][1] .
+              ' acl '.self::$html_tags['object'][0].$acl->name.self::$html_tags['object'][1].' = ' .
+              self::$html_tags['object'][0]. 'fortigate' . self::$html_tags['object'][1] . ' {'
+      			:
+      			$sp->put().'service acl '.$acl->name.' = fortigate {');
+
 
           if (!empty($service['fortios_admin_prof'])) array_push($outputService,
     			($html) ? $sp->put('a').self::$html_tags['param'][0] . "optional admin_prof" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . $service['fortios_admin_prof'] . self::$html_tags['val'][1]
@@ -1122,10 +1149,19 @@ class ConfigPatterns
         ///PaloALto///START///
         if ( $service['paloalto_enable'] ) {
           //start//
-          array_push($outputService,
-    			($html) ? $sp->put().self::$html_tags['attr'][0] . "service" . self::$html_tags['attr'][1] . ' = ' . self::$html_tags['object'][0]. 'PaloAlto' . self::$html_tags['object'][1] . ' {'
-    			:
-    			$sp->put().'service = PaloAlto {');
+
+          if ( empty($service['acl']) )
+            array_push($outputService,
+      			($html) ? $sp->put().self::$html_tags['attr'][0] . "service" . self::$html_tags['attr'][1] . ' = ' . self::$html_tags['object'][0]. 'PaloAlto' . self::$html_tags['object'][1] . ' {'
+      			:
+      			$sp->put().'service = PaloAlto {');
+          else
+            array_push($outputService,
+      			($html) ? $sp->put().self::$html_tags['attr'][0] . "service" . self::$html_tags['attr'][1] .
+              ' acl '.self::$html_tags['object'][0].$acl->name.self::$html_tags['object'][1].' = ' .
+              self::$html_tags['object'][0]. 'PaloAlto' . self::$html_tags['object'][1] . ' {'
+      			:
+      			$sp->put().'service acl '.$acl->name.' = PaloAlto {');
 
           array_push($outputService,
     			($html) ? $sp->put('a').self::$html_tags['object'][0] . "set protocol = firewall" . self::$html_tags['object'][1] . self::$html_tags['comment'][0] . " #default settings" . self::$html_tags['comment'][1]
@@ -1169,10 +1205,20 @@ class ConfigPatterns
         ///Silver Peak///START///
         if ( $service['silverpeak_enable'] ) {
           //start//
-          array_push($outputService,
-    			($html) ? $sp->put().self::$html_tags['attr'][0] . "service " . self::$html_tags['attr'][1] . ' = ' . self::$html_tags['object'][0]. 'silverpeak' . self::$html_tags['object'][1] . ' {'
-    			:
-    			$sp->put().'service = silverpeak {');
+
+          if ( empty($service['acl']) )
+            array_push($outputService,
+      			($html) ? $sp->put().self::$html_tags['attr'][0] . "service" . self::$html_tags['attr'][1] . ' = ' . self::$html_tags['object'][0]. 'silverpeak' . self::$html_tags['object'][1] . ' {'
+      			:
+      			$sp->put().'service = silverpeak {');
+          else
+            array_push($outputService,
+      			($html) ? $sp->put().self::$html_tags['attr'][0] . "service" . self::$html_tags['attr'][1] .
+              ' acl '.self::$html_tags['object'][0].$acl->name.self::$html_tags['object'][1].' = ' .
+              self::$html_tags['object'][0]. 'silverpeak' . self::$html_tags['object'][1] . ' {'
+      			:
+      			$sp->put().'service acl '.$acl->name.' = silverpeak {');
+
           if ( @$service['silverpeak_role'] == 'admin') {
             array_push($outputService,
       			($html) ? $sp->put('a').self::$html_tags['param'][0] . "set priv-lvl" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . '7' . self::$html_tags['val'][1]

@@ -104,14 +104,12 @@ class ConfDevices extends Controller
 			return $res -> withStatus(200) -> write(json_encode($data));
 		}
 
-		$data['device'] = Conf_Devices::leftJoin('obj_addresses as oa','oa.id','=','confM_devices.address')->
-		leftJoin('confM_credentials as cc','cc.id','=','confM_devices.credential')->
-		select(['confM_devices.*', 'oa.name as addr_name', 'cc.name as credo_name'])->
+		$data['device'] = Conf_Devices::leftJoin('confM_credentials as cc','cc.id','=','confM_devices.credential')->
+		select(['confM_devices.*', 'cc.name as credo_name'])->
 		where('confM_devices.id', $req->getParam('id'))->first();
 
-		$data['device']['address'] = (empty($data['device']['addr_name'])) ?
-			[] : [[ 'id' => $data['device']['address'], 'text' => $data['device']['addr_name']]];
-		unset($data['device']['addr_name']);
+		$data['device']['address'] = $this->db->table('obj_addresses')->
+			select(['name as text','id','type','address'])->where('id',$data['device']->address)->get();
 		$data['device']['credential'] = (empty($data['device']['credo_name'])) ?
 			[] : [[ 'id' => $data['device']['credential'], 'text' => $data['device']['credo_name']]];
 		unset($data['device']['credo_name']);

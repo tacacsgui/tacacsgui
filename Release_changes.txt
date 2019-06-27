@@ -1,4 +1,12 @@
 ##############################
+Version_0.9.72 20190627
+	* Hello IPv6 Support
+	* Now! Services can depend on ACL
+	* Now! Set multiple services for users or user groups
+	* New fast filter for side-bar items
+	* Address object preview on hover
+	* Some bugs fixed
+##############################
 Version_0.9.71 20190623
 	* Powerful filtering of AAA logs
 	* Some Bugs Fixed
