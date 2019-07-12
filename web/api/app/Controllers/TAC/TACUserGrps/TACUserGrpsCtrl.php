@@ -152,14 +152,25 @@ class TACUserGrpsCtrl extends Controller
 		//CHECK ACCESS TO THAT FUNCTION//END//
 
 		$data['group']=TACUserGrps::select()->where('id',$req->getParam('id'))->first();
+		$data['group']->acl = $this->db->table('tac_acl')->
+			select(['name as text','id'])->where('id',$data['group']->acl)->get();
+
 		$data['group']['service'] = $this->db::table('tac_bind_service')->
 			leftJoin('tac_services as ts','ts.id','=','service_id')->
 			select(['ts.id as id', 'ts.name as text'])->where('tac_grp_id',$req->getParam('id'))->get();
-		$data['group']['ldap_groups']=$this->db::table('ldap_bind')->select('ldap_id')->where('tac_grp_id',$req->getParam('id'))->pluck('ldap_id')->toArray();
-		$data['group']['device_list']=$this->db::table('tac_bind_dev')->select('device_id')->where('group_id',$req->getParam('id'))->pluck('device_id')->toArray();
-		$data['group']['device_group_list']=$this->db::table('tac_bind_devGrp')->select('devGroup_id')->where('group_id',$req->getParam('id'))->pluck('devGroup_id')->toArray();
 
-		//$data['ldap_groups'] = explode(';;', $data['ldap_groups']);
+		$data['group']['ldap_groups']=$this->db::table('ldap_bind')->
+			leftJoin('ldap_groups as ld','ld.id','=','ldap_id')->
+			select(['ld.cn as text', 'ld.id as id'])->where('tac_grp_id',$req->getParam('id'))->get();
+		// $data['group']['ldap_groups']=$this->db::table('ldap_bind')->select('ldap_id')->where('tac_grp_id',$req->getParam('id'))->pluck('ldap_id')->toArray();
+
+		$data['group']['device_list']=$this->db::table('tac_bind_dev')->
+			leftJoin('tac_devices as td','td.id','=','device_id')->
+			select(['td.name as text', 'td.id as id'])->where('group_id',$req->getParam('id'))->get();
+
+		$data['group']['device_group_list']=$this->db::table('tac_bind_devGrp')->
+			leftJoin('tac_device_groups as tdg','tdg.id','=','devGroup_id')->
+			select(['tdg.name as text', 'tdg.id as id'])->where('group_id',$req->getParam('id'))->get();
 
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
@@ -207,7 +218,7 @@ class TACUserGrpsCtrl extends Controller
 					)
 				)
 			),
-			'enable' => v::when( v::nullType() , v::alwaysValid(), v::noWhitespace()->notContainChars()->
+			'enable' => v::when( v::oneOf( v::nullType(), v::equals('') ), v::alwaysValid(), v::noWhitespace()->notContainChars()->
 				length($policy['tac_pw_length'], 64)->
 				notEmpty()->
 				passwdPolicyUppercase($policy['tac_pw_uppercase'])->

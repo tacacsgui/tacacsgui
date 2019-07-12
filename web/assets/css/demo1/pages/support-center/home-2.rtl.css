@@ -1,0 +1,149 @@
+.kt-sc-2 {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  position: relative; }
+  .kt-sc-2 .kt-sc__bg {
+    position: absolute;
+    top: 4rem;
+    right: 4rem;
+    left: 4rem;
+    bottom: 4rem;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-pack: end;
+    -ms-flex-pack: end;
+    justify-content: flex-end;
+    -webkit-box-align: end;
+    -ms-flex-align: end;
+    align-items: flex-end;
+    z-index: 0; }
+    .kt-sc-2 .kt-sc__bg .kt-svg-icon {
+      height: 100%;
+      width: auto; }
+    .kt-sc-2 .kt-sc__bg--layer {
+      top: 0;
+      right: 0;
+      left: 0;
+      bottom: 0; }
+      .kt-sc-2 .kt-sc__bg--layer .kt-svg-icon {
+        height: auto;
+        width: 100%;
+        fill: #f7f8fa; }
+  .kt-sc-2 .kt-sc-bg-2 .kt-svg-icon {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 100%;
+    height: auto;
+    z-index: 1; }
+  .kt-sc-2 .kt-sc__top {
+    min-height: 385px;
+    position: relative;
+    z-index: 1; }
+    .kt-sc-2 .kt-sc__top .kt-sc__content {
+      margin-left: 50%;
+      display: -webkit-box;
+      display: -ms-flexbox;
+      display: flex;
+      -webkit-box-orient: vertical;
+      -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+      flex-direction: column;
+      -webkit-box-pack: center;
+      -ms-flex-pack: center;
+      justify-content: center;
+      min-height: 385px;
+      padding: 0 3rem; }
+      .kt-sc-2 .kt-sc__top .kt-sc__content .kt-sc__title {
+        color: #48465b;
+        font-size: 2rem;
+        font-weight: 600;
+        margin-bottom: 2.5rem; }
+      .kt-sc-2 .kt-sc__top .kt-sc__content .kt-sc__form .input-group {
+        width: 450px;
+        -webkit-box-shadow: 0px 0px 27px 0px rgba(160, 160, 191, 0.2);
+        box-shadow: 0px 0px 27px 0px rgba(160, 160, 191, 0.2); }
+        .kt-sc-2 .kt-sc__top .kt-sc__content .kt-sc__form .input-group .input-group-text {
+          border-top-left-radius: 0;
+          border-bottom-left-radius: 0;
+          border: none;
+          padding: 0.65rem 2rem;
+          background-color: #ffffff; }
+        .kt-sc-2 .kt-sc__top .kt-sc__content .kt-sc__form .input-group .form-control {
+          border: none;
+          padding: 2.5rem 0;
+          font-weight: 400;
+          font-size: 1.1rem; }
+  .kt-sc-2 .kt-sc__bottom {
+    padding: 25px 25px 0;
+    position: relative;
+    z-index: 1; }
+    .kt-sc-2 .kt-sc__bottom .nav-tabs {
+      margin-bottom: -25px; }
+      .kt-sc-2 .kt-sc__bottom .nav-tabs.nav-tabs-line {
+        border-bottom: 0;
+        padding: 0 3rem; }
+      .kt-sc-2 .kt-sc__bottom .nav-tabs .nav-item {
+        margin-left: 50px; }
+        .kt-sc-2 .kt-sc__bottom .nav-tabs .nav-item .nav-link, .kt-sc-2 .kt-sc__bottom .nav-tabs .nav-item a.nav-link {
+          font-size: 1.2rem;
+          padding: 0 0 1.5rem;
+          font-weight: 500;
+          color: #48465b;
+          margin-bottom: 25px;
+          border-bottom: 2px solid transparent; }
+          .kt-sc-2 .kt-sc__bottom .nav-tabs .nav-item .nav-link:hover, .kt-sc-2 .kt-sc__bottom .nav-tabs .nav-item a.nav-link:hover {
+            border-bottom: 2px solid #5d78ff;
+            color: #48465b; }
+          .kt-sc-2 .kt-sc__bottom .nav-tabs .nav-item .nav-link.active, .kt-sc-2 .kt-sc__bottom .nav-tabs .nav-item a.nav-link.active {
+            border-bottom: 2px solid #5d78ff;
+            color: #5d78ff; }
+  .kt-sc-2--wave {
+    background-color: #f7f8fa !important;
+    overflow: hidden;
+    position: relative; }
+    .kt-sc-2--wave > div {
+      z-index: 1; }
+    .kt-sc-2--wave:before {
+      content: ' ';
+      position: absolute;
+      top: 0;
+      right: 0;
+      left: 0;
+      bottom: 0;
+      background-color: #fff;
+      z-index: -1; }
+    .kt-sc-2--wave:after {
+      content: ' ';
+      width: 1000px;
+      height: 1025px;
+      position: absolute;
+      bottom: 65%;
+      right: -250px;
+      border-radius: 35%;
+      background: white;
+      z-index: 0; }
+    .kt-sc-2--wave:after {
+      bottom: 25%;
+      -webkit-transform: rotate(-45deg);
+      transform: rotate(-45deg); }
+
+@media (max-width: 1024px) {
+  .kt-sc-2 {
+    min-height: auto; }
+    .kt-sc-2 .kt-sc__bg {
+      opacity: 0.2; }
+    .kt-sc-2 .kt-sc__top {
+      min-height: auto; }
+      .kt-sc-2 .kt-sc__top .kt-sc__content {
+        padding: 4rem 0;
+        margin-left: 0;
+        min-height: auto; }
+        .kt-sc-2 .kt-sc__top .kt-sc__content .kt-sc__form .input-group {
+          width: 100%; } }

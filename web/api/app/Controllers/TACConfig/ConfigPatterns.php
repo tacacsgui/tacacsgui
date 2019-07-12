@@ -1095,14 +1095,16 @@ class ConfigPatterns
 
           $sp->put('a');
           $roles = explode( ';;', $service['cisco_wlc_roles'] );
-
-          for ($i=0; $i < count($roles); $i++) {
-            if (! in_array($roles[$i], array_keys(self::$ciscoWLCRoles) ) ) continue;
+          $roles_filtered = array_values( array_filter( $roles, function($x){ return $x != '';} ) );
+          
+          for ($i=0; $i < count($roles_filtered); $i++) {
+            if ($roles_filtered[$i] == '') continue;
+            if (! in_array($roles_filtered[$i], array_keys(self::$ciscoWLCRoles) ) ) continue;
 
             array_push($outputService,
-      			($html) ? $sp->put().self::$html_tags['param'][0] . "set role". ($i + 1) . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . self::$ciscoWLCRoles[$roles[$i]] . self::$html_tags['val'][1]
+      			($html) ? $sp->put().self::$html_tags['param'][0] . "set role". ($i + 1) . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . self::$ciscoWLCRoles[$roles_filtered[$i]] . self::$html_tags['val'][1]
       			:
-      			$sp->put().'set role'. ($i + 1) .' = ' . self::$ciscoWLCRoles[$roles[$i]] );
+      			$sp->put().'set role'. ($i + 1) .' = ' . self::$ciscoWLCRoles[$roles_filtered[$i]] );
           }
 
           $outputService = array_merge( $outputService,  self::manualConfigPrint($service['cisco_wlc_manual'], $html) );

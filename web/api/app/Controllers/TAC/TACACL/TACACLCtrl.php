@@ -103,7 +103,10 @@ class TACACLCtrl extends Controller
 		$aces = $this->db->table('tac_acl_ace as ace')->
 			leftJoin('obj_addresses as addr_s', 'addr_s.id', '=', 'ace.nas')->
 			leftJoin('obj_addresses as addr_c', 'addr_c.id', '=', 'ace.nac')->
-			select(['nas as nas_id', 'nac as nac_id', 'addr_s.name as nas_name', 'addr_c.name as nac_name', 'action', 'order'])->
+			select(['nas as nas_id', 'nac as nac_id', 'addr_s.name as nas_name', 'addr_s.type as nas_type',
+				'addr_s.address as nas_address', 'addr_c.name as nac_name', 'addr_c.type as nac_type',
+				'addr_c.address as nac_address', 'action', 'order'
+				])->
 			orderBy('order', 'asc')->
 			where('acl_id',$req->getParam('id'))->get();
 
@@ -114,10 +117,14 @@ class TACACLCtrl extends Controller
 				'nas' => [[
 					'id' => $ace->nas_id,
 					'text' => $ace->nas_name,
+					'type' => $ace->nas_type,
+					'address' => $ace->nas_address,
 				]],
 				'nac' => [[
 					'id' => $ace->nac_id,
 					'text' => $ace->nac_name,
+					'type' => $ace->nac_type,
+					'address' => $ace->nac_address,
 				]],
 			];
 		}

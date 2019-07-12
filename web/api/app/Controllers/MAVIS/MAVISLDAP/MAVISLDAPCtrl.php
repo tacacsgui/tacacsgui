@@ -181,9 +181,11 @@ class MAVISLDAPCtrl extends Controller
 		if ( $ldap->type == 'openldap' ) {
 
 			$adQuery = $adSearch->select()->where('objectclass', 'posixGroup');
+			$data['recordsTotal'] =	$adQuery->get()->count();
 
 			$adQuery = ( empty($search) ) ? $adQuery : $adQuery->where('cn', 'contains', $search);
 			$data['total'] =	$adQuery->get()->count();
+			
 			$records = $adQuery->paginate($pageSize, $pageNum)->getIterator();
 
 			foreach ($records as $record) {
@@ -200,9 +202,11 @@ class MAVISLDAPCtrl extends Controller
 		} else {
 
 			$adQuery = $adSearch->groups()->select();
+			$data['recordsTotal'] =	$adQuery->get()->count();
 
 			$adQuery = ( empty($search) ) ? $adQuery : $adQuery->where('cn', 'contains', $search);
 			$data['total'] =	$adQuery->get()->count();
+
 			$records = $adQuery->paginate($pageSize, $pageNum)->getIterator();
 
 			$data['test1'] = $records;

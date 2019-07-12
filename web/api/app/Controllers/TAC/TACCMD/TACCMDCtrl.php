@@ -423,7 +423,7 @@ class TACCMDCtrl extends Controller
 				$query->where('name','LIKE', '%'.$search.'%');
 			});
 
-		$data['results']=$query->get();
+		$data['results']=$query->orderBy('name')->get();
 
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
@@ -471,7 +471,7 @@ class TACCMDCtrl extends Controller
 				$query->where('name','LIKE', '%'.$search.'%');
 			});
 
-		$data['results']=$query->get();
+		$data['results']=$query->orderBy('name')->get();
 
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}

@@ -1,0 +1,22 @@
+.kt-sc-license {
+  background-position: center top;
+  background-size: cover;
+  background-repeat: no-repeat; }
+  .kt-sc-license .kt-sc__top {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    padding: 6rem 0 10rem;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center; }
+    .kt-sc-license .kt-sc__top .kt-sc__title {
+      margin-bottom: 0;
+      font-size: 1.85rem;
+      font-weight: 600;
+      color: #ffffff; }
+    .kt-sc-license .kt-sc__top .kt-sc__nav {
+      margin: auto 0 auto auto; }
+      .kt-sc-license .kt-sc__top .kt-sc__nav .kt-link {
+        font-size: 1.3rem;
+        font-weight: 400; }

@@ -480,6 +480,7 @@ class ConfQueries extends Controller
 			leftJoin('confM_credentials as cq', 'cq.id', '=', $this->db::raw($creden) )->
 			select([
 				'd.name as name',
+				'd.prompt as prompt',
 				$this->db::raw("substring_index(addr.address,'/',1) as ip"),
 				//"substring_index(`addr.address`,'/',1) as ip",
 				'd.protocol as protocol',
@@ -498,6 +499,9 @@ class ConfQueries extends Controller
 			return $res -> withStatus(200) -> write(json_encode($data));
 		}
 
+		$prompt_m = array_filter( array_map('trim', explode(',', $model->prompt) ), function($value) { return $value !== ''; } );
+		$prompt_d = array_filter( array_map('trim', explode(',', $device->prompt) ), function($value) { return $value !== ''; } );
+
 		$pattern = [ 'queries' =>
 			[
 				[
@@ -511,7 +515,7 @@ class ConfQueries extends Controller
 						'password' => ( ( !empty($device->d_username) OR !empty($device->d_password) ) ? $device->d_password : $device->q_password ),
 					],
 					'group' => '',
-					'prompt' => array_filter( array_map('trim', explode(',', $model->prompt) ), function($value) { return $value !== ''; } ),
+					'prompt' => array_merge($prompt_d, $prompt_m),
 					'omitLines' => array_filter( array_map('trim', explode(',', $req->getParam('omitLines')) ), function($value) { return $value !== ''; } ),
 					'timeout' => 4,
 					'expectations' => json_decode( json_encode($expectations), true )

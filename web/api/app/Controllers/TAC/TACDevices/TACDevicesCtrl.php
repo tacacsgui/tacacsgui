@@ -162,6 +162,15 @@ class TACDevicesCtrl extends Controller
 			first();
 		$data['device']->address = $this->db->table('obj_addresses')->
 			select(['name as text','id','type','address'])->where('id',$data['device']->address)->get();
+			
+		$data['device']->group = $this->db->table('tac_device_groups')->
+			select(['name as text','id'])->where('id',$data['device']->group)->get();
+
+		$data['device']->acl = $this->db->table('tac_acl')->
+			select(['name as text','id'])->where('id',$data['device']->acl)->get();
+
+		$data['device']->user_group = $this->db->table('tac_user_groups')->
+			select(['name as text','id'])->where('id',$data['device']->user_group)->get();
 
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}

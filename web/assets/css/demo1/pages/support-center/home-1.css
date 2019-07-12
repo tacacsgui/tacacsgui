@@ -1,0 +1,71 @@
+.kt-sc {
+  background-position: center top;
+  background-size: cover;
+  background-repeat: no-repeat;
+  margin-bottom: 2rem; }
+  .kt-sc .kt-sc__top {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    -webkit-box-pack: justify;
+    -ms-flex-pack: justify;
+    justify-content: space-between;
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid #ffffff; }
+    .kt-sc .kt-sc__top .kt-sc__title {
+      margin-bottom: 0;
+      font-size: 1.45rem;
+      color: #48465b; }
+    .kt-sc .kt-sc__top .kt-sc__nav .kt-link {
+      margin-left: 2rem;
+      font-size: 1.1rem;
+      font-weight: 400; }
+      .kt-sc .kt-sc__top .kt-sc__nav .kt-link:first-child {
+        margin-left: 0; }
+  .kt-sc .kt-sc__bottom {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -ms-flex-direction: column;
+    flex-direction: column;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    -webkit-box-pack: center;
+    -ms-flex-pack: center;
+    justify-content: center;
+    padding-top: 10rem;
+    padding-bottom: 10rem; }
+    .kt-sc .kt-sc__bottom .kt-sc__heading {
+      margin-bottom: 4rem; }
+    .kt-sc .kt-sc__bottom .kt-sc__form .input-group {
+      width: 630px;
+      -webkit-box-shadow: 0px 0px 9px 0px rgba(122, 104, 181, 0.09);
+      box-shadow: 0px 0px 9px 0px rgba(122, 104, 181, 0.09); }
+      .kt-sc .kt-sc__bottom .kt-sc__form .input-group .input-group-text {
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
+        border: none;
+        padding: 0.65rem 2rem;
+        background-color: #ffffff; }
+      .kt-sc .kt-sc__bottom .kt-sc__form .input-group .form-control {
+        border: none;
+        padding: 2.5rem 0;
+        font-weight: 400;
+        font-size: 1.1rem; }
+
+@media (max-width: 1024px) {
+  .kt-content--fit-top .kt-sc {
+    margin-top: -15px; }
+  .kt-sc .kt-sc__top .kt-sc__nav .kt-link {
+    margin-left: 1rem; }
+    .kt-sc .kt-sc__top .kt-sc__nav .kt-link:first-child {
+      margin-left: 0; }
+  .kt-sc .kt-sc__bottom .kt-sc__form .input-group {
+    width: 100%; } }

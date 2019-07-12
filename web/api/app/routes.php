@@ -22,6 +22,7 @@ $app->post('/user/edit/', 'APIUsersCtrl:postUserEdit');
 $app->get('/user/delete/', 'APIUsersCtrl:getUserDelete');
 $app->post('/user/delete/', 'APIUsersCtrl:postUserDelete');
 $app->get('/user/info/', 'APIUsersCtrl:getUserInfo');
+$app->get('/user/status/', 'APIUsersCtrl:getUserStatus');
 #####################################################
 ###User Routes#######################################
 $app->post('/user/group/datatables/', 'APIUserGrpsCtrl:postUserGroupDatatables');

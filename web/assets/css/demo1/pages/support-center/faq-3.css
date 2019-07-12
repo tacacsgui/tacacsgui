@@ -1,0 +1,46 @@
+.kt-sc-faq-3 {
+  text-align: center;
+  padding: 3rem 0 0; }
+  .kt-sc-faq-3 .kt-sc__title {
+    color: #48465b;
+    font-size: 2.2rem;
+    font-weight: 600;
+    margin-bottom: 1.2rem; }
+  .kt-sc-faq-3 .kt-sc__subtitle {
+    font-size: 1.4rem;
+    color: #9392a0;
+    margin-bottom: 0.5rem;
+    font-weight: 400; }
+  .kt-sc-faq-3 .kt-sc__bg svg {
+    width: 550px;
+    height: auto; }
+  .kt-sc-faq-3.kt-negative-spacing {
+    margin-top: -15px;
+    padding-top: 0; }
+  .kt-sc-faq-3--accordion {
+    padding-top: 0; }
+    .kt-sc-faq-3--accordion .accordion.accordion-toggle-svg {
+      margin-bottom: 3rem; }
+      .kt-sc-faq-3--accordion .accordion.accordion-toggle-svg .card {
+        -webkit-box-shadow: 0px 0px 13px 0px rgba(82, 63, 105, 0.05);
+        box-shadow: 0px 0px 13px 0px rgba(82, 63, 105, 0.05);
+        border-radius: 4px !important;
+        margin-bottom: 0.9rem; }
+        .kt-sc-faq-3--accordion .accordion.accordion-toggle-svg .card .card-header .card-title {
+          padding: 3rem;
+          font-size: 1.45rem; }
+          .kt-sc-faq-3--accordion .accordion.accordion-toggle-svg .card .card-header .card-title svg {
+            width: 30px;
+            height: 30px; }
+        .kt-sc-faq-3--accordion .accordion.accordion-toggle-svg .card .card-body {
+          padding: 0 3rem 3rem;
+          border: none;
+          text-align: left;
+          font-size: 1.15rem;
+          line-height: 2rem;
+          font-weight: 400;
+          color: #9392a0; }
+
+@media (max-width: 1024px) {
+  .kt-sc-faq-3 .kt-sc__bg svg {
+    width: 100%; } }

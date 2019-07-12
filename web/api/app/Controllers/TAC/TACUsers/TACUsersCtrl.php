@@ -188,16 +188,26 @@ class TACUsersCtrl extends Controller
 		//CHECK ACCESS TO THAT FUNCTION//END//
 
 		$data['user']=TACUsers::select()->where('id',$req->getParam('id'))->first();
+		$data['user']->acl = $this->db->table('tac_acl')->
+			select(['name as text','id'])->where('id',$data['user']->acl)->get();
+
 		$data['user']['service'] = $this->db::table('tac_bind_service')->
 			leftJoin('tac_services as ts','ts.id','=','service_id')->
 			select(['ts.id as id', 'ts.name as text'])->where('tac_usr_id',$req->getParam('id'))->get();
-		$data['user']['group']=$this->db::table('tac_bind_usrGrp')->select('group_id')->where('user_id',$req->getParam('id'))->pluck('group_id')->toArray();
-		$data['user']['device_list']=$this->db::table('tac_bind_dev')->select('device_id')->where('user_id',$req->getParam('id'))->pluck('device_id')->toArray();
-		$data['user']['device_group_list']=$this->db::table('tac_bind_devGrp')->select('devGroup_id')->where('user_id',$req->getParam('id'))->pluck('devGroup_id')->toArray();
-		// $data['otp_status']=$this->MAVISOTP->globalStatus();
-		// $data['sms_status']=$this->MAVISSMS->globalStatus();
-		// $data['user']->login = ( $data['user']->login_flag == 3 ) ? $this->generateRandomString(12) : $data['user']->login;
-		// $data['user']->enable = ( $data['user']->enable_flag == 3 ) ? $this->generateRandomString(12) : $data['user']->enable;
+
+		$data['user']['group']=$this->db::table('tac_bind_usrGrp as tbug')->
+			leftJoin('tac_user_groups as tug','tug.id','=','tbug.group_id')->
+			select(['tug.name as text', 'tug.id as id'])->where('tbug.user_id',$req->getParam('id'))->get();
+
+		$data['user']['device_list']=$this->db::table('tac_bind_dev')->
+			leftJoin('tac_devices as td','td.id','=','device_id')->
+			select(['td.name as text', 'td.id as id'])->where('user_id',$req->getParam('id'))->get();
+
+		$data['user']['device_group_list']=$this->db::table('tac_bind_devGrp')->
+			leftJoin('tac_device_groups as tdg','tdg.id','=','devGroup_id')->
+			select(['tdg.name as text', 'tdg.id as id'])->where('user_id',$req->getParam('id'))->get();
+
+		if ($data['user']['login_flag'] == 3) unset($data['user']['login']);
 
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}

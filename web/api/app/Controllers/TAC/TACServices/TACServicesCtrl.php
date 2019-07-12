@@ -178,6 +178,7 @@ class TACServicesCtrl extends Controller
 		$data['service']->junos_cmd_do = $sections['junos_cmd_do'];
 		$data['service']->junos_cmd_ac = $sections['junos_cmd_ac'];
 		$data['service']->junos_cmd_dc = $sections['junos_cmd_dc'];
+		$data['service']->cisco_wlc_roles = explode(';;', $data['service']->cisco_wlc_roles);
 
 		$data['service']->acl = $this->db::table('tac_acl')->select(['id','name as text'])->where('id', $data['service']->acl)->get();
 
@@ -325,8 +326,8 @@ class TACServicesCtrl extends Controller
 		$logEntry=array('action' => 'delete', 'obj_name' => $req->getParam('name'), 'obj_id' => $req->getParam('id'), 'section' => 'tacacs services', 'message' => 408);
 		$data['logging']=$this->APILoggingCtrl->makeLogEntry($logEntry);
 
-		$data['footprints_users']=TACUsers::where([['service','=',$req->getParam('id')]])->update(['service' => '0']);
-		$data['footprints_groups']=TACUserGrps::where([['service','=',$req->getParam('id')]])->update(['service' => '0']);
+		// $data['footprints_users']=TACUsers::where([['service','=',$req->getParam('id')]])->update(['service' => '0']);
+		// $data['footprints_groups']=TACUserGrps::where([['service','=',$req->getParam('id')]])->update(['service' => '0']);
 
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
@@ -421,7 +422,7 @@ class TACServicesCtrl extends Controller
 		when( !empty($queries),
 			function($query) use ($queries)
 			{
-				$query->where('username','LIKE', '%'.$queries.'%');
+				$query->where('name','LIKE', '%'.$queries.'%');
 				return $query;
 			});
 		$data['recordsFiltered'] = $tempData->count();

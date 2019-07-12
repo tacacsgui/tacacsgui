@@ -123,7 +123,7 @@ class APINotificationCtrl extends Controller
 		//Filter end
 		$data['recordsTotal'] = PostLog::count();
 		//Get temp data for Datatables with Fliter and some other parameters
-		$tempData = PostLog::select($columns)->
+		$tempData = PostLog::select($columns);
 		// when( !empty($queries),
 		// 	function($query) use ($queries)
 		// 	{
@@ -131,9 +131,9 @@ class APINotificationCtrl extends Controller
 		// 		$query->orWhere('nac','LIKE', '%'.$queries.'%');
 		// 		return $query;
 		// 	})->
-		take($size)->
-		offset($start);
-		$data['total'] = $tempData->count();
+    $data['total'] = $tempData->count();
+
+		$tempData = $tempData->take($size)->offset($start);
 
 		if (!empty($params['sortColumn']) and !empty($params['sortDirection']))
 				$tempData = $tempData->orderBy($params['sortColumn'],$params['sortDirection']);

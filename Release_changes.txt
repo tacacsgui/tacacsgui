@@ -1,4 +1,10 @@
 ##############################
+Version_0.9.73 20190712
+	* Hello Angualar 8 (full re-builded gui)
+	* Add/Edit Address/Cmd Set from sidebar
+	* Virtual Scroll everywhere (to save your browser)
+	* Some bugs fixed
+##############################
 Version_0.9.72 20190627
 	* Hello IPv6 Support
 	* Now! Services can depend on ACL

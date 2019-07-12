@@ -1,0 +1,28 @@
+.card-full-screen {
+  width: 100%;
+  height: 100%;
+}
+.tacgui-blockui-main {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-color: #44444426;
+}
+
+.tacgui-blockui-main-message > span {
+  margin-left: 6px;
+}
+.tacgui-blockui-main-message > div.kt-spinner {
+  position: static !important;
+}
+.tacgui-blockui-main-message > div.kt-spinner::before {
+  margin-left: 6px;
+}
+.tacgui-blockui-main-message {
+  border-radius: 15px;
+  position: absolute;
+  top: 30%;
+  left: 35%;
+  background-color: #fff;
+  padding: 10px 20px;
+}

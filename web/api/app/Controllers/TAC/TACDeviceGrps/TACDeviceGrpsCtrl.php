@@ -112,6 +112,12 @@ class TACDeviceGrpsCtrl extends Controller
 			where('id',$req->getParam('id'))->
 			first();
 
+		$data['group']->acl = $this->db->table('tac_acl')->
+			select(['name as text','id'])->where('id',$data['group']->acl)->get();
+
+		$data['group']->user_group = $this->db->table('tac_user_groups')->
+			select(['name as text','id'])->where('id',$data['group']->user_group)->get();
+
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
 

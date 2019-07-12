@@ -330,10 +330,11 @@ class TACReportsCtrl extends Controller
 			}
 
 			return $query;
-			})->
-		take($size)->
-		offset($start);
+		});
+		
 		$data['total'] = $tempData->count();
+
+		$tempData = $tempData->take($size)->offset($start);
 
 		if (!empty($params['sortColumn']) and !empty($params['sortDirection']))
 				$tempData = $tempData->orderBy($params['sortColumn'],$params['sortDirection']);
@@ -447,17 +448,18 @@ class TACReportsCtrl extends Controller
 				}
 
 				return $query;
-			})->
-		take($size)->
-		offset($start);
+			});
+
 		$data['total'] = $tempData->count();
+
+		$tempData = $tempData->take($size)->offset($start);
 
 		if (!empty($params['sortColumn']) and !empty($params['sortDirection']))
 				$tempData = $tempData->orderBy($params['sortColumn'],$params['sortDirection']);
 
-		$data['querySql'] = count($queries); //$tempData->toSql();
+		//$data['querySql'] = $tempData; //$tempData->toSql();
 
-		$data['data'] = $tempData->get()->toArray();
+		$data['data'] = $tempData->get();
 
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
@@ -575,10 +577,11 @@ class TACReportsCtrl extends Controller
 			}
 
 			return $query;
-			})->
-		take($size)->
-		offset($start);
+		});
+
 		$data['total'] = $tempData->count();
+
+		$tempData = $tempData->take($size)->offset($start);
 
 		if (!empty($params['sortColumn']) and !empty($params['sortDirection']))
 				$tempData = $tempData->orderBy($params['sortColumn'],$params['sortDirection']);

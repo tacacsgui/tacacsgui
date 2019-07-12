@@ -49,7 +49,7 @@ class APIUsersCtrl extends Controller
 		$validation = $this->validator->validate($req, [
 			'email' => v::when( v::nullType() , v::alwaysValid(), v::noWhitespace()->email()->setName('Email')),
 			'username' => v::noWhitespace()->notEmpty()->usernameAvailable(),
-			'group' => v::notEmpty()->adminRights(),
+			'group' => v::notEmpty(),//->adminRights(),
 			'password' => v::noWhitespace()->
 					notContainChars()->
 					length($policy['api_pw_length'], 64)->
@@ -173,7 +173,7 @@ class APIUsersCtrl extends Controller
 					passwdPolicySame($policy['api_pw_same'], $password, 'api')->
 					passwdPolicyNumbers($policy['api_pw_numbers'])->setName('Password') ),
 			'repassword' => v::checkPassword($req->getParam('password')),
-			'group' => v::notEmpty()->checkAccess(7)->adminRights()->setName('Group')
+			'group' => v::notEmpty()->checkAccess(7)->setName('Group')//->adminRights()->setName('Group')
 		]);
 
 		if ($validation->failed()){
@@ -344,6 +344,29 @@ class APIUsersCtrl extends Controller
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
 ########	Get User Info	###############END###########
+########	Get User Status	###############START###########
+	#########	GET User Status	#########
+	public function getUserStatus($req,$res)
+	{
+		//INITIAL CODE////START//
+		$data=array();
+		$data=$this->initialData([
+			'type' => 'get',
+			'object' => 'user',
+			'action' => 'status',
+		]);
+		#check error#
+		if ($_SESSION['error']['status']){
+			$data['error']=$_SESSION['error'];
+			return $res -> withStatus(401) -> write(json_encode($data));
+		}
+		//INITIAL CODE////END//
+
+		$data['changeConfiguration']=$this->db->table('tac_global_settings')->select('changeFlag')->first()->changeFlag;
+
+		return $res -> withStatus(200) -> write(json_encode($data));
+	}
+########	Get User Status	###############END###########
 ######################################################
 	public static function changeCmdType($type = 0)
 	{

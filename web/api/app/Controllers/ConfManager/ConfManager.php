@@ -1385,7 +1385,9 @@ public function getPreview($req,$res)
 			];
 
 			foreach ($output as $out) {
-				$prompt = ( !empty($out['d.prompt']) ) ? $out['d.prompt'] : $out['m_prompt'];
+				//$prompt = ( !empty($out['d_prompt']) ) ? $out['d_prompt'] : $out['m_prompt'];
+				$prompt_m = array_filter( array_map('trim', explode(',', $out['d_prompt']) ), function($value) { return $value !== ''; } );
+				$prompt_d = array_filter( array_map('trim', explode(',', $out['m_prompt']) ), function($value) { return $value !== ''; } );
 				if (!$params['preview'])
 					$passwd = ( ( !empty($out['d_uname']) OR !empty($out['d_passwd']) ) ? $out['d_passwd'] : $out['q_passwd'] );
 				else
@@ -1408,7 +1410,7 @@ public function getPreview($req,$res)
 						],
 						// 'group' => $out['group'],
 						'path' => $out['path'],
-						'prompt' => array_filter( array_map('trim', explode(',', $prompt) ), function($value) { return $value !== ''; } ),
+						'prompt' => array_merge($prompt_d, $prompt_m),
 						'omitLines' => array_filter( array_map('trim', explode(',', $out['omitLines']) ), function($value) { return $value !== ''; } ),
 						'timeout' => 15,
 						'expectations' => json_decode( json_encode( $this->db::table('confM_bind_model_expect')->
