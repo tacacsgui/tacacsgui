@@ -34,6 +34,10 @@ class APINotificationCtrl extends Controller
     //CHECK ACCESS TO THAT FUNCTION//END//
 
     $data['settings'] = APINotification::select()->first();
+
+    if ( empty($data['settings']->bad_authentication_email_list) ) $data['settings']->bad_authentication_email_list='';
+    if ( empty($data['settings']->bad_authorization_email_list) ) $data['settings']->bad_authorization_email_list='';
+    
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
   public function postSettings($req,$res)
