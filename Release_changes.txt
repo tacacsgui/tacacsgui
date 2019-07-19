@@ -1,4 +1,8 @@
 ##############################
+Version_0.9.74 20190719
+	* Reference Sidebar for Services, ACLs, Addresses
+	* Some bugs fixed (Please use combination of Ctrl + Shift + R to clear browser cache)
+##############################
 Version_0.9.73 20190712
 	* Hello Angualar 8 (full re-builded gui)
 	* Add/Edit Address/Cmd Set from sidebar

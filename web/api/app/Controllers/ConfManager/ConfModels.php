@@ -268,16 +268,15 @@ class ConfModels extends Controller
 		//Filter end
 		$data['recordsTotal'] = Conf_Models::count();
 		//Get temp data for Datatables with Fliter and some other parameters
-		$tempData = Conf_Models::select($columns)->
+		$tempData = Conf_Models::
 			leftJoin('confM_queries as q', 'q.model', '=', 'confM_models.id')->
 			groupBy('confM_models.id')->
-			select($columns);
-		// when( !empty($queries),
-		// 	function($query) use ($queries)
-		// 	{
-		// 		$query->where('username','LIKE', '%'.$queries.'%');
-		// 		return $query;
-		// 	});
+			when( !empty($queries),
+				function($query) use ($queries)
+				{
+					$query->where('confM_models.name','LIKE', '%'.$queries.'%');
+					return $query;
+				})->select($columns);
 		$data['recordsFiltered'] = $tempData->count();
 
 		if (!empty($params['sortColumn']) and !empty($params['sortDirection']))

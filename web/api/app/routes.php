@@ -62,6 +62,7 @@ $app->post('/obj/address/edit/', 'ObjAddress:postEdit');
 $app->post('/obj/address/delete/', 'ObjAddress:postDel');
 $app->post('/obj/address/csv/', 'ObjAddress:postCsv');
 $app->get('/obj/address/list/', 'ObjAddress:getList');
+$app->get('/obj/address/ref/', 'ObjAddress:getRef');
 #####################################################
 ###Tacacs Devices Routes#######################################
 $app->post('/tacacs/device/datatables/', 'TACDevicesCtrl:postDeviceDatatables');
@@ -119,6 +120,7 @@ $app->post('/tacacs/acl/edit/', 'TACACLCtrl:postACLEdit');
 $app->get('/tacacs/acl/delete/', 'TACACLCtrl:getACLDelete');
 $app->post('/tacacs/acl/delete/', 'TACACLCtrl:postACLDelete');
 $app->get('/tacacs/acl/list/', 'TACACLCtrl:getAclList');
+$app->get('/tacacs/acl/ref/', 'TACACLCtrl:getAclRef');
 $app->post('/tacacs/acl/csv/', 'TACACLCtrl:postACLCsv');
 #####################################################
 ###Tacacs ACL Routes#######################################
@@ -130,6 +132,7 @@ $app->post('/tacacs/service/edit/', 'TACServicesCtrl:postServiceEdit');
 $app->get('/tacacs/service/delete/', 'TACServicesCtrl:getServiceDelete');
 $app->post('/tacacs/service/delete/', 'TACServicesCtrl:postServiceDelete');
 $app->get('/tacacs/service/list/', 'TACServicesCtrl:getServiceList');
+$app->get('/tacacs/service/ref/', 'TACServicesCtrl:getServiceRef');
 $app->post('/tacacs/service/csv/', 'TACServicesCtrl:postServiceCsv');
 #####################################################
 ###Tacacs CMD Routes#######################################

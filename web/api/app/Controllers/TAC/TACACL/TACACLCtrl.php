@@ -319,16 +319,25 @@ class TACACLCtrl extends Controller
 
 		$params=$req->getParams(); //Get ALL parameters form Datatables
 
-		$columns = $this->APICheckerCtrl->getTableTitles('tac_acl'); //Array of all columnes that will used
-		array_unshift( $columns, 'id' );
-		array_push( $columns, 'created_at', 'updated_at' );
+		//$columns = $this->APICheckerCtrl->getTableTitles('tac_acl'); //Array of all columnes that will used
+		$columns = [];
+		array_unshift( $columns, 'tac_acl.*' );
+		array_push( $columns,
+			$this->db::raw('(SELECT COUNT(*) FROM tac_device_groups WHERE acl = tac_acl.id) + '.
+			'(SELECT COUNT(*) FROM tac_devices WHERE acl = tac_acl.id) + '.
+			'(SELECT COUNT(*) FROM tac_user_groups WHERE acl = tac_acl.id) + '.
+			'(SELECT COUNT(*) FROM tac_user_groups WHERE acl_match = tac_acl.id) + '.
+			'(SELECT COUNT(*) FROM tac_services WHERE acl = tac_acl.id) + '.
+			'(SELECT COUNT(*) FROM tac_users WHERE acl = tac_acl.id)  as ref')
+		);
 		$data['columns'] = $columns;
 		$queries = (empty($params['searchTerm'])) ? [] : $params['searchTerm'];
 
 		//Filter end
 		$data['recordsTotal'] = TACACL::count();
 		//Get temp data for Datatables with Fliter and some other parameters
-		$tempData = TACACL::select($columns)->
+		$tempData = TACACL::
+		select($columns)->
 		when( !empty($queries),
 			function($query) use ($queries)
 			{
@@ -389,6 +398,62 @@ class TACACLCtrl extends Controller
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
 ########	List ACL	###############END###########
+################################################
+########	Reference List ACL	###############START###########
+	#########	GET List ACL#########
+	public function getAclRef($req,$res)
+	{
+		//INITIAL CODE////START//
+		$data=array();
+		$data=$this->initialData([
+			'type' => 'get',
+			'object' => 'acl',
+			'action' => 'ref',
+		]);
+		#check error#
+		if ($_SESSION['error']['status']){
+			$data['error']=$_SESSION['error'];
+			return $res -> withStatus(401) -> write(json_encode($data));
+		}
+		//INITIAL CODE////END//
+
+		$data['obj'] = TACACL::select(['id','name as text'])->where('id',$req->getParam('id'))->first();
+		$data['mainlist'] = [
+			[ 'name' => 'TACACS Users', 'list' => [] ],
+			[ 'name' => 'TACACS User Groups', 'list' => [] ],
+			[ 'name' => 'TACACS Devices', 'list' => [] ],
+			[ 'name' => 'TACACS Device Groups', 'list' => [] ],
+			[ 'name' => 'TACACS User Groups Ref', 'list' => [] ],
+			[ 'name' => 'TACACS Services Ref', 'list' => [] ],
+		];
+
+		$data['mainlist'][0]['list'] = $this->db->table('tac_users as tu')->
+		select(['tu.username as text', 'tu.id as id'])->
+		where('acl',$req->getParam('id'))->get();
+
+		$data['mainlist'][1]['list'] = $this->db->table('tac_user_groups as tug')->
+		select(['tug.name as text', 'tug.id as id'])->
+		where('acl',$req->getParam('id'))->get();
+
+		$data['mainlist'][2]['list'] = $this->db->table('tac_devices as td')->
+		select(['td.name as text', 'td.id as id'])->
+		where('acl',$req->getParam('id'))->get();
+
+		$data['mainlist'][3]['list'] = $this->db->table('tac_device_groups as tdg')->
+		select(['tdg.name as text', 'tdg.id as id'])->
+		where('acl',$req->getParam('id'))->get();
+
+		$data['mainlist'][4]['list'] = $this->db->table('tac_user_groups as tug')->
+		select(['tug.name as text', 'tug.id as id'])->
+		where('acl_match',$req->getParam('id'))->get();
+
+		$data['mainlist'][5]['list'] = $this->db->table('tac_services as ts')->
+		select(['ts.name as text', 'ts.id as id'])->
+		where('acl',$req->getParam('id'))->get();
+
+		return $res -> withStatus(200) -> write(json_encode($data));
+	}
+########	Reference List ACL	###############END###########
 ################################################
 
 }//END OF CLASS//

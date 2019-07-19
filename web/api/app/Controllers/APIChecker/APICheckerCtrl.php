@@ -856,6 +856,47 @@ class APICheckerCtrl extends Controller
 ////////////////////////////////////////
 ////////////////////////////////////////
 ////////////////////////////////////////
+////////////////////////////////////////
+///Version 0.9.74 Service Fix
+////////////////////////////////////////
+
+$serviceRef = $this->db::table('INFORMATION_SCHEMA.KEY_COLUMN_USAGE as U')->
+	leftJoin('INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS as C', 'U.CONSTRAINT_NAME', '=', 'C.CONSTRAINT_NAME')->
+	where([ ['U.TABLE_SCHEMA', 'tgui'], ['U.TABLE_NAME', 'tac_bind_service'], ['U.COLUMN_NAME', 'tac_grp_id'] ])->
+	select(['U.COLUMN_NAME', 'C.DELETE_RULE' ])->first();
+
+if ($serviceRef->DELETE_RULE == 'NO ACTION'){
+	$this->db::getSchemaBuilder()->disableForeignKeyConstraints();
+
+	$this->db::connection()->getSchemaBuilder()->table('tac_bind_service', function(Blueprint $table) {
+		$table->integer('tac_grp_id')->nullable()->unsigned()->default(null)->change();
+		$table->dropForeign(['tac_grp_id']);
+		$table->foreign('tac_grp_id')->references('id')->on('tac_user_groups')->onDelete('cascade');
+
+		$table->integer('tac_usr_id')->nullable()->unsigned()->default(null)->change();
+		$table->dropForeign(['tac_usr_id']);
+		$table->foreign('tac_usr_id')->references('id')->on('tac_users')->onDelete('cascade');
+	});
+
+	$this->db::connection()->getSchemaBuilder()->table('ldap_bind', function(Blueprint $table) {
+		$table->integer('tac_grp_id')->nullable()->unsigned()->default(null)->change();
+		$table->dropForeign(['tac_grp_id']);
+		$table->foreign('tac_grp_id')->references('id')->on('tac_user_groups')->onDelete('cascade');
+
+		$table->integer('api_grp_id')->nullable()->unsigned()->default(null)->change();
+		$table->dropForeign(['api_grp_id']);
+		$table->foreign('api_grp_id')->references('id')->on('api_user_groups')->onDelete('cascade');
+	});
+
+
+}
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+////////////////////////////////////////
+////////////////////////////////////////
+
 		if ( array_search('NAS', $this->db::connection('logging')->getSchemaBuilder()->getColumnListing('tac_log_authentication')) )
 		{
 			$response['status'] = true;

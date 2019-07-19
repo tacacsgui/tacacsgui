@@ -472,23 +472,27 @@ class ConfigPatterns
 			///USER GROUP TITLE///
 			// $outputUserGroup[$group['id']][0] = array('title_flag' => 0, 'name' =>"");
 			///USER GROUP NAME///
+
 			array_push($outputUserGroup,
 			($html) ? $sp->put().self::$html_tags['attr'][0] . "group" . self::$html_tags['attr'][1] . ' = ' . self::$html_tags['object'][0] .$group['name']. self::$html_tags['object'][1] . ' {'
 			:
 			$sp->put().'group = '.$group['name'].' {');
       $sp->put('a');
       ///LDAP Groups///
-      if ( $group['ldap_groups'] ){
-        $ldapGrp = explode(';;', $group['ldap_groups']);
+      $ldapDn = TACUserGrps::from('tac_user_groups as tug')->leftJoin('ldap_bind as lb', 'lb.tac_grp_id','=','tug.id')->
+        leftJoin('ldap_groups as ld','ld.id','=','lb.ldap_id')->
+        select(['ld.dn as dn'])->where('lb.tac_grp_id',$group['id'])->get();
+
+      if ( count($ldapDn) ){
         array_push($outputUserGroup,
     		($html) ? $sp->put().self::$html_tags['comment'][0] . "#### LDAP Groups List #### DistinguishedName ###" . self::$html_tags['comment'][1]
     		:
     		$sp->put()."#### LDAP Groups List #### DistinguishedName ###");
-        for ($i=0; $i < count($ldapGrp); $i++) {
+        for ($i=0; $i < count($ldapDn); $i++) {
           array_push($outputUserGroup,
-      		($html) ? $sp->put().self::$html_tags['comment'][0] . "### ".$ldapGrp[$i]." ###" . self::$html_tags['comment'][1]
+      		($html) ? $sp->put().self::$html_tags['comment'][0] . "### ".$ldapDn[$i]->dn . self::$html_tags['comment'][1]
       		:
-      		$sp->put()."### ".$ldapGrp[$i]." ###");
+      		$sp->put()."### ".$ldapDn[$i]->dn);
         }
       }
 			///USER GROUP ENABLE///
@@ -1096,7 +1100,7 @@ class ConfigPatterns
           $sp->put('a');
           $roles = explode( ';;', $service['cisco_wlc_roles'] );
           $roles_filtered = array_values( array_filter( $roles, function($x){ return $x != '';} ) );
-          
+
           for ($i=0; $i < count($roles_filtered); $i++) {
             if ($roles_filtered[$i] == '') continue;
             if (! in_array($roles_filtered[$i], array_keys(self::$ciscoWLCRoles) ) ) continue;

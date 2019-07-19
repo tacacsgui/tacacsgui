@@ -209,6 +209,7 @@ class APIDatabase
   		'valid_from' => ['timestamp', '_'],
   		'valid_until' => ['timestamp', '_'],
       'acl' => ['foreign-null', ['references'=>'id', 'on'=>'tac_acl', 'onDelete'=>'restrict'] ],
+      'acl_match' => ['foreign-null', ['references'=>'id', 'on'=>'tac_acl', 'onDelete'=>'restrict'] ],
       // 'service' => ['foreign-null', ['references'=>'id', 'on'=>'tac_services', 'onDelete'=>'restrict'] ],
   		// 'ldap_groups' => ['text', '_'],
   		//'priv-lvl' => ['integer', -1], #deprecated
@@ -225,8 +226,8 @@ class APIDatabase
       'unsetId' => true,
       'unsetTimestamp' => true,
       'ldap_id' => ['foreign-null', ['references'=>'id', 'on'=>'ldap_groups', 'onDelete'=>'restrict'] ],
-      'tac_grp_id' => ['foreign-null', ['references'=>'id', 'on'=>'tac_user_groups', 'onDelete'=>'restrict'] ],
-      'api_grp_id' => ['foreign-null', ['references'=>'id', 'on'=>'api_user_groups', 'onDelete'=>'restrict'] ],
+      'tac_grp_id' => ['foreign-null', ['references'=>'id', 'on'=>'tac_user_groups', 'onDelete'=>'cascade'] ],
+      'api_grp_id' => ['foreign-null', ['references'=>'id', 'on'=>'api_user_groups', 'onDelete'=>'cascade'] ],
     ],
 
     'ldap_groups' => [
@@ -239,8 +240,8 @@ class APIDatabase
   		'enable' => ['string', ''],
   		'key' => ['string', ''],
   		'enable_flag' => ['integer', '0'],
-      'acl' => ['foreign-null', ['references'=>'id', 'on'=>'tac_acl', 'onDelete'=>'cascade'] ],
-      'user_group' => ['foreign-null', ['references'=>'id', 'on'=>'tac_user_groups', 'onDelete'=>'cascade'] ],
+      'acl' => ['foreign-null', ['references'=>'id', 'on'=>'tac_acl', 'onDelete'=>'restrict'] ],
+      'user_group' => ['foreign-null', ['references'=>'id', 'on'=>'tac_user_groups', 'onDelete'=>'restrict'] ],
       'connection_timeout' => ['integer', '_'],
   		'banner_welcome' => ['text', '_'],
   		'banner_failed' => ['text', '_'],
@@ -273,8 +274,8 @@ class APIDatabase
       'unsetTimestamp' => true,
       'order' => ['integer', '0' ],
       'service_id' => ['foreign', ['references'=>'id', 'on'=>'tac_services', 'onDelete'=>'restrict'] ],
-      'tac_usr_id' => ['foreign-null', ['references'=>'id', 'on'=>'tac_users', 'onDelete'=>'restrict'] ],
-      'tac_grp_id' => ['foreign-null', ['references'=>'id', 'on'=>'tac_user_groups', 'onDelete'=>'restrict'] ],
+      'tac_usr_id' => ['foreign-null', ['references'=>'id', 'on'=>'tac_users', 'onDelete'=>'cascade'] ],
+      'tac_grp_id' => ['foreign-null', ['references'=>'id', 'on'=>'tac_user_groups', 'onDelete'=>'cascade'] ],
     ],
 
   	'tac_services' =>

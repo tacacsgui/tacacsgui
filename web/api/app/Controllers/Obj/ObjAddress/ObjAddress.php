@@ -218,11 +218,14 @@ class ObjAddress extends Controller
 
     $params = $req->getParams(); //Get ALL parameters form Datatables
 
-		$columns = $this->APICheckerCtrl->getTableTitles('obj_addresses'); //Array of all columnes that will used
-		array_unshift( $columns, 'obj_addresses.id as id' );
-		// $columns[array_search('address', $columns)] = 'tac_devices.address AS address_id';
-		$columns[array_search('name', $columns)] = 'obj_addresses.name AS name';
-		$columns[array_search('type', $columns)] = 'obj_addresses.type AS type';
+		//$columns = $this->APICheckerCtrl->getTableTitles('obj_addresses'); //Array of all columnes that will used
+		$columns = [];
+		array_unshift( $columns, 'obj_addresses.*' );
+		array_push( $columns,
+			$this->db::raw('(SELECT COUNT(*) FROM tac_devices WHERE address = obj_addresses.id) + '.
+			'(SELECT COUNT(*) FROM confM_devices WHERE address = obj_addresses.id) + '.
+			'(SELECT COUNT(*) FROM tac_acl as ta LEFT JOIN tac_acl_ace as tae ON tae.acl_id = ta.id WHERE tae.nas = obj_addresses.id OR tae.nas = obj_addresses.id ) as ref')
+		);
 		$data['columns'] = $columns;
 		$queries = (empty($params['searchTerm'])) ? [] : $params['searchTerm'];
 
@@ -242,7 +245,7 @@ class ObjAddress extends Controller
 
 			if (!empty($params['sortColumn']) and !empty($params['sortDirection']))
 					$tempData = $tempData->orderBy($params['sortColumn'],$params['sortDirection']);
-
+			$data['sql'] = $tempData->toSql();
 			$data['data'] = $tempData->
 			get()->toArray();
 
@@ -293,6 +296,53 @@ class ObjAddress extends Controller
 			});
 
 		$data['results']=$query->get();
+
+		return $res -> withStatus(200) -> write(json_encode($data));
+	}
+
+	public function getRef($req,$res)
+	{
+		//INITIAL CODE////START//
+		$data=array();
+		$data=$this->initialData([
+			'type' => 'get',
+			'object' => 'obj',
+			'action' => 'address ref',
+		]);
+		#check error#
+		if ($_SESSION['error']['status']){
+			$data['error']=$_SESSION['error'];
+			return $res -> withStatus(401) -> write(json_encode($data));
+		}
+		//INITIAL CODE////END//
+
+		//CHECK ACCESS TO THAT FUNCTION//START//
+		if(!$this->checkAccess(1, true))
+		{
+			return $res -> withStatus(403) -> write(json_encode($data));
+		}
+		//CHECK ACCESS TO THAT FUNCTION//END//
+
+		$data['obj'] = ObjAddress_::select(['id','name as text'])->where('id',$req->getParam('id'))->first();
+		$data['mainlist'] = [
+			[ 'name' => 'TACACS Devices', 'list' => [] ],
+			[ 'name' => 'TACACS ACLs', 'list' => [] ],
+			[ 'name' => 'ConfManger Devices', 'list' => [] ],
+		];
+
+		$data['mainlist'][0]['list'] = $this->db->table('tac_devices as td')->
+		select(['td.name as text', 'td.id as id'])->
+		where('address',$req->getParam('id'))->get();
+
+		$data['mainlist'][1]['list'] = $this->db->table('tac_acl as ta')->
+		leftJoin('tac_acl_ace as tae', 'tae.acl_id','=','ta.id')->
+		select(['ta.name as text', 'ta.id as id'])->
+		groupBy('ta.id')->
+		where('tae.nas',$req->getParam('id'))->whereOr('tae.nac',$req->getParam('id'))->get();
+
+		$data['mainlist'][2]['list'] = $this->db->table('confM_devices as cd')->
+		select(['cd.name as text', 'cd.id as id'])->
+		where('address',$req->getParam('id'))->get();
 
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}

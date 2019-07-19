@@ -409,16 +409,19 @@ class TACServicesCtrl extends Controller
 
 		$params=$req->getParams(); //Get ALL parameters form Datatables
 
-		$columns = $this->APICheckerCtrl->getTableTitles('tac_services'); //Array of all columnes that will used
-		array_unshift( $columns, 'id' );
-		array_push( $columns, 'created_at', 'updated_at' );
+		//$columns = $this->APICheckerCtrl->getTableTitles('tac_services'); //Array of all columnes that will used
+		$columns = [];
+		array_unshift( $columns, 'tac_services.*' );
+		array_push( $columns, $this->db::raw('(SELECT COUNT(*) FROM tac_bind_service WHERE service_id = tac_services.id) as ref'));
 		$data['columns'] = $columns;
 		$queries = (empty($params['searchTerm'])) ? [] : $params['searchTerm'];
 
 		//Filter end
 		$data['recordsTotal'] = TACServices::count();
 		//Get temp data for Datatables with Fliter and some other parameters
-		$tempData = TACServices::select($columns)->
+		$tempData = TACServices:://leftJoin('tac_bind_service as tbs','tbs.service_id','=','tac_services.id')->
+		select($columns)->
+		//groupBy('tac_services.id')->
 		when( !empty($queries),
 			function($query) use ($queries)
 			{
@@ -487,6 +490,52 @@ class TACServicesCtrl extends Controller
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
 ########	List of Services	###############END###########
+################################################
+########	List of Service Reference	###############START###########
+	#########	GET List Service Reference#########
+	public function getServiceRef($req,$res)
+	{
+		//INITIAL CODE////START//
+		$data=array();
+		$data=$this->initialData([
+			'type' => 'get',
+			'object' => 'services',
+			'action' => 'ref',
+		]);
+		#check error#
+		if ($_SESSION['error']['status']){
+			$data['error']=$_SESSION['error'];
+			return $res -> withStatus(401) -> write(json_encode($data));
+		}
+		//INITIAL CODE////END//
+
+		//CHECK ACCESS TO THAT FUNCTION//START//
+		if(!$this->checkAccess(13, true))
+		{
+			return $res -> withStatus(403) -> write(json_encode($data));
+		}
+		//CHECK ACCESS TO THAT FUNCTION//END//
+
+		$data['obj'] = TACServices::select(['id','name as text'])->where('id',$req->getParam('id'))->first();
+		$data['mainlist'] = [
+			[ 'name' => 'TACACS Users', 'list' => [] ],
+			[ 'name' => 'TACACS User Groups', 'list' => [] ],
+		];
+
+		$data['mainlist'][0]['list'] = $this->db->table('tac_bind_service')->
+		leftJoin('tac_users as tu', 'tu.id', '=', 'tac_usr_id')->
+		select(['tu.username as text', 'tu.id as id'])->
+		where([['service_id',$req->getParam('id')], ['tac_usr_id', '<>', null]])->get();
+
+		$data['mainlist'][1]['list'] = $this->db->table('tac_bind_service')->
+		leftJoin('tac_user_groups as tug', 'tug.id', '=', 'tac_grp_id')->
+		select(['tug.name as text', 'tug.id as id'])->
+		where([['service_id',$req->getParam('id')], ['tac_grp_id', '<>', null]])->get();
+
+
+		return $res -> withStatus(200) -> write(json_encode($data));
+	}
+########	List of Service Reference	###############END###########
 ################################################
 
 }//END OF CLASS//
