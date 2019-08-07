@@ -61,11 +61,20 @@ class APIUserGrpsCtrl extends Controller
 
 		$allParams = $req->getParams();
 
+		$ldapGroups = $allParams['ldap_groups'];
+		unset($allParams['ldap_groups']);
+
 		// if ($allParams['default_flag']) APIUserGrps::where([['default_flag', '=', 1]])->update(['default_flag' => 0]);
 		//
 		// $allParams['rights'] = $this->rightsToOneValue($allParams['rights']);
 
 		$data['group'] = APIUserGrps::create($allParams);
+
+		$ldap_bind = [];
+		foreach ($ldapGroups as $ldapGroup) {
+			$ldap_bind[] = ['api_grp_id' => $data['group']->id, 'ldap_id' => $ldapGroup];
+		}
+		$this->db::table('ldap_bind')->insert($ldap_bind);
 
 		$logEntry=array('action' => 'add', 'obj_name' => $data['group']->name, 'obj_id' => $data['group']->id, 'section' => 'api user groups', 'message' => 206);
 		$data['logging']=$this->APILoggingCtrl->makeLogEntry($logEntry);
@@ -106,6 +115,10 @@ class APIUserGrpsCtrl extends Controller
 		$data['group']=APIUserGrps::select()->
 			where('id',$req->getParam('id'))->
 			first();
+
+		$data['group']['ldap_groups']=$this->db::table('ldap_bind')->
+			leftJoin('ldap_groups as ld','ld.id','=','ldap_id')->
+			select(['ld.cn as text', 'ld.id as id'])->where('api_grp_id',$req->getParam('id'))->get();
 
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
@@ -155,6 +168,9 @@ class APIUserGrpsCtrl extends Controller
 
 		$allParams = $req->getParams();
 
+		$ldapGroups = $allParams['ldap_groups'];
+		unset($allParams['ldap_groups']);
+
 		// if ($allParams['default_flag']) APIUserGrps::where([['default_flag', '=', 1]])->update(['default_flag' => 0]);
 		// $id = $allParams['id'];
 		// unset($allParams['id']);
@@ -162,6 +178,15 @@ class APIUserGrpsCtrl extends Controller
 		$id = $allParams['id'];
 		$data['save']=APIUserGrps::where('id',$id)->
 			update($allParams);
+
+		$ldap_bind = [];
+		foreach ($ldapGroups as $ldapGroup) {
+			$ldap_bind[] = ['api_grp_id' => $id, 'ldap_id' => $ldapGroup];
+		}
+		$this->db::table('ldap_bind')->where('api_grp_id', $id)->delete();
+		$this->db::table('ldap_bind')->insert($ldap_bind);
+
+		$data['save'] = 1;
 
 		$name = $allParams['name'];
 

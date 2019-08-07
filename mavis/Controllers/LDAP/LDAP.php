@@ -52,6 +52,7 @@ class LDAP extends Controller
   public function run()
   {
     $this->mavis->debugIn( $this->dPrefix() .'DN: '. $this->adUser->distinguishedname[0]);
+    //var_dump($this->adUser->gidnumber);
     $this->mavis->result('NAK');
     //var_dump($this->adUser->dn[0]); die;
     //var_dump( $this->ad->auth()->attempt( $this->adUser->dn[0], $this->mavis->getPassword() ) ); die;
@@ -88,9 +89,8 @@ class LDAP extends Controller
 
     $this->mavis->debugIn( $this->dPrefix() . ( ($this->mavis->getVariable(AV_A_TACTYPE) == 'AUTH') ? 'Auth Success!' : 'Auth via INFO!') );
 
-    $usr = $this->db->table('tac_users')->select('login_flag')->whereRaw("BINARY `username`='{$this->mavis->getUsername()}'")->where('login_flag', 20);
+    $usr = $this->db->table('tac_users')->select('login_flag')->whereRaw("BINARY `username`='{$this->mavis->getUsername()}'")->where([['login_flag', 20],['disabled',0]]);
     $usr_local = $usr->count();
-
     $this->mavis->debugIn( $this->dPrefix() .'Does it locally predefined? '. ( ( $usr_local ) ? 'Yes' : 'No') );
 
     if ( $usr_local == 0 ){
@@ -109,6 +109,8 @@ class LDAP extends Controller
         for ($mgui=0; $mgui < count($this->adUser->gidnumber); $mgui++) {
           $mainGUI = $search->where('objectclass', 'posixGroup')->where( 'gidNumber', $this->adUser->gidnumber[$mgui] )->first();
           $groupList_fullNames[] = ( is_array($mainGUI->dn) ) ? $mainGUI->dn[0] : $mainGUI->dn;
+
+          $this->mavis->debugIn( $this->dPrefix() .'CN: '. ( ( is_array($mainGUI->cn) ) ? $mainGUI->cn[0] : $mainGUI->cn ) );
           $groupList[] = ( is_array($mainGUI->cn) ) ? $mainGUI->cn[0] : $mainGUI->cn;
         }
         $subGUI = $search->where('objectclass', 'posixGroup')->where( 'memberUid', $this->mavis->getUsername() )->get();

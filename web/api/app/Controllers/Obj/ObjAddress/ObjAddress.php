@@ -224,7 +224,7 @@ class ObjAddress extends Controller
 		array_push( $columns,
 			$this->db::raw('(SELECT COUNT(*) FROM tac_devices WHERE address = obj_addresses.id) + '.
 			'(SELECT COUNT(*) FROM confM_devices WHERE address = obj_addresses.id) + '.
-			'(SELECT COUNT(*) FROM tac_acl as ta LEFT JOIN tac_acl_ace as tae ON tae.acl_id = ta.id WHERE tae.nas = obj_addresses.id OR tae.nas = obj_addresses.id ) as ref')
+			'(select count(distinct tae.acl_id) from tgui.tac_acl_ace tae where tae.nac = obj_addresses.id or tae.nas = obj_addresses.id ) as ref')
 		);
 		$data['columns'] = $columns;
 		$queries = (empty($params['searchTerm'])) ? [] : $params['searchTerm'];
@@ -338,7 +338,7 @@ class ObjAddress extends Controller
 		leftJoin('tac_acl_ace as tae', 'tae.acl_id','=','ta.id')->
 		select(['ta.name as text', 'ta.id as id'])->
 		groupBy('ta.id')->
-		where('tae.nas',$req->getParam('id'))->whereOr('tae.nac',$req->getParam('id'))->get();
+		where('tae.nas',$req->getParam('id'))->orWhere('tae.nac',$req->getParam('id'))->get();
 
 		$data['mainlist'][2]['list'] = $this->db->table('confM_devices as cd')->
 		select(['cd.name as text', 'cd.id as id'])->

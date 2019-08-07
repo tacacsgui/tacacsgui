@@ -114,10 +114,13 @@ class AuthController extends Controller
 			///LOGGING//end//
 			return $res -> withStatus(401) -> write(json_encode($data));
 		}
-
-		$data['user']=APIUsers::where('id',$_SESSION['uid'])->first();
-		$data['info']['user']['id']=(isset($_SESSION['uid'])) ? $_SESSION['uid'] : 'empty';
-		$data['info']['user']['username']=(isset($_SESSION['uname'])) ? $_SESSION['uname'] : 'empty';
+		if ( !isset($_SESSION['ldap']) ){
+			$data['user']=APIUsers::where('id',$_SESSION['uid'])->first();
+			$data['info']['user']['id']=(isset($_SESSION['uid'])) ? $_SESSION['uid'] : 'empty';
+			$data['info']['user']['username']=(isset($_SESSION['uname'])) ? $_SESSION['uname'] : 'empty';
+		} else {
+			$data['user']=$_SESSION['user'];
+		}
 
 		///LOGGING//start//
 		$logEntry = array('action' => 'Signin', 'section' => 'api auth', 'message' => 101);
@@ -127,7 +130,7 @@ class AuthController extends Controller
 		$data['authorised']=$this->auth->check();
 		$data['info']['user']['changePasswd'] = (isset($_SESSION['changePasswd'])) ? $_SESSION['changePasswd'] : 'empty';
 
-    $data['token'] = JWT::encode(['id' => $data['user']->id, 'username' => $data['user']->username], "supersecretkeyyoushouldnotcommittogithub", "HS256");
+    $data['token'] = JWT::encode(['id' => $data['user']->id, 'username' => $data['user']->username], DB_PASSWORD, "HS256");
 
 		//$data['error']='authorised'; //$this->message->getError(false, 6, 0);
 		return $res -> withStatus(200) -> write(json_encode($data));

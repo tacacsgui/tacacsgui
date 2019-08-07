@@ -1,4 +1,8 @@
 ##############################
+Version_0.9.75 20190807
+	* Added LDAP Auth for API Users
+	* Some bugs fixed (Please use combination of Ctrl + Shift + R to clear browser cache)
+##############################
 Version_0.9.74 20190719
 	* Reference Sidebar for Services, ACLs, Addresses
 	* Some bugs fixed (Please use combination of Ctrl + Shift + R to clear browser cache)

@@ -45,7 +45,7 @@ class OTP extends Controller
     }
     $this->mavis->debugIn( $this->dPrefix() .'Global OTP: '.json_encode ( $this->otp_settings ));
 		$otp = TOTP::create(
-				$this->user->mavis_otp_secret,
+				trim(Base32::encodeUpper($this->user->mavis_otp_secret), '='),
 				$this->otp_settings->period,//$this->user->mavis_otp_period, // The period (30 seconds)
 				$this->otp_settings->digest,//$this->user->mavis_otp_digest, // The digest algorithm
 				$this->otp_settings->digits//$this->user->mavis_otp_digits

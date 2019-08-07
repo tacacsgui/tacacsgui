@@ -194,7 +194,7 @@ $app->add(new Tuupola\Middleware\JwtAuthentication([
 		//"path" => "/api/auth/123",
 		"ignore" => ["/auth", "/tacacs/user/change_passwd/change/", "/backup/download/", "/backup/upload/", '/ha/'],
 		"attribute" => "decoded_token_data",
-    "secret" => "supersecretkeyyoushouldnotcommittogithub",
+    "secret" => DB_PASSWORD,
 		"algorithm" => ["HS256"],
 		"secure" => false,
 		"error" => function ($response, $arguments) {

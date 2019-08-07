@@ -4,7 +4,7 @@
         "illuminate/database": "^5.5",
         "respect/validation": "^1.1",
         "slim/csrf": "^0.8.2",
-        "spomky-labs/otphp": "^9.1",
+        "spomky-labs/otphp": "^10.0",
         "bacon/bacon-qr-code": "^1.0",
         "irazasyed/telegram-bot-sdk": "^2.0",
         "php-smpp/php-smpp": "^1.2",
