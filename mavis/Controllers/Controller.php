@@ -154,7 +154,12 @@ class Controller
     }
     $output.="=".$this->mavis_result."\n";
 
+    $this->V_IN = [];
+
     fwrite(STDOUT, $output);
+
+    // if (isset($this->V_IN[AV_A_USER_RESPONSE]))
+    //   $this->V_IN[AV_A_USER_RESPONSE];
     //exit(0);
   }
 

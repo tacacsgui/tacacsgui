@@ -39,8 +39,13 @@ class MAVISOTPCtrl extends Controller
 			return $res -> withStatus(401) -> write(json_encode($data));
 		}
 		//INITIAL CODE////END//
+		$allParams = $req->getParams();
 
-		$secret = $this->secret($req->getParam('secret'));
+		if (empty($allParams['secret']))
+			$secret = $this->secret();
+		else
+			$secret = $allParams['secret'];
+		//$secret = $this->secret($req->getParam('secret'));
 		$username = ($req->getParam('username')) ? $req->getParam('username') : 'Unknown';
 		// $period = $req->getParam('period');
 		// $digits = $req->getParam('digits');
@@ -59,6 +64,7 @@ class MAVISOTPCtrl extends Controller
 		$otp->setLabel($username); // The label (string)
 		$otp->setIssuer('TACACSGUI');
 		$data['url'] = $otp->getProvisioningUri();
+		$data['secret'] = $secret;
 		// $data['url'] = 'otpauth://totp/tacacsgui:'.$username.'?secret='.$secret.'&issuer=tacacsgui&algorithm=SHA1&digits='.$mavis->digits.'&period='.$mavis->period;
 		// $data['url'] = 'otpauth://totp/tacacsgui:'.$username.'?secret='.$secret.'&issuer=tacacsgui&algorithm='.strtoupper($mavis->digest).'&digits=6&period=30';
 		//$data['url'] = 'otpauth://totp/tacacsgui:otpu?secret=243Z2MMW7XZ3W45DWDVGGXFAWJ26SLU4&issuer=tacacsgui&algorithm=SHA1&digits=6&period=30';

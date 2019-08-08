@@ -44,13 +44,23 @@ class OTP extends Controller
       return false;
     }
     $this->mavis->debugIn( $this->dPrefix() .'Global OTP: '.json_encode ( $this->otp_settings ));
-		$otp = TOTP::create(
-				trim(Base32::encodeUpper($this->user->mavis_otp_secret), '='),
-				$this->otp_settings->period,//$this->user->mavis_otp_period, // The period (30 seconds)
-				$this->otp_settings->digest,//$this->user->mavis_otp_digest, // The digest algorithm
-				$this->otp_settings->digits//$this->user->mavis_otp_digits
-		);
-		$verification = $otp->verify( $this->mavis->getPassword() );
+
+    $otp = TOTP::create(
+        $this->user->mavis_otp_secret,
+        $this->otp_settings->period,//$this->user->mavis_otp_period, // The period (30 seconds)
+        $this->otp_settings->digest,//$this->user->mavis_otp_digest, // The digest algorithm
+        $this->otp_settings->digits//$this->user->mavis_otp_digits
+    );
+    $verification = false;
+    try {
+      $verification = $otp->verify( $this->mavis->getPassword() );
+    } catch (\Exception $e) {
+      $this->mavis->debugIn( $this->dPrefix() .'OTP Secret: '.json_encode ( $this->user->mavis_otp_secret ));
+      $this->mavis->debugIn( $this->dPrefix() .'OTP Error: '.json_encode ( $e ));
+    }
+
+
+		//$verification = $otp->verify( $this->mavis->getPassword() );
 		$this->mavis->debugIn( $this->dPrefix() .'Verification status: ' . ( ( $verification ) ? 'allow' : 'deny' ) );
     if ($verification)
     {

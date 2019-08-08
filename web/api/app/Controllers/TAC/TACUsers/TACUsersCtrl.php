@@ -8,6 +8,8 @@ use tgui\Models\MAVISOTP;
 use tgui\Models\TACGlobalConf;
 use tgui\Models\APIPWPolicy;
 use tgui\Controllers\Controller;
+use ParagonIE\ConstantTime\Base32;
+
 use Respect\Validation\Validator as v;
 
 class TACUsersCtrl extends Controller
@@ -110,8 +112,8 @@ class TACUsersCtrl extends Controller
 
 		// $otp_default = MAVISOTP::select()->first();
 		//$nxos_support = TACGlobalConf::select('nxos_support')->first();
-
-		// $allParams['mavis_otp_secret'] = $this->MAVISOTP->secret();
+		// if (isset($allParams['mavis_otp_secret']))
+		// 	$allParams['mavis_otp_secret'] = trim(Base32::encodeUpper($allParams['mavis_otp_secret']), '=');
 		// $allParams['mavis_otp_period'] = $otp_default->period;
 		// $allParams['mavis_otp_digits'] = $otp_default->digits;
 
@@ -324,6 +326,9 @@ class TACUsersCtrl extends Controller
 		unset($allParams['group']);
 		unset($allParams['device_group_list']);
 		unset($allParams['device_list']);
+
+		// if (isset($allParams['mavis_otp_secret']))
+		// 	$allParams['mavis_otp_secret'] = trim(Base32::encodeUpper($allParams['mavis_otp_secret']), '=');
 
 
 		$data['save']=TACUsers::where('id',$req->getParam('id'))->
