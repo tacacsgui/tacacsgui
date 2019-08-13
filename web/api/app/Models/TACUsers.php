@@ -10,6 +10,7 @@ class TACUsers extends Model
 
 	protected $fillable = [
 		'username',
+		'email',
 		'login',
 		'login_flag',
 		'pap',

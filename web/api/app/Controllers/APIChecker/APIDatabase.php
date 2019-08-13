@@ -114,6 +114,8 @@ class APIDatabase
   	'tac_users' =>
   	[
   		'username' => ['string', ''],
+  		'email' => ['string', ''],
+  		'login_date' => ['timestamp', '_'],
   		'login' => ['string', ''],
   		'login_flag' => ['integer', '0'],
   		'login_change' => ['integer', '1'],

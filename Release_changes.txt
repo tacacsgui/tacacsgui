@@ -1,4 +1,10 @@
 ##############################
+Version_0.9.76 20190813
+	* Send random Local MAVIS password via email
+	* Send OTP MAVIS password via email
+	* Put hashed MD5 password
+##############################
+##############################
 Version_0.9.75 20190807
 	* Added LDAP Auth for API Users
 	* Some bugs fixed (Please use combination of Ctrl + Shift + R to clear browser cache)

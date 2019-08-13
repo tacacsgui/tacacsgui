@@ -5,6 +5,7 @@ namespace tgui\Controllers;
 use tgui\Models\TACGlobalConf;
 use tgui\Controllers\APIChecker\APIDatabase;
 use tgui\Controllers\APISettings\HA;
+use tgui\Models\APIPWPolicy;
 
 class Controller
 {
@@ -140,6 +141,41 @@ class Controller
 		}
 		return $randomString;
 	}
+	public static function generatePassword($lp = true, $length = 9, $available_sets = 'luds') {
+		if ($lp) {
+			$policy = APIPWPolicy::select()->first(1);
+			$length = $policy['tac_pw_length'];
+			$available_sets = '';
+			$available_sets .= ($policy['tac_pw_uppercase']) ? 'u': '';
+			$available_sets .= ($policy['tac_pw_lowercase']) ? 'l': '';
+			$available_sets .= ($policy['tac_pw_special']) ? 's': '';
+			$available_sets .= ($policy['tac_pw_numbers']) ? 'n': '';
+			if ( empty($available_sets) ) $available_sets = 'lu';
+		}
+		$sets = array();
+		if(strpos($available_sets, 'l') !== false)
+			$sets[] = 'abcdefghjkmnpqrstuvwxyz';
+		if(strpos($available_sets, 'u') !== false)
+			$sets[] = 'ABCDEFGHJKMNPQRSTUVWXYZ';
+		if(strpos($available_sets, 'd') !== false)
+			$sets[] = '23456789';
+		if(strpos($available_sets, 's') !== false)
+			$sets[] = '!@#$%&*?';
+		$all = '';
+		$password = '';
+		foreach($sets as $set)
+		{
+			$password .= $set[array_rand(str_split($set))];
+			$all .= $set;
+		}
+		$all = str_split($all);
+		for($i = 0; $i < $length - count($sets); $i++)
+			$password .= $all[array_rand($all)];
+		$password = str_shuffle($password);
+
+		return $password;
+
+	}
 	////////////////////////////////////////
 	////////////////////////////////////////
   public static function serverTime()
@@ -165,7 +201,8 @@ class Controller
 			return trim(shell_exec('openssl passwd -1 \''.$password."'"));
 		} elseif ($type == 2 AND $encrypt == 1 )
 		{
-			return trim(shell_exec('openssl passwd -crypt \''.$password."'"));
+			return $password;
+			//return trim(shell_exec('openssl passwd -crypt \''.$password."'"));
 		} elseif ($type == 3)
 		{
 			return password_hash($password, PASSWORD_DEFAULT);

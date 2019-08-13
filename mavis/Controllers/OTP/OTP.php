@@ -29,7 +29,7 @@ class OTP extends Controller
     $this->user = $this->db->table('tac_users')->
         select('mavis_otp_secret','id')->
         // leftJoin('tac_bind_usrGrp as tb', 'tb.user_id', '=', 'tu.id')->
-        whereRaw("BINARY `username`='{$this->mavis->getUsername()}'")->where('login_flag', 10);
+        whereRaw("BINARY `username`='{$this->mavis->getUsername()}'")->whereIn('login_flag', [10, 12]);
     $this->mavis->debugIn( $this->dPrefix() . 'Check Status: ' . ( ($this->user->count()) ? 'User Found. Run' : 'User Not Found. Exit' ) );
     return $this->user->count();
   }

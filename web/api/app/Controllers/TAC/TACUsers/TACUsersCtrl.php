@@ -10,6 +10,14 @@ use tgui\Models\APIPWPolicy;
 use tgui\Controllers\Controller;
 use ParagonIE\ConstantTime\Base32;
 
+use tgui\PHPMailer\EmailEngine;
+use tgui\Models\APISMTP;
+
+// use BaconQrCode\Renderer\ImageRenderer;
+// use BaconQrCode\Renderer\Image\ImagickImageBackEnd;
+// use BaconQrCode\Renderer\RendererStyle\RendererStyle;
+// use BaconQrCode\Writer;
+
 use Respect\Validation\Validator as v;
 
 class TACUsersCtrl extends Controller
@@ -65,17 +73,15 @@ class TACUsersCtrl extends Controller
 				passwdPolicyUppercase($policy['tac_pw_uppercase'])->
 				passwdPolicyLowercase($policy['tac_pw_lowercase'])->
 				passwdPolicySpecial($policy['tac_pw_special'])->
-				passwdPolicyNumbers($policy['tac_pw_numbers'])->
-				desRestriction($req->getParam('enable_flag'))->setName('Enable') ),
-			'enable_flag' => v::when( v::nullType() , v::alwaysValid(), v::oneOf( v::equals('1'), v::equals('0'), v::equals('4') ) ),
+				passwdPolicyNumbers($policy['tac_pw_numbers'])->setName('Enable') ),
+			'enable_flag' => v::when( v::nullType() , v::alwaysValid(), v::oneOf( v::equals('1'), v::equals('2'), v::equals('0'), v::equals('4') ) ),
 			'pap' => v::when( v::oneOf( v::nullType(), v::equals(''), v::loginClone( $req->getParam('pap_flag') ) ) , v::alwaysValid(), v::noWhitespace()->notContainChars()->
 				length($policy['tac_pw_length'], 64)->
 				notEmpty()->
 				passwdPolicyUppercase($policy['tac_pw_uppercase'])->
 				passwdPolicyLowercase($policy['tac_pw_lowercase'])->
 				passwdPolicySpecial($policy['tac_pw_special'])->
-				passwdPolicyNumbers($policy['tac_pw_numbers'])->
-				desRestriction($req->getParam('pap_flag'))->setName('PAP') ),
+				passwdPolicyNumbers($policy['tac_pw_numbers'])->setName('PAP') ),
 			'pap_flag' => v::when( v::nullType() , v::alwaysValid(), v::oneOf( v::equals('1'), v::equals('0'), v::equals('4') ) ),
 			'login' => v::when( v::checkLoginType($req->getParam('login_flag')), v::alwaysValid(), v::noWhitespace()->
 					notContainChars()->
@@ -84,9 +90,20 @@ class TACUsersCtrl extends Controller
 					passwdPolicyUppercase($policy['tac_pw_uppercase'], $allParams['login_flag'])->
 					passwdPolicyLowercase($policy['tac_pw_lowercase'], $allParams['login_flag'])->
 					passwdPolicySpecial($policy['tac_pw_special'], $allParams['login_flag'])->
-					passwdPolicyNumbers($policy['tac_pw_numbers'], $allParams['login_flag'])->
-					desRestriction($req->getParam('login_flag'))->setName('Login Password') ),
-			'login_flag' => v::noWhitespace()->numeric()->oneOf( v::equals('1'), v::equals('0'), v::equals('3'), v::equals('10'), v::equals('20'), v::equals('30') ),
+					passwdPolicyNumbers($policy['tac_pw_numbers'], $allParams['login_flag'])->setName('Login Password') ),
+			'login_flag' => v::noWhitespace()->numeric()->
+				oneOf(
+					v::equals('1'),
+					v::equals('0'),
+					v::equals('2'),
+					v::equals('3'),
+					v::equals('5'),
+					v::equals('10'),
+					v::equals('12'),
+					v::equals('20'),
+					v::equals('30')
+				),
+			'email' => v::when( v::checkLoginType($req->getParam('login_flag'), 'email'), v::alwaysValid(), v::notEmpty()->email()->setName('Email') ),
 			'valid_from' => v::when( v::nullType() , v::alwaysValid(), v::date('Y-m-d')->setName('Valid From') ),
 			'valid_until' => v::when( v::nullType() , v::alwaysValid(), v::date('Y-m-d')->setName('Valid Until') )
 		]);
@@ -154,6 +171,35 @@ class TACUsersCtrl extends Controller
 		$this->db::table('tac_bind_devGrp')->insert($devGrps_bind);
 
 		$data['user']=$user;
+
+		if (in_array($allParams['login_flag'], [12, 5])){
+			$password = ($allParams['login_flag'] == 12) ? $secret = $this->MAVISOTP::newSecret() : $this->generatePassword();
+
+			$data = $this->passwdSender($data, $user->id, $password, $allParams['email'], $allParams['login_flag']);
+
+
+			if (!$data['mail'])
+				return $res -> withStatus(200) -> write(json_encode($data));
+
+			$data['login_date'] = date('Y-m-d H:i:s',time());
+
+			switch ($allParams['login_flag']) {
+				case '12':
+					TACUsers::where('id',$user->id)->update([
+						'login' => '',
+						'login_date' => $data['login_date'],
+						'mavis_otp_secret' => $password
+					]);
+					break;
+
+				default:
+					TACUsers::where('id',$user->id)->update([
+						'login' => password_hash($password, PASSWORD_DEFAULT),
+						'login_date' => $data['login_date']
+					]);
+					break;
+			}
+		}
 
 		$data['changeConfiguration']=$this->changeConfigurationFlag(['unset' => 0]);
 
@@ -267,9 +313,8 @@ class TACUsersCtrl extends Controller
 				passwdPolicyUppercase($policy['tac_pw_uppercase'])->
 				passwdPolicyLowercase($policy['tac_pw_lowercase'])->
 				passwdPolicySpecial($policy['tac_pw_special'])->
-				passwdPolicyNumbers($policy['tac_pw_numbers'])->
-				desRestriction($req->getParam('enable_flag'))->setName('Enable') ),
-			'enable_flag' => v::when( v::nullType() , v::alwaysValid(), v::oneOf( v::equals('1'), v::equals('0'), v::equals('4') ) ),
+				passwdPolicyNumbers($policy['tac_pw_numbers'])->setName('Enable') ),
+			'enable_flag' => v::when( v::nullType() , v::alwaysValid(), v::oneOf( v::equals('1'), v::equals('2'), v::equals('0'), v::equals('4') ) ),
 			'login' => v::when( v::oneOf( v::nullType(), v::checkLoginType($req->getParam('login_flag')) ) , v::alwaysValid(), v::noWhitespace()->
 					notContainChars()->
 					length($policy['tac_pw_length'], 64)->
@@ -277,17 +322,28 @@ class TACUsersCtrl extends Controller
 					passwdPolicyUppercase($policy['tac_pw_uppercase'], $allParams['login_flag'])->
 					passwdPolicyLowercase($policy['tac_pw_lowercase'], $allParams['login_flag'])->
 					passwdPolicySpecial($policy['tac_pw_special'], $allParams['login_flag'])->
-					passwdPolicyNumbers($policy['tac_pw_numbers'], $allParams['login_flag'])->
-					desRestriction($req->getParam('login_flag'))->setName('Login') ),
-			'login_flag' => v::when( v::nullType() , v::alwaysValid(), v::oneOf( v::equals('1'), v::equals('0'), v::equals('3'), v::equals('10'), v::equals('20'), v::equals('30') ) ),
+					passwdPolicyNumbers($policy['tac_pw_numbers'], $allParams['login_flag'])->setName('Login') ),
+			'login_flag' => v::when( v::nullType() , v::alwaysValid(),
+				v::oneOf(
+					v::equals('1'),
+					v::equals('0'),
+					v::equals('2'),
+					v::equals('3'),
+					v::equals('5'),
+					v::equals('10'),
+					v::equals('12'),
+					v::equals('20'),
+					v::equals('30') )
+				),
 			'pap' => v::when( v::oneOf( v::nullType(), v::equals(''), v::loginClone( $req->getParam('pap_flag') ) ) , v::alwaysValid(), v::noWhitespace()->notContainChars()->
 				length($policy['tac_pw_length'], 64)->
 				notEmpty()->
 				passwdPolicyUppercase($policy['tac_pw_uppercase'])->
 				passwdPolicyLowercase($policy['tac_pw_lowercase'])->
 				passwdPolicySpecial($policy['tac_pw_special'])->
-				passwdPolicyNumbers($policy['tac_pw_numbers'])->
-				desRestriction($req->getParam('pap_flag'))->setName('PAP') ),
+				passwdPolicyNumbers($policy['tac_pw_numbers'])->setName('PAP') ),
+
+			'email' => v::when( v::checkLoginType($req->getParam('login_flag'), 'email'), v::alwaysValid(), v::notEmpty()->email()->setName('Email') ),
 			'pap_flag' => v::when( v::nullType() , v::alwaysValid(), v::oneOf( v::equals('1'), v::equals('0'), v::equals('4') ) ),
 			'mavis_otp_period' => v::noWhitespace()->when( v::nullType() , v::alwaysValid(), v::intVal()->between(30, 120)),
 			'mavis_otp_digits' => v::noWhitespace()->when( v::nullType() , v::alwaysValid(), v::intVal()->between(5, 8)),
@@ -330,6 +386,12 @@ class TACUsersCtrl extends Controller
 		// if (isset($allParams['mavis_otp_secret']))
 		// 	$allParams['mavis_otp_secret'] = trim(Base32::encodeUpper($allParams['mavis_otp_secret']), '=');
 
+		//$sendEmail = false;
+		$oldData = TACUsers::where('id',$req->getParam('id'))->select(['login_flag', 'email'])->first();
+		$nochanges = (
+			( in_array($allParams['login_flag'], [12, 5]) ) AND
+			$oldData->login_flag == $allParams['login_flag'] AND $oldData->email == $allParams['email']
+		);
 
 		$data['save']=TACUsers::where('id',$req->getParam('id'))->
 			update($allParams);
@@ -363,6 +425,35 @@ class TACUsersCtrl extends Controller
 		$this->db::table('tac_bind_devGrp')->insert($devGrps_bind);
 
 		$data['save']=1;
+
+	if (!$nochanges){
+			$password = ($allParams['login_flag'] == 12) ? $secret = $this->MAVISOTP::newSecret() : $this->generatePassword();
+
+			$data = $this->passwdSender($data, $id, $password, $allParams['email'], $allParams['login_flag']);
+
+
+			if (!$data['mail'])
+				return $res -> withStatus(200) -> write(json_encode($data));
+
+			$data['login_date'] = date('Y-m-d H:i:s',time());
+
+			switch ($allParams['login_flag']) {
+				case '12':
+					TACUsers::where('id',$id)->update([
+						'login' => '',
+						'login_date' => $data['login_date'],
+						'mavis_otp_secret' => $password
+					]);
+					break;
+
+				default:
+					TACUsers::where('id',$id)->update([
+						'login' => password_hash($password, PASSWORD_DEFAULT),
+						'login_date' => $data['login_date']
+					]);
+					break;
+			}
+		}
 
 		$data['changeConfiguration']=$this->changeConfigurationFlag(['unset' => 0]);
 
@@ -570,18 +661,23 @@ class TACUsersCtrl extends Controller
 			return $res -> withStatus(200) -> write(json_encode($data));
 		}
 		$allParams = $req->getParams();
-		$user = TACUsers::select()->where([['username','=',$allParams['username']], ['login_flag','=',3]])->orWhere([['username','=',$allParams['username']], ['enable_flag','=',3]])->first();
+		$user = TACUsers::select()->where([['username','=',$allParams['username']]])->
+		//orWhere([['username','=',$allParams['username']], ['enable_flag','=',3]])->
+		whereIn('login_flag',[3,5])->
+			first();
+
 		$data['success'] = false;
 		// $data['test5'] = empty($user);
 		// $data['test1'] = ($allParams['object'] == 'login' AND !password_verify($allParams['password'], $user->login) );
 		// $data['test4'] = ($allParams['object'] == 'enable' AND !password_verify($allParams['password'], $user->enable) );
 		// $data['test2'] = ($allParams['object'] == 'login' AND (!$user->login_change OR $user->login_flag != 3 ));
 		// $data['test3'] = ($allParams['object'] == 'enable' AND (!$user->enable_change OR $user->enable_flag != 3 ) );
+		$data['user'] = password_verify($allParams['password'], $user->login);
 		if (
 			empty($user) OR
 			($allParams['object'] == 'login' AND !password_verify($allParams['password'], $user->login) ) OR
 			($allParams['object'] == 'enable' AND !password_verify($allParams['password'], $user->enable) ) OR
-			($allParams['object'] == 'login' AND (!$user->login_change OR $user->login_flag != 3 ) )OR
+			($allParams['object'] == 'login' AND (!$user->login_change OR !in_array($user->login_flag, [3,5]) ) )OR
 			($allParams['object'] == 'enable' AND (!$user->enable_change OR $user->enable_flag != 3 ) )
 		){
 			$_SESSION['error']['status']=true;
@@ -626,5 +722,120 @@ class TACUsersCtrl extends Controller
 
 
 		return $res -> withStatus(200) -> write(json_encode($data));
+	}
+
+	public function postSendPasswd($req,$res)
+	{
+		//INITIAL CODE////START//
+		$data=array();
+		$data=$this->initialData([
+			'type' => 'post',
+			'object' => 'user',
+			'action' => 'send passwd login',
+		]);
+		#check error#
+		//INITIAL CODE////END//
+
+		//CHECK SHOULD I STOP THIS?//START//
+		if( $this->shouldIStopThis() )
+		{
+			$data['error'] = $this->shouldIStopThis();
+			return $res -> withStatus(400) -> write(json_encode($data));
+		}
+		//CHECK SHOULD I STOP THIS?//END//
+		//CHECK ACCESS TO THAT FUNCTION//START//
+		if(!$this->checkAccess(4))
+		{
+			return $res -> withStatus(403) -> write(json_encode($data));
+		}
+		//CHECK ACCESS TO THAT FUNCTION//END//
+
+		//$policy = APIPWPolicy::select()->first(1);
+		$validation = $this->validator->validate($req, [
+			'id' => v::noWhitespace()->notEmpty()->numeric(),
+			'flag' => v::noWhitespace()->notEmpty()->numeric(),
+			'email' => v::notEmpty()->email(),
+		]);
+
+		if ($validation->failed()){
+			$data['error']['status']=true;
+			$data['error']['validation']=$validation->error_messages;
+			return $res -> withStatus(200) -> write(json_encode($data));
+		}
+		$allParams = $req->getParams();
+		$id = $allParams['id'];
+
+		$password = ($allParams['flag'] == 12) ? $secret = $this->MAVISOTP::newSecret() : $this->generatePassword();
+
+		$data = $this->passwdSender($data, $id, $password, $allParams['email'], $allParams['flag']);
+
+
+		if (!$data['mail'])
+			return $res -> withStatus(200) -> write(json_encode($data));
+
+		$data['login_date'] = date('Y-m-d H:i:s',time());
+
+		switch ($allParams['flag']) {
+			case '12':
+				TACUsers::where('id',$id)->update([
+					'login' => '',
+					'login_date' => $data['login_date'],
+					'email' => $allParams['email'],
+					'mavis_otp_secret' => $password
+				]);
+				break;
+
+			default:
+				TACUsers::where('id',$id)->update([
+					'login' => password_hash($password, PASSWORD_DEFAULT),
+					'login_date' => $data['login_date'],
+					'email' => $allParams['email']
+				]);
+				break;
+		}
+
+		$data['changeConfiguration']=$this->changeConfigurationFlag(['unset' => 0]);
+
+		return $res -> withStatus(200) -> write(json_encode($data));
+	}
+
+	private function passwdSender($data = [], $uid = 0, $password = '', $email = '', $flag = 5){
+
+		$user = TACUsers::where('id', $uid)->select()->first();
+
+		$variables = [
+			'subject' => 'TACACSGUI New Credential',
+			'username' => $user->username,
+		];
+
+		$template = 'newpw';
+
+		if (file_exists('/opt/tacacsgui/temp/qrcode_.png'))
+			unlink('/opt/tacacsgui/temp/qrcode_.png');
+
+		switch ($flag) {
+			case '12':
+				$variables['qr'] = '/opt/tacacsgui/temp/qrcode_.png';
+				$renderer = new \BaconQrCode\Renderer\Image\Png();
+				$renderer->setHeight(256);
+				$renderer->setWidth(256);
+				$writer = new \BaconQrCode\Writer($renderer);
+
+				$writer->writeFile($this->MAVISOTP::getUrl($user->username, $password), $variables['qr']);
+				$template = 'newqr';
+				break;
+
+			default:
+
+				$variables['password'] = $password;
+				TACUsers::where('id',$uid)->update([
+					'login' => password_hash($variables['password'], PASSWORD_DEFAULT),
+				]);
+				break;
+		}
+
+		$mail = new EmailEngine(APISMTP::select()->find(1));
+		$data['mail'] = $mail->addAddress($email)->setTemplate($template, $variables)->send(true);
+		return $data;
 	}
 }//END OF CLASS//

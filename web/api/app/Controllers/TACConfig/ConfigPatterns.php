@@ -628,7 +628,7 @@ class ConfigPatterns
 			$sp->put().'user = '.$user['username'].' {');
 			///USER KEY///
 			$login = '';
-			if ( !in_array( $user['login_flag'], [1, 0] ) ) {
+			if ( !in_array( $user['login_flag'], [1, 2, 0] ) ) {
         $login = 'mavis ' . self::$crypto_flag[$user['login_flag']];
       } else $login = self::$crypto_flag[$user['login_flag']].' "'. $user['login'].'"';
 			//$login = self::$crypto_flag[$user['login_flag']].' '. ( ($user['login_flag'] != 3 ) ? $user['login'] : '#local' );
@@ -674,7 +674,7 @@ class ConfigPatterns
 			$sp->put().'ms-chap = '. 'clear '.$user['ms-chap']);
 			///USER ENABLE///
       $enable = '';
-      if ( !in_array($user['enable_flag'], [1, 0]) ) {
+      if ( !in_array($user['enable_flag'], [1, 2, 0]) ) {
         $enable = 'login ' . self::$crypto_flag[$user['enable_flag']];
       } else {
         if ($user['enable_flag'] == 0) $user['enable'] = '"'.$user['enable'].'"';

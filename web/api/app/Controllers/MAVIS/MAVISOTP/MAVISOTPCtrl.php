@@ -71,6 +71,26 @@ class MAVISOTPCtrl extends Controller
 
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
+
+	public static function getUrl($username, $secret){
+
+		$mavis = MAVISOTP::select()->first();
+
+		//$data['secret'] = ($secret == 'new') ? $this->secret() : $secret;
+		$otp = TOTP::create(
+				$secret,
+				intVal($mavis->period),     // The period (30 seconds)
+				$mavis->digest, // The digest algorithm
+				intVal($mavis->digits)
+			);
+		$otp->setLabel($username); // The label (string)
+		$otp->setIssuer('TACACSGUI');
+		return $otp->getProvisioningUri();
+
+	}
+	public static function newSecret(){
+		return trim(Base32::encodeUpper(random_bytes(128)), '=');
+	}
 ########	MAVIS OTP Secret	###############END###########
 ################################################
 ########	MAVIS OTP URL	###############START###########

@@ -62,9 +62,8 @@ class TACUserGrpsCtrl extends Controller
 				passwdPolicyUppercase($policy['tac_pw_uppercase'])->
 				passwdPolicyLowercase($policy['tac_pw_lowercase'])->
 				passwdPolicySpecial($policy['tac_pw_special'])->
-				passwdPolicyNumbers($policy['tac_pw_numbers'])->
-				desRestriction($req->getParam('enable_flag'))->setName('Enable') ),
-			'enable_flag' => v::when( v::nullType() , v::alwaysValid(), v::oneOf( v::equals('1'), v::equals('0') ) ),
+				passwdPolicyNumbers($policy['tac_pw_numbers'])->setName('Enable') ),
+			'enable_flag' => v::when( v::nullType() , v::alwaysValid(), v::oneOf( v::equals('1'), v::equals('2'), v::equals('0') ) ),
 		]);
 
 		if ($validation->failed()){
@@ -224,9 +223,8 @@ class TACUserGrpsCtrl extends Controller
 				passwdPolicyUppercase($policy['tac_pw_uppercase'])->
 				passwdPolicyLowercase($policy['tac_pw_lowercase'])->
 				passwdPolicySpecial($policy['tac_pw_special'])->
-				passwdPolicyNumbers($policy['tac_pw_numbers'])->
-				desRestriction($req->getParam('enable_flag'))->setName('Enable') ),
-			'enable_flag' => v::when( v::nullType() , v::alwaysValid(), v::oneOf( v::equals('1'), v::equals('0') ) ),
+				passwdPolicyNumbers($policy['tac_pw_numbers'])->setName('Enable') ),
+			'enable_flag' => v::when( v::nullType() , v::alwaysValid(), v::oneOf( v::equals('1'), v::equals('2'), v::equals('0') ) ),
 		]);
 
 		if ($validation->failed()){

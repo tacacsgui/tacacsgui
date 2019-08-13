@@ -96,6 +96,7 @@ $app->post('/tacacs/user/edit/', 'TACUsersCtrl:postUserEdit');
 $app->get('/tacacs/user/delete/', 'TACUsersCtrl:getUserDelete');
 $app->post('/tacacs/user/delete/', 'TACUsersCtrl:postUserDelete');
 $app->post('/tacacs/user/change_passwd/change/', 'TACUsersCtrl:postUserPWChange');
+$app->post('/tacacs/user/change_passwd/send/', 'TACUsersCtrl:postSendPasswd');
 $app->post('/tacacs/user/csv/', 'TACUsersCtrl:postUserCsv');
 #####################################################
 ###Tacacs User Groups Routes#######################################

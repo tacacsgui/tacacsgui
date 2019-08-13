@@ -26,18 +26,27 @@ class EmailEngine
     $this->mail->Port = ( isset($params['smtp_port']) ) ? $params['smtp_port'] : 465;
     if ( isset($params['smtp_secure']) ) $this->mail->SMTPSecure = $params['smtp_secure'];
     if ( isset($params['smtp_auth']) ) $this->mail->SMTPAuth = $params['smtp_auth'];
-    $this->mail->setFrom($params['smtp_from'], 'TacacsGUI');
+    $this->mail->setFrom($params['smtp_from'], 'TACACSGUI');
     $this->mail->SMTPAutoTLS = ( isset($params['smtp_autotls']) ) ? $params['smtp_autotls'] : false;
-    $this->mail->Subject = 'Hello From TacacsGUI';
+    $this->mail->Subject = 'Hello From TACACSGUI';
     $this->mail->Body    = 'Something goes <b>wrong!</b>';
     $this->mail->AltBody = '';
     $this->mail->isHTML(true); // Set email format to HTML
     $this->mail->isSMTP(); // Set mailer to use SMTP
+    $this->mail->Timeout = 20;
+    $this->mail->AddEmbeddedImage('/opt/tacacsgui/web/assets/media/logos/logo_tgui-md.png', 'logo');
   }
 
   public function setTemplate($name = 'test', $variables = [])
   {
     if ( isset( $this->default_titles[$name]) ) $this->mail->Subject = $this->default_titles[$name];
+
+    if ( isset($variables['subject']))
+      $this->mail->Subject = $variables['subject'];
+
+    if ( isset($variables['qr'])){
+      $this->mail->AddEmbeddedImage($variables['qr'], 'qrcode');
+    }
 
     // if ($name == 'feedback') $this->mail->Subject = $this->default_titles[$name] .' '. ucfirst($variables['type']);
 
@@ -56,16 +65,30 @@ class EmailEngine
     return $this;
   }
 
-  public function send()
+  public function addAddress($email){
+    $this->mail->addAddress($email);
+    // $this->mail->addAddress($email, 'Joe User');
+    return $this;
+  }
+
+  public function addAddresses(){
+
+  }
+
+  public function send($trigger = false)
   {
     try {
         //Server settings
         if ($this->smtp_debug) $this->mail->SMTPDebug = 2;          // Enable verbose debug output
-                                              
 
         $this->mail->send();
+
+        if (file_exists('/opt/tacacsgui/temp/qrcode_.png'))
+    			unlink('/opt/tacacsgui/temp/qrcode_.png');
+        if ($trigger) return true;
         return 'Message has been sent';
     } catch (Exception $e) {
+        if ($trigger) return false;
         return 'Message could not be sent. Mailer Error: '. $this->mail->ErrorInfo;
     }
   }

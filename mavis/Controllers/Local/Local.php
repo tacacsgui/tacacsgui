@@ -25,7 +25,7 @@ class Local extends Controller
       $this->mavis->debugIn( $this->dPrefix() . 'Check Status: TACTYPE '.$this->mavis->getVariable(AV_A_TACTYPE).' Unsupported. Exit' );
       return false;
     }
-    $this->user = $this->db->table('tac_users')->select('id','login', 'login_flag', 'login_change')->whereRaw("BINARY `username`='{$this->mavis->getUsername()}'")->where('login_flag', 3);
+    $this->user = $this->db->table('tac_users')->select('id','login', 'login_flag', 'login_change')->whereRaw("BINARY `username`='{$this->mavis->getUsername()}'")->whereIn('login_flag', [3, 5]);
     $this->mavis->debugIn( $this->dPrefix() . 'Check Status: ' . ( ($this->user->count()) ? 'User Found. Run' : 'User Not Found. Exit' ) );
     return $this->user->count();
   }
