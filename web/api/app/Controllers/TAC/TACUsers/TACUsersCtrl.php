@@ -388,9 +388,9 @@ class TACUsersCtrl extends Controller
 
 		//$sendEmail = false;
 		$oldData = TACUsers::where('id',$req->getParam('id'))->select(['login_flag', 'email'])->first();
-		$nochanges = (
+		$changes = (
 			( in_array($allParams['login_flag'], [12, 5]) ) AND
-			$oldData->login_flag == $allParams['login_flag'] AND $oldData->email == $allParams['email']
+			($oldData->login_flag != $allParams['login_flag'] OR $oldData->email != $allParams['email'])
 		);
 
 		$data['save']=TACUsers::where('id',$req->getParam('id'))->
@@ -426,7 +426,7 @@ class TACUsersCtrl extends Controller
 
 		$data['save']=1;
 
-	if (!$nochanges){
+	if ($changes){
 			$password = ($allParams['login_flag'] == 12) ? $secret = $this->MAVISOTP::newSecret() : $this->generatePassword();
 
 			$data = $this->passwdSender($data, $id, $password, $allParams['email'], $allParams['login_flag']);
