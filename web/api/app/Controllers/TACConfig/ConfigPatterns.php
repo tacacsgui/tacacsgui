@@ -807,7 +807,8 @@ class ConfigPatterns
 		$mavis_sms_settings = MAVISSMS::select()->first();
 		$mavis_local_settings = MAVISLocal::select()->first();
 
-		if ($mavis_ldap_settings->enabled == 0 AND $mavis_otp_settings->enabled == 0 AND $mavis_sms_settings->enabled == 0 AND $mavis_local_settings->enabled == 0) return array('title_flag' => 0, 'name' =>"");
+		if ($mavis_ldap_settings->enabled == 0 AND $mavis_otp_settings->enabled == 0 AND $mavis_sms_settings->enabled == 0 AND $mavis_local_settings->enabled == 0)
+      return array();
     $outputMavisGeneral = [];
 		$outputMavisGeneral[]= ($html) ? $sp->put('a').self::$html_tags['comment'][0] . "####MAVIS GENERAL SETTINGS####" . self::$html_tags['comment'][1]
 		:
