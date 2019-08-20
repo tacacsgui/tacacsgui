@@ -47,7 +47,7 @@ class TACServicesCtrl extends Controller
 			'name' => v::noWhitespace()->notEmpty()->theSameNameUsed( '\tgui\Models\TACServices' ),
 			//Cisco General Pattern//
 			'cisco_rs_enable' => v::noWhitespace()->boolVal(),
-			'cisco_rs_privlvl' => v::notEmpty()->numeric()->between(-1, 15)->setName('Privilege Level'),
+			'cisco_rs_privlvl' => v::oneOf(v::notEmpty(), v::numeric())->between(-1, 15)->setName('Privilege Level'),
 			'cisco_rs_def_cmd' => v::noWhitespace()->boolVal(),
 			'cisco_rs_def_attr' => v::noWhitespace()->boolVal(),
 			'cisco_rs_idletime' => v::when( v::nullType(), v::alwaysValid(), v::numeric()->between(0, 128)->setName('Idle time') ),
@@ -59,7 +59,7 @@ class TACServicesCtrl extends Controller
 			//'cisco_rs_manual' => ['text', '_'],
 			//H3C General Pattern//
 			'h3c_enable' => v::noWhitespace()->boolVal(),
-			'h3c_privlvl' => v::when( v::nullType(), v::alwaysValid(), v::noWhitespace()->numeric()->between(-1, 15)->setName('Privilege Level') ),
+			'h3c_privlvl' => v::oneOf(v::notEmpty(), v::numeric())->between(-1, 15)->setName('Privilege Level'),
 			'h3c_def_cmd' => v::noWhitespace()->boolVal(),
 			'h3c_def_attr' => v::noWhitespace()->boolVal(),
 			'h3c_idletime' => v::when( v::nullType(), v::alwaysValid(), v::numeric()->between(0, 128)->setName('Idle time') ),
@@ -78,11 +78,14 @@ class TACServicesCtrl extends Controller
 
 		$cisco_rs_cmd = $allParams['cisco_rs_cmd'];
 		$h3c_cmd = $allParams['h3c_cmd'];
+		$huawei_cmd = $allParams['huawei_cmd'];
+		$extreme_cmd = $allParams['extreme_cmd'];
 		$junos_cmd_ao = $allParams['junos_cmd_ao'];
 		$junos_cmd_do = $allParams['junos_cmd_do'];
 		$junos_cmd_ac = $allParams['junos_cmd_ac'];
 		$junos_cmd_dc = $allParams['junos_cmd_dc'];
 		unset($allParams['cisco_rs_cmd']);unset($allParams['h3c_cmd']);
+		unset($allParams['huawei_cmd']);unset($allParams['extreme_cmd']);
 		unset($allParams['junos_cmd_ao']);unset($allParams['junos_cmd_do']);
 		unset($allParams['junos_cmd_ac']);unset($allParams['junos_cmd_dc']);
 
@@ -97,6 +100,14 @@ class TACServicesCtrl extends Controller
 		foreach ($h3c_cmd as $value) {
 			if (empty($value)) continue;
 			$service_cmd[] = [ 'service_id' => $tempId, 'cmd_id' => $value, 'section' => 'h3c_cmd'];
+		}
+		foreach ($huawei_cmd as $value) {
+			if (empty($value)) continue;
+			$service_cmd[] = [ 'service_id' => $tempId, 'cmd_id' => $value, 'section' => 'huawei_cmd'];
+		}
+		foreach ($extreme_cmd as $value) {
+			if (empty($value)) continue;
+			$service_cmd[] = [ 'service_id' => $tempId, 'cmd_id' => $value, 'section' => 'extreme_cmd'];
 		}
 		foreach ($junos_cmd_ao as $value) {
 			if (empty($value)) continue;
@@ -154,6 +165,8 @@ class TACServicesCtrl extends Controller
 		$sections = [
 			'cisco_rs_cmd' => [],
 			'h3c_cmd' => [],
+			'huawei_cmd' => [],
+			'extreme_cmd' => [],
 			'junos_cmd_ao' => [],
 			'junos_cmd_do' => [],
 			'junos_cmd_ac' => [],
@@ -174,6 +187,8 @@ class TACServicesCtrl extends Controller
 
 		$data['service']->cisco_rs_cmd = $sections['cisco_rs_cmd'];
 		$data['service']->h3c_cmd = $sections['h3c_cmd'];
+		$data['service']->huawei_cmd = $sections['huawei_cmd'];
+		$data['service']->extreme_cmd = $sections['extreme_cmd'];
 		$data['service']->junos_cmd_ao = $sections['junos_cmd_ao'];
 		$data['service']->junos_cmd_do = $sections['junos_cmd_do'];
 		$data['service']->junos_cmd_ac = $sections['junos_cmd_ac'];
@@ -217,8 +232,8 @@ class TACServicesCtrl extends Controller
 
 		$validation = $this->validator->validate($req, [
 			'name' => v::notEmpty()->theSameNameUsed( '\tgui\Models\TACServices', $req->getParam('id') ),
-			'cisco_rs_privlvl' => v::notEmpty()->numeric()->between(-1, 15)->setName('Privilege Level'),
-			'h3c_privlvl' => v::noWhitespace()->when( v::nullType() , v::alwaysValid(), v::numeric()->between(-1, 15)->setName('Privilege Level') ),
+			'cisco_rs_privlvl' => v::oneOf(v::notEmpty(), v::numeric())->between(-1, 15)->setName('Privilege Level'),
+			'h3c_privlvl' => v::oneOf(v::notEmpty(), v::numeric())->between(-1, 15)->setName('Privilege Level'),
 			//'priv-lvl' => v::noWhitespace()->when( v::nullType() , v::alwaysValid(), v::numeric()->between(-1, 15)),
 			//'default_cmd' => v::noWhitespace()->when( v::nullType() , v::alwaysValid(), v::boolVal()),
 			'manual_conf_only' => v::noWhitespace()->when( v::nullType() , v::alwaysValid(), v::boolVal()),
@@ -234,11 +249,14 @@ class TACServicesCtrl extends Controller
 
 		$cisco_rs_cmd = $allParams['cisco_rs_cmd'];
 		$h3c_cmd = $allParams['h3c_cmd'];
+		$huawei_cmd = $allParams['huawei_cmd'];
+		$extreme_cmd = $allParams['extreme_cmd'];
 		$junos_cmd_ao = $allParams['junos_cmd_ao'];
 		$junos_cmd_do = $allParams['junos_cmd_do'];
 		$junos_cmd_ac = $allParams['junos_cmd_ac'];
 		$junos_cmd_dc = $allParams['junos_cmd_dc'];
 		unset($allParams['cisco_rs_cmd']);unset($allParams['h3c_cmd']);
+		unset($allParams['huawei_cmd']);unset($allParams['extreme_cmd']);
 		unset($allParams['junos_cmd_ao']);unset($allParams['junos_cmd_do']);
 		unset($allParams['junos_cmd_ac']);unset($allParams['junos_cmd_dc']);
 
@@ -255,6 +273,14 @@ class TACServicesCtrl extends Controller
 		foreach ($h3c_cmd as $value) {
 			if (empty($value)) continue;
 			$service_cmd[] = [ 'service_id' => $tempId, 'cmd_id' => $value, 'section' => 'h3c_cmd'];
+		}
+		foreach ($huawei_cmd as $value) {
+			if (empty($value)) continue;
+			$service_cmd[] = [ 'service_id' => $tempId, 'cmd_id' => $value, 'section' => 'huawei_cmd'];
+		}
+		foreach ($extreme_cmd as $value) {
+			if (empty($value)) continue;
+			$service_cmd[] = [ 'service_id' => $tempId, 'cmd_id' => $value, 'section' => 'extreme_cmd'];
 		}
 		foreach ($junos_cmd_ao as $value) {
 			if (empty($value)) continue;
@@ -485,7 +511,7 @@ class TACServicesCtrl extends Controller
 				$query->where('name','LIKE', '%'.$search.'%');
 			});
 
-		$data['results']=$query->get();
+		$data['results']=$query->orderBy('name','asc')->get();
 
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}

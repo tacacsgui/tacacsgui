@@ -185,7 +185,7 @@ class MAVISLDAPCtrl extends Controller
 
 			$adQuery = ( empty($search) ) ? $adQuery : $adQuery->where('cn', 'contains', $search);
 			$data['total'] =	$adQuery->get()->count();
-			
+
 			$records = $adQuery->paginate($pageSize, $pageNum)->getIterator();
 
 			foreach ($records as $record) {
@@ -393,7 +393,7 @@ class MAVISLDAPCtrl extends Controller
 				$query->where('cn','LIKE', '%'.$search.'%');
 			});
 
-		$data['results']=$query->get();
+		$data['results']=$query->orderBy('dn','asc')->get();
 
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}

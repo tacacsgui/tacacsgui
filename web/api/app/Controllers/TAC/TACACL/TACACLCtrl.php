@@ -44,8 +44,8 @@ class TACACLCtrl extends Controller
 		$validation = $this->validator->validate($req, [
 			'name' => v::noWhitespace()->notEmpty()->aclNameAvailable(0),
 			'ace' => v::arrayVal()->length(1, null)->each(v::arrayVal()->allOf(
-				v::key('nac', v::numeric())->setName('NAC'),
-				v::key('nas', v::numeric())->setName('NAS'),
+				v::key('nac', v::oneOf(v::numeric(), v::nullType()))->setName('NAC'),
+				v::key('nas', v::oneOf(v::numeric(), v::nullType()))->setName('NAS'),
 				v::key('action', v::numeric())->setName('Action')
 			))
 		]);
@@ -115,16 +115,16 @@ class TACACLCtrl extends Controller
 				'action' => $ace->action,
 				'order' => $ace->order,
 				'nas' => [[
-					'id' => $ace->nas_id,
-					'text' => $ace->nas_name,
+					'id' => ($ace->nas_id) ? $ace->nas_id : 0,
+					'text' => ($ace->nas_name) ? $ace->nas_name : 'any',
 					'type' => $ace->nas_type,
-					'address' => $ace->nas_address,
+					'address' => ($ace->nas_address) ? $ace->nas_address : 'any',
 				]],
 				'nac' => [[
-					'id' => $ace->nac_id,
-					'text' => $ace->nac_name,
+					'id' => ($ace->nac_id) ? $ace->nac_id : 0,
+					'text' => ($ace->nac_name) ? $ace->nac_name : 'any',
 					'type' => $ace->nac_type,
-					'address' => $ace->nac_address,
+					'address' => ($ace->nac_address) ? $ace->nac_address : 'any',
 				]],
 			];
 		}
@@ -167,8 +167,8 @@ class TACACLCtrl extends Controller
 		$validation = $this->validator->validate($req, [
 			'name' => v::noWhitespace()->notEmpty()->theSameNameUsed( '\tgui\Models\TACACL', $req->getParam('id') ),
 			'ace' => v::arrayVal()->length(1, null)->each(v::arrayVal()->allOf(
-				v::key('nac', v::numeric())->setName('NAC'),
-				v::key('nas', v::numeric())->setName('NAS'),
+				v::key('nac', v::oneOf(v::numeric(), v::nullType()))->setName('NAC'),
+				v::key('nas', v::oneOf(v::numeric(), v::nullType()))->setName('NAS'),
 				v::key('action', v::numeric())->setName('Action')
 			))
 		]);
@@ -393,7 +393,7 @@ class TACACLCtrl extends Controller
 				$query->where('name','LIKE', '%'.$search.'%');
 			});
 
-		$data['results']=$query->get();
+		$data['results']=$query->orderBy('name','asc')->get();
 
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}

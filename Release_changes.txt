@@ -1,4 +1,10 @@
 ##############################
+Version_0.9.77 20190820
+	* Added Huawei pattern
+	* Added Extreme Networks pattern
+	* Added any to ACL
+	* Many bugs fixed
+##############################
 Version_0.9.76 20190813
 	* Send random Local MAVIS password via email
 	* Send OTP MAVIS password via email

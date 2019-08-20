@@ -295,7 +295,12 @@ class ObjAddress extends Controller
 				$query->where('name','LIKE', '%'.$search.'%');
 			});
 
-		$data['results']=$query->get();
+		$data['results']=$query->orderBy('name')->get()->toArray();
+
+		$extra = json_decode($req->getParam('extra'));
+
+		if ( $extra AND !empty($extra->any) )
+			array_unshift( $data['results'], ['text' => 'any', 'id' => 0, 'address' => 'any']);
 
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}

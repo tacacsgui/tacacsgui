@@ -65,7 +65,7 @@ class TACCMDCtrl extends Controller
 		$this->db->table('tac_cmd_arg')->insert(
 			array_map(
 				function($x, $k)use ($tempId) {
-					$x['tac_cmd_id'] = $tempId; return $x;
+					$x['tac_cmd_id'] = $tempId; $x['order'] = $k; return $x;
 				}, $args, array_keys($args)
 			)
 		); //end of insert
@@ -107,7 +107,7 @@ class TACCMDCtrl extends Controller
 		$data['cmd']=TACCMD::select()->where('id',$req->getParam('id'))->first();
 		$data['cmd']->junos = explode(',', $data['cmd']->junos);
 		$data['cmd_attr'] = $this->db->table('tac_cmd_arg')->
-			select()->orderBy('order','asc')->
+			select(['arg','action'])->orderBy('order','asc')->
 			where('tac_cmd_id',$req->getParam('id'))->get();
 		$data['cmd']->cmd_attr = ($data['cmd_attr']) ? $data['cmd_attr'] : [];
 
@@ -170,7 +170,7 @@ class TACCMDCtrl extends Controller
 		$this->db->table('tac_cmd_arg')->insert(
 			array_map(
 				function($x, $k)use ($tempId) {
-					$x['tac_cmd_id'] = $tempId; return $x;
+					$x['tac_cmd_id'] = $tempId; $x['order'] = $k; return $x;
 				}, $args, array_keys($args)
 			)
 		); //end of insert

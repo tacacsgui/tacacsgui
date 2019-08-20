@@ -86,7 +86,7 @@ class TACDevicesCtrl extends Controller
 		$allParams = $req->getParams();
 
 		$validation = $this->validator->validate($req, [
-			'name' => v::noWhitespace()->notEmpty()->deviceNameAvailable(0),
+			'name' => v::noWhitespace()->notEmpty()->theSameNameUsed( '\tgui\Models\TACDevices' )->theSameNameUsed( '\tgui\Models\TACDeviceGrps' ),
 			'group' => v::when( v::nullType(), v::alwaysValid(), v::numeric()),
 			'enable' => v::when( v::oneOf( v::nullType(), v::equals('') ) , v::alwaysValid(), v::noWhitespace()->notContainChars()->
 				length($policy['tac_pw_length'], 64)->
@@ -94,9 +94,8 @@ class TACDevicesCtrl extends Controller
 				passwdPolicyUppercase($policy['tac_pw_uppercase'])->
 				passwdPolicyLowercase($policy['tac_pw_lowercase'])->
 				passwdPolicySpecial($policy['tac_pw_special'])->
-				passwdPolicyNumbers($policy['tac_pw_numbers'])->
-				desRestriction($req->getParam('enable_flag'))->setName('Enable') ),
-			'enable_flag' => v::when( v::nullType() , v::alwaysValid(), v::oneOf( v::equals('1'), v::equals('0') ) ),
+				passwdPolicyNumbers($policy['tac_pw_numbers'])->setName('Enable') ),
+			'enable_flag' => v::when( v::nullType() , v::alwaysValid(), v::oneOf( v::equals('1'), v::equals('2'), v::equals('0') ) ),
 			'key' => v::when( v::tacacsKeyAvailable($allParams['group']), v::alwaysValid(),
 			 	v::noWhitespace()->notContainChars()->
 				length($policy['tac_pw_length'], 64)->
@@ -162,7 +161,7 @@ class TACDevicesCtrl extends Controller
 			first();
 		$data['device']->address = $this->db->table('obj_addresses')->
 			select(['name as text','id','type','address'])->where('id',$data['device']->address)->get();
-			
+
 		$data['device']->group = $this->db->table('tac_device_groups')->
 			select(['name as text','id'])->where('id',$data['device']->group)->get();
 
@@ -211,7 +210,7 @@ class TACDevicesCtrl extends Controller
 		$group= (empty($allParams['group'])) ? TACDevices::where([['id','=',$allParams['id']]])->first()->group : $allParams['group'];
 
 		$validation = $this->validator->validate($req, [
-			'name' => v::noWhitespace()->when( v::nullType() , v::alwaysValid(), v::notEmpty()->deviceNameAvailable($req->getParam('id'))),
+			'name' => v::noWhitespace()->when( v::nullType() , v::alwaysValid(), v::notEmpty()->theSameNameUsed( '\tgui\Models\TACDevices', $req->getParam('id') )->theSameNameUsed( '\tgui\Models\TACDeviceGrps' )),
 			'group' => v::when( v::nullType(), v::alwaysValid(), v::numeric() ),
 			'enable' => v::when( v::oneOf( v::nullType(), v::equals('') ) , v::alwaysValid(), v::noWhitespace()->notContainChars()->
 				length($policy['tac_pw_length'], 64)->
@@ -219,9 +218,8 @@ class TACDevicesCtrl extends Controller
 				passwdPolicyUppercase($policy['tac_pw_uppercase'])->
 				passwdPolicyLowercase($policy['tac_pw_lowercase'])->
 				passwdPolicySpecial($policy['tac_pw_special'])->
-				passwdPolicyNumbers($policy['tac_pw_numbers'])->
-				desRestriction($req->getParam('enable_flag'))->setName('Enable') ),
-			'enable_flag' => v::when( v::nullType() , v::alwaysValid(), v::oneOf( v::equals('1'), v::equals('0') ) ),
+				passwdPolicyNumbers($policy['tac_pw_numbers'])->setName('Enable') ),
+			'enable_flag' => v::when( v::nullType() , v::alwaysValid(), v::oneOf( v::equals('1'), v::equals('2'), v::equals('0') ) ),
 			'key' => v::when( v::oneOf(v::tacacsKeyAvailable($group), v::nullType()) , v::alwaysValid(), v::noWhitespace()->notContainChars()->
 				length($policy['tac_pw_length'], 64)->
 				notEmpty()->

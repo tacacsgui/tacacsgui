@@ -420,19 +420,31 @@ class ConfigPatterns
 				($html) ? $sp->put().self::$html_tags['attr'][0] . "acl" . self::$html_tags['attr'][1] . ' = ' . self::$html_tags['object'][0] .$acl->name. self::$html_tags['object'][1] . ' '.$action.' {'
 				:
 				$sp->put().'acl = '.$acl->name.' '.$action.' {');
-
+        $sp->put('a');
 				///ACL NAC///
-				array_push($outputACL,
-				($html) ? $sp->put('a').self::$html_tags['param'][0] . "nac" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] .$acl->nac. self::$html_tags['val'][1]
-				:
-				$sp->put('a').'nac = '.$acl->nac);
+        if ( !empty($acl->nac) )
+  				array_push($outputACL,
+  				($html) ? $sp->put().self::$html_tags['param'][0] . "nac" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] .$acl->nac. self::$html_tags['val'][1]
+  				:
+  				$sp->put().'nac = '.$acl->nac);
+        else
+          array_push($outputACL,
+          ($html) ? $sp->put().self::$html_tags['param'][0] . "# nac" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] .'any'. self::$html_tags['val'][1]
+          :
+          $sp->put().'# nac = any');
 
 				///ACL NAS///
-				array_push($outputACL,
-				($html) ? $sp->put().self::$html_tags['param'][0] . "nas" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] .$acl->nas. self::$html_tags['val'][1]
-				:
-				$sp->put().'nas = '.$acl->nas);
-				///ACL NAS///
+        if ( !empty($acl->nas) )
+  				array_push($outputACL,
+  				($html) ? $sp->put().self::$html_tags['param'][0] . "nas" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] .$acl->nas. self::$html_tags['val'][1]
+  				:
+  				$sp->put().'nas = '.$acl->nas);
+        else
+          array_push($outputACL,
+          ($html) ? $sp->put().self::$html_tags['param'][0] . "# nas" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] .'any'. self::$html_tags['val'][1]
+          :
+          $sp->put().'# nas = any');
+				///ACL END///
 				array_push($outputACL, $sp->put('d').'}');
 			// }
 			// array_push($outputACL, ($html) ? $sp->put().self::$html_tags['comment'][0] . '###ACL '.$acl['name'].' END###' . self::$html_tags['comment'][1]
@@ -966,11 +978,11 @@ class ConfigPatterns
               self::$html_tags['object'][0]. 'shell' . self::$html_tags['object'][1] . ' {'
       			:
       			$sp->put().'service acl '.$acl->name.' = shell {');
-
+          $sp->put('a');
           if ( $service['h3c_privlvl'] != -1 ) array_push($outputService,
-    			($html) ? $sp->put('a').self::$html_tags['param'][0] . "set priv-lvl" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . $service['h3c_privlvl'] . self::$html_tags['val'][1]
+    			($html) ? $sp->put().self::$html_tags['param'][0] . "set priv-lvl" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . $service['h3c_privlvl'] . self::$html_tags['val'][1]
     			:
-    			$sp->put('a').'set priv-lvl = '.$service['h3c_privlvl']);
+    			$sp->put().'set priv-lvl = '.$service['h3c_privlvl']);
 
           if ( !empty($service['h3c_def_attr']) ) array_push($outputService,
     			($html) ? $sp->put().self::$html_tags['param'][0] . "default attribute" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . 'permit' . self::$html_tags['val'][1]
@@ -1002,6 +1014,116 @@ class ConfigPatterns
     			$sp->put('d').'} #END OF H3C General Service');
         }
         ///H3C///END///
+        ///Huawei///START///
+        if ( $service['huawei_enable'] ) {
+          //start//
+          $general_cmds = TACServices::
+          leftJoin('bind_service_cmd as bsc', 'bsc.service_id','=', 'id')->
+          select('bsc.cmd_id')->where('id', $id)->where('bsc.section','huawei_cmd')->pluck('bsc.cmd_id')->toArray();
+
+          if ( empty($service['acl']) )
+            array_push($outputService,
+      			($html) ? $sp->put().self::$html_tags['attr'][0] . "service" . self::$html_tags['attr'][1] . ' = ' . self::$html_tags['object'][0]. 'shell' . self::$html_tags['object'][1] . ' {'
+      			:
+      			$sp->put().'service = shell {');
+          else
+            array_push($outputService,
+      			($html) ? $sp->put().self::$html_tags['attr'][0] . "service" . self::$html_tags['attr'][1] .
+              ' acl '.self::$html_tags['object'][0].$acl->name.self::$html_tags['object'][1].' = ' .
+              self::$html_tags['object'][0]. 'shell' . self::$html_tags['object'][1] . ' {'
+      			:
+      			$sp->put().'service acl '.$acl->name.' = shell {');
+          $sp->put('a');
+          if ( $service['huawei_privlvl'] != -1 ) array_push($outputService,
+    			($html) ? $sp->put().self::$html_tags['param'][0] . "set priv-lvl" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . $service['huawei_privlvl'] . self::$html_tags['val'][1]
+    			:
+    			$sp->put().'set priv-lvl = '.$service['huawei_privlvl']);
+
+          if ( !empty($service['huawei_def_attr']) ) array_push($outputService,
+    			($html) ? $sp->put().self::$html_tags['param'][0] . "default attribute" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . 'permit' . self::$html_tags['val'][1]
+    			:
+    			$sp->put().'default attribute = permit');
+          if ( !empty($service['huawei_def_cmd']) ) array_push($outputService,
+    			($html) ? $sp->put().self::$html_tags['param'][0] . "default cmd" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . 'permit' . self::$html_tags['val'][1]
+    			:
+    			$sp->put().'default cmd = permit');
+          if ( !empty($service['huawei_idletime']) ) array_push($outputService,
+    			($html) ? $sp->put().self::$html_tags['param'][0] . "set idletime" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . $service['huawei_idletime'] . self::$html_tags['val'][1]
+    			:
+    			$sp->put().'set idletime = ' . $service['huawei_idletime']);
+          if ( !empty($service['huawei_timeout']) ) array_push($outputService,
+    			($html) ? $sp->put().self::$html_tags['param'][0] . "set timeout" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . $service['huawei_timeout'] . self::$html_tags['val'][1]
+    			:
+    			$sp->put().'set timeout = ' . $service['huawei_timeout']);
+
+          if ( $general_cmds ){
+            $outputService = array_merge( $outputService,  self::tacCMDAttr($html, $general_cmds, 0, 3) );
+          }
+
+          $outputService = array_merge( $outputService,  self::manualConfigPrint($service['huawei_manual'], $html) );
+
+          //end//
+          array_push($outputService,
+    			($html) ? $sp->put('d').'} ' . self::$html_tags['comment'][0] . '#END OF Huawei General Service'. self::$html_tags['comment'][1]
+    			:
+    			$sp->put('d').'} #END OF Huawei General Service');
+        }
+        ///Huawei///END///
+        ///Extreme Networks///START///
+        if ( $service['extreme_enable'] ) {
+          //start//
+          $general_cmds = TACServices::
+          leftJoin('bind_service_cmd as bsc', 'bsc.service_id','=', 'id')->
+          select('bsc.cmd_id')->where('id', $id)->where('bsc.section','extreme_cmd')->pluck('bsc.cmd_id')->toArray();
+
+          if ( empty($service['acl']) )
+            array_push($outputService,
+      			($html) ? $sp->put().self::$html_tags['attr'][0] . "service" . self::$html_tags['attr'][1] . ' = ' . self::$html_tags['object'][0]. 'shell' . self::$html_tags['object'][1] . ' {'
+      			:
+      			$sp->put().'service = shell {');
+          else
+            array_push($outputService,
+      			($html) ? $sp->put().self::$html_tags['attr'][0] . "service" . self::$html_tags['attr'][1] .
+              ' acl '.self::$html_tags['object'][0].$acl->name.self::$html_tags['object'][1].' = ' .
+              self::$html_tags['object'][0]. 'shell' . self::$html_tags['object'][1] . ' {'
+      			:
+      			$sp->put().'service acl '.$acl->name.' = shell {');
+          $sp->put('a');
+          if ( $service['extreme_privlvl'] != -1 ) array_push($outputService,
+    			($html) ? $sp->put().self::$html_tags['param'][0] . "set priv-lvl" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . $service['extreme_privlvl'] . self::$html_tags['val'][1]
+    			:
+    			$sp->put().'set priv-lvl = '.$service['extreme_privlvl']);
+
+          if ( !empty($service['extreme_def_attr']) ) array_push($outputService,
+    			($html) ? $sp->put().self::$html_tags['param'][0] . "default attribute" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . 'permit' . self::$html_tags['val'][1]
+    			:
+    			$sp->put().'default attribute = permit');
+          if ( !empty($service['extreme_def_cmd']) ) array_push($outputService,
+    			($html) ? $sp->put().self::$html_tags['param'][0] . "default cmd" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . 'permit' . self::$html_tags['val'][1]
+    			:
+    			$sp->put().'default cmd = permit');
+          if ( !empty($service['extreme_idletime']) ) array_push($outputService,
+    			($html) ? $sp->put().self::$html_tags['param'][0] . "set idletime" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . $service['extreme_idletime'] . self::$html_tags['val'][1]
+    			:
+    			$sp->put().'set idletime = ' . $service['extreme_idletime']);
+          if ( !empty($service['extreme_timeout']) ) array_push($outputService,
+    			($html) ? $sp->put().self::$html_tags['param'][0] . "set timeout" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . $service['extreme_timeout'] . self::$html_tags['val'][1]
+    			:
+    			$sp->put().'set timeout = ' . $service['extreme_timeout']);
+
+          if ( $general_cmds ){
+            $outputService = array_merge( $outputService,  self::tacCMDAttr($html, $general_cmds, 0, 3) );
+          }
+
+          $outputService = array_merge( $outputService,  self::manualConfigPrint($service['extreme_manual'], $html) );
+
+          //end//
+          array_push($outputService,
+    			($html) ? $sp->put('d').'} ' . self::$html_tags['comment'][0] . '#END OF Extreme Networks Service'. self::$html_tags['comment'][1]
+    			:
+    			$sp->put('d').'} #END OF Extreme Networks Service');
+        }
+        ///Extreme Networks///END///
         ///JunOS///START///
         if ( $service['junos_enable'] ) {
           //start//
