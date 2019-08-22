@@ -1172,7 +1172,7 @@ class ConfigPatterns
           if ( $junos_cmd_do ){
 
             array_push($outputService,
-            ($html) ? $sp->put().self::$html_tags['param'][0] . "set allow-commands" . self::$html_tags['param'][1] . ' = ' . self::tacCMDAttr($html, $junos_cmd_do, 1, 3, ['action' => 'deny'])
+            ($html) ? $sp->put().self::$html_tags['param'][0] . "set deny-commands" . self::$html_tags['param'][1] . ' = ' . self::tacCMDAttr($html, $junos_cmd_do, 1, 3, ['action' => 'deny'])
             :
             $sp->put().'set deny-commands = ' . self::tacCMDAttr($html, $junos_cmd_do, 1, 3));
 
