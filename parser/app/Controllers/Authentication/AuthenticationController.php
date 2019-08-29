@@ -64,6 +64,15 @@ class AuthenticationController extends Controller
 			$returnData['unknown']=$unknownElements;
 		}
 		$returnData['server'] = $this->server_ip;
+
+		$missConfig = $this->missLoggingCheck();
+		//var_dump( !preg_match('/.*succeeded.*/', $returnData['action']) );die;
+		if ( !!preg_match('/.*succeeded.*/', $returnData['action']) AND $missConfig) {
+			//var_dump($this->missLoggingTry($returnData['username'], $returnData['NAC'], $missConfig));//die;
+			if( $this->missLoggingTry($returnData['username'], $returnData['NAC'], $missConfig) )
+				return "miss";
+		}
+		
 		$authentication = Authentication::create($returnData);
 
 		if ($this->server_ip == 'localhost' AND strpos($returnData['action'], 'fail') !== false AND $this->postEngine->run(['type' => 'bad_authentication']) ){

@@ -130,6 +130,14 @@ class AccountingController extends Controller
 			$returnData['unknown']=$unknownElements;
 		}
 		$returnData['server'] = $this->server_ip;
+
+		$missConfig = $this->missLoggingCheck('acc');
+		if ( $missConfig ) {
+			//var_dump($this->missLoggingTry($returnData['username'], $returnData['NAC'], $missConfig));//die;
+			if( $this->missLoggingTry($returnData['username'], $returnData['NAC'], $missConfig) )
+				return "miss";
+		}
+
 		$accounting = Accounting::create($returnData);
 
 		return $accounting;

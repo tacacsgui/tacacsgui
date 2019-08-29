@@ -1,4 +1,9 @@
 ##############################
+Version_0.9.78 20190829
+	* Skip Authe, Autho or Acc log. Useful for monitoring or another services
+	* Skip Authe, Autho log. Useful for monitoring or another services
+	* Minor bugs fixed
+##############################
 Version_0.9.77 20190820
 	* Added Huawei pattern
 	* Added Extreme Networks pattern

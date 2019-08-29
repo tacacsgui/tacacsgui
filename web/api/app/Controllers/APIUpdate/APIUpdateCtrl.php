@@ -36,7 +36,7 @@ class APIUpdateCtrl extends Controller
 		$data['slaves'] = [];
 		if (HA::isMaster() AND HA::isThereSlaves()){
 			$ha_config=HA::getFullConfiguration();
-			$data['slaves'] = $ha_config['server_list']['slave'];
+			$data['slaves'] = array_values($ha_config['server_list']['slave']);
 		}
 
 		return $res -> withStatus(200) -> write(json_encode($data));

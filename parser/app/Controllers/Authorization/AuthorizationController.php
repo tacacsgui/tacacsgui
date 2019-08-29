@@ -63,6 +63,14 @@ class AuthorizationController extends Controller
 			$returnData['cmd']=$unknownElements;
 		}
 		$returnData['server'] = $this->server_ip;
+
+		$missConfig = $this->missLoggingCheck('autho');
+		if ( 'permit' == $returnData['action'] AND $missConfig) {
+			// var_dump($this->missLoggingTry($returnData['username'], $returnData['NAC'], $missConfig));//die;
+			if( $this->missLoggingTry($returnData['username'], $returnData['NAC'], $missConfig) )
+				return "miss";
+		}
+
 		$authorization = Authorization::create($returnData);
 
 		if ($this->server_ip == 'localhost' AND strpos($returnData['action'], 'deny') !== false AND $this->postEngine->run(['type' => 'bad_authorization']) ){

@@ -52,6 +52,16 @@ class APIDatabase
   		'api_logging_max_entries' => ['integer', 500],
   		'update_key' => ['string', ''],
   	],
+  	'api_logging_miss_rules' =>
+  	[
+  		'name' => ['string', ''],
+  		'type' => ['integer', '0'],	# 0 tacacs 1 radius
+  		'tacacs_type' => ['integer', '0'],	# 0 authe 1 autho 2 acc
+  		'username' => ['string', ''],
+      'nac_address' => ['foreign-null', ['references'=>'id', 'on'=>'obj_addresses', 'onDelete'=>'restrict'] ],
+      'nas_address' => ['foreign-null', ['references'=>'id', 'on'=>'obj_addresses', 'onDelete'=>'restrict'] ],
+      'description' => ['text', '_' ],
+  	],
   	'api_password_policy' =>
   	[
   		'api_pw_length' => ['integer', '8'],

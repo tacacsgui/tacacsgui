@@ -144,6 +144,7 @@ class APIHACtrl extends Controller
         [
           'key'=> $this->uuid_hash(),
           'version' => APIVER,
+          'revision' => APIREVISION,
         ]
       ]
     ];

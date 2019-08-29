@@ -225,6 +225,12 @@ $app->post('/mavis/local/check/', 'MAVISLocal:postCheck');
 ###APIChecker Routes#######################################
 $app->post('/logging/datatables/', 'APILoggingCtrl:postLoggingDatatables');
 $app->post('/logging/delete/', 'APILoggingCtrl:postLoggingDelete');
+$app->post('/logging/delete/special/', 'APILoggingCtrl:postDelSpecial');
+$app->post('/logging/miss/add/', 'APILoggingCtrl:postMissAdd');
+// $app->get('/logging/miss/edit/', 'APILoggingCtrl:getMiss');
+// $app->post('/logging/miss/edit/', 'APILoggingCtrl:postMissEdit');
+$app->post('/logging/miss/delete/', 'APILoggingCtrl:postMissDel');
+$app->post('/logging/miss/datatables/', 'APILoggingCtrl:postMissTable');
 #####################################################
 
 ###APIChecker Routes#######################################
