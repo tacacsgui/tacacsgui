@@ -4,7 +4,7 @@ namespace tgui\Controllers;
 
 use tgui\Models\TACGlobalConf;
 use tgui\Controllers\APIChecker\APIDatabase;
-use tgui\Controllers\APISettings\HA;
+use tgui\Controllers\APIHA\HAGeneral;
 use tgui\Models\APIPWPolicy;
 
 class Controller
@@ -62,12 +62,12 @@ class Controller
 		if ($data['info']['user']['changePasswd'] == 1){
 			$_SESSION['error']['status']=true;
 		}
-		$data['ha_role'] = ( $data['authorised'] ) ? HA::getServerRole() : 'empty';
+		$data['ha_role'] = ( $data['authorised'] ) ? HAGeneral::getRole() : 'empty';
 		//$data['ha_slave'] = $data['ha_role'] == 'slave';
 		return $data;
 	}
 	public function getHaRole(){
-		return HA::getServerRole();
+		return HAGeneral::getRole();
 	}
 	////INITIAL DATA FUNCTION////END//
 	///////////////////////////////////
@@ -87,7 +87,7 @@ class Controller
 	////CHECK SLAVE HA////END//
 	public function shouldIStopThis()
 	{
-		if (HA::getServerRole() == 'slave') return [ 'message' => 'Server in Slave mode! Changes Forbidden!'];
+		if ( HAGeneral::isSlave() ) return [ 'message' => 'Server in Slave mode! Changes Forbidden!'];
 		return false;
 	}
 	////CHECK SLAVE HA////END//
@@ -99,7 +99,7 @@ class Controller
 		//Clear DEMO//
 		if (count($rightsArray) !== 1 AND $rightsArray[0] !== 1) $demo = false;
 		//DEMO//
-		//$value = ( HA::getServerRole() == 'slave' ) ? 0 : $value;
+		//$value = ( HAGeneral::getRole() == 'slave' ) ? 0 : $value;
 		if ($value == 0 AND count($rightsArray) == 1 AND $rightsArray[0] == 1) return true;
 		//Administrator//
 		if ($rightsArray[1] == 1) return true;
@@ -189,6 +189,12 @@ class Controller
 	}
 	////////////////////////////////////////
 	////////////////////////////////////////
+	public function databaseHash() {
+		$list = $this->db::select( 'CHECKSUM TABLE '. implode( ",", array_keys($this->tablesArr) ) );
+    return [ sha1( implode(',', array_map(function($x){ return $x->Checksum;}, $list) ) ), $list];
+	}
+	////////////////////////////////////////
+	////////////////////////////////////////
 	public static function activated() {
 		if (! file_exists(TAC_ROOT_PATH.'/../tgui_data/tgui.key') ) return false;
 		return file_get_contents(TAC_ROOT_PATH.'/../tgui_data/tgui.key') == self::uuid_hash();
@@ -267,4 +273,11 @@ class Controller
 		return ['filter' => $filter, 'queries' => $queries];
 	}
 	////////////////////////////////////////
+	public function debMsg($message = '', $prefix = ''){
+
+		if ($this->container->debug)
+			echo date('Y-m-d H:i:s') .' '.$prefix.' '.$message."\n";
+
+		return $this;
+	}
 }

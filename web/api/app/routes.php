@@ -48,10 +48,10 @@ $app->get('/settings/time/status/', 'APISettingsCtrl:getTimeStatus');
 $app->get('/settings/network/interface/list/', 'APISettingsCtrl:getInterfaceList');
 $app->get('/settings/network/interface/', 'APISettingsCtrl:getInterfaceSettings');
 $app->post('/settings/network/interface/', 'APISettingsCtrl:postInterfaceSettings');
-$app->get('/settings/ha/', 'APISettingsCtrl:getHASettings');
-$app->post('/settings/ha/', 'APISettingsCtrl:postHASettings');
-$app->post('/settings/ha/status/', 'APISettingsCtrl:postHAStatus');
-$app->post('/settings/ha/slave/delete/', 'APISettingsCtrl:postHASlaveDel');
+$app->get('/settings/ha/', 'APIHACtrl:getSettings');
+$app->post('/settings/ha/', 'APIHACtrl:postSettings');
+$app->post('/settings/ha/status/', 'APIHACtrl:getStatus');
+$app->post('/settings/ha/slave/del/', 'APIHACtrl:postSlaveDel');
 $app->post('/settings/ha/slave/list/', 'APISettingsCtrl:postHASlaveList');
 #####################################################
 ###Tacacs Devices Routes#######################################
@@ -246,12 +246,13 @@ $app->get('/download/log/', 'APIDownloadCtrl:getDownloadLog');
 #####################################################
 
 ###API HA##################################################
-$app->post('/ha/sync/', 'APIHACtrl:postHASync');
-$app->post('/ha/info/', 'APIHACtrl:postHAInfo');
-$app->post('/ha/do/apply/', 'APIHACtrl:postHADoApplyConfig');
+$app->post('/ha/init/', 'APIHACtrl:postInitFromSlave');
+$app->post('/ha/check/', 'APIHACtrl:postCheck');
+$app->post('/ha/cfg/apply/', 'APIHACtrl:postApply');
 $app->post('/ha/log/add/', 'APIHACtrl:postLoggingEvent');
-$app->post('/ha/update/check/', 'APIHACtrl:postCheckUpdate');
-$app->post('/ha/update/setup/', 'APIHACtrl:postSetupUpdate');
+// $app->post('/ha/salave/update/check/', 'APIHACtrl:postCheckUpdate');
+$app->post('/ha/slave/update/', 'APIHACtrl:postSlaveUpdate');
+$app->post('/ha/slave/update/do/', 'APIHACtrl:postSlaveUpdateDo');
 #####################################################
 
 ###API HA##################################################

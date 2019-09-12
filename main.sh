@@ -150,6 +150,21 @@ cp $ROOT_PATH/tac_plus.sh /etc/init.d/tac_plus
 		;;
 		esac
 	;;
+	self-test)
+		#crontab -l 2>/dev/null
+		CRONTAB_REAL="$(crontab -l 2>/dev/null)"
+		if [[ $(echo $CRONTAB_REAL | grep 'TGUI SELF-TEST' | wc -l) -eq 0 ]]; then
+			echo -e "$CRONTAB_REAL\n#### TGUI SELF-TEST ####\n*/5 * * * * /opt/tacacsgui/web/api/self/app.php > /dev/null 2>/dev/null &" | crontab -
+			echo 1;
+		else
+			echo 0;
+		fi
+		# echo $("$(crontab -l)" ; echo "#### TGUI SELF-TEST ####") #| crontab -
+		# SCRIPT_TEST="*/5 * * * * /opt/tacacsgui/web/api/self/app.php"
+		# echo $("$(crontab -l)" ; echo $SCRIPT_TEST) #| crontab -
+		# echo "#### TGUI SELF-TEST ####" | crontab -
+		# echo "*/5 * * * * /opt/tacacsgui/web/api/self/app.php" | crontab -
+	;;
 	*)
 		echo 'Unexpected main argument. Exit.'
 		exit 0

@@ -39,6 +39,13 @@ class TACReportsCtrl extends Controller
 			trim( shell_exec(TAC_ROOT_PATH . "/main.sh ntp get-time") )
 		);
 		$data['range']=$weekTimeRange;
+		$data['ha'] = [
+			'config' => $this->HAGeneral->getFullConfig(),
+			'slaves' => $this->HAMaster->getSlaves(),
+			'master' => $this->HASlave->getMaster(),
+			'db' => $this->databaseHash()[0],
+			'api' => APIVER,
+		];
 		/////////////NAMBER OF FAILED AUTH/////START//
 		//$data['numberOfAuthFails']=Authentication::select()->whereBetween('date', $weekTimeRange)->where([['action','LIKE','%fail%']])->get()->count();
 		/////////////NUMBER OF FAILED AUTH/////end//
@@ -331,7 +338,7 @@ class TACReportsCtrl extends Controller
 
 			return $query;
 		});
-		
+
 		$data['total'] = $tempData->count();
 
 		$tempData = $tempData->take($size)->offset($start);

@@ -5,7 +5,7 @@ namespace tgui\Controllers\TACConfig;
 use tgui\Controllers\TACConfig\ConfigPatterns;
 use tgui\Models\TACGlobalConf;
 use tgui\Controllers\Controller;
-use tgui\Controllers\APISettings\HA;
+// use tgui\Controllers\APISettings\HA;
 
 use Respect\Validation\Validator as v;
 
@@ -35,6 +35,12 @@ class TACConfigCtrl extends Controller
 		//CHECK ACCESS TO THAT FUNCTION//END//
 
 		$html = (empty($req->getParam('html'))) ? false : true;
+
+		$data['ha'] = ['config'=>[], 'slaves'=>[],'master'=>[]];
+		$data['ha']['config'] = $this->HAGeneral->getFullConfig();
+		if (empty($data['ha']['config'])) $data['ha']['config'] = false;
+		$data['ha']['slaves'] = $this->HAMaster->getSlaves();
+		$data['ha']['master'] = $this->HASlave->getMaster();
 
 		$data['tac_mavis']=array_values(ConfigPatterns::tacMavisGeneralGen($html));
 		$data['tac_devices']=array_values(ConfigPatterns::tacDevicesPartGen($html));
@@ -180,41 +186,6 @@ class TACConfigCtrl extends Controller
 			ConfigPatterns::tacUsersPartGen(false)
 		));
 
-		////////////////////////////////////
-		//SPAWND CONFIGURATION//START//
-		// $output.="id = spawnd {".$lineSeparator;
-		// $output.=$this->arrayParserToText($tempSpawndConfArray,$lineSeparator);
-		// $output.="} ##END OF SPAWND".$lineSeparator;
-		//SPAWND CONFIGURATION//END//
-		////////////////////////////////////
-		//GLOBAL CONFIGURATION//START//
-		// $output.="id = tac_plus { ##START GLOBAL CONFIGURATION".$lineSeparator;
-		// $output.=$this->arrayParserToText($tempGlobalConfArray,$lineSeparator);
-		//GLOBAL CONFIGURATION//END//
-		////////////////////////////////////
-		//MAVIS GENERAL CONFIGURATION//START//
-		// $output.=$this->arrayParserToText($tempMavisGeneralArray,$lineSeparator);
-		//MAVIS GENERAL CONFIGURATION//END//
-		////////////////////////////////////
-		//ACL LIST CONFIGURATION//START//
-		// $output.=$this->arrayParserToText($tempACL,$lineSeparator);
-		//ACL LIST CONFIGURATION//END//
-		////////////////////////////////////
-		//DEVICE GROUP LIST CONFIGURATION//START//
-		// $output.=$this->arrayParserToText($tempDeviceGroupArray,$lineSeparator);
-		//DEVICE GROUP LIST CONFIGURATION//END//
-		////////////////////////////////////
-		//DEVICE LIST CONFIGURATION//START//
-		// $output.=$this->arrayParserToText($tempDeviceArray,$lineSeparator);
-		//DEVICE LIST CONFIGURATION//END//
-		//////////////////////////////////
-		//USER GROUP LIST CONFIGURATION//START//
-		// $output.=$this->arrayParserToText($tempUserGroupArray,$lineSeparator);
-		//USER GROUP LIST CONFIGURATION//END//
-		//////////////////////////////////
-		//USER LIST CONFIGURATION//START//
-		// $output.=$this->arrayParserToText($tempUserArray,$lineSeparator);
-		//USER LIST CONFIGURATION//END//
 		//////////////////////////////////
 		$output.="\n}##END GLOBAL CONFIGURATION".$lineSeparator;
 		//////////////////////////////////
@@ -274,25 +245,19 @@ class TACConfigCtrl extends Controller
 			$logEntry = array('action' => 'tacacs test conf', 'obj_name' => 'tacacs configuration', 'section' => 'tacacs configuration', 'message' => 501);
 			$this->APILoggingCtrl->makeLogEntry($logEntry);
 			///LOGGING//end//
-			$data['server_list'] = [];
-			$data['server_list_response'] = [];
-			if ( HA::isThereSlaves() ){
-				$ha = new HA(['capsule' => false ]);
-				$data['server_list'] = $ha->getServerList();
-				// $data['checksum'] = [];
-				// $tempArray = $this->db::select( 'CHECKSUM TABLE '. implode( ",", array_keys($this->tablesArr) ) );
-		    // for ($i=0; $i < count($tempArray); $i++) {
-		    //   $data['checksum'][$tempArray[$i]->Table]=$tempArray[$i]->Checksum;
-		    // }
-				// $data['server_list_response'] = $ha->sendConfigurationApply([ 'checksum'=>$data['checksum']]);
-			}
-			//$newSlaveAvailable = HA::isThereNewSlaves();
-			//$data['unstoppable'] = $unstoppable = ( HA::isMAster() AND HA::unconfiguredSlaves() );
-			//$data['test01']= $newSlaveAvailable;
+			$data['slaves'] = [];
+			$data['cfg']='';
+			$data['api']=APIVER;
+			//Backup check and make
 			$doBackup = $req->getParam('doBackup');
-		if ( $doBackup /*OR $unstoppable*/ ) {
+
+			$unstoppable = true;
+			if ($this->HAGeneral->isMaster())
+				$unstoppable = $this->HAMaster->checkSlaveCfg();
+
+			if ( $doBackup /*OR $unstoppable*/ ) {
 				$data['backup'] = $doBackup = $this->APIBackupCtrl->makeBackup(['make' => 'tcfg']);
-			if ( !$doBackup['status'] /*AND ! $unstoppable */) {
+			if ( !$doBackup['status'] AND $unstoppable) {
 					$data['applyStatus'] = ['error' => true, 'message' => $doBackup['message'], 'errorLine' => 0];
 					return $res -> withStatus(200) -> withHeader('Content-type', $contentTypeOutput) -> write(json_encode($data));
 				}
@@ -300,17 +265,28 @@ class TACConfigCtrl extends Controller
 			///LOGGING//
 			$data['applyStatus']=$this->applyConfiguration($output);
 
-			$data['server_list'] = [];
-			$data['server_list_response'] = [];
-			if ( HA::isThereSlaves() ){
-				$ha = new HA(['capsule' => false ]);
-				$data['server_list'] = $ha->getServerList();
-				// $data['checksum'] = [];
-				// $tempArray = $this->db::select( 'CHECKSUM TABLE '. implode( ",", array_keys($this->tablesArr) ) );
-		    // for ($i=0; $i < count($tempArray); $i++) {
-		    //   $data['checksum'][$tempArray[$i]->Table]=$tempArray[$i]->Checksum;
-		    // }
-				// $data['server_list_response'] = $ha->sendConfigurationApply([ 'checksum'=>$data['checksum']]);
+			if ($this->HAGeneral->isMaster() AND !$data['applyStatus']['error']){
+				$this->HAGeneral->setCfg();
+				$data['cfg']= $this->HAGeneral->config['cfg'];
+				//$this->HAGeneral->getFullConfig();
+				$db = $this->databaseHash()[0];
+				$data['slaves'] = $this->HAMaster->getSlaves();
+				for ($sl=0; $sl < count($data['slaves']); $sl++) {
+					$data['slaves'][$sl]['resp'] = $this->HAMaster->slaveRequest($data['slaves'][$sl]['ip'], 'apply', $this->HAGeneral->psk, $db);
+					if ($data['slaves'][$sl]['resp']) {
+						$this->HAMaster->setSlave([
+							'api' => $data['slaves'][$sl]['resp']->api,
+							'db' => $data['slaves'][$sl]['resp']->db,
+							'status' => ($data['slaves'][$sl]['resp']->status) ? 99 : 90,
+							'cfg' => $data['slaves'][$sl]['resp']->cfg,
+						],$data['slaves'][$sl]['ip']);
+					}
+					$data['slaves'][$sl]['api'] = $data['slaves'][$sl]['resp']->api;
+					$data['slaves'][$sl]['db'] = $data['slaves'][$sl]['resp']->db;
+					$data['slaves'][$sl]['cfg'] = $data['slaves'][$sl]['resp']->cfg;
+					$data['slaves'][$sl]['date'] = date('Y-m-d H:i:s', time());
+					$data['slaves'][$sl]['status'] = ($data['slaves'][$sl]['resp']->status) ? 99 : 90;
+				}
 			}
 
 			///LOGGING//start//
@@ -318,7 +294,7 @@ class TACConfigCtrl extends Controller
 
 			///LOGGING//end//
 
-			$data['changeConfiguration']= (!$data['applyStatus']['error'] AND !HA::unconfiguredSlaves() ) ? $this->changeConfigurationFlag(['unset' => 1]) : 0;
+			$data['changeConfiguration']= ( !$data['applyStatus']['error'] ) ? $this->changeConfigurationFlag(['unset' => 1]) : 0;
 
 			$this->APILoggingCtrl->makeLogEntry($logEntry);
 			return $res -> withStatus(200) -> withHeader('Content-type', $contentTypeOutput) -> write(json_encode($data));
@@ -346,46 +322,46 @@ class TACConfigCtrl extends Controller
 		}
 	}
 	//////////////CREATE CONFIGURATION////END//
-	public function postApplySlaveCfg($req,$res)
-	{
-		//INITIAL CODE////START//
-		$data=array();
-		$data=$this->initialData([
-			'type' => 'post',
-			'object' => 'config',
-			'action' => 'slave apply',
-		]);
-		#check error#
-		if ($_SESSION['error']['status']){
-			$data['error']=$_SESSION['error'];
-			return $res -> withStatus(401) -> write(json_encode($data));
-		}
-		//INITIAL CODE////END//
-
-		//CHECK SHOULD I STOP THIS?//START//
-		if( $this->shouldIStopThis() )
-		{
-			$data['error'] = $this->shouldIStopThis();
-			return $res -> withStatus(400) -> write(json_encode($data));
-		}
-		//CHECK SHOULD I STOP THIS?//END//
-		//CHECK ACCESS TO THAT FUNCTION//START//
-		if(!$this->checkAccess(6))
-		{
-			return $res -> withStatus(403) -> write(json_encode($data));
-		}
-		//CHECK ACCESS TO THAT FUNCTION//END//
-
-		$ha = new HA();
-		$data['checksum'] = [];
-		$tempArray = $this->db::select( 'CHECKSUM TABLE '. implode( ",", array_keys($this->tablesArr) ) );
-		for ($i=0; $i < count($tempArray); $i++) {
-		  $data['checksum'][$tempArray[$i]->Table]=$tempArray[$i]->Checksum;
-		}
-		$data['server_response'] = $ha->sendConfigurationApply([ 'checksum'=>$data['checksum'], 'sid' => $req->getParam('sid')]);
-
-		return $res -> withStatus(200) -> write(json_encode($data));
-	}
+	// public function ApplySlaveCfg($req,$res)
+	// {
+	// 	//INITIAL CODE////START//
+	// 	$data=array();
+	// 	$data=$this->initialData([
+	// 		'type' => 'post',
+	// 		'object' => 'config',
+	// 		'action' => 'slave apply',
+	// 	]);
+	// 	#check error#
+	// 	if ($_SESSION['error']['status']){
+	// 		$data['error']=$_SESSION['error'];
+	// 		return $res -> withStatus(401) -> write(json_encode($data));
+	// 	}
+	// 	//INITIAL CODE////END//
+	//
+	// 	//CHECK SHOULD I STOP THIS?//START//
+	// 	if( $this->shouldIStopThis() )
+	// 	{
+	// 		$data['error'] = $this->shouldIStopThis();
+	// 		return $res -> withStatus(400) -> write(json_encode($data));
+	// 	}
+	// 	//CHECK SHOULD I STOP THIS?//END//
+	// 	//CHECK ACCESS TO THAT FUNCTION//START//
+	// 	if(!$this->checkAccess(6))
+	// 	{
+	// 		return $res -> withStatus(403) -> write(json_encode($data));
+	// 	}
+	// 	//CHECK ACCESS TO THAT FUNCTION//END//
+	//
+	// 	$ha = new HA();
+	// 	$data['checksum'] = [];
+	// 	$tempArray = $this->db::select( 'CHECKSUM TABLE '. implode( ",", array_keys($this->tablesArr) ) );
+	// 	for ($i=0; $i < count($tempArray); $i++) {
+	// 	  $data['checksum'][$tempArray[$i]->Table]=$tempArray[$i]->Checksum;
+	// 	}
+	// 	$data['server_response'] = $ha->sendConfigurationApply([ 'checksum'=>$data['checksum'], 'sid' => $req->getParam('sid')]);
+	//
+	// 	return $res -> withStatus(200) -> write(json_encode($data));
+	// }
 	public function postConfigGen($req,$res)
 	{
 		//INITIAL CODE////START//

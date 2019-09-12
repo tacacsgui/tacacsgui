@@ -4,7 +4,7 @@ namespace tgui\Controllers\APIUpdate;
 
 use tgui\Controllers\Controller;
 use tgui\Models\APISettings;
-use tgui\Controllers\APISettings\HA;
+
 use GuzzleHttp\Client as gclient;
 use GuzzleHttp\Exception\RequestException;
 
@@ -34,9 +34,8 @@ class APIUpdateCtrl extends Controller
 		$data['info']['update_activated']=$this->activated();
 		$data['info']['version']=APIVER;
 		$data['slaves'] = [];
-		if (HA::isMaster() AND HA::isThereSlaves()){
-			$ha_config=HA::getFullConfiguration();
-			$data['slaves'] = array_values($ha_config['server_list']['slave']);
+		if ( $this->HAGeneral->isMaster() ){
+			$data['slaves'] = $this->HAMaster->getSlaves();
 		}
 
 		return $res -> withStatus(200) -> write(json_encode($data));
@@ -225,7 +224,7 @@ class APIUpdateCtrl extends Controller
 				'connect_timeout'=> 7,
 				'form_params'=>
 				[
-					'key'=> $this->uuid_hash(),
+					'key'=> [ $this->uuid_hash() ],
 					'version' => APIVER,
 					'revision' => APIREVISION,
 				]

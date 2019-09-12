@@ -9,7 +9,7 @@ use tgui\Models\APISettings;
 use tgui\Controllers\Controller;
 use Respect\Validation\Validator as v;
 use tgui\Services\CMDRun\CMDRun as CMDRun;
-use tgui\Controllers\APISettings\HA;
+// use tgui\Controllers\APISettings\HA;
 
 class APISettingsCtrl extends Controller
 {
@@ -652,188 +652,188 @@ public function getInterfaceList($req,$res)
 ####NETWORK SETTINGS######End
 #########################
 ####High Availability SETTINGS######
-public function getHASettings($req,$res)
-{
-  //INITIAL CODE////START//
-  $data=array();
-  $data=$this->initialData([
-    'type' => 'get',
-    'object' => 'ha',
-    'action' => 'info',
-  ]);
-  #check error#
-  if ($_SESSION['error']['status']){
-    $data['error']=$_SESSION['error'];
-    return $res -> withStatus(401) -> write(json_encode($data));
-  }
-  //INITIAL CODE////END//
-  //CHECK ACCESS TO THAT FUNCTION//START//
-  if(!$this->checkAccess(1, true))
-  {
-    return $res -> withStatus(403) -> write(json_encode($data));
-  }
-  //CHECK ACCESS TO THAT FUNCTION//END//
+// public function getHASettings($req,$res)
+// {
+//   //INITIAL CODE////START//
+//   $data=array();
+//   $data=$this->initialData([
+//     'type' => 'get',
+//     'object' => 'ha',
+//     'action' => 'info',
+//   ]);
+//   #check error#
+//   if ($_SESSION['error']['status']){
+//     $data['error']=$_SESSION['error'];
+//     return $res -> withStatus(401) -> write(json_encode($data));
+//   }
+//   //INITIAL CODE////END//
+//   //CHECK ACCESS TO THAT FUNCTION//START//
+//   if(!$this->checkAccess(1, true))
+//   {
+//     return $res -> withStatus(403) -> write(json_encode($data));
+//   }
+//   //CHECK ACCESS TO THAT FUNCTION//END//
+//
+//   $ha = new HA();
+//
+//   $data['result'] = $ha->getFullData();
+//
+//   $data['test'] = HA::getServerRole();
+//
+//   return $res -> withStatus(200) -> write(json_encode($data));
+// }
+// public function postHASettings($req,$res)
+// {
+//   //INITIAL CODE////START//
+//   $data=array();
+//   $data=$this->initialData([
+//     'type' => 'get',
+//     'object' => 'ha',
+//     'action' => 'save',
+//   ]);
+//   #check error#
+//   if ($_SESSION['error']['status']){
+//     $data['error']=$_SESSION['error'];
+//     return $res -> withStatus(401) -> write(json_encode($data));
+//   }
+//   //INITIAL CODE////END//
+//   //CHECK ACCESS TO THAT FUNCTION//START//
+//   if( !$this->checkAccess(1) )
+//   {
+//     return $res -> withStatus(403) -> write(json_encode($data));
+//   }
+//   //CHECK ACCESS TO THAT FUNCTION//END//
+//
+//   $validation = $this->validator->validate($req, [
+//     'role' => v::oneOf( v::equals('disabled'), v::equals('master'), v::equals('slave')),
+//     'slaves_ip' => v::when( v::haRole('master', $req->getParam('role') ), v::notEmpty()->arrayVal()->each(v::ip()->setName('Slaves List'))->setName('Slaves List'), v::alwaysValid() ),
+//     'psk_master' => v::when( v::haRole('master', $req->getParam('role') ), v::notEmpty()->length(5, null)->alnum('% $ @ # * ^ ! ? {} [] () <> : ; - _')->noWhitespace()->setName('Pre-Shared Key'), v::alwaysValid() ),
+//     'psk_slave' => v::when( v::haRole('slave', $req->getParam('role') ), v::notEmpty()->length(5, null)->alnum('% $ @ # * ^ ! ? {} [] () <> : ; - _')->noWhitespace()->setName('Pre-Shared Key'), v::alwaysValid() ),
+//     'ipaddr_master' => v::when( v::haRole('slave', $req->getParam('role') ) , v::notEmpty()->ip()->setName('Mater IP'), v::alwaysValid() ),
+//   ]);
+//
+//   if ($validation->failed()){
+//     $data['error']['status']=true;
+//     $data['error']['validation']=$validation->error_messages;
+//     return $res -> withStatus(200) -> write(json_encode($data));
+//   }
+//
+//   $allParams = $req->getParams();
+//   $allParams['slaves_ip'] = implode(',', $allParams['slaves_ip']);
+//   $data['rootpw'] = false;
+//   $data['response_e'] = '';
+//   $data['response'] = [];
+//   $ha = new HA();
+//   if (!$this->activated()){
+//     $data['response_e'] = 'Not activated version!';
+//     return $res -> withStatus(200) -> write(json_encode($data));
+//   }
+//   if (!$ha->getRootpw($allParams['rootpw'])){
+//     $data['rootpw'] = true;
+//     $data['response_e'] = 'MySQL root password required!';
+//     return $res -> withStatus(200) -> write(json_encode($data));
+//   }
+//   //$data['test2'] = $ha->getRootpw();
+//   //
+//   // $allParams = $req->getParams();
+//   //
+//   $data['response'] = $ha->save( $allParams );
+//
+//   return $res -> withStatus(200) -> write(json_encode($data));
+// }
+// public function postHAStatus($req,$res)
+// {
+//   //INITIAL CODE////START//
+//   $data=array();
+//   $data=$this->initialData([
+//     'type' => 'get',
+//     'object' => 'ha',
+//     'action' => 'save',
+//   ]);
+//   #check error#
+//   if ($_SESSION['error']['status']){
+//     $data['error']=$_SESSION['error'];
+//     return $res -> withStatus(401) -> write(json_encode($data));
+//   }
+//   //INITIAL CODE////END//
+//   //CHECK ACCESS TO THAT FUNCTION//START//
+//   if(!$this->checkAccess(1, true))
+//   {
+//     return $res -> withStatus(403) -> write(json_encode($data));
+//   }
+//   //CHECK ACCESS TO THAT FUNCTION//END//
+//   $data['status'] = HA::getStatus();
+//   return $res -> withStatus(200) -> write(json_encode($data));
+// }
 
-  $ha = new HA();
+// public function postHASlaveDel($req,$res)
+// {
+//   //INITIAL CODE////START//
+//   $data=array();
+//   $data=$this->initialData([
+//     'type' => 'get',
+//     'object' => 'ha',
+//     'action' => 'slave delete',
+//   ]);
+//   #check error#
+//   if ($_SESSION['error']['status']){
+//     $data['error']=$_SESSION['error'];
+//     return $res -> withStatus(401) -> write(json_encode($data));
+//   }
+//   //INITIAL CODE////END//
+//   //CHECK ACCESS TO THAT FUNCTION//START//
+//   if(!$this->checkAccess(1, true))
+//   {
+//     return $res -> withStatus(403) -> write(json_encode($data));
+//   }
+//   //CHECK ACCESS TO THAT FUNCTION//END//
+//   $validation = $this->validator->validate($req, [
+//     'sid' => v::notEmpty()->numeric(),
+//   ]);
+//
+//   if ($validation->failed()){
+//     $data['error']['status']=true;
+//     $data['status'] = false;
+//     $data['error']['validation']=$validation->error_messages;
+//     return $res -> withStatus(200) -> write(json_encode($data));
+//   }
+//   $data['status'] = HA::delSlave($req->getParam('sid'));
+//   return $res -> withStatus(200) -> write(json_encode($data));
+// }
 
-  $data['result'] = $ha->getFullData();
-
-  $data['test'] = HA::getServerRole();
-
-  return $res -> withStatus(200) -> write(json_encode($data));
-}
-public function postHASettings($req,$res)
-{
-  //INITIAL CODE////START//
-  $data=array();
-  $data=$this->initialData([
-    'type' => 'get',
-    'object' => 'ha',
-    'action' => 'save',
-  ]);
-  #check error#
-  if ($_SESSION['error']['status']){
-    $data['error']=$_SESSION['error'];
-    return $res -> withStatus(401) -> write(json_encode($data));
-  }
-  //INITIAL CODE////END//
-  //CHECK ACCESS TO THAT FUNCTION//START//
-  if( !$this->checkAccess(1) )
-  {
-    return $res -> withStatus(403) -> write(json_encode($data));
-  }
-  //CHECK ACCESS TO THAT FUNCTION//END//
-
-  $validation = $this->validator->validate($req, [
-    'role' => v::oneOf( v::equals('disabled'), v::equals('master'), v::equals('slave')),
-    'slaves_ip' => v::when( v::haRole('master', $req->getParam('role') ), v::notEmpty()->arrayVal()->each(v::ip()->setName('Slaves List'))->setName('Slaves List'), v::alwaysValid() ),
-    'psk_master' => v::when( v::haRole('master', $req->getParam('role') ), v::notEmpty()->length(5, null)->alnum('% $ @ # * ^ ! ? {} [] () <> : ; - _')->noWhitespace()->setName('Pre-Shared Key'), v::alwaysValid() ),
-    'psk_slave' => v::when( v::haRole('slave', $req->getParam('role') ), v::notEmpty()->length(5, null)->alnum('% $ @ # * ^ ! ? {} [] () <> : ; - _')->noWhitespace()->setName('Pre-Shared Key'), v::alwaysValid() ),
-    'ipaddr_master' => v::when( v::haRole('slave', $req->getParam('role') ) , v::notEmpty()->ip()->setName('Mater IP'), v::alwaysValid() ),
-  ]);
-
-  if ($validation->failed()){
-    $data['error']['status']=true;
-    $data['error']['validation']=$validation->error_messages;
-    return $res -> withStatus(200) -> write(json_encode($data));
-  }
-
-  $allParams = $req->getParams();
-  $allParams['slaves_ip'] = implode(',', $allParams['slaves_ip']);
-  $data['rootpw'] = false;
-  $data['response_e'] = '';
-  $data['response'] = [];
-  $ha = new HA();
-  if (!$this->activated()){
-    $data['response_e'] = 'Not activated version!';
-    return $res -> withStatus(200) -> write(json_encode($data));
-  }
-  if (!$ha->getRootpw($allParams['rootpw'])){
-    $data['rootpw'] = true;
-    $data['response_e'] = 'MySQL root password required!';
-    return $res -> withStatus(200) -> write(json_encode($data));
-  }
-  //$data['test2'] = $ha->getRootpw();
-  //
-  // $allParams = $req->getParams();
-  //
-  $data['response'] = $ha->save( $allParams );
-
-  return $res -> withStatus(200) -> write(json_encode($data));
-}
-public function postHAStatus($req,$res)
-{
-  //INITIAL CODE////START//
-  $data=array();
-  $data=$this->initialData([
-    'type' => 'get',
-    'object' => 'ha',
-    'action' => 'save',
-  ]);
-  #check error#
-  if ($_SESSION['error']['status']){
-    $data['error']=$_SESSION['error'];
-    return $res -> withStatus(401) -> write(json_encode($data));
-  }
-  //INITIAL CODE////END//
-  //CHECK ACCESS TO THAT FUNCTION//START//
-  if(!$this->checkAccess(1, true))
-  {
-    return $res -> withStatus(403) -> write(json_encode($data));
-  }
-  //CHECK ACCESS TO THAT FUNCTION//END//
-  $data['status'] = HA::getStatus();
-  return $res -> withStatus(200) -> write(json_encode($data));
-}
-
-public function postHASlaveDel($req,$res)
-{
-  //INITIAL CODE////START//
-  $data=array();
-  $data=$this->initialData([
-    'type' => 'get',
-    'object' => 'ha',
-    'action' => 'slave delete',
-  ]);
-  #check error#
-  if ($_SESSION['error']['status']){
-    $data['error']=$_SESSION['error'];
-    return $res -> withStatus(401) -> write(json_encode($data));
-  }
-  //INITIAL CODE////END//
-  //CHECK ACCESS TO THAT FUNCTION//START//
-  if(!$this->checkAccess(1, true))
-  {
-    return $res -> withStatus(403) -> write(json_encode($data));
-  }
-  //CHECK ACCESS TO THAT FUNCTION//END//
-  $validation = $this->validator->validate($req, [
-    'sid' => v::notEmpty()->numeric(),
-  ]);
-
-  if ($validation->failed()){
-    $data['error']['status']=true;
-    $data['status'] = false;
-    $data['error']['validation']=$validation->error_messages;
-    return $res -> withStatus(200) -> write(json_encode($data));
-  }
-  $data['status'] = HA::delSlave($req->getParam('sid'));
-  return $res -> withStatus(200) -> write(json_encode($data));
-}
-
-public function postHASlaveList($req,$res)
-{
-  //INITIAL CODE////START//
-  $data=array();
-  $data=$this->initialData([
-    'type' => 'get',
-    'object' => 'ha',
-    'action' => 'slave list',
-  ]);
-  #check error#
-  if ($_SESSION['error']['status']){
-    $data['error']=$_SESSION['error'];
-    return $res -> withStatus(401) -> write(json_encode($data));
-  }
-  //INITIAL CODE////END//
-  //CHECK ACCESS TO THAT FUNCTION//START//
-  if(!$this->checkAccess(1, true))
-  {
-    return $res -> withStatus(403) -> write(json_encode($data));
-  }
-  //CHECK ACCESS TO THAT FUNCTION//END//
-  $validation = $this->validator->validate($req, [
-    'slaves_ip' => v::notEmpty()->arrayVal()->each(v::ip()->setName('Slaves List'))->setName('Slaves List'),
-  ]);
-
-  if ($validation->failed()){
-    $data['error']['status']=true;
-    $data['status'] = false;
-    $data['error']['validation']=$validation->error_messages;
-    return $res -> withStatus(200) -> write(json_encode($data));
-  }
-  $data['status'] = HA::updateSlave( implode(',', $req->getParam('slaves_ip')) );
-  return $res -> withStatus(200) -> write(json_encode($data));
-}
+// public function postHASlaveList($req,$res)
+// {
+//   //INITIAL CODE////START//
+//   $data=array();
+//   $data=$this->initialData([
+//     'type' => 'get',
+//     'object' => 'ha',
+//     'action' => 'slave list',
+//   ]);
+//   #check error#
+//   if ($_SESSION['error']['status']){
+//     $data['error']=$_SESSION['error'];
+//     return $res -> withStatus(401) -> write(json_encode($data));
+//   }
+//   //INITIAL CODE////END//
+//   //CHECK ACCESS TO THAT FUNCTION//START//
+//   if(!$this->checkAccess(1, true))
+//   {
+//     return $res -> withStatus(403) -> write(json_encode($data));
+//   }
+//   //CHECK ACCESS TO THAT FUNCTION//END//
+//   $validation = $this->validator->validate($req, [
+//     'slaves_ip' => v::notEmpty()->arrayVal()->each(v::ip()->setName('Slaves List'))->setName('Slaves List'),
+//   ]);
+//
+//   if ($validation->failed()){
+//     $data['error']['status']=true;
+//     $data['status'] = false;
+//     $data['error']['validation']=$validation->error_messages;
+//     return $res -> withStatus(200) -> write(json_encode($data));
+//   }
+//   $data['status'] = HA::updateSlave( implode(',', $req->getParam('slaves_ip')) );
+//   return $res -> withStatus(200) -> write(json_encode($data));
+// }
 ####High Availability SETTINGS######End
 }

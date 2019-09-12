@@ -16,7 +16,7 @@ $_SESSION['error']['message']='Unknown Error';
 require __DIR__ . '/../config.php';
 require __DIR__ . '/../vendor/autoload.php';
 
-use tgui\Controllers\APISettings\HA;
+use tgui\Controllers\APIHA\HAGeneral;
 use Illuminate\Database\Capsule\Manager as Capsule;
 $app = new \Slim\App([
 	'settings' => [
@@ -26,8 +26,8 @@ $app = new \Slim\App([
 				'driver' => 'mysql',
 				'host'	=> DB_HOST,
 				'database' => DB_NAME,
-				'username' => ( ! HA::isSlave() ) ? DB_USER : 'tgui_ro',
-				'password' => ( ! HA::isSlave() ) ? DB_PASSWORD : HA::slavePsk(),
+				'username' => ( ! HAGeneral::isSlave() ) ? DB_USER : 'tgui_ro',
+				'password' => ( ! HAGeneral::isSlave() ) ? DB_PASSWORD : HAGeneral::isSlave(),
 				'charset' => DB_CHARSET,
 				'collation' => DB_COLLATE,
 				'prefix' => ''
@@ -176,6 +176,16 @@ $container['ConfigCredentials'] = function($container) {
 };
 $container['ConfQueries'] = function($container) {
 	return new \tgui\Controllers\ConfManager\ConfQueries($container);
+};
+
+$container['HAGeneral'] = function($container) {
+	return new \tgui\Controllers\APIHA\HAGeneral($container);
+};
+$container['HAMaster'] = function($container) {
+	return new \tgui\Controllers\APIHA\HAMaster($container);
+};
+$container['HASlave'] = function($container) {
+	return new \tgui\Controllers\APIHA\HASlave($container);
 };
 
 /*$container['csrf'] = function($container) {

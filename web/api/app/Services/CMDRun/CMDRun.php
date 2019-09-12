@@ -102,6 +102,9 @@ class CMDRun
       case '2>&1':
         $this->stdOut_parameter = $parameter;
         break;
+      case '2>/dev/null':
+        $this->stdOut_parameter = $parameter;
+        break;
 
       default:
         $this->stdOut_parameter = '';

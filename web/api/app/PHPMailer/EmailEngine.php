@@ -71,8 +71,11 @@ class EmailEngine
     return $this;
   }
 
-  public function addAddresses(){
-
+  public function addAddresses($email = []){
+    for ($em=0; $em < count($email); $em++) {
+      $this->mail->addAddress($email[$em]);
+    }
+    return $this;
   }
 
   public function send($trigger = false)

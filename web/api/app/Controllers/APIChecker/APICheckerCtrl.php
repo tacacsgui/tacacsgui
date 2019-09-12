@@ -240,6 +240,9 @@ class APICheckerCtrl extends Controller
 			return $res -> withStatus(401) -> write(json_encode($data));
 		}
 		//INITIAL CODE////END//
+		//Sel self-check script//
+		CMDRun::init()->setCmd(MAINSCRIPT)->setAttr( [ 'self-test'] )->get();
+		/////////////////////////
 		$updateFlag = (@$req->getParam('update')) ? 1 : 0;
 		//var_dump( $this->db::getSchemaBuilder()->getColumnType('tac_users', 'username') ); die;
 		//var_dump($req->getParam('update'));die();

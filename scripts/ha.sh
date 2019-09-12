@@ -287,16 +287,25 @@ case $1 in
 		exit 1;
 	;;
 	dump)
-		rm /opt/tacacsgui/temp/tgui_dump.sql
+		rm -rf /opt/tacacsgui/temp/tgui_dump.sql 2>&1
+		rm -rf /opt/tacacsgui/temp/sql.cfg 2>&1
+		echo "
+		[client]
+		user = $2
+		password = $3
+		" > /opt/tacacsgui/temp/sql.cfg;
 		#PASSWD=$(sinitize_passwd $3);
-		COMMAND="mysqldump -u$2 -p'$3' tgui"
-		eval $COMMAND | grep -v "Using a password" > /opt/tacacsgui/temp/tgui_dump.sql
-		echo "mysqldump -u $2 -p$PASSWD tgui | grep -v 'Using a password' > /opt/tacacsgui/temp/tgui_dump.sql 2>&1";
+		COMMAND="mysqldump --defaults-extra-file=/opt/tacacsgui/temp/sql.cfg tgui"
+		eval $COMMAND > /opt/tacacsgui/temp/tgui_dump.sql
+		#echo "mysqldump -u $2 -p'$3' tgui | grep -v 'Using a password' > /opt/tacacsgui/temp/tgui_dump.sql 2>&1";
+		#echo "mysqldump --defaults-extra-file=/opt/tacacsgui/temp/sql.cfg tgui | grep -v 'Using a password' > /opt/tacacsgui/temp/tgui_dump.sql 2>&1";
 		if [ -f /opt/tacacsgui/temp/tgui_dump.sql ]; then
 			echo -n 1
+			rm -rf /opt/tacacsgui/temp/sql.cfg 2>&1
 			exit 0
 		fi
 		echo 0
+		rm -rf /opt/tacacsgui/temp/sql.cfg 2>&1
 		exit 0
 	;;
 	dump-deploy)

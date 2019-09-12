@@ -41,9 +41,9 @@ $settings = array(
 		'prefix' => ''
 		]);
 
-/*php ./parser/parser.php accounting '2018-01-18 11:39:40 +0300|!|10.10.50.251|!|cisco123|!|tty1|!|10.10.50.200|!|stop|!|task_id=124|!|timezone=UTC|!|service=shell|!|priv-lvl=15|!|cmd=configure terminal <cr>'*/
-/*php ./parser/parser.php authentication '2018-01-21 15:11:47 +0300|!|10.10.50.251|!|cisco123|!|tty1|!|10.10.50.200|!|shell login succeeded'*/
-/*php ./parser/parser.php authentication '2018-01-21 15:11:47 +0300|!|10.10.50.251|!|cisco123|!|tty1|!|10.10.50.200|!|shell login failed'*/
+/*php ./parser/parser.php accounting '2019-09-11 11:39:40 +0300|!|10.10.50.251|!|cisco123|!|tty1|!|10.10.50.200|!|stop|!|task_id=124|!|timezone=UTC|!|service=shell|!|priv-lvl=15|!|cmd=configure terminal <cr>'*/
+/*php ./parser/parser.php authentication '2019-09-11 15:11:47 +0300|!|10.10.50.251|!|cisco123|!|tty1|!|10.10.50.200|!|shell login succeeded'*/
+/*php ./parser/parser.php authentication '2019-09-11 15:11:47 +0300|!|10.10.50.251|!|cisco123|!|tty1|!|10.10.50.200|!|shell login failed'*/
 /*php ./parser/parser.php authorization '2018-01-21 15:42:51 +0300|!|10.10.50.251|!|cisco123|!|tty1|!|10.10.50.200|!|permit|!|no|!|aaa authorization commands 14 default <cr>'
 
 echo -e '2018-01-18 11:39:40 +0300|!|10.10.50.251|!|cisco123|!|tty1|!|10.10.50.200|!|stop|!|task_id=124|!|timezone=UTC|!|service=shell|!|priv-lvl=15|!|cmd=configure terminal <cr>\n2018-01-18 11:39:40 +0300|!|10.10.50.251|!|cisco123|!|tty1|!|10.10.50.200|!|stop|!|task_id=124|!|timezone=UTC|!|service=shell|!|priv-lvl=15|!|cmd=configure terminal <cr>\n2018-01-18 11:39:40 +0300|!|10.10.50.251|!|cisco123|!|tty1|!|10.10.50.200|!|stop|!|task_id=124|!|timezone=UTC|!|service=shell|!|priv-lvl=15|!|cmd=configure terminal <cr> | /opt/tgui/parser/tacacs_parser.sh accounting'
@@ -79,7 +79,10 @@ switch ($container->logType) {
 		break;
 }
 
-use tgui\Controllers\APISettings\HA;
-if (HA::isSlave()){
-	HA::sendLogEvent(['log_type' => $container->logType, 'log_entry' => $container->logLine]);
+use tgui\Controllers\APIHA\HAGeneral;
+use tgui\Controllers\APIHA\HASlave;
+if (HAGeneral::isSlave()){
+	// var_dump(HASlave::sendLogEvent(['log_type' => $container->logType, 'log_entry' => $container->logLine]));
+	if (!HASlave::sendLogEvent(['log_type' => $container->logType, 'log_entry' => $container->logLine]));
+		echo 0;
 }
