@@ -326,7 +326,8 @@ public function postDeviceCsv($req,$res)
 		return $res -> withStatus(403) -> write(json_encode($data));
 	}
 	//CHECK ACCESS TO THAT FUNCTION//END//
-	$data['clear'] = shell_exec( TAC_ROOT_PATH . '/main.sh delete temp');
+	//$data['clear'] = shell_exec( TAC_ROOT_PATH . '/main.sh delete temp');
+	shell_exec( TAC_ROOT_PATH . '/main.sh delete temp');
 	$path = TAC_ROOT_PATH . '/temp/';
 	$filename = 'tac_devices_'. $this->generateRandomString(8) .'.csv';
 
@@ -339,12 +340,15 @@ public function postDeviceCsv($req,$res)
 
 	fputcsv($f, $columns /*, ',)'*/);
   foreach ($array as $line) {
-	fputcsv($f, $line /*, ',)'*/);
+		fputcsv($f, $line /*, ',)'*/);
   }
 
-	$data['filename']=$filename;
-	sleep(3);
-	return $res -> withStatus(200) -> write(json_encode($data));
+	//$data['filename']=$path.$filename;
+	header("X-Sendfile: $path.$filename");
+	header("Content-type: application/octet-stream");
+	header('Content-Disposition: attachment; filename="'.$filename.'"');
+	exit(0);
+	//return $res -> withStatus(200) -> write(json_encode($data));
 }
 ########	CSV Device	###############END###########
 ########	#########################

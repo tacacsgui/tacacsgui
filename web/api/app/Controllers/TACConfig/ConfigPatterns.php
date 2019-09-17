@@ -667,10 +667,10 @@ class ConfigPatterns
       }
 			///USER PAP///
       $pap = '';
-			if ( !in_array($user['pap_flag'], [1, 0]) ) {
+			if ( $user['pap_flag'] == 4 ) {
         $pap = 'login ' . self::$crypto_flag[$user['pap_flag']];
-      } else $pap = self::$crypto_flag[$user['pap_flag']].' '. $user['pap'];
-			if ( $user['pap'] != '' ) array_push($outputUsers,
+      } else $pap = (empty($user['pap'])) ? '' : self::$crypto_flag[$user['pap_flag']].' '. $user['pap'];
+			if ( $pap != '' ) array_push($outputUsers,
 			($html) ? $sp->put().self::$html_tags['param'][0] . "pap" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . $pap . self::$html_tags['val'][1]
 			:
 			$sp->put().'pap = '. $pap );

@@ -1,7 +1,10 @@
 ##############################
+Version_0.9.80 20190917
+	* Logging bug fixed
+##############################
 Version_0.9.79 20190912
 	* Added Slave list on Dashboard
-	* Re-builded High Availability feature
+	* New version of High Availability feature
 	* Email notification if Slave or Master down
 	* Upgrade Slaves from Master
 	* Self-test every 5 minutes

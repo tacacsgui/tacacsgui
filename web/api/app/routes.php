@@ -172,6 +172,12 @@ $app->post('/tacacs/reports/delete/', 'TACReportsCtrl:postLogDelete');
 $app->get('/tacacs/widget/chart/auth/', 'TACReportsCtrl:getAuthChartData');
 #####################################################
 
+###Tacacs Export Routes#######################################
+$app->get('/export/tacacs/', 'TACExportCtrl:getExport');
+###Tacacs Import Routes#######################################
+$app->post('/import/upload/file/', 'TACImportCtrl:postFile');
+#####################################################
+
 ###APIChecker Routes#######################################
 $app->get('/apicheck/database/', 'APICheckerCtrl:getCheckDatabase');
 $app->get('/apicheck/status/', 'APICheckerCtrl:getApiStatus');

@@ -1,9 +1,13 @@
 <?php
-require '/opt/tacacsgui/web/api/app/Controllers/APISettings/HA.php';
+// require '/opt/tacacsgui/web/api/app/Controllers/APIHA/HAGeneral.php';
+// require '/opt/tacacsgui/web/api/app/Controllers/APIHA/HASlave.php';
 require __DIR__ . '/../web/api/config.php';
 require __DIR__ . '/../web/api/constants.php';
 $loader = require __DIR__ . '/../web/api/vendor/autoload.php';
 $loader->addPsr4('parser\\', __DIR__ . '/app');
+
+use tgui\Controllers\APIHA\HAGeneral;
+use tgui\Controllers\APIHA\HASlave;
 
 class Container {
 
@@ -42,7 +46,7 @@ $settings = array(
 		]);
 
 /*php ./parser/parser.php accounting '2019-09-11 11:39:40 +0300|!|10.10.50.251|!|cisco123|!|tty1|!|10.10.50.200|!|stop|!|task_id=124|!|timezone=UTC|!|service=shell|!|priv-lvl=15|!|cmd=configure terminal <cr>'*/
-/*php ./parser/parser.php authentication '2019-09-11 15:11:47 +0300|!|10.10.50.251|!|cisco123|!|tty1|!|10.10.50.200|!|shell login succeeded'*/
+/*php ./parser/parser.php authentication '2019-09-17 15:11:47 +0300|!|10.10.50.251|!|cisco123|!|tty1|!|10.10.50.200|!|shell login succeeded'*/
 /*php ./parser/parser.php authentication '2019-09-11 15:11:47 +0300|!|10.10.50.251|!|cisco123|!|tty1|!|10.10.50.200|!|shell login failed'*/
 /*php ./parser/parser.php authorization '2018-01-21 15:42:51 +0300|!|10.10.50.251|!|cisco123|!|tty1|!|10.10.50.200|!|permit|!|no|!|aaa authorization commands 14 default <cr>'
 
@@ -79,8 +83,6 @@ switch ($container->logType) {
 		break;
 }
 
-use tgui\Controllers\APIHA\HAGeneral;
-use tgui\Controllers\APIHA\HASlave;
 if (HAGeneral::isSlave()){
 	// var_dump(HASlave::sendLogEvent(['log_type' => $container->logType, 'log_entry' => $container->logLine]));
 	if (!HASlave::sendLogEvent(['log_type' => $container->logType, 'log_entry' => $container->logLine]));

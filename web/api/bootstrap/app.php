@@ -128,6 +128,13 @@ $container['TACConfigCtrl'] = function($container) {
 	return new \tgui\Controllers\TACConfig\TACConfigCtrl($container);
 };
 
+$container['TACExportCtrl'] = function($container) {
+	return new \tgui\Controllers\TAC\TACExport\TACExportCtrl($container);
+};
+$container['TACImportCtrl'] = function($container) {
+	return new \tgui\Controllers\TAC\TACImport\TACImportCtrl($container);
+};
+
 $container['ObjAddress'] = function($container) {
 	return new \tgui\Controllers\Obj\ObjAddress\ObjAddress($container);
 };
@@ -202,7 +209,7 @@ $app->add(new \tgui\Middleware\ChangeHeaderMiddleware($container));
 
 $app->add(new Tuupola\Middleware\JwtAuthentication([
 		//"path" => "/api/auth/123",
-		"ignore" => ["/auth", "/tacacs/user/change_passwd/change/", "/backup/download/", "/backup/upload/", '/ha/'],
+		"ignore" => ["/auth", "/tacacs/user/change_passwd/change/", "/backup/download/", "/backup/upload/", '/ha/', '/export/', '/import/'],
 		"attribute" => "decoded_token_data",
     "secret" => DB_PASSWORD,
 		"algorithm" => ["HS256"],
