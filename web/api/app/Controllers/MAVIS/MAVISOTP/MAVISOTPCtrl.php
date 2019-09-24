@@ -9,6 +9,8 @@ use ParagonIE\ConstantTime\Base32;
 use tgui\Controllers\Controller;
 use Respect\Validation\Validator as v;
 
+use tgui\Services\CMDRun\CMDRun as CMDRun;
+
 class MAVISOTPCtrl extends Controller
 {
 	public function secret($secret = '')
@@ -229,7 +231,8 @@ class MAVISOTPCtrl extends Controller
 
 		$data['test_configuration'] = $this->TACConfigCtrl->testConfiguration($this->TACConfigCtrl->createConfiguration("\n "));
 
-		$data['check_result']=shell_exec(TAC_ROOT_PATH . '/main.sh check mavis '.$req->getParam('username').' '.$req->getParam('password').' 2>&1');
+		$data['check_result'] = preg_replace('/PASSWORD\s+.*/i', "PASSWORD\t\t******", CMDRun::init()->setCmd(TAC_ROOT_PATH . '/main.sh')->setAttr(['check','mavis',$req->getParam('username'),$req->getParam('password')])->setStdOut('2>&1')->get() );
+		//$data['check_result']=preg_replace('/PASSWORD\s+.*/i', "PASSWORD\t\t******", shell_exec(TAC_ROOT_PATH . '/main.sh check mavis '.escapeshellarg( $req->getParam('username') ).' '.escapeshellarg($req->getParam('password')).' 2>&1') );
 
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
