@@ -10,6 +10,28 @@ use Respect\Validation\Validator as v;
 
 class TACDeviceGrpsCtrl extends Controller
 {
+
+	public function itemValidation($req = [], $state = 'add'){
+		$id = 0;
+		if (is_object($req)){
+			$id = ($state == 'edit') ? $req->getParam('id') : 0;
+		}
+
+		$policy = APIPWPolicy::select()->first(1);
+		return $this->validator->validate($req, [
+			'name' => v::noWhitespace()->notEmpty()->theSameNameUsed( '\tgui\Models\TACDeviceGrps', $id )->theSameNameUsed( '\tgui\Models\TACDevices' ),
+			'enable' => v::when( v::oneOf( v::nullType(), v::equals('') ) , v::alwaysValid(), v::noWhitespace()->notContainChars()->
+				length($policy['tac_pw_length'], 64)->
+				notEmpty()->
+				passwdPolicyUppercase($policy['tac_pw_uppercase'])->
+				passwdPolicyLowercase($policy['tac_pw_lowercase'])->
+				passwdPolicySpecial($policy['tac_pw_special'])->
+				passwdPolicyNumbers($policy['tac_pw_numbers'])->setName('Enable') ),
+			'enable_flag' => v::when( v::nullType() , v::alwaysValid(), v::oneOf( v::equals('1'), v::equals('2'), v::equals('0') ) ),
+			'key' => v::noWhitespace()->prohibitedChars(),
+		]);
+	}
+
 ################################################
 	#########	POST Add New Device	Group#########
 	public function postDeviceGroupAdd($req,$res)
@@ -40,19 +62,8 @@ class TACDeviceGrpsCtrl extends Controller
 			return $res -> withStatus(403) -> write(json_encode($data));
 		}
 		//CHECK ACCESS TO THAT FUNCTION//END//
-		$policy = APIPWPolicy::select()->first(1);
-		$validation = $this->validator->validate($req, [
-			'name' => v::noWhitespace()->notEmpty()->theSameNameUsed( '\tgui\Models\TACDevices')->theSameNameUsed( '\tgui\Models\TACDeviceGrps' ),
-			'enable' => v::when( v::oneOf( v::nullType(), v::equals('') ) , v::alwaysValid(), v::noWhitespace()->notContainChars()->
-				length($policy['tac_pw_length'], 64)->
-				notEmpty()->
-				passwdPolicyUppercase($policy['tac_pw_uppercase'])->
-				passwdPolicyLowercase($policy['tac_pw_lowercase'])->
-				passwdPolicySpecial($policy['tac_pw_special'])->
-				passwdPolicyNumbers($policy['tac_pw_numbers'])->setName('Enable') ),
-			'enable_flag' => v::when( v::nullType() , v::alwaysValid(), v::oneOf( v::equals('1'), v::equals('2'), v::equals('0') ) ),
-			'key' => v::noWhitespace()->prohibitedChars(),
-		]);
+
+		$validation = $this->itemValidation($req);
 
 		if ($validation->failed()){
 			$data['error']['status']=true;
@@ -149,19 +160,8 @@ class TACDeviceGrpsCtrl extends Controller
 			return $res -> withStatus(403) -> write(json_encode($data));
 		}
 		//CHECK ACCESS TO THAT FUNCTION//END//
-		$policy = APIPWPolicy::select()->first(1);
-		$validation = $this->validator->validate($req, [
-			'name' => v::noWhitespace()->when( v::nullType() , v::alwaysValid(), v::notEmpty()->theSameNameUsed( '\tgui\Models\TACDevices')->theSameNameUsed( '\tgui\Models\TACDeviceGrps', $req->getParam('id') )),
-			'enable' => v::when( v::oneOf( v::nullType(), v::equals('') ) , v::alwaysValid(), v::noWhitespace()->notContainChars()->
-				length($policy['tac_pw_length'], 64)->
-				notEmpty()->
-				passwdPolicyUppercase($policy['tac_pw_uppercase'])->
-				passwdPolicyLowercase($policy['tac_pw_lowercase'])->
-				passwdPolicySpecial($policy['tac_pw_special'])->
-				passwdPolicyNumbers($policy['tac_pw_numbers'])->setName('Enable') ),
-			'enable_flag' => v::when( v::nullType() , v::alwaysValid(), v::oneOf( v::equals('1'), v::equals('2'), v::equals('0') ) ),
-			'key' => v::noWhitespace()->when( v::nullType() , v::alwaysValid(), v::prohibitedChars()),
-		]);
+		
+		$validation = $this->itemValidation($req, 'edit');
 
 		if ($validation->failed()){
 			$data['error']['status']=true;

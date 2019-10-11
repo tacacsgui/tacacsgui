@@ -456,4 +456,25 @@ class TACACLCtrl extends Controller
 ########	Reference List ACL	###############END###########
 ################################################
 
+	public function getAclId($acl){
+		$id = 0;
+		$messages = [];
+		$type = 0;
+
+		if ( ctype_digit( (string) $acl ) ){
+			$temp = TACACL::select('name')->where('id', $acl)->first();
+			if ($temp)
+				return [$acl, ['ACL found: '. $temp->name]];
+			else
+				return [0, ['ACL with id '.$acl.' NOT found']];
+		}
+
+		$temp = TACACL::select('id')->where('name', $acl)->first();
+		if (!$temp)
+			return [0, ['ACL with name '.$acl.' NOT found']];
+
+		return [$temp->id, ['ACL name '.$acl.' found']];
+
+	}
+
 }//END OF CLASS//

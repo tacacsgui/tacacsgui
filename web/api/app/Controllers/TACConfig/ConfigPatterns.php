@@ -650,20 +650,35 @@ class ConfigPatterns
 			:
 			$sp->put('a').'login = '. $login);
       ///USER MEMBER///
-      $groups = TACUserGrps::select()->
-        leftJoin('tac_bind_usrGrp as tb', 'tb.group_id', '=', 'id')->
+      $groups = TACUserGrps::from('tac_user_groups as tug')->
+        select(['tug.name as name', 'ta.name as acl'])->
+        leftJoin('tac_bind_usrGrp as tb', 'tb.group_id', '=', 'tug.id')->
+        leftJoin('tac_acl as ta', 'ta.id', '=', 'tug.acl_match')->
         where('tb.user_id', $user['id'])->orderBy('tb.order', 'asc')->get();
 			if ( count($groups) ){
         $user_group = '';
-        for ($i=0; $i < count($groups); $i++) {
-            if ( $i == 0 ) $user_group .= $groups[$i]->name;
-            else $user_group .= '/'.$groups[$i]->name;
+        $user_group_acl = [];
+        for ($g=0; $g < count($groups); $g++) {
+          if (!empty($groups[$g]->acl)) {
+            $user_group_acl[] = ['acl' => $groups[$g]->acl, 'name' => $groups[$g]->name];
+            continue;
+          }
+          if ( empty($user_group) ) $user_group .= $groups[$g]->name;
+          else $user_group .= '/'.$groups[$g]->name;
         }
 
         array_push($outputUsers,
   			($html) ? $sp->put().self::$html_tags['param'][0] . "member" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . $user_group . self::$html_tags['val'][1]
   			:
   			$sp->put().'member = '.$user_group);
+
+        for ($ga=0; $ga < count($user_group_acl); $ga++) {
+          $textLine = self::$html_tags['object'][0] .' acl '. $user_group_acl[$ga]['acl'] . self::$html_tags['object'][1];
+          array_push($outputUsers,
+    			($html) ? $sp->put().self::$html_tags['param'][0] . "member" . self::$html_tags['param'][1] . $textLine .' = ' . self::$html_tags['val'][0] . $user_group_acl[$ga]['name'] . self::$html_tags['val'][1]
+    			:
+    			$sp->put().'member acl '.$user_group_acl[$ga]['acl'].' = '.$user_group_acl[$ga]['name']);
+        }
       }
 			///USER PAP///
       $pap = '';
@@ -688,11 +703,12 @@ class ConfigPatterns
       $enable = '';
       if ( !in_array($user['enable_flag'], [1, 2, 0]) ) {
         $enable = 'login ' . self::$crypto_flag[$user['enable_flag']];
-      } else {
+      }
+      if ( !empty($user['enable']) AND in_array($user['enable_flag'], [1, 2, 0]) ) {
         if ($user['enable_flag'] == 0) $user['enable'] = '"'.$user['enable'].'"';
         $enable = self::$crypto_flag[$user['enable_flag']].' '. $user['enable'];
       }
-      if ( $user['enable'] != '' OR !in_array($user['enable_flag'], [1, 0]) ) array_push($outputUsers,
+      if ( !empty($user['enable']) ) array_push($outputUsers,
       ($html) ? $sp->put().self::$html_tags['param'][0] . "enable" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . $enable . self::$html_tags['val'][1]
       :
       $sp->put().'enable = '. $enable );

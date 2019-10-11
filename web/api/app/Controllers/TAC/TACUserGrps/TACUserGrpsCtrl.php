@@ -4,16 +4,45 @@ namespace tgui\Controllers\TAC\TACUserGrps;
 
 use tgui\Models\TACUsers;
 use tgui\Models\TACUserGrps;
-use tgui\Models\MAVISLDAP;
+// use tgui\Models\MAVISLDAP;
 use tgui\Models\APIPWPolicy;
 use tgui\Controllers\Controller;
 use Respect\Validation\Validator as v;
-use Adldap\Adldap as Adldap;
-use Adldap\Schemas\ActiveDirectory as AD;
-use Adldap\Auth\BindException as ADErr;
 
 class TACUserGrpsCtrl extends Controller
 {
+
+	public function itemValidation($req = [], $state = 'add'){
+		$id = 0;
+		if (is_object($req)){
+			$id = ($state == 'edit') ? $req->getParam('id') : 0;
+		}
+
+		$policy = APIPWPolicy::select()->first();
+
+		return $this->validator->validate($req, [
+			'name' => v::noWhitespace()->notEmpty()->theSameNameUsed( '\tgui\Models\TACUserGrps', $id )->
+				not( v::oneOf(
+						v::contains('@'),
+						v::contains('='),
+						v::contains('*'),
+						v::contains('/'),
+						v::contains('%'),
+						v::contains('$')
+					)
+				),
+			'enable' => v::when( v::oneOf( v::nullType(), v::equals('') ) , v::alwaysValid(), v::noWhitespace()->notContainChars()->
+				length($policy['tac_pw_length'], 64)->
+				notEmpty()->
+				passwdPolicyUppercase($policy['tac_pw_uppercase'])->
+				passwdPolicyLowercase($policy['tac_pw_lowercase'])->
+				passwdPolicySpecial($policy['tac_pw_special'])->
+				passwdPolicyNumbers($policy['tac_pw_numbers'])->setName('Enable') ),
+			'enable_flag' => v::when( v::nullType() , v::alwaysValid(), v::oneOf( v::equals('1'), v::equals('2'), v::equals('0') ) ),
+		]);
+
+	}
+
 ################################################
 	#########	POST Add New User Group	#########
 	public function postUserGroupAdd($req,$res)
@@ -44,27 +73,7 @@ class TACUserGrpsCtrl extends Controller
 			return $res -> withStatus(403) -> write(json_encode($data));
 		}
 		//CHECK ACCESS TO THAT FUNCTION//END//
-		$policy = APIPWPolicy::select()->first(1);
-		$validation = $this->validator->validate($req, [
-			'name' => v::noWhitespace()->notEmpty()->userGroupTacAvailable(0)->
-				not( v::oneOf(
-						v::contains('@'),
-						v::contains('='),
-						v::contains('*'),
-						v::contains('/'),
-						v::contains('%'),
-						v::contains('$')
-					)
-				),
-			'enable' => v::when( v::nullType() , v::alwaysValid(), v::noWhitespace()->notContainChars()->
-				length($policy['tac_pw_length'], 64)->
-				notEmpty()->
-				passwdPolicyUppercase($policy['tac_pw_uppercase'])->
-				passwdPolicyLowercase($policy['tac_pw_lowercase'])->
-				passwdPolicySpecial($policy['tac_pw_special'])->
-				passwdPolicyNumbers($policy['tac_pw_numbers'])->setName('Enable') ),
-			'enable_flag' => v::when( v::nullType() , v::alwaysValid(), v::oneOf( v::equals('1'), v::equals('2'), v::equals('0') ) ),
-		]);
+		$validation = $this->itemValidation($req);
 
 		if ($validation->failed()){
 			$data['error']['status']=true;
@@ -151,8 +160,12 @@ class TACUserGrpsCtrl extends Controller
 		//CHECK ACCESS TO THAT FUNCTION//END//
 
 		$data['group']=TACUserGrps::select()->where('id',$req->getParam('id'))->first();
+
 		$data['group']->acl = $this->db->table('tac_acl')->
 			select(['name as text','id'])->where('id',$data['group']->acl)->get();
+
+		$data['group']->acl_match = $this->db->table('tac_acl')->
+			select(['name as text','id'])->where('id',$data['group']->acl_match)->get();
 
 		$data['group']['service'] = $this->db::table('tac_bind_service')->
 			leftJoin('tac_services as ts','ts.id','=','service_id')->
@@ -203,35 +216,7 @@ class TACUserGrpsCtrl extends Controller
 			return $res -> withStatus(403) -> write(json_encode($data));
 		}
 		//CHECK ACCESS TO THAT FUNCTION//END//
-		$policy = APIPWPolicy::select()->first(1);
-		$validation = $this->validator->validate($req, [
-			'name' => v::noWhitespace()->when( v::nullType() , v::alwaysValid(),
-				v::userGroupTacAvailable($req->getParam('id'))->
-				not( v::oneOf(
-						v::contains('@'),
-						v::contains('='),
-						v::contains('*'),
-						v::contains('/'),
-						v::contains('%'),
-						v::contains('$')
-					)
-				)
-			),
-			'enable' => v::when( v::oneOf( v::nullType(), v::equals('') ), v::alwaysValid(), v::noWhitespace()->notContainChars()->
-				length($policy['tac_pw_length'], 64)->
-				notEmpty()->
-				passwdPolicyUppercase($policy['tac_pw_uppercase'])->
-				passwdPolicyLowercase($policy['tac_pw_lowercase'])->
-				passwdPolicySpecial($policy['tac_pw_special'])->
-				passwdPolicyNumbers($policy['tac_pw_numbers'])->setName('Enable') ),
-			'enable_flag' => v::when( v::nullType() , v::alwaysValid(), v::oneOf( v::equals('1'), v::equals('2'), v::equals('0') ) ),
-		]);
-
-		if ($validation->failed()){
-			$data['error']['status']=true;
-			$data['error']['validation']=$validation->error_messages;
-			return $res -> withStatus(200) -> write(json_encode($data));
-		}
+		$validation = $this->itemValidation($req, 'edit');
 
 		$allParams = $req->getParams();
 
@@ -491,7 +476,9 @@ class TACUserGrpsCtrl extends Controller
 		}
 		//////////////////////
 		////LIST OF GROUPS////
-		$query = TACUserGrps::select(['id','name as text']);
+		$query = TACUserGrps::from('tac_user_groups as tug')->
+		select(['tug.id as id','tug.name as text', 'tug.acl_match as acl_match', $this->db::raw('(SELECT COUNT(*) FROM ldap_bind WHERE tac_grp_id = tug.id) as ldap')]);
+		//leftJoin('ldap_bind as lb', 'lb.tac_grp_id','=','tug.id');
 		$data['total'] = $query->count();
 		$search = $req->getParam('search');
 

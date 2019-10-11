@@ -12,45 +12,77 @@ class TACDevicesCtrl extends Controller
 {
 ////////////////////////////////////
 ////Device Ping///////////Start///////
-	public function getDevicePing($req,$res)
-	{
-		//INITIAL CODE////START//
-		$data=array();
-		$data=$this->initialData([
-			'type' => 'get',
-			'object' => 'device',
-			'action' => 'ping'
-		]);
-		#check error#
-		if ($_SESSION['error']['status']){
-			$data['error']=$_SESSION['error'];
-			return $res -> withStatus(401) -> write(json_encode($data));
-		}
-		//INITIAL CODE////END//
-		//CHECK ACCESS TO THAT FUNCTION//START//
-		if(!$this->checkAccess(2, true))
-		{
-			return $res -> withStatus(403) -> write(json_encode($data));
-		}
-		//CHECK ACCESS TO THAT FUNCTION//END//
-
-		$validation = $this->validator->validate($req, [
-			'ipaddr' => v::noWhitespace()->notEmpty()->ip()
-		]);
-
-		if ($validation->failed()){
-			$data['error']['status']=true;
-			$data['error']['validation']=$validation->error_messages;
-			return $res -> withStatus(200) -> write(json_encode($data));
-		}
-
-		$data['pingResponses'] = intval(trim(shell_exec('ping '.$req->getParam('ipaddr').' -c4 | grep "64 bytes from" | wc -l')));
-
-
-		return $res -> withStatus(200) -> write(json_encode($data));
-	}
+	// public function getDevicePing($req,$res)
+	// {
+	// 	//INITIAL CODE////START//
+	// 	$data=array();
+	// 	$data=$this->initialData([
+	// 		'type' => 'get',
+	// 		'object' => 'device',
+	// 		'action' => 'ping'
+	// 	]);
+	// 	#check error#
+	// 	if ($_SESSION['error']['status']){
+	// 		$data['error']=$_SESSION['error'];
+	// 		return $res -> withStatus(401) -> write(json_encode($data));
+	// 	}
+	// 	//INITIAL CODE////END//
+	// 	//CHECK ACCESS TO THAT FUNCTION//START//
+	// 	if(!$this->checkAccess(2, true))
+	// 	{
+	// 		return $res -> withStatus(403) -> write(json_encode($data));
+	// 	}
+	// 	//CHECK ACCESS TO THAT FUNCTION//END//
+	//
+	// 	$validation = $this->validator->validate($req, [
+	// 		'ipaddr' => v::noWhitespace()->notEmpty()->ip()
+	// 	]);
+	//
+	// 	if ($validation->failed()){
+	// 		$data['error']['status']=true;
+	// 		$data['error']['validation']=$validation->error_messages;
+	// 		return $res -> withStatus(200) -> write(json_encode($data));
+	// 	}
+	//
+	// 	$data['pingResponses'] = intval(trim(shell_exec('ping '.$req->getParam('ipaddr').' -c4 | grep "64 bytes from" | wc -l')));
+	//
+	//
+	// 	return $res -> withStatus(200) -> write(json_encode($data));
+	// }
 ////Device Ping///////////End///////
 ################################################
+
+	public function itemValidation($req = [], $state = 'add'){
+		$id = 0;
+		$group = 0;
+		if (is_object($req)){
+			$id = ($state == 'edit') ? $req->getParam('id') : 0;
+			$group = $req->getParam('group');
+		}
+
+		$policy = APIPWPolicy::select()->first(1);
+		return $this->validator->validate($req, [
+			'name' => v::noWhitespace()->notEmpty()->theSameNameUsed( '\tgui\Models\TACDevices', $id )->theSameNameUsed( '\tgui\Models\TACDeviceGrps' ),
+			'group' => v::when( v::oneOf( v::nullType(), v::equals('')), v::alwaysValid(), v::numeric()->setName('Group ID')),
+			'enable' => v::when( v::oneOf( v::nullType(), v::equals('') ) , v::alwaysValid(), v::noWhitespace()->notContainChars()->
+				length($policy['tac_pw_length'], 64)->
+				notEmpty()->
+				passwdPolicyUppercase($policy['tac_pw_uppercase'])->
+				passwdPolicyLowercase($policy['tac_pw_lowercase'])->
+				passwdPolicySpecial($policy['tac_pw_special'])->
+				passwdPolicyNumbers($policy['tac_pw_numbers'])->setName('Enable') ),
+			'enable_flag' => v::when( v::nullType() , v::alwaysValid(), v::oneOf( v::equals('1'), v::equals('2'), v::equals('0') ) ),
+			'key' => v::when( v::tacacsKeyAvailable($group), v::alwaysValid(),
+			 	v::noWhitespace()->notContainChars()->
+				length($policy['tac_pw_length'], 64)->
+				notEmpty()->
+				passwdPolicyUppercase($policy['tac_pw_uppercase'])->
+				passwdPolicyLowercase($policy['tac_pw_lowercase'])->
+				passwdPolicySpecial($policy['tac_pw_special'])->
+				passwdPolicyNumbers($policy['tac_pw_numbers'])->setName('Tacacs Key') ),
+			'address' => v::notEmpty()->numeric(),
+		]);
+	}
 
 	#########	POST Add New Device	#########
 	public function postDeviceAdd($req,$res)
@@ -81,31 +113,10 @@ class TACDevicesCtrl extends Controller
 			return $res -> withStatus(403) -> write(json_encode($data));
 		}
 		//CHECK ACCESS TO THAT FUNCTION//END//
-		$policy = APIPWPolicy::select()->first(1);
 
 		$allParams = $req->getParams();
 
-		$validation = $this->validator->validate($req, [
-			'name' => v::noWhitespace()->notEmpty()->theSameNameUsed( '\tgui\Models\TACDevices' )->theSameNameUsed( '\tgui\Models\TACDeviceGrps' ),
-			'group' => v::when( v::nullType(), v::alwaysValid(), v::numeric()),
-			'enable' => v::when( v::oneOf( v::nullType(), v::equals('') ) , v::alwaysValid(), v::noWhitespace()->notContainChars()->
-				length($policy['tac_pw_length'], 64)->
-				notEmpty()->
-				passwdPolicyUppercase($policy['tac_pw_uppercase'])->
-				passwdPolicyLowercase($policy['tac_pw_lowercase'])->
-				passwdPolicySpecial($policy['tac_pw_special'])->
-				passwdPolicyNumbers($policy['tac_pw_numbers'])->setName('Enable') ),
-			'enable_flag' => v::when( v::nullType() , v::alwaysValid(), v::oneOf( v::equals('1'), v::equals('2'), v::equals('0') ) ),
-			'key' => v::when( v::tacacsKeyAvailable($allParams['group']), v::alwaysValid(),
-			 	v::noWhitespace()->notContainChars()->
-				length($policy['tac_pw_length'], 64)->
-				notEmpty()->
-				passwdPolicyUppercase($policy['tac_pw_uppercase'])->
-				passwdPolicyLowercase($policy['tac_pw_lowercase'])->
-				passwdPolicySpecial($policy['tac_pw_special'])->
-				passwdPolicyNumbers($policy['tac_pw_numbers'])->setName('Tacacs Key') ),
-			'address' => v::notEmpty(),
-		]);
+		$validation = $this->itemValidation($req);
 
 		if ($validation->failed()){
 			$data['error']['status']=true;
@@ -203,33 +214,12 @@ class TACDevicesCtrl extends Controller
 			return $res -> withStatus(403) -> write(json_encode($data));
 		}
 		//CHECK ACCESS TO THAT FUNCTION//END//
-		$policy = APIPWPolicy::select()->first(1);
 
 		$allParams = $req->getParams();
 
-		$group= (empty($allParams['group'])) ? TACDevices::where([['id','=',$allParams['id']]])->first()->group : $allParams['group'];
+		// $group = (empty($allParams['group'])) ? TACDevices::where([['id','=',$allParams['id']]])->first()->group : $allParams['group'];
 
-		$validation = $this->validator->validate($req, [
-			'name' => v::noWhitespace()->when( v::nullType() , v::alwaysValid(), v::notEmpty()->theSameNameUsed( '\tgui\Models\TACDevices', $req->getParam('id') )->theSameNameUsed( '\tgui\Models\TACDeviceGrps' )),
-			'group' => v::when( v::nullType(), v::alwaysValid(), v::numeric() ),
-			'enable' => v::when( v::oneOf( v::nullType(), v::equals('') ) , v::alwaysValid(), v::noWhitespace()->notContainChars()->
-				length($policy['tac_pw_length'], 64)->
-				notEmpty()->
-				passwdPolicyUppercase($policy['tac_pw_uppercase'])->
-				passwdPolicyLowercase($policy['tac_pw_lowercase'])->
-				passwdPolicySpecial($policy['tac_pw_special'])->
-				passwdPolicyNumbers($policy['tac_pw_numbers'])->setName('Enable') ),
-			'enable_flag' => v::when( v::nullType() , v::alwaysValid(), v::oneOf( v::equals('1'), v::equals('2'), v::equals('0') ) ),
-			'key' => v::when( v::oneOf(v::tacacsKeyAvailable($group), v::nullType()) , v::alwaysValid(), v::noWhitespace()->notContainChars()->
-				length($policy['tac_pw_length'], 64)->
-				notEmpty()->
-				passwdPolicyUppercase($policy['tac_pw_uppercase'])->
-				passwdPolicyLowercase($policy['tac_pw_lowercase'])->
-				passwdPolicySpecial($policy['tac_pw_special'])->
-				passwdPolicyNumbers($policy['tac_pw_numbers'])->setName('Tacacs Key') ),
-			'ipaddr' => v::noWhitespace()->when( v::nullType() , v::alwaysValid(), v::ip()),
-			'prefix' => v::noWhitespace()
-		]);
+		$validation = $this->itemValidation($req, 'edit');
 
 		if ($validation->failed()){
 			$data['error']['status']=true;
@@ -305,51 +295,51 @@ class TACDevicesCtrl extends Controller
 ########	Delete Device	###############END###########
 ################################################
 #########	POST CSV Device	#########
-public function postDeviceCsv($req,$res)
-{
-	//INITIAL CODE////START//
-	$data=array();
-	$data=$this->initialData([
-		'type' => 'post',
-		'object' => 'device',
-		'action' => 'csv',
-	]);
-	#check error#
-	if ($_SESSION['error']['status']){
-		$data['error']=$_SESSION['error'];
-		return $res -> withStatus(401) -> write(json_encode($data));
-	}
-	//INITIAL CODE////END//
-	//CHECK ACCESS TO THAT FUNCTION//START//
-	if(!$this->checkAccess(2))
-	{
-		return $res -> withStatus(403) -> write(json_encode($data));
-	}
-	//CHECK ACCESS TO THAT FUNCTION//END//
-	//$data['clear'] = shell_exec( TAC_ROOT_PATH . '/main.sh delete temp');
-	shell_exec( TAC_ROOT_PATH . '/main.sh delete temp');
-	$path = TAC_ROOT_PATH . '/temp/';
-	$filename = 'tac_devices_'. $this->generateRandomString(8) .'.csv';
-
-	$columns = $this->APICheckerCtrl->getTableTitles('tac_devices');
-
-  $f = fopen($path.$filename, 'w');
-	$idList = $req->getParam('idList');
-	$array = [];
-	$array = ( empty($idList) ) ? TACDevices::select($columns)->get()->toArray() : TACDevices::select($columns)->whereIn('id', $idList)->get()->toArray();
-
-	fputcsv($f, $columns /*, ',)'*/);
-  foreach ($array as $line) {
-		fputcsv($f, $line /*, ',)'*/);
-  }
-
-	//$data['filename']=$path.$filename;
-	header("X-Sendfile: $path.$filename");
-	header("Content-type: application/octet-stream");
-	header('Content-Disposition: attachment; filename="'.$filename.'"');
-	exit(0);
-	//return $res -> withStatus(200) -> write(json_encode($data));
-}
+// public function postDeviceCsv($req,$res)
+// {
+// 	//INITIAL CODE////START//
+// 	$data=array();
+// 	$data=$this->initialData([
+// 		'type' => 'post',
+// 		'object' => 'device',
+// 		'action' => 'csv',
+// 	]);
+// 	#check error#
+// 	if ($_SESSION['error']['status']){
+// 		$data['error']=$_SESSION['error'];
+// 		return $res -> withStatus(401) -> write(json_encode($data));
+// 	}
+// 	//INITIAL CODE////END//
+// 	//CHECK ACCESS TO THAT FUNCTION//START//
+// 	if(!$this->checkAccess(2))
+// 	{
+// 		return $res -> withStatus(403) -> write(json_encode($data));
+// 	}
+// 	//CHECK ACCESS TO THAT FUNCTION//END//
+// 	//$data['clear'] = shell_exec( TAC_ROOT_PATH . '/main.sh delete temp');
+// 	shell_exec( TAC_ROOT_PATH . '/main.sh delete temp');
+// 	$path = TAC_ROOT_PATH . '/temp/';
+// 	$filename = 'tac_devices_'. $this->generateRandomString(8) .'.csv';
+//
+// 	$columns = $this->APICheckerCtrl->getTableTitles('tac_devices');
+//
+//   $f = fopen($path.$filename, 'w');
+// 	$idList = $req->getParam('idList');
+// 	$array = [];
+// 	$array = ( empty($idList) ) ? TACDevices::select($columns)->get()->toArray() : TACDevices::select($columns)->whereIn('id', $idList)->get()->toArray();
+//
+// 	fputcsv($f, $columns /*, ',)'*/);
+//   foreach ($array as $line) {
+// 		fputcsv($f, $line /*, ',)'*/);
+//   }
+//
+// 	//$data['filename']=$path.$filename;
+// 	header("X-Sendfile: $path.$filename");
+// 	header("Content-type: application/octet-stream");
+// 	header('Content-Disposition: attachment; filename="'.$filename.'"');
+// 	exit(0);
+// 	//return $res -> withStatus(200) -> write(json_encode($data));
+// }
 ########	CSV Device	###############END###########
 ########	#########################
 ########	Device Datatables ###############START###########

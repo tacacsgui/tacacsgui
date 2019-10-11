@@ -1,4 +1,12 @@
 ##############################
+Version_0.9.81 20191011
+	* Device Export/Import
+	* Device Group Export/Import
+	* TACACS User Export/Import
+	* TACACS User Group Export/Import
+	* TACACS User Group can be associated with ACL
+	* Some bugs fixed
+##############################
 Version_0.9.80 20190917
 	* Logging bug fixed
 ##############################

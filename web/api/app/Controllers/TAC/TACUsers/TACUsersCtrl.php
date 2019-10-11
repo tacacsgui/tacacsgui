@@ -22,6 +22,72 @@ use Respect\Validation\Validator as v;
 
 class TACUsersCtrl extends Controller
 {
+
+	public function itemValidation($req = [], $state = 'add'){
+		$id = 0;
+		// $group = 0;
+		if (is_object($req)){
+			$id = ($state == 'edit') ? $req->getParam('id') : 0;
+			$req = $req->getParams();
+		}
+
+		$policy = APIPWPolicy::select()->first();
+
+		return $this->validator->validate($req, [
+			'username' => v::noWhitespace()->notEmpty()->theSameNameUsed( '\tgui\Models\TACUsers', $id, 'username' )->
+				not( v::oneOf(
+						v::contains('@'),
+						v::contains('='),
+						v::contains('*'),
+						v::contains('/'),
+						v::contains('%'),
+						v::contains('$')
+					)
+				),
+			// 'group' => v::noWhitespace(),
+			'enable' => v::when( v::oneOf( v::nullType(), v::equals(''), v::loginClone( $req['enable_flag'] ) ) , v::alwaysValid(), v::noWhitespace()->notContainChars()->
+				length($policy['tac_pw_length'], 64)->
+				notEmpty()->
+				passwdPolicyUppercase($policy['tac_pw_uppercase'])->
+				passwdPolicyLowercase($policy['tac_pw_lowercase'])->
+				passwdPolicySpecial($policy['tac_pw_special'])->
+				passwdPolicyNumbers($policy['tac_pw_numbers'])->setName('Enable') ),
+			'enable_flag' => v::when( v::nullType() , v::alwaysValid(), v::oneOf( v::equals('1'), v::equals('2'), v::equals('0'), v::equals('4') ) ),
+			'pap' => v::when( v::oneOf( v::nullType(), v::equals(''), v::loginClone( $req['pap_flag'] ) ) , v::alwaysValid(), v::noWhitespace()->notContainChars()->
+				length($policy['tac_pw_length'], 64)->
+				notEmpty()->
+				passwdPolicyUppercase($policy['tac_pw_uppercase'])->
+				passwdPolicyLowercase($policy['tac_pw_lowercase'])->
+				passwdPolicySpecial($policy['tac_pw_special'])->
+				passwdPolicyNumbers($policy['tac_pw_numbers'])->setName('PAP') ),
+			'pap_flag' => v::when( v::nullType() , v::alwaysValid(), v::oneOf( v::equals('1'), v::equals('0'), v::equals('4') ) ),
+			'login' => v::when( v::oneOf(v::checkLoginType($req['login_flag']), v::nullType()), v::alwaysValid(), v::noWhitespace()->
+					notContainChars()->
+					length($policy['tac_pw_length'], 64)->
+					notEmpty()->
+					passwdPolicyUppercase($policy['tac_pw_uppercase'], $allParams['login_flag'])->
+					passwdPolicyLowercase($policy['tac_pw_lowercase'], $allParams['login_flag'])->
+					passwdPolicySpecial($policy['tac_pw_special'], $allParams['login_flag'])->
+					passwdPolicyNumbers($policy['tac_pw_numbers'], $allParams['login_flag'])->setName('Login Password') ),
+			'login_flag' => v::noWhitespace()->numeric()->
+				oneOf(
+					v::equals('1'),
+					v::equals('0'),
+					v::equals('2'),
+					v::equals('3'),
+					v::equals('5'),
+					v::equals('10'),
+					v::equals('12'),
+					v::equals('20'),
+					v::equals('30')
+				),
+			'email' => v::when( v::checkLoginType($req['login_flag'], 'email'), v::alwaysValid(), v::notEmpty()->email()->setName('Email') ),
+			'valid_from' => v::when( v::nullType() , v::alwaysValid(), v::date('Y-m-d')->setName('Valid From') ),
+			'valid_until' => v::when( v::nullType() , v::alwaysValid(), v::date('Y-m-d')->setName('Valid Until') )
+		]);
+
+	}
+
 ################################################
 	#########	POST Add New User	#########
 	public function postUserAdd($req,$res)
@@ -54,59 +120,8 @@ class TACUsersCtrl extends Controller
 		//CHECK ACCESS TO THAT FUNCTION//END//
 		//$enable_flag_test = $req->getParam('enable_flag');
 		$allParams = $req->getParams();
-		$policy = APIPWPolicy::select()->first(1);
-		$validation = $this->validator->validate($req, [
-			'username' => v::noWhitespace()->notEmpty()->userTacAvailable(0)->
-				not( v::oneOf(
-						v::contains('@'),
-						v::contains('='),
-						v::contains('*'),
-						v::contains('/'),
-						v::contains('%'),
-						v::contains('$')
-					)
-				),
-			// 'group' => v::noWhitespace(),
-			'enable' => v::when( v::oneOf( v::nullType(), v::equals(''), v::loginClone( $req->getParam('enable_flag') ) ) , v::alwaysValid(), v::noWhitespace()->notContainChars()->
-				length($policy['tac_pw_length'], 64)->
-				notEmpty()->
-				passwdPolicyUppercase($policy['tac_pw_uppercase'])->
-				passwdPolicyLowercase($policy['tac_pw_lowercase'])->
-				passwdPolicySpecial($policy['tac_pw_special'])->
-				passwdPolicyNumbers($policy['tac_pw_numbers'])->setName('Enable') ),
-			'enable_flag' => v::when( v::nullType() , v::alwaysValid(), v::oneOf( v::equals('1'), v::equals('2'), v::equals('0'), v::equals('4') ) ),
-			'pap' => v::when( v::oneOf( v::nullType(), v::equals(''), v::loginClone( $req->getParam('pap_flag') ) ) , v::alwaysValid(), v::noWhitespace()->notContainChars()->
-				length($policy['tac_pw_length'], 64)->
-				notEmpty()->
-				passwdPolicyUppercase($policy['tac_pw_uppercase'])->
-				passwdPolicyLowercase($policy['tac_pw_lowercase'])->
-				passwdPolicySpecial($policy['tac_pw_special'])->
-				passwdPolicyNumbers($policy['tac_pw_numbers'])->setName('PAP') ),
-			'pap_flag' => v::when( v::nullType() , v::alwaysValid(), v::oneOf( v::equals('1'), v::equals('0'), v::equals('4') ) ),
-			'login' => v::when( v::checkLoginType($req->getParam('login_flag')), v::alwaysValid(), v::noWhitespace()->
-					notContainChars()->
-					length($policy['tac_pw_length'], 64)->
-					notEmpty()->
-					passwdPolicyUppercase($policy['tac_pw_uppercase'], $allParams['login_flag'])->
-					passwdPolicyLowercase($policy['tac_pw_lowercase'], $allParams['login_flag'])->
-					passwdPolicySpecial($policy['tac_pw_special'], $allParams['login_flag'])->
-					passwdPolicyNumbers($policy['tac_pw_numbers'], $allParams['login_flag'])->setName('Login Password') ),
-			'login_flag' => v::noWhitespace()->numeric()->
-				oneOf(
-					v::equals('1'),
-					v::equals('0'),
-					v::equals('2'),
-					v::equals('3'),
-					v::equals('5'),
-					v::equals('10'),
-					v::equals('12'),
-					v::equals('20'),
-					v::equals('30')
-				),
-			'email' => v::when( v::checkLoginType($req->getParam('login_flag'), 'email'), v::alwaysValid(), v::notEmpty()->email()->setName('Email') ),
-			'valid_from' => v::when( v::nullType() , v::alwaysValid(), v::date('Y-m-d')->setName('Valid From') ),
-			'valid_until' => v::when( v::nullType() , v::alwaysValid(), v::date('Y-m-d')->setName('Valid Until') )
-		]);
+
+		$validation = $this->itemValidation($req);
 
 		if ($validation->failed()){
 			$data['error']['status']=true;
@@ -245,7 +260,8 @@ class TACUsersCtrl extends Controller
 
 		$data['user']['group']=$this->db::table('tac_bind_usrGrp as tbug')->
 			leftJoin('tac_user_groups as tug','tug.id','=','tbug.group_id')->
-			select(['tug.name as text', 'tug.id as id'])->where('tbug.user_id',$req->getParam('id'))->get();
+			select(['tug.name as text', 'tug.id as id', 'tug.acl_match as acl_match', $this->db::raw('(SELECT COUNT(*) FROM ldap_bind WHERE tac_grp_id = tug.id) as ldap')])->
+			where('tbug.user_id',$req->getParam('id'))->get();
 
 		$data['user']['device_list']=$this->db::table('tac_bind_dev')->
 			leftJoin('tac_devices as td','td.id','=','device_id')->
@@ -292,62 +308,7 @@ class TACUsersCtrl extends Controller
 
 		$allParams = $req->getParams();
 
-		$policy = APIPWPolicy::select()->first(1);
-		$validation = $this->validator->validate($req, [
-			'username' => v::noWhitespace()->when( v::nullType() , v::alwaysValid(),
-				v::notEmpty()->userTacAvailable($req->getParam('id'))->
-				not( v::oneOf(
-						v::contains('@'),
-						v::contains('='),
-						v::contains('*'),
-						v::contains('/'),
-						v::contains('%'),
-						v::contains('$')
-					)
-				)
-			),
-			//'group' => v::noWhitespace()->when( v::nullType() , v::alwaysValid(), v::numeric()),
-			'enable' => v::when( v::oneOf( v::nullType(), v::equals(''), v::loginClone( $req->getParam('enable_flag') ) ) , v::alwaysValid(), v::noWhitespace()->notContainChars()->
-				length($policy['tac_pw_length'], 64)->
-				notEmpty()->
-				passwdPolicyUppercase($policy['tac_pw_uppercase'])->
-				passwdPolicyLowercase($policy['tac_pw_lowercase'])->
-				passwdPolicySpecial($policy['tac_pw_special'])->
-				passwdPolicyNumbers($policy['tac_pw_numbers'])->setName('Enable') ),
-			'enable_flag' => v::when( v::nullType() , v::alwaysValid(), v::oneOf( v::equals('1'), v::equals('2'), v::equals('0'), v::equals('4') ) ),
-			'login' => v::when( v::oneOf( v::nullType(), v::checkLoginType($req->getParam('login_flag')) ) , v::alwaysValid(), v::noWhitespace()->
-					notContainChars()->
-					length($policy['tac_pw_length'], 64)->
-					notEmpty()->
-					passwdPolicyUppercase($policy['tac_pw_uppercase'], $allParams['login_flag'])->
-					passwdPolicyLowercase($policy['tac_pw_lowercase'], $allParams['login_flag'])->
-					passwdPolicySpecial($policy['tac_pw_special'], $allParams['login_flag'])->
-					passwdPolicyNumbers($policy['tac_pw_numbers'], $allParams['login_flag'])->setName('Login') ),
-			'login_flag' => v::when( v::nullType() , v::alwaysValid(),
-				v::oneOf(
-					v::equals('1'),
-					v::equals('0'),
-					v::equals('2'),
-					v::equals('3'),
-					v::equals('5'),
-					v::equals('10'),
-					v::equals('12'),
-					v::equals('20'),
-					v::equals('30') )
-				),
-			'pap' => v::when( v::oneOf( v::nullType(), v::equals(''), v::loginClone( $req->getParam('pap_flag') ) ) , v::alwaysValid(), v::noWhitespace()->notContainChars()->
-				length($policy['tac_pw_length'], 64)->
-				notEmpty()->
-				passwdPolicyUppercase($policy['tac_pw_uppercase'])->
-				passwdPolicyLowercase($policy['tac_pw_lowercase'])->
-				passwdPolicySpecial($policy['tac_pw_special'])->
-				passwdPolicyNumbers($policy['tac_pw_numbers'])->setName('PAP') ),
-
-			'email' => v::when( v::checkLoginType($req->getParam('login_flag'), 'email'), v::alwaysValid(), v::notEmpty()->email()->setName('Email') ),
-			'pap_flag' => v::when( v::nullType() , v::alwaysValid(), v::oneOf( v::equals('1'), v::equals('0'), v::equals('4') ) ),
-			'mavis_otp_period' => v::noWhitespace()->when( v::nullType() , v::alwaysValid(), v::intVal()->between(30, 120)),
-			'mavis_otp_digits' => v::noWhitespace()->when( v::nullType() , v::alwaysValid(), v::intVal()->between(5, 8)),
-		]);
+		$validation = $this->itemValidation($req, 'edit');
 
 		if ($validation->failed()){
 			$data['error']['status']=true;

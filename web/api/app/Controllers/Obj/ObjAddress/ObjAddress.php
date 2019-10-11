@@ -9,13 +9,29 @@ use Respect\Validation\Validator as v;
 class ObjAddress extends Controller
 {
 ################################################
+	public function itemValidation($req, $state = 'add'){
+		$id = 0;
+		$type = 0;
+		if (is_object($req)){
+			$id = ($state == 'edit') ? $req->getParam('id') : 0;
+			$type = $req->getParam('type');
+		} else {
+			$type = (isset($req['type'])) ? $req['type'] : 0;
+		}
+		return $this->validator->validate($req, [
+			'name' => v::noWhitespace()->notEmpty()->theSameNameUsed( '\tgui\Models\ObjAddress_', $id ),
+			'address' => v::notEmpty()->checkAddress($type)->setName('Address'),
+			'type' => v::numeric()->oneOf( v::equals(0), v::equals(1), v::equals(2)),
+		]);
+	}
+
 	public function postAdd($req,$res)
 	{
 		//INITIAL CODE////START//
 		$data=array();
 		$data=$this->initialData([
 			'type' => 'post',
-			'object' => 'confDevices',
+			'object' => 'obj address',
 			'action' => 'add',
 		]);
 		#check error#
@@ -25,11 +41,7 @@ class ObjAddress extends Controller
 		}
 		//INITIAL CODE////END//
 
-		$validation = $this->validator->validate($req, [
-			'name' => v::noWhitespace()->notEmpty()->theSameNameUsed( '\tgui\Models\ObjAddress_' ),
-			'address' => v::notEmpty()->checkAddress($req->getParam('type'))->setName('Address'),
-			'type' => v::numeric()->oneOf( v::equals(0), v::equals(1), v::equals(2)),
-		]);
+		$validation = $this->itemValidation($req);
 
 		if ($validation->failed()){
 			$data['error']['status']=true;
@@ -120,12 +132,7 @@ class ObjAddress extends Controller
 		}
 		//CHECK ACCESS TO THAT FUNCTION//END//
 
-		$validation = $this->validator->validate($req, [
-			'name' => v::noWhitespace()->notEmpty()->theSameNameUsed( '\tgui\Models\ObjAddress_',  $req->getParam('id')),
-			'address' => v::notEmpty()->setName('Address'),
-			'type' => v::numeric()->oneOf( v::equals(0), v::equals(1), v::equals(2)),
-			'id' => v::numeric()->notEmpty(),
-		]);
+		$validation = $validation = $this->itemValidation($req, 'edit');
 
 		if ($validation->failed()){
 			$data['error']['status']=true;
@@ -350,6 +357,53 @@ class ObjAddress extends Controller
 		where('address',$req->getParam('id'))->get();
 
 		return $res -> withStatus(200) -> write(json_encode($data));
+	}
+
+	public function selectType($type = 0){
+		if (is_int($type))
+			return $type;
+		if ($type == 'ipv6')
+			return 2;
+
+		return 0;
+	}
+
+	public function getAddressId($address, $name = ''){
+		$id = 0;
+		$messages = [];
+		$type = 0;
+		switch (true) {
+			case (v::CheckAddress(0)->validate($address)):
+				break;
+			case (v::CheckAddress(1)->validate($address)):
+				$type = 1;
+				break;
+			default:
+				if ( ctype_digit( (string) $address ) ){
+					$temp = ObjAddress_::select('name')->where('id', $address)->first();
+					if ($temp)
+						return [$address, ['Address found: '. $temp->name]];
+					else
+						return [0, ['Address with id '.$address.' NOT found']];
+				}
+				else
+					return [0, ['Incorrect Address '.$address]];
+		}
+
+		$temp = ObjAddress_::select(['id','name'])->where('address', $address)->first();
+		if ($temp)
+			return [$temp->id, ['Address found: '. $temp->name]];
+
+		if (empty($name))
+			$name = $address;
+
+		$newAddr = ObjAddress_::create([
+			'name' => $name,
+			'address' => $address,
+			'type' => $type,
+		]);
+
+		return [$newAddr->id, ['New Address was added: '. $newAddr->name]];
 	}
 
 }//END OF CLASS//
