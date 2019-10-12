@@ -58,6 +58,9 @@ class TACDevicesCtrl extends Controller
 		if (is_object($req)){
 			$id = ($state == 'edit') ? $req->getParam('id') : 0;
 			$group = $req->getParam('group');
+		} else {
+			if ( isset($req['group']) )
+				$group = $req['group'];
 		}
 
 		$policy = APIPWPolicy::select()->first(1);
