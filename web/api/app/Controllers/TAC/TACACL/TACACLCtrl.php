@@ -10,6 +10,25 @@ use Respect\Validation\Validator as v;
 
 class TACACLCtrl extends Controller
 {
+
+	public function itemValidation($req = [], $state = 'add'){
+		$id = 0;
+		if (is_object($req)){
+			$id = ($state == 'edit') ? $req->getParam('id') : 0;
+		}
+
+		return $this->validator->validate($req, [
+			'name' => v::noWhitespace()->notEmpty()->theSameNameUsed( 'tgui\Models\TACACL', $id ),
+			'ace' => v::arrayVal()->length(1, null)->each(v::arrayVal()->allOf(
+				v::key('order', v::oneOf(v::numeric(), v::nullType(), v::equals('')))->setName('Order'),
+				v::key('nac', v::oneOf(v::numeric(), v::nullType(), v::equals('')))->setName('NAC'),
+				v::key('nas', v::oneOf(v::numeric(), v::nullType(), v::equals('')))->setName('NAS'),
+				v::key('action', v::numeric(), v::oneOf( v::equals(1), v::equals(0)) )->setName('Action')
+			))
+		]);
+	}
+
+
 ################################################
 	#########	POST Add New ACL	#########
 	public function postACLAdd($req,$res)
@@ -41,14 +60,7 @@ class TACACLCtrl extends Controller
 		}
 		//CHECK ACCESS TO THAT FUNCTION//END//
 
-		$validation = $this->validator->validate($req, [
-			'name' => v::noWhitespace()->notEmpty()->aclNameAvailable(0),
-			'ace' => v::arrayVal()->length(1, null)->each(v::arrayVal()->allOf(
-				v::key('nac', v::oneOf(v::numeric(), v::nullType()))->setName('NAC'),
-				v::key('nas', v::oneOf(v::numeric(), v::nullType()))->setName('NAS'),
-				v::key('action', v::numeric())->setName('Action')
-			))
-		]);
+		$validation = $this->itemValidation($req);
 
 		if ( $validation->failed() ){
 			$data['error']['status']=true;
@@ -164,14 +176,7 @@ class TACACLCtrl extends Controller
 		}
 		//CHECK ACCESS TO THAT FUNCTION//END//
 
-		$validation = $this->validator->validate($req, [
-			'name' => v::noWhitespace()->notEmpty()->theSameNameUsed( '\tgui\Models\TACACL', $req->getParam('id') ),
-			'ace' => v::arrayVal()->length(1, null)->each(v::arrayVal()->allOf(
-				v::key('nac', v::oneOf(v::numeric(), v::nullType()))->setName('NAC'),
-				v::key('nas', v::oneOf(v::numeric(), v::nullType()))->setName('NAS'),
-				v::key('action', v::numeric())->setName('Action')
-			))
-		]);
+		$validation = $validation = $this->itemValidation($req, 'edit');
 
 		if ( $validation->failed() ){
 			$data['error']['status']=true;
@@ -475,6 +480,64 @@ class TACACLCtrl extends Controller
 
 		return [$temp->id, ['ACL name '.$acl.' found']];
 
+	}
+
+	public function getAclAction($action = 0){
+		if ( ctype_digit( (string) $action ) ){
+			if ( (string) $action == '1' )
+				return 1;
+			else
+				return 0;
+		}
+
+		if ( (string) $action == 'permit' )
+			return 1;
+
+		return 0;
+	}
+
+	public function prepareAcl($acl){
+		$newAcl = [];
+		$checkLength = 0;
+		$name = '';
+		$messages = [];
+
+		for ($i=0; $i < count($acl); $i++) {
+			if (empty($checkLength))
+				$checkLength = count(array_keys($acl[$i]));
+			if ($checkLength != count(array_keys($acl[$i])))
+				return [[], ['Incorrect file fields list!']];
+
+			$name = $acl[$i]['name'];
+			if( empty($newAcl[$name]) )
+				$newAcl[ $name ] = [ 'name' => $name, 'ace' => [] ];
+
+			if (empty($acl[$i]['order']))
+				$acl[$i]['order'] = (count($newAcl[$name]['ace']) + 1);
+
+			$acl[$i]['action'] = $this->getAclAction( $acl[$i]['action'] );
+
+			if (!empty($acl[$i]['nas'])){
+				list($acl[$i]['nas'], $messages) = $this->ObjAddress->getAddressId( $acl[$i]['nas'] );
+				if (empty($acl[$i]['nas']))
+					return [[], $messages];
+			}
+			if (!empty($acl[$i]['nac'])){
+				list($acl[$i]['nac'], $messages) = $this->ObjAddress->getAddressId( $acl[$i]['nac'] );
+				if (empty($acl[$i]['nac']))
+					return [[], $messages];
+			}
+
+			$newAcl[ $name ]['ace'][] = [
+				'order' => $acl[$i]['order'],
+				'action' => $acl[$i]['action'],
+				'nas' => empty($acl[$i]['nas']) ? null : $acl[$i]['nas'] ,
+				'nac' => empty($acl[$i]['nac']) ? null : $acl[$i]['nac'] ,
+			];
+
+		}
+
+		return array_values($newAcl);
 	}
 
 }//END OF CLASS//

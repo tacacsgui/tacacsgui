@@ -56,6 +56,10 @@ class TACExportCtrl extends Controller
         list($columns, $query)= $this->getTacUserGroups($allParams);
         $mainName = 'tac_user_groups';
         break;
+      case 'tac_acl':
+        list($columns, $query)= $this->getAcl($allParams);
+        $mainName = 'acl';
+        break;
     }
 
     if ( !$query ){
@@ -131,6 +135,18 @@ class TACExportCtrl extends Controller
 
     $query = $this->db::table('tac_user_groups')->select($columns);
     if ( count($params['ids']) ) $query->whereIn('tac_user_groups.id', $params['ids']);
+    return [$columns, $query];
+  }
+
+  public function getAcl($params = []){
+    $columns = $this->db::getSchemaBuilder()->getColumnListing('tac_acl');
+    $columns = array_merge($columns, ['action', 'order', 'nas', 'nac']);
+
+    $query = $this->db::table('tac_acl as ta')->select(['ta.*', $this->db::raw("IF(ae.action=1,'permit','deny') as action"), 'ae.order as order', 'addr_nas.address as nas', 'addr_nac.address as nac'])->
+    leftJoin('tac_acl_ace as ae', 'ae.acl_id', '=', 'ta.id')->
+    leftJoin('obj_addresses as addr_nas', 'addr_nas.id', '=', 'ae.nas')->
+    leftJoin('obj_addresses as addr_nac', 'addr_nac.id', '=', 'ae.nac');
+    if ( count($params['ids']) ) $query->whereIn('ta.id', $params['ids']);
     return [$columns, $query];
   }
 

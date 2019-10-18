@@ -293,7 +293,8 @@ class MAVISLDAPCtrl extends Controller
 
 		$data['data'] = [];
 
-		$query = $this->db->table('ldap_groups')->select();
+		$query = $this->db->table('ldap_groups as lg')->
+		select(['lg.*', $this->db::raw('(SELECT COUNT(*) FROM ldap_bind WHERE ldap_id = lg.id) as ref')]);
 		$data['total'] = $query->count();
 		$search = $req->getParam('searchTerm');
 
@@ -307,16 +308,15 @@ class MAVISLDAPCtrl extends Controller
 
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
-########	MAVIS LDAP Bind	###############END###########
-########	MAVIS LDAP Check	###############START###########
-	public function postLDAPCheck($req,$res)
+
+	public function getBindRef($req,$res)
 	{
 		//INITIAL CODE////START//
 		$data=array();
 		$data=$this->initialData([
-			'type' => 'post',
-			'object' => 'mavis ldap',
-			'action' => 'check',
+			'type' => 'get',
+			'object' => 'ldap bind',
+			'action' => 'ref',
 		]);
 		#check error#
 		if ($_SESSION['error']['status']){
@@ -324,31 +324,100 @@ class MAVISLDAPCtrl extends Controller
 			return $res -> withStatus(401) -> write(json_encode($data));
 		}
 		//INITIAL CODE////END//
-
 		//CHECK ACCESS TO THAT FUNCTION//START//
-		if(!$this->checkAccess(11, true))
+		if(!$this->checkAccess(1))
 		{
 			return $res -> withStatus(403) -> write(json_encode($data));
 		}
 		//CHECK ACCESS TO THAT FUNCTION//END//
 
-		$validation = $this->validator->validate($req, [
-			'test_username' => v::notEmpty(),
-			'test_password' => v::notEmpty()
-		]);
+		$data['obj'] = $this->db::table('ldap_groups')->select(['id','cn as text'])->where('id',$req->getParam('id'))->first();
+		$data['mainlist'] = [
+			[ 'name' => 'TACACS User Groups', 'list' => [] ],
+			[ 'name' => 'API User Groups', 'list' => [] ],
+		];
 
-		if ($validation->failed()){
-			$data['error']['status']=true;
-			$data['error']['validation']=$validation->error_messages;
-			return $res -> withStatus(200) -> write(json_encode($data));
-		}
+		$data['mainlist'][0]['list'] = $this->db::table('ldap_bind as lb')->
+		leftJoin('tac_user_groups as tug', 'tug.id', '=', 'lb.tac_grp_id')->
+		select(['tug.name as text', 'tug.id as id'])->
+		where('lb.ldap_id',$req->getParam('id'))->whereNull('api_grp_id')->get();
 
-		$data['test_configuration'] = $this->TACConfigCtrl->testConfiguration($this->TACConfigCtrl->createConfiguration("\n "));
-
-		$data['check_result']=preg_replace('/PASSWORD\s+.*/i', "PASSWORD\t\t******", shell_exec(TAC_ROOT_PATH . '/main.sh check mavis '.escapeshellarg( $req->getParam('test_username') ).' '.escapeshellarg($req->getParam('test_password')).' 2>&1') );
+		$data['mainlist'][1]['list'] = $this->db::table('ldap_bind as lb')->
+		leftJoin('api_user_groups as aug', 'aug.id', '=', 'lb.api_grp_id')->
+		select(['aug.name as text', 'aug.id as id'])->
+		where('lb.ldap_id',$req->getParam('id'))->whereNull('tac_grp_id')->get();
 
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
+
+	public function postBindDel($req,$res)
+	{
+		//INITIAL CODE////START//
+		$data=array();
+		$data=$this->initialData([
+			'type' => 'get',
+			'object' => 'ldap bind',
+			'action' => 'delete',
+		]);
+		#check error#
+		if ($_SESSION['error']['status']){
+			$data['error']=$_SESSION['error'];
+			return $res -> withStatus(401) -> write(json_encode($data));
+		}
+		//INITIAL CODE////END//
+		//CHECK ACCESS TO THAT FUNCTION//START//
+		if(!$this->checkAccess(1))
+		{
+			return $res -> withStatus(403) -> write(json_encode($data));
+		}
+		//CHECK ACCESS TO THAT FUNCTION//END//
+
+		$data['result'] = $this->db::table('ldap_groups')->where('id', $req->getParam('id'))->delete();
+
+		return $res -> withStatus(200) -> write(json_encode($data));
+	}
+########	MAVIS LDAP Bind	###############END###########
+########	MAVIS LDAP Check	###############START###########
+	// public function postLDAPCheck($req,$res)
+	// {
+	// 	//INITIAL CODE////START//
+	// 	$data=array();
+	// 	$data=$this->initialData([
+	// 		'type' => 'post',
+	// 		'object' => 'mavis ldap',
+	// 		'action' => 'check',
+	// 	]);
+	// 	#check error#
+	// 	if ($_SESSION['error']['status']){
+	// 		$data['error']=$_SESSION['error'];
+	// 		return $res -> withStatus(401) -> write(json_encode($data));
+	// 	}
+	// 	//INITIAL CODE////END//
+	//
+	// 	//CHECK ACCESS TO THAT FUNCTION//START//
+	// 	if(!$this->checkAccess(11, true))
+	// 	{
+	// 		return $res -> withStatus(403) -> write(json_encode($data));
+	// 	}
+	// 	//CHECK ACCESS TO THAT FUNCTION//END//
+	//
+	// 	$validation = $this->validator->validate($req, [
+	// 		'test_username' => v::notEmpty(),
+	// 		'test_password' => v::notEmpty()
+	// 	]);
+	//
+	// 	if ($validation->failed()){
+	// 		$data['error']['status']=true;
+	// 		$data['error']['validation']=$validation->error_messages;
+	// 		return $res -> withStatus(200) -> write(json_encode($data));
+	// 	}
+	//
+	// 	$data['test_configuration'] = $this->TACConfigCtrl->testConfiguration($this->TACConfigCtrl->createConfiguration("\n "));
+	//
+	// 	$data['check_result']=preg_replace('/PASSWORD\s+.*/i', "PASSWORD\t\t******", shell_exec(TAC_ROOT_PATH . '/main.sh check mavis '.escapeshellarg( $req->getParam('test_username') ).' '.escapeshellarg($req->getParam('test_password')).' 2>&1') );
+	//
+	// 	return $res -> withStatus(200) -> write(json_encode($data));
+	// }
 ########	MAVIS LDAP Check	###############END###########
 ########	MAVIS LDAP List	###############START###########
 	public function getLdapList($req,$res)

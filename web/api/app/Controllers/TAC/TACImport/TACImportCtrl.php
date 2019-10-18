@@ -73,6 +73,9 @@ class TACImportCtrl extends Controller
       case 'tac_user_groups':
         $data['output'] = $this->tac_user_groups($data['csv'], $header);
         break;
+      case 'tac_acl':
+        $data['output'] = $this->tac_acl($data['csv'], $header);
+        break;
       default:
         $data['output'] = [['name'=>'Server Error', 'validation'=>['Something goes wrong']]];
         return $res -> withStatus(200) -> write(json_encode($data));
@@ -263,6 +266,42 @@ class TACImportCtrl extends Controller
             array_merge($items[$i], ['created_at' => date('Y-m-d H:i:s'), 'updated_at' => date('Y-m-d H:i:s')]
             )
           );
+        } catch (\Exception $e) {
+          $output[$i]['validation'][] = $e->getMessage();
+        }
+    }
+
+    return $output;
+  }
+
+  public function tac_acl($items = [], $header = []){
+    $itemHeader = ['name'];
+    if (!$this->checkHeader($itemHeader, $header))
+      return [['name'=>'File Error', 'validation'=>['Incorrect file header. Please, use required columns '. implode(', ', $itemHeader)]]];
+    $output = [];
+
+    $items = $this->TACACLCtrl->prepareAcl($items);
+    // var_dump($items);die;
+
+    for ($i=0; $i < count($items); $i++) {
+      $messages = [];
+
+      if (count($items[$i]['ace']) == 0)
+        return [['name'=>'ACL Error', 'validation'=> 'Incorrect entry']];
+
+      $validation = $this->TACACLCtrl->itemValidation($items[$i]);
+      $output[$i] = [
+        'name' => $items[$i]['name'],
+        'validation' => $validation->getMessages(),
+        'messages' => $messages,
+        'db_status' => false
+      ];
+      if (empty($output[$i]['validation']))
+        try {
+          $id = 0;
+          $aclId = $this->db::table('tac_acl')->insertGetId( [ 'name' => $items[$i]['name'], 'created_at' => date('Y-m-d H:i:s'), 'updated_at' => date('Y-m-d H:i:s') ] );
+          $ace = array_map( function($x) use ($aclId){ $x['acl_id'] = $aclId; return $x; }, $items[$i]['ace']);
+          $output[$i]['db_status'] = $this->db::table('tac_acl_ace')->insert($ace);
         } catch (\Exception $e) {
           $output[$i]['validation'][] = $e->getMessage();
         }

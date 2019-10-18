@@ -127,6 +127,8 @@ class Controller
 		if ($value == 12 AND $rightsArray[12] == 1 OR $demo) return true;
 		//Add/Edit/Delete Tac Services//
 		if ($value == 13 AND $rightsArray[13] == 1 OR $demo) return true;
+		//Add/Edit/Delete Address Objects//
+		if ($value == 14 AND $rightsArray[14] == 1 OR $demo) return true;
 		//Default false//
 		return false;
 	}

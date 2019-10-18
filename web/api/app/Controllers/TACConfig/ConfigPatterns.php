@@ -459,19 +459,20 @@ class ConfigPatterns
 	{
     $sp = new spacer(1);
 
-    $query = TACUserGrps::select(['tac_user_groups.*','ta.name as acl_name'])->
-      leftJoin('tac_acl as ta', 'ta.id', '=', 'tac_user_groups.acl');
+    $query = TACUserGrps::select(['tac_user_groups.*','ta.name as acl_name', 'ta2.name as acl_name2'])->
+      leftJoin('tac_acl as ta', 'ta.id', '=', 'tac_user_groups.acl')->
+      leftJoin('tac_acl as ta2', 'ta2.id', '=', 'tac_user_groups.acl_match');
 
 		$allUserGroups = ($id == 0) ? $query->get()->toArray() : $query->where('tac_user_groups.id', $id)->get()->toArray();
 
 		// $allUserGroups = ( $id == 0 ) ? TACUserGrps::select()->get()->toArray() : TACUserGrps::select()->where('id', $id)->get()->toArray();
-		$allACL_array = TACACL::select('id','name')->get()->toArray();
+		// $allACL_array = TACACL::select('id','name')->get()->toArray();
 
-		$allACL = array();
-		foreach($allACL_array as $acl)
-		{
-			$allACL[$acl['id']]=$acl['name'];
-		}
+		// $allACL = array();
+		// foreach($allACL_array as $acl)
+		// {
+		// 	$allACL[$acl['id']]=$acl['name'];
+		// }
     $outputUserGroup = [];
 		if ( $id == 0 ) $outputUserGroup[] = ($html) ? $sp->put().self::$html_tags['comment'][0] . "####LIST OF USER GROUPS####" . self::$html_tags['comment'][1]
 		:
@@ -490,6 +491,12 @@ class ConfigPatterns
 			:
 			$sp->put().'group = '.$group['name'].' {');
       $sp->put('a');
+      if ($group['acl_name2'])
+        array_push($outputUserGroup,
+        ($html) ? $sp->put().self::$html_tags['comment'][0] . '### Associated with ACL '. $group['acl_name2'] . self::$html_tags['comment'][1]
+        :
+        $sp->put().'### Associated with ACL '. $group['acl_name2']);
+
       ///LDAP Groups///
       $ldapDn = TACUserGrps::from('tac_user_groups as tug')->leftJoin('ldap_bind as lb', 'lb.tac_grp_id','=','tug.id')->
         leftJoin('ldap_groups as ld','ld.id','=','lb.ldap_id')->
@@ -588,11 +595,11 @@ class ConfigPatterns
       // :
       // $sp->put().'server = '. $group['server_ip']);
 			///USER GROUP DEFAULT SERVICE///
-			$default_service = ($group['default_service']) ? 'permit' : 'deny';
-			array_push($outputUserGroup,
-			($html) ? $sp->put().self::$html_tags['param'][0] . "default service" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] .$default_service. self::$html_tags['val'][1]
-			:
-			$sp->put().'default service = '. $default_service);
+			if ($group['default_service'] == 1)
+        array_push($outputUserGroup,
+    			($html) ? $sp->put().self::$html_tags['param'][0] . "default service" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] .'permit'. self::$html_tags['val'][1]
+    			:
+    			$sp->put().'default service = permit');
 			///USER GROUP SERVICE SHELL///
       $services = TACUserGrps::from('tac_user_groups as tug')->leftJoin('tac_bind_service as ts','ts.tac_grp_id','=','tug.id')->
         where('tug.id',$group['id'])->select('ts.service_id as serv_id')->get();
@@ -667,10 +674,11 @@ class ConfigPatterns
           else $user_group .= '/'.$groups[$g]->name;
         }
 
-        array_push($outputUsers,
-  			($html) ? $sp->put().self::$html_tags['param'][0] . "member" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . $user_group . self::$html_tags['val'][1]
-  			:
-  			$sp->put().'member = '.$user_group);
+        if ( !empty($user_group) )
+          array_push($outputUsers,
+    			($html) ? $sp->put().self::$html_tags['param'][0] . "member" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . $user_group . self::$html_tags['val'][1]
+    			:
+    			$sp->put().'member = '.$user_group);
 
         for ($ga=0; $ga < count($user_group_acl); $ga++) {
           $textLine = self::$html_tags['object'][0] .' acl '. $user_group_acl[$ga]['acl'] . self::$html_tags['object'][1];

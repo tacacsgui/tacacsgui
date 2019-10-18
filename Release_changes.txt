@@ -1,4 +1,11 @@
 ##############################
+Version_0.9.82 20191018
+	* ACL Export/Import
+	* New API user group right - Add/Edit/Delete Object Address
+	* Hide menu items if user does not have rights
+	* LDAP Bind table now with Reference and Action columns
+	* Some bugs fixed
+##############################
 Version_0.9.81 20191011
 	* Device Export/Import
 	* Device Group Export/Import

@@ -40,6 +40,19 @@ class ObjAddress extends Controller
 			return $res -> withStatus(401) -> write(json_encode($data));
 		}
 		//INITIAL CODE////END//
+		//CHECK SHOULD I STOP THIS?//START//
+		if( $this->shouldIStopThis() )
+		{
+			$data['error'] = $this->shouldIStopThis();
+			return $res -> withStatus(400) -> write(json_encode($data));
+		}
+		//CHECK SHOULD I STOP THIS?//END//
+		//CHECK ACCESS TO THAT FUNCTION//START//
+		if(!$this->checkAccess(14))
+		{
+			return $res -> withStatus(403) -> write(json_encode($data));
+		}
+		//CHECK ACCESS TO THAT FUNCTION//END//
 
 		$validation = $this->itemValidation($req);
 
@@ -81,7 +94,7 @@ class ObjAddress extends Controller
 		}
 		//CHECK SHOULD I STOP THIS?//END//
 		//CHECK ACCESS TO THAT FUNCTION//START//
-		if(!$this->checkAccess(1))
+		if(!$this->checkAccess(14))
 		{
 			return $res -> withStatus(403) -> write(json_encode($data));
 		}
@@ -126,7 +139,7 @@ class ObjAddress extends Controller
 		}
 		//CHECK SHOULD I STOP THIS?//END//
 		//CHECK ACCESS TO THAT FUNCTION//START//
-		if(!$this->checkAccess(1))
+		if(!$this->checkAccess(14))
 		{
 			return $res -> withStatus(403) -> write(json_encode($data));
 		}
@@ -171,7 +184,7 @@ class ObjAddress extends Controller
 		}
 		//CHECK SHOULD I STOP THIS?//END//
 		//CHECK ACCESS TO THAT FUNCTION//START//
-		if(!$this->checkAccess(1))
+		if(!$this->checkAccess(14))
 		{
 			return $res -> withStatus(403) -> write(json_encode($data));
 		}
@@ -214,7 +227,7 @@ class ObjAddress extends Controller
     unset($data['error']);//BEACAUSE DATATABLES USES THAT VARIABLE//
 
     //CHECK ACCESS TO THAT FUNCTION//START//
-    if(!$this->checkAccess(1, true))
+    if(!$this->checkAccess(14, true))
     {
       $data['data'] = [];
       $data['recordsTotal'] = 0;
@@ -276,7 +289,7 @@ class ObjAddress extends Controller
 		//INITIAL CODE////END//
 
 		//CHECK ACCESS TO THAT FUNCTION//START//
-		if(!$this->checkAccess(1, true))
+		if(!$this->checkAccess(14, true))
 		{
 			return $res -> withStatus(403) -> write(json_encode($data));
 		}
@@ -329,7 +342,7 @@ class ObjAddress extends Controller
 		//INITIAL CODE////END//
 
 		//CHECK ACCESS TO THAT FUNCTION//START//
-		if(!$this->checkAccess(1, true))
+		if(!$this->checkAccess(14, true))
 		{
 			return $res -> withStatus(403) -> write(json_encode($data));
 		}

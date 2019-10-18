@@ -30,7 +30,10 @@ class AuthController extends Controller
 		}
 		//INITIAL CODE////END//
 
-		$data['user']=APIUsers::where('id',$_SESSION['uid'])->first();
+		$data['user']=APIUsers::from('api_users as au')->
+		leftJoin('api_user_groups as aug.id','aug','=','au.group')->
+		select(['au.*', 'aug.rights as rights'])->
+		where('au.id',$_SESSION['uid'])->first();
 
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
@@ -115,7 +118,10 @@ class AuthController extends Controller
 			return $res -> withStatus(401) -> write(json_encode($data));
 		}
 		if ( !isset($_SESSION['ldap']) ){
-			$data['user']=APIUsers::where('id',$_SESSION['uid'])->first();
+			$data['user']=APIUsers::from('api_users as au')->
+			leftJoin('api_user_groups as aug','aug.id','=','au.group')->
+			select(['au.*', 'aug.rights as rights'])->
+			where('au.id',$_SESSION['uid'])->first();
 			$data['info']['user']['id']=(isset($_SESSION['uid'])) ? $_SESSION['uid'] : 'empty';
 			$data['info']['user']['username']=(isset($_SESSION['uname'])) ? $_SESSION['uname'] : 'empty';
 		} else {
@@ -181,7 +187,10 @@ class AuthController extends Controller
 			return $res -> withStatus(200) -> write(json_encode($data));
 		}
 
-		$user = APIUsers::select()->where([['id','=',$_SESSION['uid']]])->first();
+		$user = APIUsers::from('api_users as au')->
+		leftJoin('api_user_groups as aug','aug.id','=','au.group')->
+		select(['au.*', 'aug.rights as rights'])->
+		where('au.id',$_SESSION['uid'])->first();
 
 		if ($user->changePasswd == 0){
 			$data['error']['status']=true;
@@ -189,7 +198,7 @@ class AuthController extends Controller
 			return $res -> withStatus(401) -> write(json_encode($data));
 		}
 
-		$data['status']=APIUsers::where([['id','=',$_SESSION['uid']]])->
+		$data['status']=APIUsers::where('id',$_SESSION['uid'])->
 			update([
 				'password' => password_hash($req->getParam('change_passwd'), PASSWORD_DEFAULT),
 				'changePasswd' => 0

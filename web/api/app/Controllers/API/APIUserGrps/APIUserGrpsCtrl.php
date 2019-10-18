@@ -318,6 +318,7 @@ class APIUserGrpsCtrl extends Controller
 		[ 'name' => 'Edit/Apply/Test Tac Configuration', 'value' => '6'],
 		// [ 'name' => 'Add/Edit/Delete API Users', 'value' => '7'],
 		// [ 'name' => 'Add/Edit/Delete API User Groups', 'value' => '8'],
+		[ 'name' => 'Add/Edit/Delete Object Addresses', 'value' => '14'],
 		[ 'name' => 'Delete/Restore Backups', 'value' => '9'],
 		[ 'name' => 'Upgrade API', 'value' => '10'],
 		[ 'name' => 'MAVIS', 'value' => '11'],
