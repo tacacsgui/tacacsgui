@@ -30,10 +30,14 @@ class AuthController extends Controller
 		}
 		//INITIAL CODE////END//
 
-		$data['user']=APIUsers::from('api_users as au')->
-		leftJoin('api_user_groups as aug.id','aug','=','au.group')->
-		select(['au.*', 'aug.rights as rights'])->
-		where('au.id',$_SESSION['uid'])->first();
+		if ( !isset($_SESSION['ldap']) ){
+
+			$data['user']=APIUsers::from('api_users as au')->
+			leftJoin('api_user_groups as aug.id','aug','=','au.group')->
+			select(['au.*', 'aug.rights as rights'])->
+			where('au.id',$_SESSION['uid'])->first();
+			
+		}
 
 		return $res -> withStatus(200) -> write(json_encode($data));
 	}
@@ -126,6 +130,7 @@ class AuthController extends Controller
 			$data['info']['user']['username']=(isset($_SESSION['uname'])) ? $_SESSION['uname'] : 'empty';
 		} else {
 			$data['user']=$_SESSION['user'];
+			$data['user']['rights'] = $this->db::table('api_user_groups')->select()->where('id',$_SESSION['groupId'])->first()->rights;
 		}
 
 		///LOGGING//start//
@@ -187,10 +192,14 @@ class AuthController extends Controller
 			return $res -> withStatus(200) -> write(json_encode($data));
 		}
 
-		$user = APIUsers::from('api_users as au')->
-		leftJoin('api_user_groups as aug','aug.id','=','au.group')->
-		select(['au.*', 'aug.rights as rights'])->
-		where('au.id',$_SESSION['uid'])->first();
+		if ( !isset($_SESSION['ldap']) ){
+			$user = APIUsers::from('api_users as au')->
+			leftJoin('api_user_groups as aug','aug.id','=','au.group')->
+			select(['au.*', 'aug.rights as rights'])->
+			where('au.id',$_SESSION['uid'])->first();
+		} else {
+			return $res -> withStatus(200) -> write(json_encode($data));
+		}
 
 		if ($user->changePasswd == 0){
 			$data['error']['status']=true;

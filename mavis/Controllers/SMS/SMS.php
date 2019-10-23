@@ -36,7 +36,7 @@ class SMS extends Controller
       $this->mavis->debugIn( $this->dPrefix() . 'Check Status: TACTYPE '.$this->mavis->getVariable(AV_A_TACTYPE).' Unsupported. Exit' );
       return false;
     }
-    $this->user = $this->db->table('tac_users')->select('username','mavis_sms_number','group')->whereRaw("BINARY `username`='{$this->mavis->getUsername()}'")->where([ ['mavis_sms_enabled', 1], ['mavis_otp_enabled', 0]]);
+    $this->user = $this->db->table('tac_users')->select('username','mavis_sms_number','group')->whereRaw("BINARY `username`='{$this->mavis->getUsername()}'")->where('login_flag', 30);
     $this->mavis->debugIn( $this->dPrefix() . 'Check Status: ' . ( ($this->user->count()) ? 'User Found. Run' : 'User Not Found. Exit' ) );
     return $this->user->count();
   }
