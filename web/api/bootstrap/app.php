@@ -1,4 +1,6 @@
 <?php
+ini_set('max_execution_time', 300); //300 seconds = 5 minutes // FIX LOOP Timeout Issue
+set_time_limit(300); // FIX LOOP Timeout Issue
 ini_set('memory_limit', '1024M'); // or you could use 1G
 // date_default_timezone_set ( trim( shell_exec("timedatectl | grep 'Time zone:' | awk '{ print $3 }'")) );
 
