@@ -81,9 +81,11 @@ class Auth
 #################################################
 
 	public function ldapAuth($uname = '', $passwd = ''){
+
 		$ldapGroups = Capsule::table('ldap_bind as lb')->leftJoin('ldap_groups as lg','lg.id','=','lb.ldap_id')->
 		leftJoin('api_user_groups as aug', 'aug.id','=','lb.api_grp_id')->orderBy('aug.rights', 'asc')->
 		whereNotNull('api_grp_id')->select(['lg.dn as dn','aug.name as name', 'aug.rights as rights', 'aug.id as gid']);
+
 		if ( $ldapGroups->count() == 0 ) return false;
 		$ldap = Capsule::table('mavis_ldap')->select()->first();
 
@@ -114,10 +116,11 @@ class Auth
 				$search = $provider->search();
 
 				$adUser = ( $ldap->type == 'openldap' ) ?
-					$search->where('objectclass', 'inetOrgPerson')->where( $ldap->filter, $uname )->first()
+					$search->select(['*', 'memberof'])->where('objectclass', 'inetOrgPerson')->where( $ldap->filter, $uname )->first()
 					:
 					$search->select()->where('objectclass', 'user')->
 						where( $ldap->filter, $uname )->first();
+
 				if (!$adUser)
 					return false;
 
@@ -141,6 +144,7 @@ class Auth
 				$groupList = [];
 				$groupList_fullNames = [];
 
+
 				if ( $ldap->type == 'openldap' ) {
 					//OpenLDAP//
 					for ($mgui=0; $mgui < count($adUser->gidnumber); $mgui++) {
@@ -156,6 +160,18 @@ class Auth
 						if ( !in_array( $group_temp, $groupList ) )  $groupList[] = $group_temp;
 						if ( !in_array( $group_temp_full, $groupList_fullNames ) ) $groupList_fullNames[] = $group_temp_full;
 					}
+
+					if ( is_array(@$adUser->memberOf) ) {
+						for ($memOf=0; $memOf < count($adUser->memberof); $memOf++) {
+							// $this->mavis->debugIn( $this->dPrefix() . 'User memberof: ' . $adUser->memberof[$memOf] );
+							// var_dump($adUser->memberof[$memOf]);
+							preg_match_all('/^CN=(.*?),.*/is', $adUser->memberof[$memOf], $groupName);
+							// var_dump($groupName);
+							$groupList[] = $groupName[1][0];
+						}
+						$groupList_fullNames = array_merge($groupList_fullNames, $adUser->memberof);
+					}
+
 					//var_dump($groupList); var_dump($groupList_fullNames); die; //gidnumber $search->where( $ldap->filter, $uname )->first()
 				} else {
 					//General LDAP//

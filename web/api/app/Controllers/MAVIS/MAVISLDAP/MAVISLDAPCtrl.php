@@ -180,7 +180,7 @@ class MAVISLDAPCtrl extends Controller
 
 		if ( $ldap->type == 'openldap' ) {
 
-			$adQuery = $adSearch->select()->where('objectclass', 'posixGroup');
+			$adQuery = $adSearch->select()->orWhere('objectclass', '=', 'posixGroup')->orWhere('objectclass', '=', 'groupOfNames');
 			$data['recordsTotal'] =	$adQuery->get()->count();
 
 			$adQuery = ( empty($search) ) ? $adQuery : $adQuery->where('cn', 'contains', $search);

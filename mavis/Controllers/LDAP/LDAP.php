@@ -106,13 +106,16 @@ class LDAP extends Controller
 
       if ( $this->ldap->type == 'openldap' ) {
         //OpenLDAP//
+        // var_dump($this->adUser->gidnumber);
         for ($mgui=0; $mgui < count($this->adUser->gidnumber); $mgui++) {
           $mainGUI = $search->where('objectclass', 'posixGroup')->where( 'gidNumber', $this->adUser->gidnumber[$mgui] )->first();
+          if (!$mainGUI) continue;
           $groupList_fullNames[] = ( is_array($mainGUI->dn) ) ? $mainGUI->dn[0] : $mainGUI->dn;
 
           $this->mavis->debugIn( $this->dPrefix() .'CN: '. ( ( is_array($mainGUI->cn) ) ? $mainGUI->cn[0] : $mainGUI->cn ) );
           $groupList[] = ( is_array($mainGUI->cn) ) ? $mainGUI->cn[0] : $mainGUI->cn;
         }
+
         $subGUI = $search->where('objectclass', 'posixGroup')->where( 'memberUid', $this->mavis->getUsername() )->get();
         for ($sgui=0; $sgui < count($subGUI); $sgui++) {
           $group_temp_full = ( is_array($subGUI[$sgui]->dn) ) ? $subGUI[$sgui]->dn[0] : $subGUI[$sgui]->dn;
@@ -120,6 +123,18 @@ class LDAP extends Controller
           if ( !in_array( $group_temp, $groupList ) )  $groupList[] = $group_temp;
           if ( !in_array( $group_temp_full, $groupList_fullNames ) ) $groupList_fullNames[] = $group_temp_full;
         }
+
+        if ( is_array(@$this->adUser->memberOf) ) {
+          for ($memOf=0; $memOf < count($this->adUser->memberof); $memOf++) {
+            $this->mavis->debugIn( $this->dPrefix() . 'User memberof: ' . $this->adUser->memberof[$memOf] );
+            // var_dump($this->adUser->memberof[$memOf]);
+          	preg_match_all('/^CN=(.*?),.*/is', $this->adUser->memberof[$memOf], $groupName);
+            // var_dump($groupName);
+          	$groupList[] = $groupName[1][0];
+          }
+          $groupList_fullNames = array_merge($groupList_fullNames, $this->adUser->memberof);
+        }
+
         //var_dump($groupList); var_dump($groupList_fullNames); die; //gidnumber $search->where( $this->ldap->filter, $this->mavis->getUsername() )->first()
       } else {
         //General LDAP//
@@ -216,7 +231,7 @@ class LDAP extends Controller
     $search = $this->provider->search();
 
     $this->adUser = ( $this->ldap->type == 'openldap' ) ?
-      $search->where('objectclass', 'inetOrgPerson')->where( $this->ldap->filter, $this->mavis->getUsername() )->first()
+      $search->select(['*', 'memberof'])->where('objectclass', 'inetOrgPerson')->where( $this->ldap->filter, $this->mavis->getUsername() )->first()
       :
       $search->select()->where('objectclass', 'user')->
         where( $this->ldap->filter, $this->mavis->getUsername() )->first();
