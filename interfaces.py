@@ -95,9 +95,12 @@ if args.list:
             print(inter, end='\n')
         quit()
     if args.debug: debug(message='Get data from netifaces')
+
     if args.ip:
         for inter in netifaces.interfaces():
-            print('{}-{}'.format( inter, netifaces.ifaddresses(inter)[netifaces.AF_INET][0]['addr']), end='\n')
+            interf_details = netifaces.ifaddresses(inter).get(netifaces.AF_INET, None)
+            if interf_details:
+                print('{}-{}'.format( inter, netifaces.ifaddresses(inter)[netifaces.AF_INET][0]['addr']), end='\n')
         quit()
     print('\n'.join(netifaces.interfaces()), end='\n')
     quit()
