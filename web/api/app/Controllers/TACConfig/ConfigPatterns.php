@@ -716,7 +716,7 @@ class ConfigPatterns
         if ($user['enable_flag'] == 0) $user['enable'] = '"'.$user['enable'].'"';
         $enable = self::$crypto_flag[$user['enable_flag']].' '. $user['enable'];
       }
-      if ( !empty($user['enable']) ) array_push($outputUsers,
+      if ( !empty($enable) ) array_push($outputUsers,
       ($html) ? $sp->put().self::$html_tags['param'][0] . "enable" . self::$html_tags['param'][1] . ' = ' . self::$html_tags['val'][0] . $enable . self::$html_tags['val'][1]
       :
       $sp->put().'enable = '. $enable );
