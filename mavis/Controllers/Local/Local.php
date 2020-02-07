@@ -4,7 +4,7 @@ namespace mavis\Controllers\Local;
 
 use mavis\Controllers\Controller;
 
-use Respect\Validation\Validator as v;
+use \Respect\Validation\Validator as v;
 
 class Local extends Controller
 {
@@ -69,6 +69,8 @@ class Local extends Controller
           if ($validation != ''){
             $this->mavis->setVariable(AV_A_USER_RESPONSE, '# ERROR # !!! ATTENTION !!! Password should contain: ' . $validation . ' # ERROR #' );
             $this->mavis->debugIn( $this->dPrefix().'Password policy not met! Exit.' );
+            $this->mavis->setVariable(AV_A_TACTYPE, AV_V_TACTYPE_AUTH)->result('NAK');
+            break;
           }
 
           $this->db->table('tac_users')->where([['username', $this->mavis->getUsername()],['id', $this->user->id]])->update([
