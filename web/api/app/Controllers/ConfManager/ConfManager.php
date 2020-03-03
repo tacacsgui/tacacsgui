@@ -1216,10 +1216,10 @@ public function postLogDatatables($req,$res)
 		{
 			$query->orWhere('date','LIKE', '%'.$queries.'%');
 			return $query;
-		})->
-	take($size)->
-	offset($start);
+		});
 	$data['total'] = $tempData->count();
+
+	$tempData->take($size)->offset($start);
 
 	if (!empty($params['sortColumn']) and !empty($params['sortDirection']))
 			$tempData = $tempData->orderBy($params['sortColumn'],$params['sortDirection']);
