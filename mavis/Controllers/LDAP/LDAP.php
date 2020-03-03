@@ -196,8 +196,8 @@ class LDAP extends Controller
 
     $username = ( strpos($this->ldap->user, '@') !== false ) ? $this->ldap->user : $this->ldap->user . '@'.( str_replace( ',', '.', preg_replace('/DC=/i', '', $this->ldap->base) ) );
 
-		$username = ( $this->ldap->type == 'openldap' ) ? $this->ldap->user : $username;
-
+    $username = ( $this->ldap->type == 'openldap' ) ? $this->ldap->user : $username;
+	  
     $config = [
     	// Mandatory Configuration Options
     	'hosts'            => array_map('trim', explode(',', $this->ldap->hosts) ),
@@ -207,6 +207,7 @@ class LDAP extends Controller
     	// Optional Configuration Options
     	'schema'           => ( $this->ldap->type == 'openldap' ) ? OpenLDAP::class : ActiveDirectory::class,
     	'port'             => $this->ldap->port,
+	'use_tls'          => ( $this->ldap->tls == 1 ? true : false ),
     	'version'          => 3,
     	'timeout'          => 5,
     ];
@@ -218,10 +219,10 @@ class LDAP extends Controller
     $this->ad->addProvider($config);
 
     try {
-    		$this->mavis->debugIn( $this->dPrefix() .'Attempt to connect');
-        $this->provider = $this->ad->connect();
+	    $this->mavis->debugIn( $this->dPrefix() .'Attempt to connect');
+	    $this->provider = $this->ad->connect();
     } catch (\Adldap\Auth\BindException $e) {
-    		$this->mavis->debugIn( $this->dPrefix() .'Connect FAIL! '.$e->getMessage().' Exit.');
+	    $this->mavis->debugIn( $this->dPrefix() .'Connect FAIL! '.$e->getMessage().' Exit.');
         return false;
     }
     return true;
