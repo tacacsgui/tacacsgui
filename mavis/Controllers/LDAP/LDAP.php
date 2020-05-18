@@ -207,6 +207,7 @@ class LDAP extends Controller
     	// Optional Configuration Options
     	'schema'           => ( $this->ldap->type == 'openldap' ) ? OpenLDAP::class : ActiveDirectory::class,
     	'port'             => $this->ldap->port,
+      'use_ssl'          => !!$this->ldap->ssl,
     	'version'          => 3,
     	'timeout'          => 5,
     ];

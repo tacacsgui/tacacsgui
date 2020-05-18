@@ -414,6 +414,7 @@ class APIDatabase
   		//'fallthrough' => ['integer', '0'],
   		//'cache_conn' => ['integer', '0'],
   		'tls' => ['integer', '0'],
+  		'ssl' => ['integer', '0'],
   		'enable_login' => ['integer', '1'],
   		'pap_login' => ['integer', '1'],
   		'message_flag' => ['integer', '0'],

@@ -150,6 +150,7 @@ class MAVISLDAPCtrl extends Controller
 			// Optional Configuration Options
 			'schema'           => ( $ldap->type == 'openldap' ) ?\Adldap\Schemas\OpenLDAP::class : \Adldap\Schemas\ActiveDirectory::class,
 			'port'             => $ldap->port,
+			'use_ssl'          => !!$ldap->ssl,
 			'version'          => 3,
 			'timeout'          => 5,
 		];
@@ -501,6 +502,8 @@ class MAVISLDAPCtrl extends Controller
 
 		$username = ( $allParams['type'] == 'openldap' ) ? $allParams['user'] : $username;
 
+		$data['test22'] = $allParams;
+
 		$config = [
 			// Mandatory Configuration Options
 			'hosts'            => array_map('trim', explode(',', $allParams['hosts']) ),
@@ -511,7 +514,7 @@ class MAVISLDAPCtrl extends Controller
 			'schema'           => ( $allParams['type'] == 'openldap' ) ? OpenLDAP::class : ActiveDirectory::class,
 			'port'             => intval($allParams['port']),
 			'follow_referrals' => false,
-			'use_ssl'          => false,
+			'use_ssl'          => !!$allParams['ssl'],
 			'use_tls'          => false,
 			'version'          => 3,
 			'timeout'          => 5,

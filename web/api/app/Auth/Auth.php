@@ -102,6 +102,7 @@ class Auth
 			// Optional Configuration Options
 			'schema'           => ( $ldap->type == 'openldap' ) ? OpenLDAP::class : ActiveDirectory::class,
 			'port'             => $ldap->port,
+			'use_ssl'          => !!$ldap->ssl,
 			'version'          => 3,
 			'timeout'          => 5,
 		];
