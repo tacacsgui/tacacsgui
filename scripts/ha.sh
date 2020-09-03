@@ -295,7 +295,7 @@ case $1 in
 		password = $3
 		" > /opt/tacacsgui/temp/sql.cfg;
 		#PASSWD=$(sinitize_passwd $3);
-		COMMAND="mysqldump --defaults-extra-file=/opt/tacacsgui/temp/sql.cfg tgui"
+		COMMAND="mysqldump --defaults-extra-file=/opt/tacacsgui/temp/sql.cfg --no-tablespaces tgui"
 		eval $COMMAND > /opt/tacacsgui/temp/tgui_dump.sql
 		#echo "mysqldump -u $2 -p'$3' tgui | grep -v 'Using a password' > /opt/tacacsgui/temp/tgui_dump.sql 2>&1";
 		#echo "mysqldump --defaults-extra-file=/opt/tacacsgui/temp/sql.cfg tgui | grep -v 'Using a password' > /opt/tacacsgui/temp/tgui_dump.sql 2>&1";
