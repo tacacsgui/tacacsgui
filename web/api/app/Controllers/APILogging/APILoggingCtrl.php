@@ -67,10 +67,10 @@ class APILoggingCtrl extends Controller
 				$query->where('username','LIKE', '%'.$queries.'%');
 				$query->orWhere('user_ip','LIKE', '%'.$queries.'%');
 				return $query;
-			})->
-		take($size)->
-		offset($start);
+			});
 		$data['total'] = $tempData->count();
+
+		$tempData->take($size)->offset($start);
 
 		if (!empty($params['sortColumn']) and !empty($params['sortDirection']))
 				$tempData = $tempData->orderBy($params['sortColumn'],$params['sortDirection']);
