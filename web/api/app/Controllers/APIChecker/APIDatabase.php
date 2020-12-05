@@ -218,6 +218,7 @@ class APIDatabase
   		'enable_flag' => ['integer', '0'],
   		'message' => ['text', '_'],
   		'default_flag' => ['integer', '0'],
+  		'priority' => ['integer', '0'],
   		'valid_from' => ['timestamp', '_'],
   		'valid_until' => ['timestamp', '_'],
       'acl' => ['foreign-null', ['references'=>'id', 'on'=>'tac_acl', 'onDelete'=>'restrict'] ],

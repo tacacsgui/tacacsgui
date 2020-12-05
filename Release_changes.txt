@@ -1,4 +1,8 @@
 ##############################
+Version_0.9.83 20201205
+	* MAVIS LDAP Improved
+	* Many bugs fixed
+##############################
 Version_0.9.82 20191018
 	* ACL Export/Import
 	* New API user group right - Add/Edit/Delete Object Address

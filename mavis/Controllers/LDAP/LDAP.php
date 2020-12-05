@@ -152,32 +152,64 @@ class LDAP extends Controller
       $this->mavis->debugIn( $this->dPrefix() . 'Trying to find group match...' );
       $groupList_result = [];
       if ( ! empty($groupList) ){
-      	$user_grps = $this->db->table('tac_user_groups as tug')->select('name')->
+      	$user_grps = $this->db->table('tac_user_groups as tug')->select('tug.name as name_g','acl_match', 'tacl.name as name_a')->
+            leftJoin('tac_acl as tacl', 'tacl.id','=','tug.acl_match')->
             leftJoin('ldap_bind as lb', 'lb.tac_grp_id','=','tug.id')->
             leftJoin('ldap_groups as lg', 'lg.id','=','lb.ldap_id')->
       			where(function ($query) use ($groupList_fullNames, $groupList) {
       					for ($i=0; $i < count($groupList_fullNames) ; $i++) {
-      						if ( $i == 0 ) { $query->where('lg.dn', 'like', '%'.$groupList_fullNames[$i].'%')->orWhere('name', $groupList[$i]); continue; }
-      						$query->orWhere('lg.dn', 'LIKE', '%'.$groupList_fullNames[$i].'%')->orWhere('name', $groupList[$i]);
+      						if ( $i == 0 ) { $query->where('lg.dn', 'like', '%'.$groupList_fullNames[$i].'%')->orWhere('tug.name', $groupList[$i]); continue; }
+      						$query->orWhere('lg.dn', 'LIKE', '%'.$groupList_fullNames[$i].'%')->orWhere('tug.name', $groupList[$i]);
       					}
-      	    })->get()->toArray();
+      	    })->orderBy('tug.priority','DESC')->orderBy('tug.id','DESC')->get()->toArray();
       	foreach ($user_grps as $ugrp) {
       		//if ( ! in_array($ugrp->name, $groupList) ) $groupList[] = $ugrp->name;
-      		$groupList_result[] = $ugrp->name;
+          if ($ugrp->name_a) {
+            $groupList_result[] = $ugrp->name_g.'->ACL('.$ugrp->name_g.')';
+            // var_dump($ugrp->name_a+'@'+$ugrp->name_g);
+          } else {
+            $groupList_result[] = $ugrp->name_g;
+          }
       	}
       }
 
-      if ( ! count( $groupList_result ) ){
+      // var_dump($user_grps);
+
+      if ( ! count( $user_grps ) ){
       	$this->mavis->debugIn( $this->dPrefix() .'Group Not found! Exit.');
       	return false;
       }
 
       $this->mavis->debugIn( $this->dPrefix() .'Group List: '. implode(',', $groupList_result));
-      $this->mavis->setMempership( $groupList_result , $this->ldap->group_selection );
+      // $this->mavis->setMempership( $groupList_result , $this->ldap->group_selection );
 
       $tacprofile = '';
       if ($this->ldap->enable_login) $tacprofile .= ' enable = login ';
       if ($this->ldap->pap_login) $tacprofile .= ' pap = login ';
+      foreach ($user_grps as $ugrp) {
+        if ($ugrp->name_a) {
+          $tacprofile .= ' member acl '.$ugrp->name_a.' = '.$ugrp->name_g;
+        }
+      }
+      if ($this->ldap->group_selection){
+        $firstGroup=false;
+        foreach ($user_grps as $ugrp) {
+          if (!$ugrp->name_a) {
+            if (!$firstGroup) {
+              $tacprofile .= ' member = '.$ugrp->name_g;
+              $firstGroup=true;
+            }
+              $tacprofile .= '/'.$ugrp->name_g;
+          }
+        }
+      } else {
+        foreach ($user_grps as $ugrp) {
+          if (!$ugrp->name_a) {
+            $tacprofile .= ' member = '.$ugrp->name_g;
+          }
+        }
+      }
+
       if ( !empty($tacprofile) ) $tacprofile = ' login = mavis ' . $tacprofile;
 
       if ($this->ldap->message_flag) $tacprofile .= ' message = "\nHello '.$this->adUser->cn[0].'.\nYour ip address is %%c, you are connected to %%r.\nToday is %F.\n\nHave a nice day! " ';

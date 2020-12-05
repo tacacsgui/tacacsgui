@@ -57,7 +57,7 @@ class Controller
     return false;
   }
 
-  public function setMempership($value = '', $manula_set = false)
+  public function setMempership($value = [], $manula_set = false)
   {
     $separator = ( $manula_set ) ? '/' : '","';
     if ( empty($value) ) return false;
