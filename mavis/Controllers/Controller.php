@@ -26,12 +26,13 @@ class Controller
 
   public function in($value = '')
   {
-    $tempArray = explode(" ", trim($value));
+    $tempArray = preg_split("/\s+/", trim($value), 2);
     if ( count($tempArray) <= 1 ) return false;
   	$this->V_IN[$tempArray[0]]=trim($tempArray[1]);
     if ($this->debug) {
       if ( $tempArray[0] != 8 ) $myfile = file_put_contents('/var/log/tacacsgui/mavis_debug.txt', $value, FILE_APPEND);
       else $myfile = file_put_contents('/var/log/tacacsgui/mavis_debug.txt', '8 <password>'."\n", FILE_APPEND);
+      //$myfile = file_put_contents('/var/log/tacacsgui/mavis_debug.txt', $value, FILE_APPEND);
     }
   	//if (trim($tempArray[0]) == 4) $username = trim($tempArray[1]);
   	//if (trim($tempArray[0]) == 8) $password = trim($tempArray[1]);
@@ -149,7 +150,8 @@ class Controller
     	$output.= $index.' '.$value."\n";
       if ($this->debug) {
         if ($index != 8) file_put_contents('/var/log/tacacsgui/mavis_debug.txt', $index.' '.$value."\n", FILE_APPEND);
-        else file_put_contents('/var/log/tacacsgui/mavis_debug.txt', '8 <password>'."\n", FILE_APPEND);
+	else file_put_contents('/var/log/tacacsgui/mavis_debug.txt', '8 <password>'."\n", FILE_APPEND);
+	//file_put_contents('/var/log/tacacsgui/mavis_debug.txt', $index.' '.$value."\n", FILE_APPEND);
       }
     }
     $output.="=".$this->mavis_result."\n";

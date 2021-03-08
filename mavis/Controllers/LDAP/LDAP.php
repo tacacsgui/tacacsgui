@@ -56,7 +56,6 @@ class LDAP extends Controller
     $this->mavis->result('NAK');
     //var_dump($this->adUser->dn[0]); die;
     //var_dump( $this->ad->auth()->attempt( $this->adUser->dn[0], $this->mavis->getPassword() ) ); die;
-
     if ( $this->mavis->getVariable(AV_A_TACTYPE) == 'AUTH' ) try {
         $nice_try = false;
         switch ($this->ldap->type) {
