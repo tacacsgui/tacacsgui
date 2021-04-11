@@ -26,9 +26,9 @@ class Controller
 
   public function in($value = '')
   {
-    $tempArray = preg_split("/\s+/", trim($value), 2);
+    $tempArray = preg_split("/\s/", $value, 2);
     if ( count($tempArray) <= 1 ) return false;
-  	$this->V_IN[$tempArray[0]]=trim($tempArray[1]);
+  	$this->V_IN[$tempArray[0]]=str_replace(PHP_EOL, '', $tempArray[1]);
     if ($this->debug) {
       if ( $tempArray[0] != 8 ) $myfile = file_put_contents('/var/log/tacacsgui/mavis_debug.txt', $value, FILE_APPEND);
       else $myfile = file_put_contents('/var/log/tacacsgui/mavis_debug.txt', '8 <password>'."\n", FILE_APPEND);
