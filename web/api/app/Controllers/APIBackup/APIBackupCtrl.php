@@ -35,7 +35,7 @@ private $listOfTacacsReportsTables = '--tables tac_log_accounting tac_log_author
 		$revision = ($attrArray['make'] == 'tcfg') ? TACGlobalConf::find(1)->revisionNum : 0;
 
 		$makeBkp = CMDRun::init()->setCmd(TAC_ROOT_PATH . '/backup.sh')->
-				setAttr(['make',DB_USER, DB_PASSWORD, DB_NAME, $backupPart]);
+				setAttr(['make',DB_HOST, DB_USER, DB_PASSWORD, DB_NAME, $backupPart]);
 
 		$data['make'] = $makeBkp->setAttr(($revision + 1))->get();//make
 		$test01= $makeBkp->setAttr(($revision + 1))->showCmd();
@@ -256,8 +256,8 @@ private $listOfTacacsReportsTables = '--tables tac_log_accounting tac_log_author
 		}
 		//CHECK ACCESS TO THAT FUNCTION//END//
 		$type = $req->getParam('type');
-		$data['cmd'] = CMDRun::init()->setCmd(TAC_ROOT_PATH . '/backup.sh')->setAttr(['restore',DB_USER,DB_PASSWORD, DB_NAME, $req->getParam('name')])->showCmd();
-		$data['result'] = CMDRun::init()->setCmd(TAC_ROOT_PATH . '/backup.sh')->setAttr(['restore',DB_USER,DB_PASSWORD, DB_NAME, $req->getParam('name')])->get();
+		$data['cmd'] = CMDRun::init()->setCmd(TAC_ROOT_PATH . '/backup.sh')->setAttr(['restore',DB_HOST,DB_USER,DB_PASSWORD, DB_NAME,$req->getParam('name')])->showCmd();
+		$data['result'] = CMDRun::init()->setCmd(TAC_ROOT_PATH . '/backup.sh')->setAttr(['restore',DB_HOST,DB_USER,DB_PASSWORD, DB_NAME, $req->getParam('name')])->get();
 
 		if ( !empty($type) AND $type != 'apicfg' ) $data['changeConfiguration']=$this->changeConfigurationFlag(['unset' => 0]);
 

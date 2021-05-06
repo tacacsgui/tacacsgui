@@ -39,7 +39,7 @@ case $1 in
 		fi
 	;;
 	diff)
-		NEW=''; OLD=''; REVISION=$3 ; DBTYPE=$2 ;
+		NEW=''; OLD=''; REVISION=$4 ; DBTYPE=$3 ;
 		#if [ -z "$REVISION" ]; then
 			for ITEM in $(ls -utr $ROOT_PATH/backups/database/ | grep $DBTYPE | tail -n 2)
 				do
@@ -83,18 +83,18 @@ case $1 in
 		rm $ROOT_PATH/backups/database/$(ls -tur $ROOT_PATH/backups/database/ | grep $DBTYPE | tail -n 1);
 	;;
 	make)
-		#$2 username $3 password $4 DBname $5 tables list $file name
+#		#$3 username $4 password $5 DBname $6 tables list $file name
 		#mysql -utgui_user -p'_I2YSwfp_mWFV0UpR15Yx{4KA4vq`IA8' -N information_schema -e "select table_name from tables where table_schema = ’tgui’ and table_name like ‘tac_%’"
 		#
-		END_OF_NAME=$5
-		REVISION=$6
+		END_OF_NAME=$6
+		REVISION=$7
 		if [ -z "$END_OF_NAME" ]; then
 			END_OF_NAME="all"
 		fi
 		if [ -z "$REVISION" ]; then
 			REVISION=0
 		fi
-		TABLES=$5
+		TABLES=$6
 		TYPE=""
 		if [ $TABLES = "full" ]; then
 			TYPE=$TABLES
@@ -109,7 +109,7 @@ case $1 in
 			TABLES="";
 		elif [ $TABLES = "tcfg" ]; then
 			TYPE=$TABLES
-			TABLES="--tables "$(mysql -u $2 -p$3 -D $4 -Bse \
+			TABLES="--tables "$(mysql -u $3 -p$4 -h $2 -D $5 -Bse \
 	"show tables where Tables_in_tgui like 'tac\_%' or Tables_in_tgui like 'mavis\_%' \
 	or Tables_in_tgui like 'ldap\_%' or Tables_in_tgui like 'obj\_%' or Tables_in_tgui like 'bind\_%'" 2>/dev/null | xargs)
 		elif [ $TABLES = "tlog" ]; then
@@ -124,14 +124,14 @@ case $1 in
 			else
 				REVISION=$((REVISION+1));
 			fi
-			TABLES="--tables $(mysql -u $2 -p$3 -D $4 -Bse \
+			TABLES="--tables $(mysql -u $3 -p$4  -h $2 -D $5 -Bse \
 	"show tables where Tables_in_tgui like 'api\_%'" 2>/dev/null | xargs)"
 		elif [ $TABLES = "api_log" ]; then
 			TYPE=$TABLES
 			TABLES="api_logging"
 		fi
-		#echo "mysqldump -u $2 -p$3 $4 $TABLES> $ROOT_PATH/backups/database/$(date '+%Y-%m-%d_%H:%M:%S')_$END_OF_NAME.sql"
-		umask 111; mysqldump -u $2 -p$3 $4 $TABLES | grep -v "Using a password" > $ROOT_PATH/backups/database/$(date '+%Y-%m-%d')_${END_OF_NAME}_${REVISION}.sql 2>&1 | grep -v "Using a password"
+		#echo "mysqldump -u $3 -p$4 $5 $TABLES> $ROOT_PATH/backups/database/$(date '+%Y-%m-%d_%H:%M:%S')_$END_OF_NAME.sql"
+		umask 111; mysqldump -u $3 -p$4  -h $2 $5 $TABLES | grep -v "Using a password" > $ROOT_PATH/backups/database/$(date '+%Y-%m-%d')_${END_OF_NAME}_${REVISION}.sql 2>&1 | grep -v "Using a password"
 
 		for f in $(ls $ROOT_PATH/backups/database/ -r | grep $TYPE | sed '21,30!d'); do
 			rm "$ROOT_PATH/backups/database/$f"
@@ -141,8 +141,8 @@ case $1 in
 	;;
 	datatables)
 
-		# START=$2; LENGTH=$3;
-		ORDER=$2; DTTYPE=$3
+		# START=$3; LENGTH=$4;
+		ORDER=$3; DTTYPE=$4
 
 		if [ -z "$DTTYPE" ]; then
 			DTTYPE='tcfg';
@@ -171,7 +171,7 @@ case $1 in
 					wc -l)";"$(ls $ROOT_PATH/backups/database/ $ORDER | \
 					grep -v apicfg | grep -v tcfg | \ #| sed "${START},${LENGTH}!d"
 					grep -v total | wc -l);
-			echo $( ls $ROOT_PATH/backups/database/ -utl $ORDER | grep -v apicfg | grep -v tcfg | awk {'print $9,$5'} ) #| sed "${START},${LENGTH}!d"
+			echo $( ls $ROOT_PATH/backups/database/ -utl $ORDER | grep -v apicfg | grep -v tcfg | awk {'print $9,$6'} ) #| sed "${START},${LENGTH}!d"
 			echo "done";
 			exit 0;
 		fi
@@ -180,18 +180,18 @@ case $1 in
 					";"$(ls $ROOT_PATH/backups/database/ $ORDER | grep $DTTYPE | \ #sed "${START},${LENGTH}!d" | \
 					grep -v total | wc -l);
 
-		echo $( ls $ROOT_PATH/backups/database/ -utl $ORDER | grep $DTTYPE | awk {'print $9,$5'} ) #| sed "${START},${LENGTH}!d")
+		echo $( ls $ROOT_PATH/backups/database/ -utl $ORDER | grep $DTTYPE | awk {'print $9,$6'} ) #| sed "${START},${LENGTH}!d")
 
 		echo "done";
 	;;
 	delete)
-		rm $ROOT_PATH/backups/database/$2;
+		rm $ROOT_PATH/backups/database/$3;
 		echo 1;
 	;;
 	restore)
 		#mysql -u tgui_user -ptgui123 tgui < /var/www/html/backups/database/2018-01-27_14:50:34_tcfg.sql
-		mysql -u $2 -p$3 $4 < $ROOT_PATH/backups/database/$5
-		#echo $(mysql -u $2 -p$3 $4 < $ROOT_PATH/backups/database/$5);
+		mysql -u $3 -p$4  -h $2  $5 < $ROOT_PATH/backups/database/$6
+		#echo $(mysql -u $3 -p$4 $5 < $ROOT_PATH/backups/database/$5);
 		echo 1;
 	;;
 	*)
