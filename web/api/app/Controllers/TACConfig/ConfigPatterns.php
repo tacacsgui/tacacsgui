@@ -1206,7 +1206,7 @@ class ConfigPatterns
             array_push($outputService,
             ($html) ? $sp->put().self::$html_tags['param'][0] . "set allow-configuration" . self::$html_tags['param'][1] . ' = ' . self::tacCMDAttr($html, $junos_cmd_ac, 1, 3)
             :
-            $sp->put().'set allow-configuration = ' . self::tacCMDAttr($html, $junos_cmd_ac, 1, 3));
+            $sp->put().'set allow-configuration-regexps = ' . self::tacCMDAttr($html, $junos_cmd_ac, 1, 3));
 
           }
           if ( $junos_cmd_dc ){
@@ -1214,7 +1214,7 @@ class ConfigPatterns
             array_push($outputService,
             ($html) ? $sp->put().self::$html_tags['param'][0] . "set deny-configuration" . self::$html_tags['param'][1] . ' = ' . self::tacCMDAttr($html, $junos_cmd_dc, 1, 3, ['action' => 'deny'])
             :
-            $sp->put().'set deny-configuration = ' . self::tacCMDAttr($html, $junos_cmd_dc, 1, 3));
+            $sp->put().'set deny-configuration-regexps = ' . self::tacCMDAttr($html, $junos_cmd_dc, 1, 3));
 
           }
 
