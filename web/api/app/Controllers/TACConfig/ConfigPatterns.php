@@ -384,8 +384,8 @@ class ConfigPatterns
       leftJoin('tac_acl_ace as ace', 'ace.acl_id', '=', 'tac_acl.id')->
       leftJoin('obj_addresses as addr_s', 'addr_s.id', '=', 'ace.nas')->
       leftJoin('obj_addresses as addr_c', 'addr_c.id', '=', 'ace.nac')->
-      select(['tac_acl.name as name', 'nas as nas_id', 'nac as nac_id',
-        'addr_s.name as nas_name', 'addr_c.name as nac_name', 'action',
+      select(['tac_acl.name as name', 'tac_acl.nas as nas_id', 'tac_acl.nac as nac_id',
+        'addr_s.name as nas_name', 'addr_c.name as nac_name', 'tac_acl.action',
         // 'addr_s.prefix as nas_prefix', 'addr_c.prefix as nac_prefix',
         'addr_s.address as nas', 'addr_c.address as nac',])->
       orderBy('name', 'ASC')->orderBy('ace.order', 'asc');
